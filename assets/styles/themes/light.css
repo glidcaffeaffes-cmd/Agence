@@ -1,0 +1,191 @@
+:root {
+  /*
+   * LIGHT THEME MAPPINGS
+   * Maps primitive color scales to semantic usage in a light theme environment.
+   */
+
+  /* SEMANTIC USAGE TOKENS */
+  --color-bg:                  var(--color-white);
+  --color-bg-soft:             var(--color-gray-50);
+  --color-surface:             var(--color-white);
+  --color-surface-2:           var(--color-gray-50);
+  --color-card:                var(--color-white);
+  --color-card-elevated:       var(--color-white);
+  
+  --color-border:              var(--color-gray-200);
+  --color-border-soft:         var(--color-gray-100);
+  --color-divider:             var(--color-gray-200);
+  
+  --color-overlay:             rgb(0 0 0 / 0.4);
+  --color-shadow:              var(--color-black);
+
+  /* TEXT TOKENS */
+  --color-text:                var(--color-gray-900);
+  --color-text-soft:           var(--color-gray-600);
+  --color-text-muted:          var(--color-gray-500);
+  --color-text-inverse:        var(--color-white);
+  --color-heading:             var(--color-navy-700);
+  --color-link:                var(--color-primary-600);
+  --color-link-hover:          var(--color-primary-800);
+
+  /* INTERACTIVE TOKENS */
+  --color-focus-ring:          var(--color-primary-300);
+  --color-selection:           var(--color-primary-100);
+  
+  --color-disabled:            var(--color-gray-100);
+  --color-disabled-text:       var(--color-gray-400);
+  --color-disabled-bg:         var(--color-gray-50);
+
+  /* HOTEL BUSINESS SEMANTIC TOKENS */
+  --color-room-available:      var(--color-success-600);
+  --color-room-booked:         var(--color-gray-400);
+  
+  --color-reservation-pending: var(--color-warning-500);
+  --color-reservation-confirmed: var(--color-success-600);
+  --color-reservation-cancelled: var(--color-gray-500);
+  --color-reservation-refused: var(--color-danger-600);
+  
+  --color-promotion-badge:     var(--color-accent-500); /* Gold for exclusivity */
+  --color-review-star:         var(--color-accent-400);
+  
+  --color-analytics-highlight: var(--color-primary-500);
+  --color-admin-action:        var(--color-navy-600);
+  --color-cancellation-policy: var(--color-info-600);
+  --color-urgent-alert:        var(--color-danger-600);
+
+  /* 
+   * COMPONENT THEME VARIABLES 
+   * Pre-configured state variables for standard components to ensure consistency.
+   */
+
+  /* Buttons - Primary */
+  --btn-primary-bg:            var(--color-primary-500);
+  --btn-primary-text:          var(--color-white);
+  --btn-primary-hover-bg:      var(--color-primary-600);
+  --btn-primary-active-bg:     var(--color-primary-700);
+
+  /* Buttons - Secondary */
+  --btn-secondary-bg:          var(--color-white);
+  --btn-secondary-text:        var(--color-secondary-600);
+  --btn-secondary-border:      var(--color-secondary-300);
+  --btn-secondary-hover-bg:    var(--color-secondary-50);
+  --btn-secondary-active-bg:   var(--color-secondary-100);
+
+  /* Buttons - Outline (Navy/Premium feel) */
+  --btn-outline-bg:            transparent;
+  --btn-outline-text:          var(--color-navy-600);
+  --btn-outline-border:        var(--color-navy-600);
+  --btn-outline-hover-bg:      var(--color-navy-50);
+  
+  /* Buttons - Ghost */
+  --btn-ghost-bg:              transparent;
+  --btn-ghost-text:            var(--color-gray-600);
+  --btn-ghost-hover-bg:        var(--color-gray-100);
+  
+  /* Status Buttons */
+  --btn-danger-bg:             var(--color-danger-500);
+  --btn-danger-hover-bg:       var(--color-danger-600);
+  
+  --btn-success-bg:            var(--color-success-500);
+  --btn-success-hover-bg:      var(--color-success-600);
+  
+  /* Inputs / Selects / Textareas */
+  --input-bg:                  var(--color-white);
+  --input-border:              var(--color-gray-300);
+  --input-text:                var(--color-text);
+  --input-placeholder:         var(--color-gray-400);
+  --input-hover-border:        var(--color-gray-400);
+  --input-focus-border:        var(--color-primary-500);
+  --input-focus-ring:          var(--shadow-focus);
+  --input-error-border:        var(--color-danger-500);
+  
+  /* Checkboxes / Radios */
+  --checkbox-border:           var(--color-gray-300);
+  --checkbox-checked-bg:       var(--color-primary-500);
+  
+  /* Switches */
+  --switch-track-bg:           var(--color-gray-200);
+  --switch-track-active-bg:    var(--color-success-500);
+  --switch-thumb-bg:           var(--color-white);
+  
+  /* Badges / Chips / Tags */
+  --badge-bg:                  var(--color-gray-100);
+  --badge-text:                var(--color-gray-700);
+  --badge-primary-bg:          var(--color-primary-50);
+  --badge-primary-text:        var(--color-primary-700);
+  
+  /* Hotel & Booking Cards */
+  --hotel-card-bg:             var(--color-card);
+  --hotel-card-border:         var(--color-border-soft);
+  --hotel-card-shadow:         var(--shadow-card);
+  --hotel-card-hover-shadow:   var(--shadow-card-hover);
+  
+  /* Layout parts */
+  --topbar-bg:                 var(--color-white);
+  --topbar-border:             var(--color-gray-200);
+  --navbar-bg:                 var(--color-white);
+  --sidebar-bg:                var(--color-navy-900); /* Dark premium sidebar for admin */
+  --sidebar-text:              var(--color-navy-100);
+  --sidebar-hover-bg:          var(--color-navy-800);
+  --sidebar-active-bg:         var(--color-primary-600);
+  
+  /* Navigation Tabs */
+  --tab-text:                  var(--color-text-muted);
+  --tab-active-text:           var(--color-primary-600);
+  --tab-active-border:         var(--color-primary-600);
+  --tab-hover-bg:              var(--color-gray-50);
+
+  /* Overlays / Modals / Drawers */
+  --modal-bg:                  var(--color-white);
+  --modal-backdrop:            var(--color-overlay);
+  --modal-shadow:              var(--shadow-modal);
+  
+  /* Toast / Snackbar */
+  --toast-bg:                  var(--color-gray-900);
+  --toast-text:                var(--color-white);
+  
+  /* Alerts */
+  --alert-info-bg:             var(--color-info-50);
+  --alert-info-border:         var(--color-info-200);
+  --alert-info-text:           var(--color-info-800);
+  
+  --alert-success-bg:          var(--color-success-50);
+  --alert-success-border:      var(--color-success-200);
+  --alert-success-text:        var(--color-success-800);
+  
+  --alert-warning-bg:          var(--color-warning-50);
+  --alert-warning-border:      var(--color-warning-200);
+  --alert-warning-text:        var(--color-warning-800);
+  
+  --alert-danger-bg:           var(--color-danger-50);
+  --alert-danger-border:       var(--color-danger-200);
+  --alert-danger-text:         var(--color-danger-800);
+
+  /* Admin Dashboard Tables */
+  --table-bg:                  var(--color-white);
+  --table-header-bg:           var(--color-gray-50);
+  --table-header-text:         var(--color-gray-600);
+  --table-border:              var(--color-gray-200);
+  --table-row-hover-bg:        var(--color-gray-50);
+  
+  /* Pagination */
+  --pagination-bg:             var(--color-white);
+  --pagination-border:         var(--color-gray-300);
+  --pagination-text:           var(--color-text);
+  --pagination-active-bg:      var(--color-primary-50);
+  --pagination-active-text:    var(--color-primary-700);
+  
+  /* Skeletons & Loaders */
+  --skeleton-bg:               var(--color-gray-200);
+  --skeleton-highlight:        var(--color-gray-100);
+  --loader-color:              var(--color-primary-500);
+
+  /* Charts / Stats Cards */
+  --stat-card-bg:              var(--color-white);
+  --stat-value-text:           var(--color-navy-700);
+  --stat-label-text:           var(--color-text-muted);
+
+  /* Rating & Reviews */
+  --review-card-bg:            var(--color-gray-50);
+  --review-text:               var(--color-text-soft);
+}

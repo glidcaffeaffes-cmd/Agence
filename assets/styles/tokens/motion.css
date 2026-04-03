@@ -1,0 +1,30 @@
+:root {
+  /* MOTION TOKENS - Subtle, smooth, premium hotel experience */
+
+  /* DURATIONS */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 350ms;
+  --duration-emphasis: 500ms;
+
+  /* EASING CURVES */
+  --easing-standard: cubic-bezier(0.4, 0, 0.2, 1);    /* Good for most transitions */
+  --easing-decelerate: cubic-bezier(0, 0, 0.2, 1);    /* Good for entrances (objects entering screen) */
+  --easing-accelerate: cubic-bezier(0.4, 0, 1, 1);    /* Good for exits (objects leaving screen) */
+  --easing-entrance: var(--easing-decelerate);
+  --easing-exit: var(--easing-accelerate);
+
+  /* PRESET TRANSITIONS */
+  --transition-hover: all var(--duration-fast) var(--easing-standard);
+  --transition-press: all 100ms var(--easing-standard);
+  --transition-focus: box-shadow var(--duration-fast) var(--easing-standard);
+  
+  --transition-fade: opacity var(--duration-normal) var(--easing-standard);
+  --transition-scale: transform var(--duration-normal) var(--easing-standard);
+  --transition-slide: transform var(--duration-normal) var(--easing-entrance);
+  
+  --transition-modal: all var(--duration-slow) var(--easing-entrance);
+  --transition-page: all var(--duration-slow) var(--easing-standard);
+  --transition-card: all var(--duration-normal) var(--easing-standard);
+  --transition-input: all var(--duration-fast) var(--easing-standard);
+}

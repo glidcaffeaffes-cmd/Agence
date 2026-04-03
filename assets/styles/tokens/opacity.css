@@ -1,0 +1,18 @@
+:root {
+  /* OPACITY TOKENS */
+  --opacity-0: 0;
+  --opacity-5: 0.05;
+  --opacity-10: 0.10;
+  --opacity-20: 0.20;
+  --opacity-40: 0.40;
+  --opacity-60: 0.60;
+  --opacity-80: 0.80;
+  --opacity-100: 1;
+
+  /* SEMANTIC OPACITY */
+  --opacity-disabled: var(--opacity-40);
+  --opacity-muted: var(--opacity-60);
+  --opacity-overlay-light: var(--opacity-20);
+  --opacity-overlay-medium: var(--opacity-40);
+  --opacity-overlay-strong: var(--opacity-80);
+}

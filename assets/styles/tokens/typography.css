@@ -1,0 +1,45 @@
+:root {
+  /* FONT FAMILIES */
+  --font-family-base: 'Inter', system-ui, -apple-system, blinkmacsystemfont, 'Segoe UI', roboto, sans-serif;
+  --font-family-heading: 'Playfair Display', ui-serif, georgia, cambria, 'Times New Roman', times, serif;
+  --font-family-mono: ui-monospace, sfmono-regular, menlo, monaco, consolas, 'Liberation Mono', 'Courier New', monospace;
+
+  /* FONT SIZES (Modular scale, assuming 16px base) */
+  --font-size-caption: 0.75rem;     /* 12px */
+  --font-size-overline: 0.75rem;    /* 12px (usually ALL CAPS) */
+  --font-size-label-sm: 0.8125rem;  /* 13px */
+  --font-size-label-md: 0.875rem;   /* 14px */
+  --font-size-label-lg: 1rem;       /* 16px */
+  
+  --font-size-body-sm: 0.875rem;    /* 14px */
+  --font-size-body-md: 1rem;        /* 16px */
+  --font-size-body-lg: 1.125rem;    /* 18px */
+
+  --font-size-title-md: 1.25rem;    /* 20px */
+  --font-size-title-lg: 1.5rem;     /* 24px */
+
+  --font-size-h3: 1.875rem;         /* 30px */
+  --font-size-h2: 2.25rem;          /* 36px */
+  --font-size-h1: 3rem;             /* 48px */
+  
+  --font-size-display-md: 3.75rem;  /* 60px */
+  --font-size-display-lg: 4.5rem;   /* 72px */
+
+  /* FONT WEIGHTS */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* LINE HEIGHTS */
+  --line-height-tight: 1.1;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+  --line-height-heading: 1.2;
+
+  /* LETTER SPACING */
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-normal: 0em;
+  --letter-spacing-wide: 0.025em;
+  --letter-spacing-widest: 0.05em; /* useful for overline */
+}
