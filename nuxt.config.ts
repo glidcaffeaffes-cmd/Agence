@@ -2,9 +2,17 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
+  modules: ['@primevue/nuxt-module'],
   css: [
+    'bootstrap/dist/css/bootstrap.min.css',
     '~/assets/styles/base/theme.css'
   ],
+  primevue: {
+    importTheme: { from: '@primeuix/themes/aura', as: 'Aura' },
+    options: {
+      ripple: true
+    }
+  },
   app: {
     head: {
       link: [
