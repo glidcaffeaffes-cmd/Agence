@@ -1,0 +1,13 @@
+/**
+ * User profile details linked to an Account.
+ * UML: Profile
+ */
+export interface Profile {
+  id: number
+  accountId: number
+  firstName: string
+  lastName: string
+  address: string
+  phone: string
+  photo: string
+}

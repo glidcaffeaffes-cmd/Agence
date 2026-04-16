@@ -1,0 +1,10 @@
+import type { Offer } from '~/types/models'
+
+export const mockOffers: Offer[] = [
+  { id: 1, hotelId: 1, title: 'Summer Escape — 30% Off', description: 'Book 5+ nights at Grand Azure Resort and enjoy 30% off your stay. Includes complimentary spa access and champagne welcome.', discountRate: 30, startDate: '2026-06-01', endDate: '2026-08-31', active: true, image: 'https://images.unsplash.com/photo-1540541338287-41700ceee514?w=800' },
+  { id: 2, hotelId: 3, title: 'Riviera Romance Package', description: 'A romantic getaway at Côte Royale: candlelit dinner, couples spa, and a bottle of Provence rosé. 25% off suite bookings.', discountRate: 25, startDate: '2026-05-01', endDate: '2026-06-30', active: true, image: 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800' },
+  { id: 3, hotelId: 4, title: 'Ski Season Early Bird', description: 'Reserve your winter retreat at Montagne Étoilée early and save 20%. Includes free ski pass for 2 adults.', discountRate: 20, startDate: '2026-10-01', endDate: '2026-12-15', active: true, image: 'https://images.unsplash.com/photo-1551524559-8af4e6624178?w=800' },
+  { id: 4, hotelId: 2, title: 'Parisian Weekend Delight', description: 'Enjoy a 3-night weekend at Le Pavillon Doré with 15% off and a complimentary breakfast experience.', discountRate: 15, startDate: '2026-04-01', endDate: '2026-05-31', active: true, image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800' },
+  { id: 5, hotelId: 6, title: 'Vineyard & Wellness Retreat', description: 'A 4-night château experience with wine tasting, spa treatments, and gourmet dining. 20% off for bookings before July.', discountRate: 20, startDate: '2026-04-15', endDate: '2026-06-30', active: true, image: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=800' },
+  { id: 6, hotelId: 5, title: 'Mediterranean Sun & Culture', description: 'Explore Marseille with our exclusive culture pass, rooftop cocktails, and 10% off all room types.', discountRate: 10, startDate: '2026-03-01', endDate: '2026-04-30', active: false, image: 'https://images.unsplash.com/photo-1533104816931-20fa691ff6ca?w=800' },
+]
