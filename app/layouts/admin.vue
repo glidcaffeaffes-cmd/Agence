@@ -1,17 +1,16 @@
 <template>
   <div class="bg-surface text-on-surface antialiased min-h-screen">
     <!-- SideNavBar -->
-    <aside class="h-screen w-64 fixed left-0 top-0 z-50 bg-[#015081] flex flex-col shadow-[4px_0_20px_rgba(1,80,129,0.10)] overflow-y-auto">
+    <aside class="admin-sidebar h-screen w-64 fixed left-0 top-0 z-50 flex flex-col overflow-y-auto">
       <!-- Brand -->
-      <div class="px-6 py-6 flex-shrink-0">
-        <div class="flex items-center gap-2 mb-1">
-          <span class="material-symbols-outlined text-[#CDAF5D] text-2xl" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">travel_explore</span>
-          <h1 class="text-white text-lg font-bold tracking-tight">VoyageHub</h1>
+      <div class="px-6 py-5 flex-shrink-0 border-b mb-2" style="border-color: var(--color-primary-500);">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-2xl" style="color: var(--color-accent-500); font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">travel_explore</span>
+          <h1 class="text-lg font-bold tracking-tight" style="color: var(--color-white);">VoyageHub</h1>
         </div>
-        <p class="text-white/50 text-[10px] font-semibold uppercase tracking-widest">Admin Portal</p>
       </div>
 
-      <nav class="flex-1 px-3 pb-4" id="sidebar-nav">
+      <nav class="flex-1 px-2 pb-4" id="sidebar-nav">
         <!-- Overview -->
         <p class="nav-group-label">Overview</p>
         <NuxtLink to="/admin" exact active-class="nav-active" class="nav-item">
@@ -78,12 +77,12 @@
       </nav>
 
       <!-- Footer -->
-      <div class="px-3 pb-4 pt-2 border-t border-white/10 flex-shrink-0">
-        <NuxtLink to="/" class="nav-item" style="color:rgba(255,255,255,0.6)">
+      <div class="px-4 pb-4 pt-4 border-t flex-shrink-0" style="border-color: var(--color-primary-500);">
+        <NuxtLink to="/" class="nav-item">
           <span class="material-symbols-outlined">open_in_new</span>
           <span>View Site</span>
         </NuxtLink>
-        <a href="/login" class="nav-item hover:bg-red-500/20" style="color:rgba(255,255,255,0.6)">
+        <a href="/login" class="nav-item nav-item--danger">
           <span class="material-symbols-outlined">logout</span>
           <span>Sign Out</span>
         </a>
@@ -115,30 +114,57 @@
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #bcc9c8; border-radius: 10px; }
 
+/* Sidebar Shell */
+.admin-sidebar {
+  background-color: var(--color-primary-600);
+  box-shadow: var(--shadow-xl);
+}
+
 /* Sidebar Navigation Classes */
 .nav-group-label {
-  font-size: 0.6875rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.08em; color: rgba(255,255,255,0.4);
-  margin: 1.5rem 1rem 0.5rem;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--sidebar-text);
+  opacity: 0.6;
+  margin: var(--spacing-6) var(--spacing-4) var(--spacing-2);
 }
 .nav-item {
-  display: flex; align-items: center; gap: 0.75rem;
-  padding: 0.625rem 1rem; margin-bottom: 0.25rem;
-  color: rgba(255,255,255,0.8); font-size: 0.875rem; font-weight: 500; font-family: 'Inter', sans-serif;
-  border-radius: 0.5rem; border-left: 3px solid transparent;
-  transition: all 0.15s ease; text-decoration: none;
+  display: flex; align-items: center; gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4);
+  margin-bottom: var(--spacing-1);
+  color: var(--sidebar-text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family-base);
+  border-radius: var(--radius-md);
+  transition: all var(--motion-duration-fast) var(--motion-ease-default);
+  text-decoration: none;
 }
 .nav-item:hover {
-  background: rgba(0, 103, 104, 0.3); color: #fff;
+  background-color: var(--color-primary-700);
+  color: var(--color-white);
 }
 .nav-item .material-symbols-outlined {
   font-size: 1.25rem;
+  transition: color var(--motion-duration-fast) ease;
 }
 .nav-active {
-  background: rgba(0, 103, 104, 0.4); color: #fff;
-  border-left-color: #CDAF5D;
+  background-color: var(--color-primary-800);
+  color: var(--color-white);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
 }
 .nav-active .material-symbols-outlined {
-  color: #CDAF5D; font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  color: var(--color-white);
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.nav-item--danger:hover {
+  background-color: var(--alert-danger-bg) !important;
+  color: var(--color-danger-600) !important;
+}
+.nav-item--danger:hover .material-symbols-outlined {
+  color: var(--color-danger-600);
 }
 </style>
