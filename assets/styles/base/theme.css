@@ -6,18 +6,18 @@
  */
 
 /* 1. Tokens Imports */
-@import './tokens/colors.css';
-@import './tokens/typography.css';
-@import './tokens/spacing.css';
-@import './tokens/radius.css';
-@import './tokens/shadows.css';
-@import './tokens/motion.css';
-@import './tokens/z-index.css';
-@import './tokens/opacity.css';
+@import '../tokens/colors.css';
+@import '../tokens/typography.css';
+@import '../tokens/spacing.css';
+@import '../tokens/radius.css';
+@import '../tokens/shadows.css';
+@import '../tokens/motion.css';
+@import '../tokens/z-index.css';
+@import '../tokens/opacity.css';
 
 /* 2. Theme Mapping Import */
 /* By default, we load the light theme semantics into the root */
-@import './themes/light.css';
+@import '../themes/light.css';
 
 /* 
  * 3. Base Resets & Global Styles 
