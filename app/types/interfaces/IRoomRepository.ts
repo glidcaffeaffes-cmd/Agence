@@ -1,6 +1,7 @@
 import type { Room, RoomType } from '../models'
 
 export interface IRoomRepository {
+  getAll(): Promise<Room[]>
   getByHotel(hotelId: number): Promise<Room[]>
   getById(id: number): Promise<Room | null>
   getAvailable(hotelId: number, checkIn: string, checkOut: string): Promise<Room[]>

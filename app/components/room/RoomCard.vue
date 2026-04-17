@@ -3,7 +3,7 @@
     <div class="room-card__layout">
       <!-- Image Section -->
       <div class="room-card__image-wrap">
-        <img :src="room.images[0] || 'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=600'" :alt="room.type" loading="lazy" />
+        <img :src="room.photos?.[0] || 'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=600'" :alt="room.type" loading="lazy" />
       </div>
 
       <!-- Info Section -->
@@ -11,7 +11,7 @@
         <div class="room-card__header">
           <div>
             <div class="room-card__badge-row">
-              <AppBadge v-if="room.isAvailable" color="success" size="sm">Available</AppBadge>
+              <AppBadge v-if="room.available" color="success" size="sm">Available</AppBadge>
               <AppBadge v-else color="danger" size="sm">Booked</AppBadge>
               <span class="room-card__capacity">
                 <i class="pi pi-users"></i> Up to {{ room.capacity }}
@@ -36,10 +36,10 @@
         <div class="room-card__actions">
           <button 
             class="app-btn app-btn--primary" 
-            :disabled="!room.isAvailable"
+            :disabled="!room.available"
             @click="$emit('book', room)"
           >
-            {{ room.isAvailable ? 'Book Now' : 'Not Available' }}
+            {{ room.available ? 'Book Now' : 'Not Available' }}
           </button>
         </div>
       </div>

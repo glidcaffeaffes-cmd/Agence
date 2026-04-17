@@ -10,6 +10,13 @@ export function useRooms() {
   const loading = ref(false)
   const error = ref<string | null>(null)
 
+  async function fetchAll() {
+    loading.value = true
+    try { rooms.value = await repo.getAll() }
+    catch (e: any) { error.value = e.message }
+    finally { loading.value = false }
+  }
+
   async function fetchByHotel(hotelId: number) {
     loading.value = true
     try { rooms.value = await repo.getByHotel(hotelId) }
@@ -31,5 +38,5 @@ export function useRooms() {
     finally { loading.value = false }
   }
 
-  return { rooms, roomTypes, loading, error, fetchByHotel, fetchAvailable, fetchRoomTypes }
+  return { rooms, roomTypes, loading, error, fetchAll, fetchByHotel, fetchAvailable, fetchRoomTypes }
 }
