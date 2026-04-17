@@ -1,110 +1,200 @@
 <template>
-  <div>
+  <div class="min-h-screen bg-surface">
     <Head>
       <title>Reservation History — VoyageHub</title>
       <meta name="description" content="View your complete reservation history and past stays with VoyageHub." />
     </Head>
 
-    <!-- Page Header -->
-    <section class="page-hero">
-      <div class="hero-inner">
-        <div class="hero-text">
-          <span class="hero-eyebrow">
-            <span class="material-symbols-outlined">history</span> My Account
-          </span>
-          <h1 class="hero-title">Reservation History</h1>
-          <p class="hero-subtitle">A complete log of all your past bookings and stays</p>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <!-- Page Header -->
+      <header class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 class="text-4xl font-bold text-on-surface tracking-tight">Reservation History</h1>
+          <p class="text-on-surface-variant mt-2 text-lg">A complete log of all your past bookings and stays.</p>
         </div>
-        <NuxtLink to="/reservations" class="cta-btn">
-          <span class="material-symbols-outlined">calendar_month</span> Active Bookings
+        <NuxtLink to="/hotels" class="inline-flex items-center gap-2 px-5 py-2.5 bg-secondary-container text-on-secondary-container font-bold rounded-xl hover:bg-secondary hover:text-on-secondary transition-colors shadow-sm">
+          <span class="material-symbols-outlined text-[20px]">calendar_month</span>
+          Make a Booking
         </NuxtLink>
-      </div>
-    </section>
+      </header>
 
-    <div class="page-body">
-      <!-- Filters bar -->
-      <div class="filter-bar">
-        <div class="filter-search">
-          <span class="material-symbols-outlined">search</span>
-          <input v-model="search" type="text" placeholder="Search by hotel, code…" id="history-search" />
-        </div>
-        <div class="filter-pills">
-          <button
-            v-for="s in statuses"
-            :key="s.value"
-            :class="['pill', { 'pill--active': statusFilter === s.value }]"
-            @click="statusFilter = s.value"
-          >{{ s.label }}</button>
-        </div>
-        <select v-model="yearFilter" class="year-select" id="history-year-filter">
-          <option value="">All years</option>
-          <option v-for="y in years" :key="y" :value="y">{{ y }}</option>
-        </select>
-      </div>
-
-      <!-- Loading -->
-      <div v-if="loading" class="loading-state">
-        <span class="material-symbols-outlined spin">progress_activity</span>
-        <p>Loading history…</p>
-      </div>
-
-      <!-- Empty -->
-      <div v-else-if="filtered.length === 0" class="empty-state">
-        <span class="material-symbols-outlined empty-icon">receipt_long</span>
-        <h3>No reservations found</h3>
-        <p>Try adjusting your filters or explore our hotels to make a booking.</p>
-        <NuxtLink to="/hotels" class="cta-btn">Explore Hotels</NuxtLink>
-      </div>
-
-      <!-- Timeline -->
-      <div v-else class="timeline">
-        <template v-for="(group, year) in grouped" :key="year">
-          <div class="year-divider">
-            <span class="year-label">{{ year }}</span>
-          </div>
-          <div class="timeline-card" v-for="r in group" :key="r.id" :id="`reservation-${r.id}`">
-            <div class="card-accent" :class="`accent--${r.status.toLowerCase()}`"></div>
-            <div class="card-body">
-              <div class="card-top">
-                <div>
-                  <p class="card-code">{{ r.confirmationCode }}</p>
-                  <h3 class="card-hotel">Hotel #{{ r.hotelId }}</h3>
-                </div>
-                <span class="status-badge" :class="`badge--${r.status.toLowerCase()}`">
-                  <span class="material-symbols-outlined">{{ statusIcon(r.status) }}</span>
-                  {{ r.status }}
-                </span>
+      <div class="flex flex-col lg:flex-row gap-10">
+        <!-- Sidebar Navigation (Consistent with Profile/Settings) -->
+        <aside class="w-full lg:w-72 flex-shrink-0">
+          <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/40 overflow-hidden sticky top-8">
+            <div class="p-6 border-b border-outline-variant/30 text-center">
+              <div class="w-24 h-24 mx-auto rounded-full bg-surface-container-high border-4 border-white shadow-md overflow-hidden mb-4">
+                <img :src="currentProfile?.photo || 'https://i.pravatar.cc/150'" alt="Avatar" class="w-full h-full object-cover" />
               </div>
-              <div class="card-meta">
-                <span class="meta-item">
-                  <span class="material-symbols-outlined">login</span>
-                  Check-in: <strong>{{ formatDate(r.checkInDate) }}</strong>
-                </span>
-                <span class="meta-item">
-                  <span class="material-symbols-outlined">logout</span>
-                  Check-out: <strong>{{ formatDate(r.checkOutDate) }}</strong>
-                </span>
-                <span class="meta-item">
-                  <span class="material-symbols-outlined">dark_mode</span>
-                  {{ r.numberOfNights }} night{{ r.numberOfNights > 1 ? 's' : '' }}
-                </span>
-                <span class="meta-item meta-amount">
-                  <span class="material-symbols-outlined">payments</span>
-                  {{ formatCurrency(r.totalAmount) }}
-                </span>
-              </div>
-              <div v-if="r.blockReason" class="block-reason">
-                <span class="material-symbols-outlined">info</span>
-                {{ r.blockReason }}
+              <h2 class="text-xl font-bold text-on-surface">{{ currentProfile?.firstName || 'Jean' }} {{ currentProfile?.lastName || 'Dupont' }}</h2>
+              <p class="text-sm text-on-surface-variant mt-1">{{ currentProfile?.email || 'jean.dupont@example.com' }}</p>
+              
+              <div class="mt-4 inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider"
+                   :class="currentProfile?.role === 'Admin' ? 'bg-accent/10 text-accent' : 'bg-primary/10 text-primary'">
+                {{ currentProfile?.role || 'Client' }}
               </div>
             </div>
-            <div class="card-actions">
-              <NuxtLink :to="`/hotels/${r.hotelId}`" class="action-btn action-btn--ghost">
-                <span class="material-symbols-outlined">hotel</span> View Hotel
+
+            <!-- Nav Links -->
+            <nav class="p-3 space-y-1">
+              <NuxtLink to="/profile" class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-medium">
+                <span class="material-symbols-outlined text-[20px]">person</span>
+                Personal Info
               </NuxtLink>
+              <NuxtLink to="/reservations/history" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/5 text-primary font-semibold transition-colors">
+                <span class="material-symbols-outlined text-[20px]">history</span>
+                Reservation History
+              </NuxtLink>
+              <NuxtLink to="/settings" class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-medium">
+                <span class="material-symbols-outlined text-[20px]">settings</span>
+                Settings & Security
+              </NuxtLink>
+            </nav>
+          </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 space-y-8">
+          
+          <!-- Filters -->
+          <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/40 p-6 flex flex-col md:flex-row gap-4 items-center">
+            <!-- Search -->
+            <div class="relative w-full md:w-64">
+              <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline">search</span>
+              <input v-model="search" type="text" placeholder="Search by hotel, code…" class="w-full pl-10 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant/60 rounded-xl text-on-surface text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none" />
+            </div>
+
+            <!-- Status Pills -->
+            <div class="flex flex-wrap gap-2 flex-1">
+              <button 
+                v-for="s in statuses" :key="s.value"
+                @click="statusFilter = s.value"
+                class="px-4 py-1.5 rounded-full text-sm font-semibold transition-colors border"
+                :class="statusFilter === s.value 
+                  ? 'bg-primary text-white border-primary' 
+                  : 'bg-white text-on-surface-variant border-outline-variant/60 hover:border-primary hover:text-primary'"
+              >
+                {{ s.label }}
+              </button>
+            </div>
+
+            <!-- Year Select -->
+            <div class="w-full md:w-auto relative">
+              <select v-model="yearFilter" class="w-full appearance-none pl-4 pr-10 py-2.5 bg-surface-container-lowest border border-outline-variant/60 rounded-xl text-on-surface text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none cursor-pointer">
+                <option value="">All years</option>
+                <option v-for="y in years" :key="y" :value="y">{{ y }}</option>
+              </select>
+              <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none">expand_more</span>
             </div>
           </div>
-        </template>
+
+          <!-- Loading State -->
+          <div v-if="loading" class="bg-white rounded-2xl shadow-sm border border-outline-variant/40 p-16 flex flex-col items-center justify-center text-on-surface-variant">
+            <span class="material-symbols-outlined animate-spin text-4xl text-primary mb-4">progress_activity</span>
+            <p class="font-medium">Loading your history…</p>
+          </div>
+
+          <!-- Empty State -->
+          <div v-else-if="filtered.length === 0" class="bg-white rounded-2xl shadow-sm border border-outline-variant/40 p-16 flex flex-col items-center justify-center text-center">
+            <span class="material-symbols-outlined text-6xl text-outline mb-4">receipt_long</span>
+            <h3 class="text-xl font-bold text-on-surface mb-2">No reservations found</h3>
+            <p class="text-on-surface-variant mb-6 max-w-sm">Try adjusting your filters or explore our luxury hotels to make your next booking.</p>
+            <NuxtLink to="/hotels" class="px-6 py-2.5 bg-primary text-white font-bold rounded-xl hover:bg-primary-container shadow-sm hover:-translate-y-0.5 transition-all">
+              Explore Hotels
+            </NuxtLink>
+          </div>
+
+          <!-- Timeline List -->
+          <div v-else class="space-y-8">
+            <template v-for="(group, year) in grouped" :key="year">
+              <!-- Year Divider -->
+              <div class="flex items-center gap-4">
+                <div class="h-px bg-outline-variant/40 flex-1"></div>
+                <span class="text-sm font-bold text-on-surface-variant uppercase tracking-wider">{{ year }}</span>
+                <div class="h-px bg-outline-variant/40 flex-1"></div>
+              </div>
+
+              <!-- Reservation Cards -->
+              <div class="space-y-4">
+                <div v-for="r in group" :key="r.id" class="bg-white rounded-2xl shadow-sm border border-outline-variant/40 overflow-hidden flex flex-col md:flex-row hover:shadow-md hover:-translate-y-0.5 transition-all group">
+                  <!-- Status Accent Line -->
+                  <div class="w-full md:w-1.5 h-1.5 md:h-auto" :class="accentColor(r.status)"></div>
+
+                  <!-- Card Content -->
+                  <div class="p-6 flex-1 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    
+                    <div class="flex gap-6 items-start flex-1">
+                      <!-- Hotel Image Thumbnail -->
+                      <div v-if="getHotel(r.hotelId)" class="hidden sm:block w-24 h-24 md:w-32 md:h-32 rounded-xl overflow-hidden flex-shrink-0 bg-surface-container-high border border-outline-variant/40 shadow-sm">
+                        <img :src="getHotel(r.hotelId)?.images[0]" :alt="getHotel(r.hotelId)?.name" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                      </div>
+
+                      <div class="space-y-4 flex-1">
+                        <div class="flex items-start justify-between md:justify-start gap-4">
+                          <div>
+                            <p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-1">{{ r.confirmationCode }}</p>
+                            <h3 class="text-lg font-bold text-on-surface line-clamp-1">{{ getHotel(r.hotelId)?.name || 'Hotel #' + r.hotelId }}</h3>
+                            <p class="text-sm text-on-surface-variant flex items-center gap-1 mt-0.5">
+                              <span class="material-symbols-outlined text-[14px]">location_on</span>
+                              {{ getHotel(r.hotelId)?.city || 'Unknown City' }}, {{ getHotel(r.hotelId)?.country || 'Unknown Country' }}
+                            </p>
+                          </div>
+                          <span class="md:hidden inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider whitespace-nowrap" :class="badgeColor(r.status)">
+                            <span class="material-symbols-outlined text-[14px]">{{ statusIcon(r.status) }}</span>
+                            {{ r.status }}
+                          </span>
+                        </div>
+
+                        <div class="flex flex-wrap gap-x-6 gap-y-2">
+                          <div class="flex items-center gap-2 text-sm text-on-surface-variant">
+                            <span class="material-symbols-outlined text-[18px] text-outline">login</span>
+                            <span>Check-in: <strong class="text-on-surface">{{ formatDate(r.checkInDate) }}</strong></span>
+                          </div>
+                          <div class="flex items-center gap-2 text-sm text-on-surface-variant">
+                            <span class="material-symbols-outlined text-[18px] text-outline">logout</span>
+                            <span>Check-out: <strong class="text-on-surface">{{ formatDate(r.checkOutDate) }}</strong></span>
+                          </div>
+                          <div class="flex items-center gap-2 text-sm text-on-surface-variant">
+                            <span class="material-symbols-outlined text-[18px] text-outline">dark_mode</span>
+                            <span>{{ r.numberOfNights }} night{{ r.numberOfNights > 1 ? 's' : '' }}</span>
+                          </div>
+                          <div class="flex items-center gap-2 text-sm font-bold text-primary">
+                            <span class="material-symbols-outlined text-[18px]">payments</span>
+                            <span>{{ formatCurrency(r.totalAmount) }}</span>
+                          </div>
+                        </div>
+
+                        <div v-if="r.blockReason" class="inline-flex items-center gap-2 mt-2 px-3 py-2 bg-error-container/30 text-error rounded-lg text-sm font-medium">
+                          <span class="material-symbols-outlined text-[16px]">info</span>
+                          {{ r.blockReason }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Right Side Actions & Desktop Badge -->
+                    <div class="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-4 md:border-l md:border-outline-variant/30 md:pl-6">
+                      <span class="hidden md:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider whitespace-nowrap" :class="badgeColor(r.status)">
+                        <span class="material-symbols-outlined text-[14px]">{{ statusIcon(r.status) }}</span>
+                        {{ r.status }}
+                      </span>
+                      
+                      <div class="flex gap-2">
+                        <button v-if="['CONFIRMED', 'COMPLETED'].includes(r.status)" class="hidden md:inline-flex items-center justify-center w-10 h-10 border border-outline-variant/60 text-on-surface-variant rounded-lg hover:bg-surface-container hover:text-on-surface transition-colors" title="Download Receipt">
+                          <span class="material-symbols-outlined text-[18px]">receipt</span>
+                        </button>
+                        <NuxtLink :to="`/hotels/${r.hotelId}`" class="inline-flex items-center gap-2 px-4 py-2 border border-outline-variant/60 text-primary font-bold rounded-lg hover:bg-primary hover:border-primary hover:text-white transition-colors whitespace-nowrap">
+                          <span class="material-symbols-outlined text-[18px]">hotel</span>
+                          View Hotel
+                        </NuxtLink>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+
+        </main>
       </div>
     </div>
   </div>
@@ -114,13 +204,17 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAuth } from '~/composables/useAuth'
 import { useReservations } from '~/composables/useReservations'
+import { useHotels } from '~/composables/useHotels'
 
-const { accountId } = useAuth()
-const { reservations, loading, fetchByAccount } = useReservations()
+const { accountId, currentProfile } = useAuth()
+const { reservations, loading: rLoading, fetchByAccount } = useReservations()
+const { hotels, fetchAll: fetchHotels, loading: hLoading } = useHotels()
 
 const search = ref('')
 const statusFilter = ref('')
 const yearFilter = ref('')
+
+const loading = computed(() => rLoading.value || hLoading.value)
 
 const statuses = [
   { value: '', label: 'All' },
@@ -135,10 +229,16 @@ const years = computed(() => {
   return [...ys].sort((a, b) => b.localeCompare(a))
 })
 
+function getHotel(id: number) {
+  return hotels.value.find(h => h.id === id)
+}
+
 const filtered = computed(() =>
   reservations.value.filter(r => {
+    const hotel = getHotel(r.hotelId)
     const matchSearch = !search.value ||
       r.confirmationCode.toLowerCase().includes(search.value.toLowerCase()) ||
+      (hotel && hotel.name.toLowerCase().includes(search.value.toLowerCase())) ||
       String(r.hotelId).includes(search.value)
     const matchStatus = !statusFilter.value || r.status === statusFilter.value
     const matchYear = !yearFilter.value || r.checkInDate.startsWith(yearFilter.value)
@@ -159,9 +259,11 @@ const grouped = computed<Record<string, typeof filtered.value>>(() => {
 function formatDate(d: string) {
   return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
 }
+
 function formatCurrency(n: number) {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(n)
 }
+
 function statusIcon(s: string) {
   const map: Record<string, string> = {
     CONFIRMED: 'check_circle', CANCELLED: 'cancel',
@@ -170,147 +272,32 @@ function statusIcon(s: string) {
   return map[s] ?? 'help'
 }
 
-onMounted(() => fetchByAccount(accountId.value || 1))
+function accentColor(s: string) {
+  const map: Record<string, string> = {
+    CONFIRMED: 'bg-primary',
+    COMPLETED: 'bg-secondary',
+    CANCELLED: 'bg-error',
+    PENDING: 'bg-accent',
+    BLOCKED: 'bg-outline',
+  }
+  return map[s] ?? 'bg-outline-variant'
+}
+
+function badgeColor(s: string) {
+  const map: Record<string, string> = {
+    CONFIRMED: 'bg-primary/10 text-primary',
+    COMPLETED: 'bg-secondary/10 text-secondary',
+    CANCELLED: 'bg-error/10 text-error',
+    PENDING: 'bg-accent/20 text-accent',
+    BLOCKED: 'bg-outline/20 text-outline',
+  }
+  return map[s] ?? 'bg-outline-variant/20 text-on-surface-variant'
+}
+
+onMounted(async () => {
+  await Promise.all([
+    fetchByAccount(accountId.value || 1),
+    fetchHotels()
+  ])
+})
 </script>
-
-<style scoped>
-.page-hero {
-  background: linear-gradient(135deg, #015081 0%, #006768 100%);
-  padding: 3rem 2rem 2.5rem;
-}
-.hero-inner {
-  max-width: 1200px; margin: 0 auto;
-  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-  flex-wrap: wrap;
-}
-.hero-eyebrow {
-  display: inline-flex; align-items: center; gap: 0.375rem;
-  font-size: 0.75rem; font-weight: 600; color: rgba(255,255,255,0.6);
-  text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem;
-}
-.hero-eyebrow .material-symbols-outlined { font-size: 0.875rem; }
-.hero-title { font-size: 2rem; font-weight: 700; color: #fff; margin: 0 0 0.25rem; letter-spacing: -0.02em; }
-.hero-subtitle { font-size: 0.9375rem; color: rgba(255,255,255,0.7); margin: 0; }
-.cta-btn {
-  display: inline-flex; align-items: center; gap: 0.5rem;
-  padding: 0.65rem 1.25rem; background: #CDAF5D; color: #015081;
-  font-weight: 700; font-size: 0.875rem; border-radius: 0.5rem;
-  text-decoration: none; transition: opacity 0.15s;
-}
-.cta-btn:hover { opacity: 0.9; }
-
-.page-body { max-width: 1200px; margin: 0 auto; padding: 2rem; }
-
-.filter-bar {
-  display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;
-  flex-wrap: wrap;
-}
-.filter-search {
-  display: flex; align-items: center; gap: 0.5rem;
-  background: #fff; border: 1px solid #bcc9c8; border-radius: 0.5rem;
-  padding: 0.5rem 0.75rem; flex: 1; min-width: 180px;
-}
-.filter-search .material-symbols-outlined { color: #6d7979; font-size: 1.125rem; }
-.filter-search input {
-  border: none; outline: none; background: transparent;
-  font-size: 0.875rem; color: #151d22; width: 100%;
-  font-family: 'Inter', sans-serif;
-}
-.filter-pills { display: flex; gap: 0.375rem; flex-wrap: wrap; }
-.pill {
-  padding: 0.375rem 0.75rem; border-radius: 999px;
-  border: 1px solid #bcc9c8; background: #fff; color: #3d4949;
-  font-size: 0.75rem; font-weight: 600; cursor: pointer;
-  transition: all 0.15s; font-family: 'Inter', sans-serif;
-}
-.pill:hover { border-color: #006768; color: #006768; }
-.pill--active { background: #006768; border-color: #006768; color: #fff; }
-.year-select {
-  padding: 0.5rem 0.75rem; border: 1px solid #bcc9c8; border-radius: 0.5rem;
-  background: #fff; font-size: 0.875rem; color: #151d22; outline: none;
-  cursor: pointer; font-family: 'Inter', sans-serif;
-}
-
-.loading-state, .empty-state {
-  text-align: center; padding: 4rem 2rem; color: #6d7979;
-}
-.loading-state .material-symbols-outlined, .empty-state .empty-icon {
-  font-size: 3rem; margin-bottom: 1rem; display: block;
-}
-.empty-state h3 { font-size: 1.125rem; font-weight: 700; color: #151d22; margin: 0 0 0.5rem; }
-.empty-state p { font-size: 0.875rem; margin: 0 0 1.5rem; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.spin { animation: spin 0.8s linear infinite; }
-
-.year-divider {
-  display: flex; align-items: center; gap: 0.75rem; margin: 1.5rem 0 1rem;
-}
-.year-divider::before, .year-divider::after {
-  content: ''; flex: 1; height: 1px; background: #bcc9c8;
-}
-.year-label { font-size: 0.8125rem; font-weight: 700; color: #6d7979; text-transform: uppercase; letter-spacing: 0.06em; }
-
-.timeline { display: flex; flex-direction: column; gap: 0.875rem; }
-.timeline-card {
-  background: #fff; border-radius: 0.75rem;
-  box-shadow: 0 1px 4px rgba(1,80,129,0.06);
-  display: flex; overflow: hidden;
-  transition: transform 0.15s, box-shadow 0.15s;
-}
-.timeline-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(1,80,129,0.10); }
-
-.card-accent { width: 4px; flex-shrink: 0; }
-.accent--confirmed { background: #006768; }
-.accent--completed { background: #236294; }
-.accent--cancelled { background: #ba1a1a; }
-.accent--pending { background: #CDAF5D; }
-.accent--blocked { background: #6d7979; }
-
-.card-body { flex: 1; padding: 1.25rem 1.5rem; }
-.card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.875rem; }
-.card-code { font-size: 0.6875rem; color: #6d7979; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin: 0; }
-.card-hotel { font-size: 1.0625rem; font-weight: 700; color: #151d22; margin: 0.125rem 0 0; }
-
-.status-badge {
-  display: inline-flex; align-items: center; gap: 0.25rem;
-  padding: 0.25rem 0.625rem; border-radius: 999px;
-  font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
-  white-space: nowrap;
-}
-.status-badge .material-symbols-outlined { font-size: 0.875rem; }
-.badge--confirmed { background: #e0f2f1; color: #006768; }
-.badge--completed { background: #e3f2fd; color: #236294; }
-.badge--cancelled { background: #ffdad6; color: #ba1a1a; }
-.badge--pending { background: #fff8e1; color: #735c10; }
-.badge--blocked { background: #e7eff6; color: #6d7979; }
-
-.card-meta { display: flex; flex-wrap: wrap; gap: 0.75rem 1.5rem; }
-.meta-item {
-  display: flex; align-items: center; gap: 0.375rem;
-  font-size: 0.8125rem; color: #3d4949;
-}
-.meta-item .material-symbols-outlined { font-size: 1rem; color: #6d7979; }
-.meta-item strong { color: #151d22; }
-.meta-amount { color: #015081; font-weight: 700; }
-
-.block-reason {
-  display: flex; align-items: center; gap: 0.375rem;
-  margin-top: 0.75rem; padding: 0.5rem 0.75rem;
-  background: #ffdad6; border-radius: 0.375rem;
-  font-size: 0.8125rem; color: #93000a;
-}
-.block-reason .material-symbols-outlined { font-size: 1rem; }
-
-.card-actions {
-  display: flex; flex-direction: column; justify-content: center;
-  padding: 1rem; border-left: 1px solid #e1e9f0; gap: 0.5rem;
-}
-.action-btn {
-  display: inline-flex; align-items: center; gap: 0.375rem;
-  padding: 0.5rem 0.875rem; border-radius: 0.5rem;
-  font-size: 0.8125rem; font-weight: 600; text-decoration: none;
-  transition: all 0.15s; white-space: nowrap;
-}
-.action-btn--ghost { border: 1px solid #bcc9c8; color: #006768; background: transparent; }
-.action-btn--ghost:hover { background: #006768; color: #fff; border-color: #006768; }
-</style>

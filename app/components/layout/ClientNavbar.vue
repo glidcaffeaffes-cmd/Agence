@@ -1,73 +1,88 @@
 <template>
-  <header class="client-navbar">
-    <div class="navbar-container">
-      <NuxtLink to="/" class="navbar-brand">
-        <span class="brand-icon">✈</span>
-        <span class="brand-text">Voyage<span class="brand-accent">Hub</span></span>
-      </NuxtLink>
+  <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-outline-variant/30 transition-shadow duration-300 hover:shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+      
+      <div class="flex items-center gap-8">
+        <!-- Brand Logo -->
+        <NuxtLink to="/" class="flex items-center gap-2 text-primary hover:opacity-90 transition-opacity">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary-container flex items-center justify-center shadow-sm">
+            <span class="material-symbols-outlined text-white text-2xl" style="font-variation-settings: 'FILL' 1;">bolt</span>
+          </div>
+          <span class="text-xl font-bold text-on-surface tracking-tight">Voyage<span class="text-primary">Hub</span></span>
+        </NuxtLink>
 
-      <nav class="navbar-links">
-        <NuxtLink to="/" class="nav-link" active-class="nav-link--active">Home</NuxtLink>
-        <NuxtLink to="/hotels" class="nav-link" active-class="nav-link--active">Hotels</NuxtLink>
-        <NuxtLink to="/offers" class="nav-link" active-class="nav-link--active">Offers</NuxtLink>
-      </nav>
+        <!-- Desktop Links -->
+        <nav class="hidden md:flex items-center gap-1">
+          <NuxtLink to="/hotels" class="px-4 py-2 rounded-lg text-sm font-semibold text-on-surface-variant hover:text-primary hover:bg-primary/5 transition-all" active-class="text-primary bg-primary/5">Hotels</NuxtLink>
+          <NuxtLink to="/offers" class="px-4 py-2 rounded-lg text-sm font-semibold text-on-surface-variant hover:text-primary hover:bg-primary/5 transition-all" active-class="text-primary bg-primary/5">Offers</NuxtLink>
+        </nav>
+      </div>
 
-      <div class="navbar-actions">
+      <!-- Desktop Actions -->
+      <div class="hidden md:flex items-center gap-4">
         <template v-if="isAuthenticated">
-          <button class="nav-icon-btn" @click="$emit('toggle-notifications')" title="Notifications">
-            <i class="pi pi-bell"></i>
-            <span v-if="unreadCount > 0" class="notification-badge">{{ unreadCount }}</span>
+          <button class="relative p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-lowest rounded-full transition-all" @click="$emit('toggle-notifications')" title="Notifications">
+            <span class="material-symbols-outlined text-[24px]">notifications</span>
+            <span v-if="unreadCount > 0" class="absolute top-1 right-1 w-4 h-4 bg-error text-white text-[10px] font-bold flex items-center justify-center rounded-full">{{ unreadCount }}</span>
           </button>
-          <NuxtLink to="/reservations" class="nav-link" active-class="nav-link--active">My Bookings</NuxtLink>
-          <div class="nav-user-menu">
-            <button class="nav-avatar-btn" @click="showUserMenu = !showUserMenu">
-              <img :src="currentProfile?.photo || 'https://i.pravatar.cc/40'" alt="Avatar" class="nav-avatar" />
-              <span class="nav-username">{{ currentProfile?.firstName }}</span>
-              <i class="pi pi-chevron-down" style="font-size: 0.7rem"></i>
+          
+          <NuxtLink to="/reservations" class="px-4 py-2 rounded-lg text-sm font-semibold text-on-surface-variant hover:text-primary hover:bg-primary/5 transition-all" active-class="text-primary bg-primary/5">My Bookings</NuxtLink>
+          
+          <div class="relative">
+            <button class="flex items-center gap-2 pl-1 pr-3 py-1 border border-outline-variant/50 rounded-full hover:border-primary/50 hover:bg-surface-container-lowest transition-all focus:outline-none" @click="showUserMenu = !showUserMenu">
+              <img :src="currentProfile?.photo || 'https://i.pravatar.cc/40'" alt="Avatar" class="w-8 h-8 rounded-full object-cover" />
+              <span class="text-sm font-bold text-on-surface">{{ currentProfile?.firstName || 'User' }}</span>
+              <span class="material-symbols-outlined text-[18px] text-on-surface-variant">expand_more</span>
             </button>
-            <Transition name="dropdown">
-              <div v-if="showUserMenu" class="user-dropdown">
-                <NuxtLink to="/profile" class="dropdown-item" @click="showUserMenu = false">
-                  <i class="pi pi-user"></i> Profile
+            
+            <!-- Dropdown -->
+            <transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 translate-y-2" enter-to-class="opacity-100 translate-y-0" leave-active-class="transition duration-150 ease-in" leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 translate-y-2">
+              <div v-if="showUserMenu" class="absolute right-0 mt-3 w-48 bg-white border border-outline-variant/40 rounded-xl shadow-lg p-2 z-50">
+                <NuxtLink to="/profile" class="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-on-surface hover:bg-surface-container-low transition-colors" @click="showUserMenu = false">
+                  <span class="material-symbols-outlined text-[20px] text-outline">person</span> Profile
                 </NuxtLink>
-                <NuxtLink v-if="isAdmin" to="/admin" class="dropdown-item" @click="showUserMenu = false">
-                  <i class="pi pi-cog"></i> Admin Panel
+                <NuxtLink v-if="isAdmin" to="/admin" class="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-on-surface hover:bg-surface-container-low transition-colors" @click="showUserMenu = false">
+                  <span class="material-symbols-outlined text-[20px] text-outline">admin_panel_settings</span> Admin Panel
                 </NuxtLink>
-                <button class="dropdown-item dropdown-item--danger" @click="handleLogout">
-                  <i class="pi pi-sign-out"></i> Logout
+                <button class="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-error hover:bg-error-container/30 transition-colors" @click="handleLogout">
+                  <span class="material-symbols-outlined text-[20px]">logout</span> Logout
                 </button>
               </div>
-            </Transition>
+            </transition>
           </div>
         </template>
         <template v-else>
-          <NuxtLink to="/login" class="nav-btn nav-btn--outline">Sign In</NuxtLink>
-          <NuxtLink to="/register" class="nav-btn nav-btn--primary">Register</NuxtLink>
+          <NuxtLink to="/login" class="px-5 py-2.5 rounded-xl text-sm font-bold text-on-surface border border-outline-variant/60 hover:border-primary hover:text-primary transition-all">Sign In</NuxtLink>
+          <NuxtLink to="/register" class="px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-primary hover:bg-primary-container shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5">Register</NuxtLink>
         </template>
       </div>
 
-      <button class="navbar-hamburger" @click="mobileOpen = !mobileOpen">
-        <i :class="mobileOpen ? 'pi pi-times' : 'pi pi-bars'"></i>
+      <!-- Mobile Menu Button -->
+      <button class="md:hidden p-2 text-on-surface-variant hover:text-primary transition-colors focus:outline-none" @click="mobileOpen = !mobileOpen">
+        <span class="material-symbols-outlined text-3xl">{{ mobileOpen ? 'close' : 'menu' }}</span>
       </button>
     </div>
 
-    <!-- Mobile menu -->
-    <Transition name="slide-down">
-      <div v-if="mobileOpen" class="mobile-menu">
-        <NuxtLink to="/" class="mobile-link" @click="mobileOpen = false">Home</NuxtLink>
-        <NuxtLink to="/hotels" class="mobile-link" @click="mobileOpen = false">Hotels</NuxtLink>
-        <NuxtLink to="/offers" class="mobile-link" @click="mobileOpen = false">Offers</NuxtLink>
+    <!-- Mobile Menu -->
+    <transition enter-active-class="transition duration-300 ease-out" enter-from-class="opacity-0 -translate-y-4" enter-to-class="opacity-100 translate-y-0" leave-active-class="transition duration-200 ease-in" leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-4">
+      <div v-if="mobileOpen" class="md:hidden border-t border-outline-variant/30 bg-white px-4 py-6 space-y-2">
+        <NuxtLink to="/" class="block px-4 py-3 rounded-xl text-base font-bold text-on-surface hover:bg-surface-container-lowest transition-colors" @click="mobileOpen = false">Home</NuxtLink>
+        <NuxtLink to="/hotels" class="block px-4 py-3 rounded-xl text-base font-bold text-on-surface hover:bg-surface-container-lowest transition-colors" @click="mobileOpen = false">Hotels</NuxtLink>
+        <NuxtLink to="/offers" class="block px-4 py-3 rounded-xl text-base font-bold text-on-surface hover:bg-surface-container-lowest transition-colors" @click="mobileOpen = false">Offers</NuxtLink>
+        
         <template v-if="isAuthenticated">
-          <NuxtLink to="/reservations" class="mobile-link" @click="mobileOpen = false">My Bookings</NuxtLink>
-          <NuxtLink to="/profile" class="mobile-link" @click="mobileOpen = false">Profile</NuxtLink>
-          <button class="mobile-link mobile-link--danger" @click="handleLogout">Logout</button>
+          <div class="h-px bg-outline-variant/30 my-4"></div>
+          <NuxtLink to="/reservations" class="block px-4 py-3 rounded-xl text-base font-bold text-on-surface hover:bg-surface-container-lowest transition-colors" @click="mobileOpen = false">My Bookings</NuxtLink>
+          <NuxtLink to="/profile" class="block px-4 py-3 rounded-xl text-base font-bold text-on-surface hover:bg-surface-container-lowest transition-colors" @click="mobileOpen = false">Profile</NuxtLink>
+          <button class="block w-full text-left px-4 py-3 rounded-xl text-base font-bold text-error hover:bg-error-container/30 transition-colors" @click="handleLogout">Logout</button>
         </template>
         <template v-else>
-          <NuxtLink to="/login" class="mobile-link" @click="mobileOpen = false">Sign In</NuxtLink>
-          <NuxtLink to="/register" class="mobile-link" @click="mobileOpen = false">Register</NuxtLink>
+          <div class="h-px bg-outline-variant/30 my-4"></div>
+          <NuxtLink to="/login" class="block text-center px-4 py-3 rounded-xl text-base font-bold text-primary border border-primary/20 hover:bg-primary/5 transition-colors mb-3" @click="mobileOpen = false">Sign In</NuxtLink>
+          <NuxtLink to="/register" class="block text-center px-4 py-3 rounded-xl text-base font-bold text-white bg-primary shadow-sm hover:bg-primary-container transition-colors" @click="mobileOpen = false">Register</NuxtLink>
         </template>
       </div>
-    </Transition>
+    </transition>
   </header>
 </template>
 
@@ -91,203 +106,3 @@ function handleLogout() {
 
 defineEmits(['toggle-notifications'])
 </script>
-
-<style scoped>
-.client-navbar {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--color-border);
-  transition: box-shadow var(--motion-duration-normal) var(--motion-ease-default);
-}
-.client-navbar:hover { box-shadow: var(--shadow-sm); }
-
-.navbar-container {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: var(--spacing-3) var(--spacing-6);
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-6);
-}
-
-.navbar-brand {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  text-decoration: none;
-  font-family: var(--font-family-heading);
-}
-.brand-icon { font-size: 1.5rem; }
-.brand-text {
-  font-size: var(--font-size-lg);
-  font-weight: 700;
-  color: var(--color-text-primary);
-}
-.brand-accent { color: var(--color-primary-500); }
-
-.navbar-links {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-1);
-  flex: 1;
-}
-
-.nav-link {
-  padding: var(--spacing-2) var(--spacing-3);
-  border-radius: var(--radius-md);
-  text-decoration: none;
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  transition: all var(--motion-duration-fast) var(--motion-ease-default);
-}
-.nav-link:hover { color: var(--color-primary-600); background: var(--color-primary-50); }
-.nav-link--active { color: var(--color-primary-600); background: var(--color-primary-50); }
-
-.navbar-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-3);
-}
-
-.nav-icon-btn {
-  position: relative;
-  background: none;
-  border: none;
-  padding: var(--spacing-2);
-  border-radius: var(--radius-full);
-  cursor: pointer;
-  color: var(--color-text-secondary);
-  transition: all var(--motion-duration-fast) var(--motion-ease-default);
-}
-.nav-icon-btn:hover { background: var(--color-surface-secondary); color: var(--color-primary-600); }
-
-.notification-badge {
-  position: absolute;
-  top: 0; right: 0;
-  width: 18px; height: 18px;
-  border-radius: var(--radius-full);
-  background: var(--color-accent-500);
-  color: white;
-  font-size: 0.65rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.nav-avatar-btn {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  background: none;
-  border: 1px solid var(--color-border);
-  padding: var(--spacing-1) var(--spacing-3) var(--spacing-1) var(--spacing-1);
-  border-radius: var(--radius-full);
-  cursor: pointer;
-  transition: all var(--motion-duration-fast) var(--motion-ease-default);
-}
-.nav-avatar-btn:hover { border-color: var(--color-primary-300); background: var(--color-surface-secondary); }
-.nav-avatar { width: 32px; height: 32px; border-radius: var(--radius-full); object-fit: cover; }
-.nav-username { font-size: var(--font-size-sm); font-weight: 500; color: var(--color-text-primary); }
-
-.nav-user-menu { position: relative; }
-
-.user-dropdown {
-  position: absolute;
-  top: calc(100% + var(--spacing-2));
-  right: 0;
-  min-width: 180px;
-  background: var(--color-surface-primary);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  padding: var(--spacing-2);
-  z-index: 200;
-}
-.dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  width: 100%;
-  padding: var(--spacing-2) var(--spacing-3);
-  border-radius: var(--radius-md);
-  text-decoration: none;
-  font-size: var(--font-size-sm);
-  color: var(--color-text-primary);
-  background: none;
-  border: none;
-  cursor: pointer;
-  transition: background var(--motion-duration-fast) var(--motion-ease-default);
-}
-.dropdown-item:hover { background: var(--color-surface-secondary); }
-.dropdown-item--danger { color: var(--color-error); }
-.dropdown-item--danger:hover { background: rgba(220, 38, 38, 0.08); }
-
-.nav-btn {
-  padding: var(--spacing-2) var(--spacing-4);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  text-decoration: none;
-  transition: all var(--motion-duration-fast) var(--motion-ease-default);
-  cursor: pointer;
-}
-.nav-btn--outline {
-  border: 1px solid var(--color-border);
-  color: var(--color-text-primary);
-  background: transparent;
-}
-.nav-btn--outline:hover { border-color: var(--color-primary-300); background: var(--color-primary-50); }
-.nav-btn--primary {
-  background: var(--color-primary-500);
-  color: white;
-  border: none;
-}
-.nav-btn--primary:hover { background: var(--color-primary-600); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
-
-.navbar-hamburger {
-  display: none;
-  background: none;
-  border: none;
-  font-size: 1.4rem;
-  cursor: pointer;
-  color: var(--color-text-primary);
-}
-
-.mobile-menu {
-  display: none;
-  flex-direction: column;
-  padding: var(--spacing-4) var(--spacing-6);
-  border-top: 1px solid var(--color-border);
-  background: var(--color-surface-primary);
-}
-.mobile-link {
-  padding: var(--spacing-3);
-  text-decoration: none;
-  font-size: var(--font-size-base);
-  color: var(--color-text-primary);
-  border-radius: var(--radius-md);
-  background: none;
-  border: none;
-  text-align: left;
-  cursor: pointer;
-}
-.mobile-link:hover { background: var(--color-surface-secondary); }
-.mobile-link--danger { color: var(--color-error); }
-
-@media (max-width: 768px) {
-  .navbar-links, .navbar-actions { display: none; }
-  .navbar-hamburger { display: block; }
-  .mobile-menu { display: flex; }
-}
-
-/* Transitions */
-.dropdown-enter-active, .dropdown-leave-active { transition: all 0.2s ease; }
-.dropdown-enter-from, .dropdown-leave-to { opacity: 0; transform: translateY(-8px); }
-.slide-down-enter-active, .slide-down-leave-active { transition: all 0.3s ease; }
-.slide-down-enter-from, .slide-down-leave-to { opacity: 0; max-height: 0; }
-</style>
