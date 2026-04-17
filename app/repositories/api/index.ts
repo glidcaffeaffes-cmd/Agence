@@ -18,23 +18,24 @@ import type { IAccountRepository } from '~/types/interfaces/IAccountRepository'
 import type { IReservationRepository } from '~/types/interfaces/IReservationRepository'
 import type { IOfferRepository } from '~/types/interfaces/IOfferRepository'
 import type { IComplaintRepository } from '~/types/interfaces/IComplaintRepository'
+import type { IRoomRepository } from '~/types/interfaces/IRoomRepository'
 
-import type { Hotel, Account, Profile, Reservation, Offer, Complaint } from '~/types/models'
-import type { HotelDTO, AccountDTO, ReservationDTO, OfferDTO, ComplaintDTO } from '~/types/dto'
+import type { Hotel, Account, Profile, Reservation, Offer, Complaint, Room, RoomType } from '~/types/models'
+import type { HotelDTO, AccountDTO, ReservationDTO, OfferDTO, ComplaintDTO, RoomDTO } from '~/types/dto'
 import type { ReservationStatus } from '~/types/enums/ReservationStatus'
 import type { ComplaintStatus } from '~/types/enums/ComplaintStatus'
 
 import {
   HotelMapper, AccountMapper, ProfileMapper,
-  ReservationMapper, OfferMapper, ComplaintMapper,
+  ReservationMapper, OfferMapper, ComplaintMapper, RoomMapper
 } from '~/mappers'
 
 // ---------------------------------------------------------------------------
 // Helper — resolve base URL from Nuxt runtime config
 // ---------------------------------------------------------------------------
 function useBase(): string {
-  // Hardcoded endpoint exclusively for admin as requested
-  return 'http://localhost:3001/api'
+  // Configured to point to the shared ngrok endpoint
+  return 'https://4126-41-224-5-209.ngrok-free.app/api'
 }
 
 // ============================================================================
@@ -316,6 +317,61 @@ export class ApiComplaintRepository implements IComplaintRepository {
       body: { status, agency_response: agencyResponse ?? null },
     })
     return ComplaintMapper.fromDto(dto)
+  }
+
+  async delete(id: number): Promise<void> {
+    await $fetch(`${this.base}/${id}`, { method: 'DELETE' })
+  }
+}
+
+// ============================================================================
+// ApiRoomRepository
+// ============================================================================
+export class ApiRoomRepository implements IRoomRepository {
+  private get base() { return `${useBase()}/rooms` }
+
+  async getAll(): Promise<Room[]> {
+    const dtos = await $fetch<RoomDTO[]>(this.base)
+    return dtos.map(RoomMapper.fromDto)
+  }
+
+  async getByHotel(hotelId: number): Promise<Room[]> {
+    const dtos = await $fetch<RoomDTO[]>(`${this.base}?hotel_id=${hotelId}`)
+    return dtos.map(RoomMapper.fromDto)
+  }
+
+  async getById(id: number): Promise<Room | null> {
+    try {
+      const dto = await $fetch<RoomDTO>(`${this.base}/${id}`)
+      return RoomMapper.fromDto(dto)
+    } catch { return null }
+  }
+
+  async getAvailable(hotelId: number, checkIn: string, checkOut: string): Promise<Room[]> {
+    const dtos = await $fetch<RoomDTO[]>(`${this.base}?hotel_id=${hotelId}&available=true`)
+    return dtos.map(RoomMapper.fromDto)
+  }
+
+  async getRoomTypes(): Promise<RoomType[]> {
+    try {
+      return await $fetch<RoomType[]>(`${useBase()}/room-types`)
+    } catch { return [] }
+  }
+
+  async create(room: Omit<Room, 'id'>): Promise<Room> {
+    const dto = await $fetch<RoomDTO>(this.base, {
+      method: 'POST',
+      body: RoomMapper.toDto(room),
+    })
+    return RoomMapper.fromDto(dto)
+  }
+
+  async update(id: number, data: Partial<Room>): Promise<Room> {
+    const dto = await $fetch<RoomDTO>(`${this.base}/${id}`, {
+      method: 'PATCH',
+      body: data as Partial<RoomDTO>,
+    })
+    return RoomMapper.fromDto(dto)
   }
 
   async delete(id: number): Promise<void> {

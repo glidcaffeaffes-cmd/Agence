@@ -65,7 +65,7 @@ Make sure to install dependencies:
 npm install
 ```
 
-Start the development server on `http://localhost:3000`:
+Start the development server on `http://localhost:3001`:
 ```bash
 npm run dev
 ```

@@ -1,8 +1,8 @@
 import { ref } from 'vue'
 import type { Room, RoomType } from '~/types/models'
-import { MockRoomRepository } from '~/repositories/mock'
+import { ApiRoomRepository } from '~/repositories/api'
 
-const repo = new MockRoomRepository()
+const repo = new ApiRoomRepository()
 
 export function useRooms() {
   const rooms = ref<Room[]>([])
