@@ -40,12 +40,8 @@ import type { IComplaintRepository }   from '~/types/interfaces/IComplaintReposi
 // Detect mode: default to Mock unless NUXT_PUBLIC_USE_API=true
 // ---------------------------------------------------------------------------
 function useApi(): boolean {
-  try {
-    const config = useRuntimeConfig()
-    return String(config.public.useApi) === 'true'
-  } catch {
-    return false // SSR / test environments without Nuxt context → fall back to mock
-  }
+  // Enforce API usage specifically for the admin panel as requested
+  return true
 }
 
 // ============================================================================

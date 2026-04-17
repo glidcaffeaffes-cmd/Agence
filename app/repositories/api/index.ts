@@ -33,8 +33,8 @@ import {
 // Helper — resolve base URL from Nuxt runtime config
 // ---------------------------------------------------------------------------
 function useBase(): string {
-  const config = useRuntimeConfig()
-  return (config.public.apiBase as string | undefined) ?? '/api'
+  // Hardcoded endpoint exclusively for admin as requested
+  return 'http://localhost:3001/api'
 }
 
 // ============================================================================
