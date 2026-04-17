@@ -41,5 +41,10 @@ export function useHotels() {
     finally { loading.value = false }
   }
 
-  return { hotels, hotel, featured, loading, error, fetchAll, fetchById, fetchFeatured, search }
+  async function getById(id: number) {
+    await fetchById(id)
+    return hotel.value
+  }
+
+  return { hotels, hotel, featured, loading, error, fetchAll, fetchById, getById, fetchFeatured, search }
 }

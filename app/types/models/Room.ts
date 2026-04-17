@@ -12,4 +12,7 @@ export interface Room {
   available: boolean
   photos: string[]
   roomTypeId: number
+  type?: string
+  description?: string
+  amenities?: string[]
 }

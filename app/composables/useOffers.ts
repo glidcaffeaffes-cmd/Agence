@@ -30,5 +30,5 @@ export function useOffers() {
     finally { loading.value = false }
   }
 
-  return { offers, loading, error, fetchActive, fetchAll, fetchByHotel }
+  return { offers, loading, error, fetchActive, fetchAll, fetchOffers: fetchAll, fetchByHotel }
 }

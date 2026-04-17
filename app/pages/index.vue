@@ -90,7 +90,7 @@ import { useRooms } from '~/composables/useRooms'
 
 const { featured, fetchFeatured } = useHotels()
 const { offers: activeOffers, fetchActive } = useOffers()
-const { rooms, fetchByHotel } = useRooms()
+const { rooms, fetchAll: fetchAllRooms } = useRooms()
 
 function getMinPrice(hotelId: number): number {
   const hotelRooms = rooms.value.filter(r => r.hotelId === hotelId)
@@ -99,11 +99,7 @@ function getMinPrice(hotelId: number): number {
 }
 
 onMounted(async () => {
-  await Promise.all([fetchFeatured(), fetchActive()])
-  // Pre-load rooms for pricing
-  for (const h of featured.value) {
-    await fetchByHotel(h.id)
-  }
+  await Promise.all([fetchFeatured(), fetchActive(), fetchAllRooms()])
 })
 </script>
 
