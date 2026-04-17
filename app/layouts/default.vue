@@ -4,9 +4,17 @@
     <main class="client-main">
       <slot />
     </main>
-    <ClientFooter />
+    <ClientFooter v-if="!hideFooter" />
   </div>
 </template>
+
+<script setup>
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+const hideFooter = computed(() => ['/login', '/register'].includes(route.path))
+</script>
 
 <style scoped>
 .client-layout {

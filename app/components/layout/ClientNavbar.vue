@@ -1,6 +1,6 @@
 <template>
   <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-outline-variant/30 transition-shadow duration-300 hover:shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between">
       
       <div class="flex items-center gap-8">
         <!-- Brand Logo -->
@@ -52,8 +52,8 @@
           </div>
         </template>
         <template v-else>
-          <NuxtLink to="/login" class="px-5 py-2.5 rounded-xl text-sm font-bold text-on-surface border border-outline-variant/60 hover:border-primary hover:text-primary transition-all">Sign In</NuxtLink>
-          <NuxtLink to="/register" class="px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-primary hover:bg-primary-container shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5">Register</NuxtLink>
+          <NuxtLink to="/login" class="px-4 py-1.5 rounded-xl text-sm font-bold text-on-surface border border-outline-variant/60 hover:border-primary hover:text-primary transition-all">Sign In</NuxtLink>
+          <NuxtLink to="/register" class="px-4 py-1.5 rounded-xl text-sm font-bold text-white bg-primary hover:bg-primary-container shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5">Register</NuxtLink>
         </template>
       </div>
 
