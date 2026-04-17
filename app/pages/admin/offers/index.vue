@@ -1,67 +1,130 @@
 <template>
-  <div>
+  <div class="p-8 max-w-7xl mx-auto font-['Inter'] antialiased">
     <Head>
-      <title>Offers & Promotions — VoyageHub Admin</title>
-      <meta name="description" content="Manage seasonal offers and promotional discounts for VoyageHub." />
+      <title>Offres & Promotions — Admin</title>
     </Head>
 
-    <div class="admin-page">
-      <div class="page-header">
-        <div>
-          <p class="page-eyebrow">Marketing</p>
-          <h1 class="page-title">Offers & Promotions</h1>
-          <p class="page-desc">Manage seasonal discounts, spotlighted hotels and packages</p>
-        </div>
-        <button id="add-offer-btn" class="btn-primary" @click="showNewModal = true">
-          <span class="material-symbols-outlined">add</span> Create Offer
-        </button>
+    <!-- Header -->
+    <div class="flex justify-between items-end mb-8">
+      <div>
+        <h2 class="text-3xl font-bold text-[#015081] tracking-tight mb-1">Offres & Promotions</h2>
+        <p class="text-outline text-sm">Gérez les offres spéciales et remises saisonnières.</p>
       </div>
+      <button @click="isModalOpen = true" class="bg-[#008F90] text-white px-6 py-2.5 rounded-lg font-semibold flex items-center gap-2 hover:bg-[#007a7a] active:scale-95 transition-all shadow-sm">
+        <span class="material-symbols-outlined">add_circle</span>
+        Créer une offre
+      </button>
+    </div>
 
-      <!-- Filters & KPI -->
-      <div class="header-tools">
-        <div class="search-box">
-          <span class="material-symbols-outlined">search</span>
-          <input v-model="search" type="text" placeholder="Search offers..." />
-        </div>
-        <select v-model="statusFilter" class="filter-select">
-          <option value="">All Statuses</option>
-          <option value="active">Active</option>
-          <option value="scheduled">Scheduled</option>
-          <option value="expired">Expired</option>
-        </select>
-      </div>
+    <!-- Table -->
+    <div class="bg-white rounded-xl overflow-hidden shadow-[0_4px_20px_rgba(1,80,129,0.06)]">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-surface-container-high/50 border-b border-surface-variant/30 text-outline text-xs font-bold uppercase tracking-widest">
+            <th class="px-6 py-4">ID</th>
+            <th class="px-6 py-4">Titre</th>
+            <th class="px-6 py-4">Hôtel</th>
+            <th class="px-6 py-4">Remise</th>
+            <th class="px-6 py-4">Période</th>
+            <th class="px-6 py-4">Statut</th>
+            <th class="px-6 py-4 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-surface-variant/20 text-sm">
+          <tr v-if="loading"><td colspan="7" class="px-6 py-8 text-center text-outline">Chargement…</td></tr>
+          <tr v-for="offer in offers" :key="offer.id" class="hover:bg-surface-container-low/50 transition-colors group">
+            <td class="px-6 py-4 font-mono text-outline">#{{ offer.id }}</td>
+            <td class="px-6 py-4 font-semibold text-on-surface">{{ offer.title }}</td>
+            <td class="px-6 py-4 text-on-surface-variant">Hôtel #{{ offer.hotelId }}</td>
+            <td class="px-6 py-4">
+              <span class="px-2.5 py-1 rounded-full bg-[#CDAF5D]/10 text-[#735c10] text-xs font-bold">{{ offer.discountRate }}% OFF</span>
+            </td>
+            <td class="px-6 py-4 text-on-surface-variant">{{ formatDate(offer.startDate) }} → {{ formatDate(offer.endDate) }}</td>
+            <td class="px-6 py-4">
+              <span v-if="offer.active" class="px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase">Active</span>
+              <span v-else class="px-2.5 py-1 rounded-full bg-surface-variant text-on-surface-variant text-[10px] font-bold uppercase">Inactive</span>
+            </td>
+            <td class="px-6 py-4 text-right space-x-1">
+              <button @click="openEdit(offer)" class="p-2 hover:bg-white rounded-lg text-secondary transition-all active:scale-90 shadow-sm border border-transparent hover:border-surface-variant/30">
+                <span class="material-symbols-outlined text-lg">edit</span>
+              </button>
+              <button @click="handleDelete(offer.id)" class="p-2 hover:bg-white rounded-lg text-error transition-all active:scale-90 shadow-sm border border-transparent hover:border-surface-variant/30">
+                <span class="material-symbols-outlined text-lg">delete</span>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-      <div class="offers-grid">
-        <div v-if="loading" class="loading-state">
-          <span class="material-symbols-outlined spin">progress_activity</span>
+    <!-- Add Modal -->
+    <div v-if="isModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-on-surface/40 backdrop-blur-sm px-4" @click.self="isModalOpen = false">
+      <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden">
+        <div class="bg-[#015081] px-6 py-4 flex items-center justify-between">
+          <h3 class="text-white font-bold">Créer une offre</h3>
+          <button @click="isModalOpen = false" class="text-white/60 hover:text-white"><span class="material-symbols-outlined">close</span></button>
         </div>
-        <div v-else-if="filtered.length === 0" class="empty-state">
-          No offers found matching your criteria.
-        </div>
-        <div v-for="offer in filtered" :key="offer.id" class="offer-card" :id="`offer-${offer.id}`">
-          <div class="offer-img-box">
-            <!-- Simulated image using gradients for offers without real assets yet -->
-            <div class="offer-img-placeholder">
-              <span class="material-symbols-outlined">{{ offer.type === 'PERCENTAGE' ? 'percent' : 'sell' }}</span>
+        <div class="p-6 space-y-4">
+          <div class="space-y-1">
+            <label class="text-[11px] font-bold text-outline uppercase">Titre</label>
+            <input v-model="form.title" class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" placeholder="ex: Été 2025" type="text">
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-1">
+              <label class="text-[11px] font-bold text-outline uppercase">Remise (%)</label>
+              <input v-model.number="form.discountRate" class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" type="number" min="1" max="100">
             </div>
-            <div class="offer-status" :class="getStatusClass(offer)">
-              {{ getStatusLabel(offer) }}
+            <div class="space-y-1">
+              <label class="text-[11px] font-bold text-outline uppercase">Hôtel ID</label>
+              <input v-model.number="form.hotelId" class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" type="number">
             </div>
           </div>
-          <div class="offer-content">
-            <h3 class="offer-title">{{ offer.title }}</h3>
-            <p class="offer-desc">{{ offer.description }}</p>
-            <div class="offer-meta">
-              <span class="meta-badge meta-badge--brand">
-                <span class="material-symbols-outlined">loyalty</span>
-                {{ offer.discountValue }}{{ offer.type === 'PERCENTAGE' ? '%' : '€' }} OFF
-              </span>
-              <span class="meta-date">Until {{ formatDate(offer.endDate) }}</span>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-1">
+              <label class="text-[11px] font-bold text-outline uppercase">Début</label>
+              <input v-model="form.startDate" class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" type="date">
             </div>
-            <div class="offer-actions">
-              <button class="btn-ghost-sm"><span class="material-symbols-outlined">edit</span> Edit</button>
-              <button class="btn-ghost-sm text-danger"><span class="material-symbols-outlined">delete</span> Drop</button>
+            <div class="space-y-1">
+              <label class="text-[11px] font-bold text-outline uppercase">Fin</label>
+              <input v-model="form.endDate" class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" type="date">
             </div>
+          </div>
+          <div class="pt-2 flex gap-3">
+            <button @click="isModalOpen = false" class="flex-1 py-2.5 rounded-lg font-bold text-outline hover:bg-surface-container-low transition-colors">Annuler</button>
+            <button @click="handleSave" class="flex-1 py-2.5 bg-[#008F90] text-white rounded-lg font-bold hover:bg-[#007a7a] transition-colors">Enregistrer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div v-if="editingOffer" class="fixed inset-0 z-[100] flex items-center justify-center bg-on-surface/40 backdrop-blur-sm px-4" @click.self="editingOffer = null">
+      <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden">
+        <div class="bg-[#015081] px-6 py-4 flex items-center justify-between">
+          <h3 class="text-white font-bold">Modifier l'offre</h3>
+          <button @click="editingOffer = null" class="text-white/60 hover:text-white"><span class="material-symbols-outlined">close</span></button>
+        </div>
+        <div class="p-6 space-y-4">
+          <div class="space-y-1">
+            <label class="text-[11px] font-bold text-outline uppercase">Titre</label>
+            <input v-model="editingOffer.title" class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" type="text">
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-1">
+              <label class="text-[11px] font-bold text-outline uppercase">Remise (%)</label>
+              <input v-model.number="editingOffer.discountRate" class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" type="number" min="1" max="100">
+            </div>
+            <div class="space-y-1">
+              <label class="text-[11px] font-bold text-outline uppercase">Active</label>
+              <select v-model="editingOffer.active" class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none">
+                <option :value="true">Oui</option>
+                <option :value="false">Non</option>
+              </select>
+            </div>
+          </div>
+          <div class="pt-2 flex gap-3">
+            <button @click="editingOffer = null" class="flex-1 py-2.5 rounded-lg font-bold text-outline hover:bg-surface-container-low transition-colors">Annuler</button>
+            <button @click="saveEdit" class="flex-1 py-2.5 bg-[#008F90] text-white rounded-lg font-bold hover:bg-[#007a7a] transition-colors">Enregistrer</button>
           </div>
         </div>
       </div>
@@ -70,96 +133,45 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useOffers } from '~/composables/useOffers'
+import { ref, onMounted } from 'vue'
+import type { Offer } from '~/types/models'
+import { OfferService } from '~/services'
 
 definePageMeta({ layout: 'admin' })
 
-const { offers, fetchOffers, loading } = useOffers()
-
-const search = ref('')
-const statusFilter = ref('')
-const showNewModal = ref(false)
-
-onMounted(fetchOffers)
+const service = new OfferService()
+const offers = ref<Offer[]>([])
+const loading = ref(false)
+const isModalOpen = ref(false)
+const editingOffer = ref<Offer | null>(null)
+const form = ref({ title: '', discountRate: 10, hotelId: 1, startDate: '', endDate: '', description: '' })
 
 function formatDate(d: string) {
   return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-function getStatus(offer: any) {
-  const now = new Date()
-  const start = new Date(offer.startDate)
-  const end = new Date(offer.endDate)
-  if (now < start) return 'scheduled'
-  if (now > end) return 'expired'
-  return 'active'
+function openEdit(offer: Offer) { editingOffer.value = { ...offer } }
+
+async function handleSave() {
+  await service.create({ ...form.value, active: true, image: undefined })
+  form.value = { title: '', discountRate: 10, hotelId: 1, startDate: '', endDate: '', description: '' }
+  isModalOpen.value = false
+  offers.value = await service.getAll()
 }
 
-function getStatusLabel(offer: any) {
-  const s = getStatus(offer)
-  return s.charAt(0).toUpperCase() + s.slice(1)
+async function saveEdit() {
+  if (!editingOffer.value) return
+  const updated = await service.update(editingOffer.value.id, editingOffer.value)
+  const i = offers.value.findIndex(o => o.id === updated.id)
+  if (i !== -1) offers.value[i] = updated
+  editingOffer.value = null
 }
 
-function getStatusClass(offer: any) {
-  const s = getStatus(offer)
-  if (s === 'active') return 'status--active'
-  if (s === 'scheduled') return 'status--scheduled'
-  return 'status--expired'
+async function handleDelete(id: number) {
+  if (!confirm('Supprimer cette offre ?')) return
+  await service.delete(id)
+  offers.value = offers.value.filter(o => o.id !== id)
 }
 
-const filtered = computed(() => {
-  return offers.value.filter(o => {
-    const q = search.value.toLowerCase()
-    const matchSearch = !q || o.title.toLowerCase().includes(q) || o.description.toLowerCase().includes(q)
-    const matchStatus = !statusFilter.value || getStatus(o) === statusFilter.value
-    return matchSearch && matchStatus
-  })
-})
+onMounted(async () => { loading.value = true; offers.value = await service.getAll(); loading.value = false })
 </script>
-
-<style scoped>
-.admin-page { padding: 2.5rem; font-family: 'Inter', sans-serif; }
-.page-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
-.page-eyebrow { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.08em; color: #6d7979; font-weight: 600; margin: 0; }
-.page-title { font-size: 1.625rem; font-weight: 700; color: #015081; margin: 0.25rem 0; letter-spacing: -0.02em; }
-.page-desc { font-size: 0.875rem; color: #3d4949; margin: 0; }
-.btn-primary { display: flex; align-items: center; gap: 0.375rem; padding: 0.625rem 1.25rem; background: linear-gradient(135deg,#006768,#008283); color: #fff; border: none; border-radius: 0.5rem; font-weight: 700; font-size: 0.875rem; cursor: pointer; }
-
-.header-tools { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
-.search-box { display: flex; align-items: center; gap: 0.5rem; background: #fff; border: 1px solid #bcc9c8; border-radius: 0.5rem; padding: 0.5rem 0.875rem; min-width: 250px; }
-.search-box input { border: none; outline: none; font-size: 0.875rem; width: 100%; }
-.filter-select { padding: 0.5rem 0.875rem; border: 1px solid #bcc9c8; border-radius: 0.5rem; font-size: 0.875rem; background: #fff; outline: none; cursor: pointer; }
-
-.loading-state, .empty-state { text-align: center; padding: 3rem; color: #6d7979; grid-column: 1 / -1; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.spin { animation: spin 0.8s linear infinite; font-size: 2rem; }
-
-.offers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; }
-.offer-card { background: #fff; border-radius: 0.875rem; overflow: hidden; box-shadow: 0 1px 4px rgba(1,80,129,0.06); display: flex; flex-direction: column; transition: transform 0.15s; }
-.offer-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(1,80,129,0.1); }
-
-.offer-img-box { height: 160px; position: relative; }
-.offer-img-placeholder { width: 100%; height: 100%; background: linear-gradient(135deg, #015081, #236294); display: flex; align-items: center; justify-content: center; }
-.offer-img-placeholder .material-symbols-outlined { font-size: 3rem; color: rgba(255,255,255,0.2); }
-.offer-status { position: absolute; top: 1rem; right: 1rem; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; backdrop-filter: blur(4px); }
-.status--active { background: rgba(0,103,104,0.9); color: #fff; }
-.status--scheduled { background: rgba(205,175,93,0.9); color: #015081; }
-.status--expired { background: rgba(21,29,34,0.8); color: #fff; }
-
-.offer-content { padding: 1.25rem; flex: 1; display: flex; flex-direction: column; }
-.offer-title { font-size: 1.0625rem; font-weight: 700; color: #015081; margin: 0 0 0.5rem; }
-.offer-desc { font-size: 0.8125rem; color: #3d4949; margin: 0 0 1.25rem; line-height: 1.5; flex: 1; }
-
-.offer-meta { display: flex; justify-content: space-between; align-items: center; padding-bottom: 1.25rem; border-bottom: 1px solid #e1e9f0; margin-bottom: 1.25rem; }
-.meta-badge { display: flex; align-items: center; gap: 0.375rem; padding: 0.375rem 0.75rem; border-radius: 0.375rem; font-size: 0.8125rem; font-weight: 700; }
-.meta-badge--brand { background: #e0f2f1; color: #006768; }
-.meta-badge .material-symbols-outlined { font-size: 1.125rem; }
-.meta-date { font-size: 0.75rem; font-weight: 600; color: #6d7979; }
-
-.offer-actions { display: flex; justify-content: flex-end; gap: 0.5rem; }
-.btn-ghost-sm { display: flex; align-items: center; gap: 0.25rem; padding: 0.375rem 0.75rem; border: 1px solid #bcc9c8; border-radius: 0.375rem; background: transparent; color: #3d4949; font-size: 0.8125rem; font-weight: 600; cursor: pointer; transition: background 0.15s; }
-.btn-ghost-sm:hover { background: #f5faff; }
-.text-danger { color: #ba1a1a; border-color: #fca5a5; }
-.text-danger:hover { background: #ffdad6; }
-</style>

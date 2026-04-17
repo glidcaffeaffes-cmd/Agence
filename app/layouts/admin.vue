@@ -92,29 +92,9 @@
 
     <!-- Main Content Canvas -->
     <main class="ml-64 min-h-screen">
-      <!-- TopAppBar -->
-      <header class="w-full sticky top-0 z-40 bg-[#f5faff] shadow-sm flex justify-between items-center h-16 px-8 ml-auto font-['Inter'] antialiased tracking-tight">
-        <div class="flex items-center gap-4 flex-1">
-          <div class="relative w-full max-w-md">
-            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm">search</span>
-            <input class="w-full pl-10 pr-4 py-2 bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-primary text-sm outline-none" placeholder="Search..." type="text"/>
-          </div>
-        </div>
-        <div class="flex items-center gap-6">
-          <div class="flex items-center gap-4 text-outline">
-            <span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">notifications</span>
-            <span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">settings</span>
-            <span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">help</span>
-          </div>
-          <div class="flex items-center gap-3 border-l border-surface-variant pl-6">
-            <div class="text-right">
-              <p class="text-xs font-bold text-on-surface">Admin User</p>
-              <p class="text-[10px] text-outline uppercase tracking-tighter">VoyageHub Manager</p>
-            </div>
-            <img alt="Administrator profile" class="w-10 h-10 rounded-full object-cover border-2 border-primary/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3jr47BTrBfbJixfp2HntDQfzkE_cdHycmT2u5Mp3vWeJth_eEXWQUSBoBejwFBDtyqrRnPItXjWxD8aHuHGlvei0LW6DMFVLi8GgzbyARM5LqwCE1z-TH7pY8AsPfx8SOreQufwY53ugh-7g0-kGFIBFchEhUgmtbRzucpWfpY-lnvYyukboDmuv_yGdT38Tow-ZDZ0MmuJWL5w6-kg9EEVKUHlOiuwnnJRCHyexxIhsGdhdbyIVcXWNXwfTbAtqJjOQH_FsskzsG"/>
-          </div>
-        </div>
-      </header>
+      <!-- Admin Topbar (autonomous from client layout) -->
+      <AdminTopbar />
+
 
       <!-- Exact Page Output Slot -->
       <slot />
