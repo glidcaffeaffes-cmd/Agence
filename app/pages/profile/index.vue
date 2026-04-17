@@ -1,121 +1,126 @@
 <template>
-  <div class="min-h-screen bg-surface">
+  <div class="min-h-screen bg-[#f8fafc] font-sans">
     <Head>
       <title>My Profile — VoyageHub</title>
       <meta name="description" content="Manage your VoyageHub profile and preferences." />
     </Head>
 
-    <!-- Global Client Navbar (Placeholder for context if needed, usually handled by layout) -->
-    
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <!-- Page Header -->
-      <header class="mb-10">
-        <h1 class="text-4xl font-bold text-on-surface tracking-tight">My Account</h1>
-        <p class="text-on-surface-variant mt-2 text-lg">Manage your personal information and preferences.</p>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <!-- Page Header: Editorial Style -->
+      <header class="mb-12">
+        <h1 class="text-5xl font-black text-neutral-900 tracking-tighter uppercase leading-none">Portfolio Identity</h1>
+        <p class="text-neutral-500 mt-4 text-lg font-medium">Manage your personal credentials and global profile.</p>
       </header>
 
-      <div class="flex flex-col lg:flex-row gap-10">
-        <!-- Sidebar Navigation -->
+      <div class="flex flex-col lg:flex-row gap-12">
+        <!-- Premium Sidebar Navigation -->
         <aside class="w-full lg:w-72 flex-shrink-0">
-          <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/40 overflow-hidden sticky top-8">
-            <!-- User Summary -->
-            <div class="p-6 border-b border-outline-variant/30 text-center">
-              <div class="w-24 h-24 mx-auto rounded-full bg-surface-container-high border-4 border-white shadow-md overflow-hidden mb-4">
-                <img :src="currentProfile?.photo || 'https://i.pravatar.cc/150'" alt="Avatar" class="w-full h-full object-cover" />
-              </div>
-              <h2 class="text-xl font-bold text-on-surface">{{ currentProfile?.firstName || 'Jean' }} {{ currentProfile?.lastName || 'Dupont' }}</h2>
-              <p class="text-sm text-on-surface-variant mt-1">{{ currentProfile?.email || 'jean.dupont@example.com' }}</p>
-              
-              <div class="mt-4 inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider"
-                   :class="currentProfile?.role === 'Admin' ? 'bg-accent/10 text-accent' : 'bg-primary/10 text-primary'">
-                {{ currentProfile?.role || 'Client' }}
+          <div class="bg-white rounded-[32px] shadow-xl shadow-neutral-200/50 overflow-hidden sticky top-8 border border-neutral-100">
+            <!-- User Summary: Concierge Style -->
+            <div class="p-8 text-center bg-neutral-900 text-white relative overflow-hidden">
+              <div class="absolute inset-0 bg-gradient-to-br from-neutral-800 to-transparent opacity-50"></div>
+              <div class="relative z-10">
+                <div class="w-24 h-24 mx-auto rounded-2xl bg-white/10 border border-white/20 shadow-2xl overflow-hidden mb-4 p-1 backdrop-blur-md">
+                  <img :src="currentProfile?.photo || 'https://i.pravatar.cc/150'" alt="Avatar" class="w-full h-full object-cover rounded-xl grayscale hover:grayscale-0 transition-all duration-500" />
+                </div>
+                <h2 class="text-xl font-black tracking-tight leading-tight">{{ currentProfile?.firstName || 'Jean' }} {{ currentProfile?.lastName || 'Dupont' }}</h2>
+                <div class="mt-4 inline-flex items-center px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] bg-white text-neutral-900">
+                  {{ currentProfile?.role || 'Verified Member' }}
+                </div>
               </div>
             </div>
 
-            <!-- Nav Links -->
-            <nav class="p-3 space-y-1">
-              <NuxtLink to="/profile" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/5 text-primary font-semibold transition-colors">
+            <!-- Nav Links: Brutalist Minimal -->
+            <nav class="p-4 space-y-2 bg-white">
+              <NuxtLink to="/profile" class="flex items-center gap-3 px-6 py-4 rounded-2xl bg-neutral-50 text-neutral-900 font-black text-[11px] uppercase tracking-widest transition-all">
                 <span class="material-symbols-outlined text-[20px]">person</span>
-                Personal Info
+                Identity
               </NuxtLink>
-              <NuxtLink to="/reservations/history" class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-medium">
+              <NuxtLink to="/reservations/history" class="flex items-center gap-3 px-6 py-4 rounded-2xl text-neutral-400 hover:text-neutral-900 hover:bg-neutral-50 font-black text-[11px] uppercase tracking-widest transition-all">
                 <span class="material-symbols-outlined text-[20px]">history</span>
-                Reservation History
+                Ledger
               </NuxtLink>
-              <NuxtLink to="/settings" class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-medium">
+              <NuxtLink to="/settings" class="flex items-center gap-3 px-6 py-4 rounded-2xl text-neutral-400 hover:text-neutral-900 hover:bg-neutral-50 font-black text-[11px] uppercase tracking-widest transition-all">
                 <span class="material-symbols-outlined text-[20px]">settings</span>
-                Settings & Security
+                Security
               </NuxtLink>
             </nav>
           </div>
         </aside>
 
-        <!-- Main Content Form -->
+        <!-- Main Content: Architectural Card -->
         <main class="flex-1">
-          <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/40 overflow-hidden">
-            <div class="p-8 border-b border-outline-variant/30">
-              <h3 class="text-2xl font-bold text-on-surface">Personal Information</h3>
-              <p class="text-sm text-on-surface-variant mt-1">Update your details to ensure smooth bookings.</p>
+          <div class="bg-white rounded-[32px] shadow-xl shadow-neutral-200/50 overflow-hidden border border-neutral-100">
+            <div class="p-10 md:p-12 border-b border-neutral-50 bg-neutral-50/30">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-neutral-900">
+                  <span class="material-symbols-outlined text-[28px]">account_circle</span>
+                </div>
+                <div>
+                  <h3 class="text-2xl font-black text-neutral-900 tracking-tight uppercase">Identity Details</h3>
+                  <p class="text-sm text-neutral-500 font-medium">Update your profile to ensure seamless coordination across all properties.</p>
+                </div>
+              </div>
             </div>
 
-            <form @submit.prevent="saveProfile" class="p-8 space-y-8">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <form @submit.prevent="saveProfile" class="p-10 md:p-12 space-y-12">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
                 <!-- First Name -->
-                <div class="space-y-2">
-                  <label class="block text-sm font-semibold text-on-surface">First Name</label>
+                <div class="space-y-3">
+                  <label class="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Given Name</label>
                   <input 
                     type="text" 
                     :value="currentProfile?.firstName" 
-                    class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant/60 rounded-xl text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none"
+                    class="w-full px-6 py-5 bg-neutral-50 border-none rounded-2xl text-neutral-900 font-semibold focus:ring-2 focus:ring-neutral-900/5 focus:bg-white transition-all outline-none shadow-sm"
                   />
                 </div>
                 <!-- Last Name -->
-                <div class="space-y-2">
-                  <label class="block text-sm font-semibold text-on-surface">Last Name</label>
+                <div class="space-y-3">
+                  <label class="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Surname</label>
                   <input 
                     type="text" 
                     :value="currentProfile?.lastName" 
-                    class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant/60 rounded-xl text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none"
+                    class="w-full px-6 py-5 bg-neutral-50 border-none rounded-2xl text-neutral-900 font-semibold focus:ring-2 focus:ring-neutral-900/5 focus:bg-white transition-all outline-none shadow-sm"
                   />
                 </div>
               </div>
 
               <!-- Email -->
-              <div class="space-y-2">
-                <div class="flex justify-between items-center">
-                  <label class="block text-sm font-semibold text-on-surface">Email Address</label>
-                  <span class="text-xs text-on-surface-variant font-medium bg-surface-container-high px-2 py-1 rounded">Verified</span>
+              <div class="space-y-3">
+                <div class="flex justify-between items-center ml-1">
+                  <label class="text-[10px] font-black text-neutral-400 uppercase tracking-widest">Digital Fingerprint</label>
+                  <span class="text-[9px] font-black text-green-600 bg-green-50 px-2.5 py-1 rounded-full uppercase tracking-widest">Verified Identity</span>
                 </div>
-                <div class="relative">
+                <div class="relative group">
                   <input 
                     type="email" 
                     :value="currentProfile?.email" 
                     disabled
-                    class="w-full px-4 py-3 bg-surface-container-low border border-outline-variant/40 rounded-xl text-on-surface-variant cursor-not-allowed outline-none"
+                    class="w-full px-6 py-5 bg-neutral-50 border-none rounded-2xl text-neutral-400 font-semibold cursor-not-allowed outline-none shadow-sm opacity-60"
                   />
-                  <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline-variant">lock</span>
+                  <span class="material-symbols-outlined absolute right-6 top-1/2 -translate-y-1/2 text-neutral-300">lock</span>
                 </div>
-                <p class="text-xs text-outline mt-1">Email cannot be changed directly. Please contact support.</p>
+                <p class="text-[10px] text-neutral-400 font-bold uppercase tracking-wide mt-2 ml-1">Identity verification is locked. Contact concierge for changes.</p>
               </div>
 
               <!-- Phone -->
-              <div class="space-y-2">
-                <label class="block text-sm font-semibold text-on-surface">Phone Number</label>
-                <div class="relative">
-                  <span class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-medium">+33</span>
+              <div class="space-y-3">
+                <label class="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Communication Line</label>
+                <div class="relative group">
+                  <span class="absolute left-6 top-1/2 -translate-y-1/2 text-neutral-400 font-bold text-sm">+33</span>
                   <input 
                     type="tel" 
                     :value="currentProfile?.phone" 
                     placeholder="6 12 34 56 78"
-                    class="w-full pl-12 pr-4 py-3 bg-surface-container-lowest border border-outline-variant/60 rounded-xl text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none"
+                    class="w-full pl-16 pr-6 py-5 bg-neutral-50 border-none rounded-2xl text-neutral-900 font-semibold focus:ring-2 focus:ring-neutral-900/5 focus:bg-white transition-all outline-none shadow-sm"
                   />
                 </div>
               </div>
 
               <!-- Actions -->
-              <div class="pt-6 border-t border-outline-variant/30 flex justify-end">
-                <button type="submit" class="px-6 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary-container shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5">
-                  Save Changes
+              <div class="pt-10 border-t border-neutral-50 flex justify-end">
+                <button type="submit" class="group flex items-center gap-3 px-12 py-5 bg-neutral-900 text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-neutral-800 transition-all shadow-xl shadow-neutral-900/10 active:scale-95">
+                  Secure Changes <span class="material-symbols-outlined text-[20px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
                 </button>
               </div>
             </form>
@@ -135,3 +140,9 @@ function saveProfile() {
   alert('Profile updated successfully! (Mock Action)')
 }
 </script>
+
+<style scoped>
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+</style>

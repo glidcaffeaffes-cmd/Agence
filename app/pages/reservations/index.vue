@@ -1,129 +1,169 @@
 <template>
-  <div class="reservations-page">
-    <header class="page-header">
-      <div class="header-content">
-        <h1 class="page-title">My Bookings</h1>
-        <p class="page-subtitle">Manage your upcoming stays and review past trips</p>
-      </div>
-    </header>
+  <div class="min-h-screen bg-surface">
+    <Head>
+      <title>My Bookings — VoyageHub</title>
+      <meta name="description" content="Manage your active reservations and upcoming stays with VoyageHub." />
+    </Head>
 
-    <div class="page-container">
-      <div class="table-card">
-        <AppCard variant="elevated">
-          <div class="table-responsive">
-            <table class="bookings-table">
-              <thead>
-                <tr>
-                  <th>Booking Reference</th>
-                  <th>Dates</th>
-                  <th>Total Amount</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody v-if="reservations.length > 0">
-                <tr v-for="res in reservations" :key="res.id">
-                  <td><strong class="ref-code">#RES-{{ String(res.id).padStart(4, '0') }}</strong></td>
-                  <td>
-                    <div class="dates-col">
-                      <span><i class="pi pi-calendar-plus"></i> {{ formatDate(res.checkIn) }}</span>
-                      <span><i class="pi pi-calendar-minus"></i> {{ formatDate(res.checkOut) }}</span>
-                    </div>
-                  </td>
-                  <td>
-                    <span class="price-val">€{{ res.totalAmount }}</span>
-                  </td>
-                  <td>
-                    <AppBadge :color="getStatusColor(res.status)" size="sm">{{ res.status }}</AppBadge>
-                  </td>
-                  <td>
-                    <button class="action-btn" title="View Details">
-                      <i class="pi pi-eye"></i>
-                    </button>
-                    <button class="action-btn action-btn--danger" title="Cancel" v-if="res.status === 'Confirmed' || res.status === 'Pending'" @click="handleCancel(res.id)">
-                      <i class="pi pi-times"></i>
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-              <tbody v-else>
-                <tr>
-                  <td colspan="5" class="empty-cell">
-                    <AppEmptyState icon="pi pi-calendar" title="No bookings yet" description="You haven't made any reservations. Discover our hotels and book your first stay!" />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <!-- Page Header -->
+      <header class="mb-12">
+        <h1 class="text-4xl font-bold text-on-surface tracking-tight">My Bookings</h1>
+        <p class="text-on-surface-variant mt-2 text-lg max-w-2xl">Manage your upcoming journeys and review your travel history with ease.</p>
+      </header>
+
+      <!-- Dashboard Grid -->
+      <div class="flex flex-col lg:flex-row gap-10">
+        <!-- Sidebar -->
+        <aside class="w-full lg:w-72 flex-shrink-0">
+          <div class="sticky top-8 space-y-4">
+             <!-- Quick Stats -->
+             <div class="bg-white rounded-2xl p-6 border border-outline-variant/30 shadow-sm">
+                <p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-4">Account Stats</p>
+                <div class="space-y-4">
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Active stays</span>
+                    <span class="text-sm font-bold text-primary">{{ activeCount }}</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Past trips</span>
+                    <span class="text-sm font-bold text-on-surface">{{ pastCount }}</span>
+                  </div>
+                </div>
+             </div>
+
+             <!-- Navigation -->
+             <nav class="bg-white rounded-2xl p-3 border border-outline-variant/30 shadow-sm space-y-1">
+                <NuxtLink to="/reservations" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/5 text-primary font-bold">
+                  <span class="material-symbols-outlined text-[20px]">calendar_today</span>
+                  Active Bookings
+                </NuxtLink>
+                <NuxtLink to="/reservations/history" class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-colors font-medium">
+                  <span class="material-symbols-outlined text-[20px]">history</span>
+                  History
+                </NuxtLink>
+             </nav>
           </div>
-        </AppCard>
+        </aside>
+
+        <!-- Main Listing -->
+        <main class="flex-1">
+          <div v-if="loading" class="flex flex-col items-center justify-center py-20 text-on-surface-variant">
+            <span class="material-symbols-outlined animate-spin text-4xl text-primary mb-4">progress_activity</span>
+            <p class="font-medium">Curating your bookings...</p>
+          </div>
+
+          <div v-else-if="reservations.length > 0" class="space-y-6">
+            <div v-for="res in reservations" :key="res.id" 
+                 class="group bg-white rounded-2xl border border-outline-variant/30 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col md:flex-row">
+              
+              <!-- Image Section -->
+              <div class="w-full md:w-64 h-48 md:h-auto relative overflow-hidden bg-surface-container">
+                <img :src="getHotel(res.hotelId)?.imageUrl || 'https://images.unsplash.com/photo-1566073771259-6a8506099945'" 
+                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                <div class="absolute top-4 left-4">
+                  <span class="px-3 py-1 bg-white/90 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm"
+                        :class="res.status === 'Cancelled' ? 'text-error' : 'text-primary'">
+                    {{ res.status }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Content Section -->
+              <div class="flex-1 p-6 flex flex-col justify-between">
+                <div>
+                  <div class="flex justify-between items-start mb-2">
+                    <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Ref: #RES-{{ String(res.id).padStart(4, '0') }}</p>
+                    <p class="text-lg font-bold text-primary">€{{ res.totalAmount }}</p>
+                  </div>
+                  <h3 class="text-xl font-bold text-on-surface mb-1">{{ getHotel(res.hotelId)?.name || 'Luxury Stay' }}</h3>
+                  <p class="text-sm text-on-surface-variant flex items-center gap-1" v-if="getHotel(res.hotelId)">
+                    <span class="material-symbols-outlined text-[16px]">location_on</span>
+                    {{ getHotel(res.hotelId).location.city }}, France
+                  </p>
+                </div>
+
+                <div class="mt-6 flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-outline-variant/10">
+                  <div class="flex gap-8">
+                    <div class="space-y-1">
+                      <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Check In</p>
+                      <p class="text-sm font-semibold text-on-surface">{{ formatDate(res.checkIn) }}</p>
+                    </div>
+                    <div class="space-y-1">
+                      <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Check Out</p>
+                      <p class="text-sm font-semibold text-on-surface">{{ formatDate(res.checkOut) }}</p>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center gap-2">
+                    <button class="px-4 py-2 text-sm font-bold text-on-surface hover:bg-surface-container rounded-xl transition-colors">Details</button>
+                    <button v-if="res.status === 'Confirmed' || res.status === 'Pending'" 
+                            @click="handleCancel(res.id)"
+                            class="px-4 py-2 text-sm font-bold text-error hover:bg-error/10 rounded-xl transition-colors">Cancel</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div v-else class="bg-white rounded-3xl p-16 text-center border border-outline-variant/30 shadow-sm">
+            <div class="w-20 h-20 bg-surface-container rounded-full flex items-center justify-center mx-auto mb-6">
+              <span class="material-symbols-outlined text-4xl text-outline">event_busy</span>
+            </div>
+            <h3 class="text-2xl font-bold text-on-surface mb-2">No active bookings</h3>
+            <p class="text-on-surface-variant mb-8 max-w-sm mx-auto">Your upcoming travel schedule is empty. Time to discover your next extraordinary stay.</p>
+            <NuxtLink to="/hotels" class="inline-flex items-center px-8 py-4 bg-primary text-white font-bold rounded-2xl hover:bg-primary-600 transition-all shadow-lg shadow-primary/20">
+              Explore Collections
+            </NuxtLink>
+          </div>
+        </main>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, computed, ref } from 'vue'
 import { useReservations } from '~/composables/useReservations'
 import { useAuth } from '~/composables/useAuth'
+import { useHotels } from '~/composables/useHotels'
 
 const { currentProfile } = useAuth()
 const { reservations, fetchByAccount, updateStatus } = useReservations()
+const { hotels, fetchAll: fetchAllHotels } = useHotels()
+
+const loading = ref(true)
+
+const activeCount = computed(() => reservations.value.filter(r => r.status === 'Confirmed' || r.status === 'Pending').length)
+const pastCount = computed(() => reservations.value.filter(r => r.status === 'Completed').length)
 
 onMounted(async () => {
+  loading.value = true
+  await fetchAllHotels()
   if (currentProfile.value) {
-    if (currentProfile.value.role === 'Admin' || currentProfile.value.role === 'Agent') {
-      // Mock loading all for admin view just for demo, though normally this is handled in admin pages
-      await fetchByAccount(currentProfile.value.id)
-    } else {
-      await fetchByAccount(currentProfile.value.id)
-    }
+    await fetchByAccount(currentProfile.value.id)
   }
+  loading.value = false
 })
+
+function getHotel(id: number) {
+  return hotels.value.find(h => h.id === id)
+}
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-function getStatusColor(status: string) {
-  const map: Record<string, string> = {
-    'Pending': 'warning',
-    'Confirmed': 'success',
-    'Cancelled': 'danger',
-    'Completed': 'info'
-  }
-  return map[status] || 'muted'
-}
-
 async function handleCancel(id: number) {
-  if (confirm('Are you sure you want to cancel this booking?')) {
+  if (confirm('Are you sure you want to cancel this booking? This action cannot be undone.')) {
     await updateStatus(id, 'Cancelled')
   }
 }
 </script>
 
 <style scoped>
-.reservations-page { background: var(--color-bg-soft); min-height: 100vh; padding-bottom: var(--spacing-16); }
-
-.page-header { background: var(--color-surface-primary); border-bottom: 1px solid var(--color-border); padding: var(--spacing-10) var(--spacing-6); margin-bottom: var(--spacing-8); text-align: center; }
-.header-content { max-width: 800px; margin: 0 auto; }
-.page-title { font-family: var(--font-family-heading); font-size: var(--font-size-2xl); font-weight: 700; margin: 0 0 var(--spacing-2); color: var(--color-text-primary); }
-.page-subtitle { font-size: var(--font-size-base); color: var(--color-text-secondary); margin: 0; }
-
-.page-container { max-width: 1024px; margin: 0 auto; padding: 0 var(--spacing-6); }
-
-.table-responsive { overflow-x: auto; }
-.bookings-table { width: 100%; border-collapse: collapse; text-align: left; }
-.bookings-table th { padding: var(--spacing-4) var(--spacing-5); font-size: var(--font-size-xs); font-weight: 600; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--color-border); background: var(--color-surface-secondary); }
-.bookings-table td { padding: var(--spacing-4) var(--spacing-5); font-size: var(--font-size-sm); color: var(--color-text-primary); border-bottom: 1px solid var(--color-border); vertical-align: middle; }
-.bookings-table tr:last-child td { border-bottom: none; }
-
-.ref-code { font-family: monospace; font-size: var(--font-size-sm); color: var(--color-primary-600); }
-.dates-col { display: flex; flex-direction: column; gap: 4px; font-size: var(--font-size-xs); color: var(--color-text-secondary); }
-.price-val { font-weight: 700; color: var(--color-text-primary); }
-
-.action-btn { background: none; border: 1px solid transparent; width: 32px; height: 32px; border-radius: var(--radius-md); color: var(--color-text-secondary); cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; margin-right: 4px; }
-.action-btn:hover { background: var(--color-surface-secondary); color: var(--color-primary-600); border-color: var(--color-border); }
-.action-btn--danger:hover { color: var(--color-error); background: rgba(220, 38, 38, 0.08); border-color: transparent; }
-
-.empty-cell { padding: 0 !important; }
+.bg-surface {
+  background-color: #f8fafc;
+}
 </style>
