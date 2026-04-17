@@ -1,209 +1,155 @@
 <template>
-  <div>
+  <div class="min-h-screen bg-surface">
     <Head>
-      <title>My Settings — VoyageHub</title>
-      <meta name="description" content="Manage your VoyageHub account settings." />
+      <title>Settings & Security — VoyageHub</title>
+      <meta name="description" content="Manage your VoyageHub account settings and security." />
     </Head>
 
-    <div class="settings-page">
-      <div class="settings-container">
-        
-        <div class="sidebar">
-          <h2 class="sidebar-title">Account Settings</h2>
-          <nav class="settings-nav">
-            <button class="nav-btn" :class="{'active': activeTab === 'profile'}" @click="activeTab = 'profile'">
-              <span class="material-symbols-outlined">person</span> Personal Info
-            </button>
-            <button class="nav-btn" :class="{'active': activeTab === 'security'}" @click="activeTab = 'security'">
-              <span class="material-symbols-outlined">lock</span> Security
-            </button>
-            <button class="nav-btn" :class="{'active': activeTab === 'notifications'}" @click="activeTab = 'notifications'">
-              <span class="material-symbols-outlined">notifications</span> Notifications
-            </button>
-            <button class="nav-btn" :class="{'active': activeTab === 'payment'}" @click="activeTab = 'payment'">
-              <span class="material-symbols-outlined">credit_card</span> Payment Methods
-            </button>
-          </nav>
-        </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <!-- Page Header -->
+      <header class="mb-10">
+        <h1 class="text-4xl font-bold text-on-surface tracking-tight">Settings & Security</h1>
+        <p class="text-on-surface-variant mt-2 text-lg">Manage your account security, notifications, and payment methods.</p>
+      </header>
 
-        <div class="content-panel">
-          <!-- Profile Tab -->
-          <div v-show="activeTab === 'profile'" class="tab-pane">
-            <h1 class="pane-title">Personal Information</h1>
-            <p class="pane-subtitle">Update your personal details and how we can reach you.</p>
+      <div class="flex flex-col lg:flex-row gap-10">
+        <!-- Sidebar Navigation (Consistent with Profile) -->
+        <aside class="w-full lg:w-72 flex-shrink-0">
+          <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/40 overflow-hidden sticky top-8">
+            <!-- User Summary -->
+            <div class="p-6 border-b border-outline-variant/30 text-center">
+              <div class="w-24 h-24 mx-auto rounded-full bg-surface-container-high border-4 border-white shadow-md overflow-hidden mb-4">
+                <img :src="currentProfile?.photo || 'https://i.pravatar.cc/150'" alt="Avatar" class="w-full h-full object-cover" />
+              </div>
+              <h2 class="text-xl font-bold text-on-surface">{{ currentProfile?.firstName || 'Jean' }} {{ currentProfile?.lastName || 'Dupont' }}</h2>
+              <p class="text-sm text-on-surface-variant mt-1">{{ currentProfile?.email || 'jean.dupont@example.com' }}</p>
+              
+              <div class="mt-4 inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider"
+                   :class="currentProfile?.role === 'Admin' ? 'bg-accent/10 text-accent' : 'bg-primary/10 text-primary'">
+                {{ currentProfile?.role || 'Client' }}
+              </div>
+            </div>
 
-            <div class="avatar-section">
-              <div class="avatar">{{ currentAccount?.email.charAt(0).toUpperCase() || 'U' }}</div>
+            <!-- Nav Links -->
+            <nav class="p-3 space-y-1">
+              <NuxtLink to="/profile" class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-medium">
+                <span class="material-symbols-outlined text-[20px]">person</span>
+                Personal Info
+              </NuxtLink>
+              <NuxtLink to="/reservations/history" class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-medium">
+                <span class="material-symbols-outlined text-[20px]">history</span>
+                Reservation History
+              </NuxtLink>
+              <NuxtLink to="/settings" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/5 text-primary font-semibold transition-colors">
+                <span class="material-symbols-outlined text-[20px]">settings</span>
+                Settings & Security
+              </NuxtLink>
+            </nav>
+          </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 space-y-8">
+          
+          <!-- Security Card -->
+          <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/40 overflow-hidden">
+            <div class="p-8 border-b border-outline-variant/30">
+              <h3 class="text-2xl font-bold text-on-surface">Security & Password</h3>
+              <p class="text-sm text-on-surface-variant mt-1">Ensure your account is secure with a strong password.</p>
+            </div>
+            <div class="p-8 space-y-8">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="space-y-2">
+                  <label class="block text-sm font-semibold text-on-surface">Current Password</label>
+                  <input type="password" class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant/60 rounded-xl text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none" />
+                </div>
+                <div class="space-y-2">
+                  <label class="block text-sm font-semibold text-on-surface">New Password</label>
+                  <input type="password" class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant/60 rounded-xl text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none" />
+                </div>
+                <div class="space-y-2">
+                  <label class="block text-sm font-semibold text-on-surface">Confirm New Password</label>
+                  <input type="password" class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant/60 rounded-xl text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none" />
+                </div>
+              </div>
+              <div class="flex justify-end">
+                <button type="button" class="px-6 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary-container shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5">
+                  Update Password
+                </button>
+              </div>
+
+              <hr class="border-outline-variant/30" />
+
               <div>
-                <button class="btn-outline-sm">Change picture</button>
-                <p class="avatar-hint">JPG, GIF or PNG. Max size of 800K</p>
+                <h4 class="text-lg font-bold text-on-surface mb-2">Two-Factor Authentication</h4>
+                <p class="text-sm text-on-surface-variant mb-4">Add an extra layer of security to your account.</p>
+                <button class="px-5 py-2.5 border-2 border-outline-variant/60 text-on-surface font-semibold rounded-xl hover:bg-surface-container-lowest transition-colors">
+                  Enable 2FA
+                </button>
               </div>
-            </div>
-
-            <div class="form-grid">
-              <div class="field-group">
-                <label>First Name</label>
-                <input type="text" class="field-input" placeholder="Jean" />
-              </div>
-              <div class="field-group">
-                <label>Last Name</label>
-                <input type="text" class="field-input" placeholder="Dupont" />
-              </div>
-              <div class="field-group">
-                <label>Email Address</label>
-                <input type="email" class="field-input" :value="currentAccount?.email" readonly />
-                <span class="field-hint">Used for login. Contact support to change.</span>
-              </div>
-              <div class="field-group">
-                <label>Phone Number</label>
-                <input type="tel" class="field-input" placeholder="+33 6 00 00 00 00" />
-              </div>
-            </div>
-
-            <div class="form-actions">
-              <button class="btn-primary">Save Changes</button>
             </div>
           </div>
 
-          <!-- Security Tab -->
-          <div v-show="activeTab === 'security'" class="tab-pane">
-            <h1 class="pane-title">Security & Password</h1>
-            <p class="pane-subtitle">Manage your password and security preferences.</p>
-
-            <div class="form-grid" style="max-width:400px">
-              <div class="field-group">
-                <label>Current Password</label>
-                <input type="password" class="field-input" />
-              </div>
-              <div class="field-group">
-                <label>New Password</label>
-                <input type="password" class="field-input" />
-              </div>
-              <div class="field-group">
-                <label>Confirm New Password</label>
-                <input type="password" class="field-input" />
-              </div>
+          <!-- Notifications Card -->
+          <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/40 overflow-hidden">
+            <div class="p-8 border-b border-outline-variant/30">
+              <h3 class="text-2xl font-bold text-on-surface">Notification Preferences</h3>
+              <p class="text-sm text-on-surface-variant mt-1">Choose what we notify you about.</p>
             </div>
-
-            <div class="form-actions">
-              <button class="btn-primary">Update Password</button>
-            </div>
-
-            <hr class="separator" />
-            
-            <h3 class="section-heading">Two-Factor Authentication</h3>
-            <p class="section-desc">Add an extra layer of security to your account.</p>
-            <button class="btn-outline">Enable 2FA</button>
-          </div>
-
-          <!-- Notifications Tab -->
-          <div v-show="activeTab === 'notifications'" class="tab-pane">
-            <h1 class="pane-title">Notification Preferences</h1>
-            <p class="pane-subtitle">Choose what we notify you about.</p>
-
-            <div class="toggle-list">
-              <label class="toggle-row">
-                <div class="toggle-info">
-                  <strong>Booking Updates</strong>
-                  <span>Confirmations, changes, and cancellations.</span>
+            <div class="p-8 space-y-4">
+              <!-- Toggle 1 -->
+              <label class="flex items-center justify-between p-4 border border-outline-variant/40 rounded-xl hover:bg-surface-container-lowest cursor-pointer transition-colors">
+                <div>
+                  <span class="block font-bold text-on-surface">Booking Updates</span>
+                  <span class="text-sm text-on-surface-variant">Confirmations, changes, and cancellations.</span>
                 </div>
-                <input type="checkbox" checked class="toggle-chbox" />
+                <input type="checkbox" checked class="w-5 h-5 text-primary bg-white border-outline-variant rounded focus:ring-primary focus:ring-2 accent-primary" />
               </label>
-              <label class="toggle-row">
-                <div class="toggle-info">
-                  <strong>Special Offers</strong>
-                  <span>Promotions, discounts, and personalized deals.</span>
+              <!-- Toggle 2 -->
+              <label class="flex items-center justify-between p-4 border border-outline-variant/40 rounded-xl hover:bg-surface-container-lowest cursor-pointer transition-colors">
+                <div>
+                  <span class="block font-bold text-on-surface">Special Offers</span>
+                  <span class="text-sm text-on-surface-variant">Promotions, discounts, and personalized deals.</span>
                 </div>
-                <input type="checkbox" class="toggle-chbox" />
+                <input type="checkbox" class="w-5 h-5 text-primary bg-white border-outline-variant rounded focus:ring-primary focus:ring-2 accent-primary" />
               </label>
-              <label class="toggle-row">
-                <div class="toggle-info">
-                  <strong>News & Updates</strong>
-                  <span>New features, policies, and company news.</span>
+              <!-- Toggle 3 -->
+              <label class="flex items-center justify-between p-4 border border-outline-variant/40 rounded-xl hover:bg-surface-container-lowest cursor-pointer transition-colors">
+                <div>
+                  <span class="block font-bold text-on-surface">News & Updates</span>
+                  <span class="text-sm text-on-surface-variant">New features, policies, and company news.</span>
                 </div>
-                <input type="checkbox" checked class="toggle-chbox" />
+                <input type="checkbox" checked class="w-5 h-5 text-primary bg-white border-outline-variant rounded focus:ring-primary focus:ring-2 accent-primary" />
               </label>
             </div>
           </div>
 
-          <!-- Payment Tab -->
-          <div v-show="activeTab === 'payment'" class="tab-pane">
-            <h1 class="pane-title">Payment Methods</h1>
-            <p class="pane-subtitle">Manage your saved credit cards.</p>
-            
-            <div class="empty-state">
-              <span class="material-symbols-outlined">credit_card_off</span>
-              <p>You have no saved payment methods.</p>
+          <!-- Payment Methods Card -->
+          <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/40 overflow-hidden">
+            <div class="p-8 border-b border-outline-variant/30">
+              <h3 class="text-2xl font-bold text-on-surface">Payment Methods</h3>
+              <p class="text-sm text-on-surface-variant mt-1">Manage your saved credit cards for faster booking.</p>
             </div>
-            <button class="btn-outline" style="margin-top:1rem">Add Payment Method</button>
+            <div class="p-8">
+              <div class="flex flex-col items-center justify-center p-10 bg-surface-container-lowest border-2 border-dashed border-outline-variant/60 rounded-xl text-center">
+                <span class="material-symbols-outlined text-4xl text-outline mb-3">credit_card_off</span>
+                <p class="text-on-surface-variant mb-6 font-medium">You have no saved payment methods.</p>
+                <button class="px-5 py-2.5 border-2 border-outline-variant/60 text-on-surface font-semibold rounded-xl hover:bg-surface-container-lowest transition-colors flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[20px]">add</span>
+                  Add Payment Method
+                </button>
+              </div>
+            </div>
           </div>
 
-        </div>
+        </main>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
 import { useAuth } from '~/composables/useAuth'
 
-const { currentAccount } = useAuth()
-const activeTab = ref('profile')
+const { currentAccount, currentProfile } = useAuth()
 </script>
-
-<style scoped>
-.settings-page { max-width: 1100px; margin: 0 auto; padding: 3rem 2rem; font-family: 'Inter', sans-serif; }
-.settings-container { display: flex; gap: 3rem; align-items: flex-start; }
-@media (max-width: 768px) { .settings-container { flex-direction: column; gap: 2rem; } }
-
-.sidebar { width: 250px; flex-shrink: 0; }
-@media (max-width: 768px) { .sidebar { width: 100%; } }
-.sidebar-title { font-size: 0.8125rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #6d7979; margin: 0 0 1rem; }
-.settings-nav { display: flex; flex-direction: column; gap: 0.25rem; }
-.nav-btn { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; background: transparent; border: none; border-radius: 0.5rem; color: #3d4949; font-size: 0.9375rem; font-weight: 600; cursor: pointer; text-align: left; transition: all 0.15s; font-family: 'Inter', sans-serif; }
-.nav-btn:hover { background: #f5faff; color: #015081; }
-.nav-btn.active { background: #e0f2f1; color: #006768; }
-.nav-btn .material-symbols-outlined { font-size: 1.25rem; font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-.nav-btn.active .material-symbols-outlined { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-
-.content-panel { flex: 1; background: #fff; border-radius: 0.875rem; padding: 2.5rem; box-shadow: 0 1px 4px rgba(1,80,129,0.06), 0 4px 16px rgba(1,80,129,0.04); }
-
-.pane-title { font-size: 1.5rem; font-weight: 700; color: #015081; margin: 0 0 0.5rem; letter-spacing: -0.02em; }
-.pane-subtitle { font-size: 0.9375rem; color: #6d7979; margin: 0 0 2.5rem; }
-
-.avatar-section { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2.5rem; }
-.avatar { width: 4rem; height: 4rem; border-radius: 50%; background: linear-gradient(135deg, #006768, #008283); color: #fff; font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; justify-content: center; }
-.avatar-hint { font-size: 0.75rem; color: #6d7979; margin: 0.375rem 0 0; }
-
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
-@media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
-.field-group { display: flex; flex-direction: column; gap: 0.375rem; }
-.field-group label { font-size: 0.8125rem; font-weight: 600; color: #151d22; }
-.field-input { padding: 0.625rem 0.875rem; border: 1px solid #bcc9c8; border-radius: 0.5rem; font-size: 0.9375rem; color: #151d22; outline: none; transition: border-color 0.15s; font-family: 'Inter', sans-serif; }
-.field-input:focus { border-color: #008F90; box-shadow: 0 0 0 2px rgba(0,143,144,0.15); }
-.field-input[readonly] { background: #f5faff; border-color: #e1e9f0; color: #6d7979; }
-.field-hint { font-size: 0.75rem; color: #6d7979; }
-
-.form-actions { display: flex; justify-content: flex-end; }
-.btn-primary { padding: 0.625rem 1.5rem; background: linear-gradient(135deg,#006768,#008283); border: none; border-radius: 0.5rem; color: #fff; font-size: 0.9375rem; font-weight: 700; cursor: pointer; transition: opacity 0.15s; font-family: 'Inter', sans-serif; }
-.btn-primary:hover { opacity: 0.9; }
-.btn-outline-sm { padding: 0.375rem 0.75rem; border: 1.5px solid #bcc9c8; border-radius: 0.375rem; background: transparent; color: #3d4949; font-size: 0.8125rem; font-weight: 600; cursor: pointer; transition: background 0.15s; font-family: 'Inter', sans-serif; }
-.btn-outline-sm:hover { background: #f5faff; }
-.btn-outline { padding: 0.625rem 1.25rem; border: 1.5px solid #bcc9c8; border-radius: 0.5rem; background: transparent; color: #3d4949; font-size: 0.9375rem; font-weight: 600; cursor: pointer; transition: background 0.15s; font-family: 'Inter', sans-serif; }
-.btn-outline:hover { background: #f5faff; }
-
-.separator { border: none; border-top: 1px solid #e1e9f0; margin: 2.5rem 0; }
-.section-heading { font-size: 1.125rem; font-weight: 700; color: #151d22; margin: 0 0 0.5rem; }
-.section-desc { font-size: 0.875rem; color: #6d7979; margin: 0 0 1.5rem; }
-
-.toggle-list { display: flex; flex-direction: column; gap: 1rem; }
-.toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 1rem; border: 1px solid #e1e9f0; border-radius: 0.75rem; cursor: pointer; transition: background 0.15s; }
-.toggle-row:hover { background: #f5faff; }
-.toggle-info strong { display: block; font-size: 0.9375rem; color: #151d22; margin-bottom: 0.125rem; }
-.toggle-info span { font-size: 0.8125rem; color: #6d7979; }
-.toggle-chbox { width: 1.25rem; height: 1.25rem; accent-color: #006768; }
-
-.empty-state { text-align: center; padding: 3rem; background: #f5faff; border-radius: 0.75rem; border: 1px dashed #bcc9c8; color: #6d7979; }
-.empty-state .material-symbols-outlined { font-size: 2.5rem; margin-bottom: 0.5rem; }
-</style>

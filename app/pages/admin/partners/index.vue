@@ -1,5 +1,5 @@
 <template>
-  <div class="p-8 pb-32 font-['Inter'] antialiased">
+  <div class="p-8 font-['Inter'] antialiased">
     <!-- Page Header -->
     <div class="flex justify-between items-end mb-8">
       <div>
@@ -17,9 +17,7 @@
       <div v-for="hotel in hotels" :key="hotel.id" class="partner-card-hover bg-surface-container-lowest rounded-xl overflow-hidden flex flex-col group border border-surface-variant/20 hover:-translate-y-2 hover:shadow-[0_20px_25px_-5px_rgba(0,0,0,0.1)] transition-all duration-300">
         <div class="relative h-48 overflow-hidden" :class="{'opacity-80': !hotel.active}">
           <img :alt="hotel.name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" :src="hotel.images[0] || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800'"/>
-          <div :class="[hotel.active ? 'bg-[#CDAF5D]' : 'bg-surface-variant text-on-surface-variant']" class="absolute top-4 left-4 text-white text-[10px] font-bold px-2 py-1 rounded tracking-widest uppercase">
-            {{ hotel.active ? 'Partenaire' : 'Suspendu' }}
-          </div>
+
           <div class="absolute top-4 right-4 bg-white/90 backdrop-blur p-1.5 rounded-lg flex items-center cursor-pointer select-none">
             <span class="text-xs font-bold mr-1" :class="hotel.active ? 'text-primary' : 'text-outline-variant'">{{ hotel.active ? 'Actif' : 'Inactif' }}</span>
             <div class="status-toggle w-2 h-2 rounded-full transition-colors" :class="hotel.active ? 'bg-emerald-500' : 'bg-outline-variant'"></div>
@@ -67,45 +65,7 @@
       </div>
     </div>
 
-    <!-- Stats Strip Footer -->
-    <footer class="fixed bottom-0 right-0 left-64 bg-white/90 backdrop-blur-xl border-t border-outline-variant/20 px-8 py-6 z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
-      <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-8">
-        <div class="flex gap-12">
-          <div class="flex flex-col">
-            <span class="text-[10px] font-bold text-outline uppercase tracking-widest mb-1">Total Partenaires</span>
-            <div class="flex items-baseline gap-2">
-              <span class="text-3xl font-extrabold text-[#015081]">{{ hotels.length }}</span>
-              <span class="text-xs text-emerald-600 font-bold flex items-center gap-0.5 bg-emerald-50 px-1.5 py-0.5 rounded">
-                <span class="material-symbols-outlined text-xs">trending_up</span> +5
-              </span>
-            </div>
-          </div>
-          <div class="flex flex-col">
-            <span class="text-[10px] font-bold text-outline uppercase tracking-widest mb-1">Chambres Gérées</span>
-            <div class="flex items-baseline gap-2">
-              <span class="text-3xl font-extrabold text-[#015081]">8,420</span>
-            </div>
-          </div>
-          <div class="flex flex-col">
-            <span class="text-[10px] font-bold text-outline uppercase tracking-widest mb-1">Revenus Partenaires</span>
-            <div class="flex items-baseline gap-2">
-              <span class="text-3xl font-extrabold text-primary">€1.42M</span>
-              <span class="text-xs text-emerald-600 font-bold flex items-center gap-0.5 bg-emerald-50 px-1.5 py-0.5 rounded">
-                <span class="material-symbols-outlined text-xs">trending_up</span> +12%
-              </span>
-            </div>
-          </div>
-        </div>
-        <div class="flex items-center gap-4">
-          <button class="text-sm font-bold text-secondary py-2.5 px-5 border-2 border-secondary/20 rounded-lg hover:bg-secondary/5 transition-all active:scale-95">
-            Exporter Rapport PDF
-          </button>
-          <NuxtLink to="/admin" class="bg-primary text-white font-bold py-2.5 px-8 rounded-lg shadow-lg shadow-primary/20 hover:brightness-110 transition-all active:scale-95 block">
-            Dashboard Global
-          </NuxtLink>
-        </div>
-      </div>
-    </footer>
+
   </div>
 </template>
 
