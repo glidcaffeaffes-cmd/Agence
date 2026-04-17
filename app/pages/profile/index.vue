@@ -1,64 +1,125 @@
 <template>
-  <div class="profile-page">
-    <header class="page-header">
-      <div class="header-content">
-        <h1 class="page-title">My Profile</h1>
-      </div>
-    </header>
+  <div class="min-h-screen bg-surface">
+    <Head>
+      <title>My Profile — VoyageHub</title>
+      <meta name="description" content="Manage your VoyageHub profile and preferences." />
+    </Head>
 
-    <div class="page-container">
-      <div class="profile-grid">
-        <!-- Sidebar Info -->
-        <aside class="profile-sidebar">
-          <AppCard variant="elevated" class="profile-card">
-            <div class="avatar-section">
-              <img :src="currentProfile?.photo || 'https://i.pravatar.cc/150'" alt="Avatar" class="profile-avatar">
-              <h2 class="profile-name">{{ currentProfile?.firstName }} {{ currentProfile?.lastName }}</h2>
-              <p class="profile-email">{{ currentProfile?.email }}</p>
-              <AppBadge :color="currentProfile?.role === 'Admin' ? 'warning' : 'primary'" class="role-badge">
-                {{ currentProfile?.role }}
-              </AppBadge>
+    <!-- Global Client Navbar (Placeholder for context if needed, usually handled by layout) -->
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <!-- Page Header -->
+      <header class="mb-10">
+        <h1 class="text-4xl font-bold text-on-surface tracking-tight">My Account</h1>
+        <p class="text-on-surface-variant mt-2 text-lg">Manage your personal information and preferences.</p>
+      </header>
+
+      <div class="flex flex-col lg:flex-row gap-10">
+        <!-- Sidebar Navigation -->
+        <aside class="w-full lg:w-72 flex-shrink-0">
+          <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/40 overflow-hidden sticky top-8">
+            <!-- User Summary -->
+            <div class="p-6 border-b border-outline-variant/30 text-center">
+              <div class="w-24 h-24 mx-auto rounded-full bg-surface-container-high border-4 border-white shadow-md overflow-hidden mb-4">
+                <img :src="currentProfile?.photo || 'https://i.pravatar.cc/150'" alt="Avatar" class="w-full h-full object-cover" />
+              </div>
+              <h2 class="text-xl font-bold text-on-surface">{{ currentProfile?.firstName || 'Jean' }} {{ currentProfile?.lastName || 'Dupont' }}</h2>
+              <p class="text-sm text-on-surface-variant mt-1">{{ currentProfile?.email || 'jean.dupont@example.com' }}</p>
+              
+              <div class="mt-4 inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider"
+                   :class="currentProfile?.role === 'Admin' ? 'bg-accent/10 text-accent' : 'bg-primary/10 text-primary'">
+                {{ currentProfile?.role || 'Client' }}
+              </div>
             </div>
-            
-            <nav class="profile-nav">
-              <a href="#" class="profile-nav-item active"><i class="pi pi-user"></i> Personal Info</a>
-              <a href="#" class="profile-nav-item"><i class="pi pi-lock"></i> Security</a>
-              <a href="#" class="profile-nav-item"><i class="pi pi-bell"></i> Preferences</a>
+
+            <!-- Nav Links -->
+            <nav class="p-3 space-y-1">
+              <NuxtLink to="/profile" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/5 text-primary font-semibold transition-colors">
+                <span class="material-symbols-outlined text-[20px]">person</span>
+                Personal Info
+              </NuxtLink>
+              <NuxtLink to="/reservations/history" class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-medium">
+                <span class="material-symbols-outlined text-[20px]">history</span>
+                Reservation History
+              </NuxtLink>
+              <NuxtLink to="/settings" class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-medium">
+                <span class="material-symbols-outlined text-[20px]">settings</span>
+                Settings & Security
+              </NuxtLink>
             </nav>
-          </AppCard>
+          </div>
         </aside>
 
-        <!-- Main Form -->
-        <main class="profile-main">
-          <AppCard variant="default">
-            <template #header>
-              <h3 class="form-title">Personal Information</h3>
-            </template>
-            <form class="profile-form" @submit.prevent="saveProfile">
-              <div class="form-row">
-                <div class="form-group">
-                  <label>First Name</label>
-                  <input type="text" class="form-input" :value="currentProfile?.firstName" />
+        <!-- Main Content Form -->
+        <main class="flex-1">
+          <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/40 overflow-hidden">
+            <div class="p-8 border-b border-outline-variant/30">
+              <h3 class="text-2xl font-bold text-on-surface">Personal Information</h3>
+              <p class="text-sm text-on-surface-variant mt-1">Update your details to ensure smooth bookings.</p>
+            </div>
+
+            <form @submit.prevent="saveProfile" class="p-8 space-y-8">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- First Name -->
+                <div class="space-y-2">
+                  <label class="block text-sm font-semibold text-on-surface">First Name</label>
+                  <input 
+                    type="text" 
+                    :value="currentProfile?.firstName" 
+                    class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant/60 rounded-xl text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none"
+                  />
                 </div>
-                <div class="form-group">
-                  <label>Last Name</label>
-                  <input type="text" class="form-input" :value="currentProfile?.lastName" />
+                <!-- Last Name -->
+                <div class="space-y-2">
+                  <label class="block text-sm font-semibold text-on-surface">Last Name</label>
+                  <input 
+                    type="text" 
+                    :value="currentProfile?.lastName" 
+                    class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant/60 rounded-xl text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none"
+                  />
                 </div>
               </div>
-              <div class="form-group">
-                <label>Email Address</label>
-                <input type="email" class="form-input" :value="currentProfile?.email" disabled />
-                <span class="help-text">Email cannot be changed directly. Please contact support.</span>
+
+              <!-- Email -->
+              <div class="space-y-2">
+                <div class="flex justify-between items-center">
+                  <label class="block text-sm font-semibold text-on-surface">Email Address</label>
+                  <span class="text-xs text-on-surface-variant font-medium bg-surface-container-high px-2 py-1 rounded">Verified</span>
+                </div>
+                <div class="relative">
+                  <input 
+                    type="email" 
+                    :value="currentProfile?.email" 
+                    disabled
+                    class="w-full px-4 py-3 bg-surface-container-low border border-outline-variant/40 rounded-xl text-on-surface-variant cursor-not-allowed outline-none"
+                  />
+                  <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline-variant">lock</span>
+                </div>
+                <p class="text-xs text-outline mt-1">Email cannot be changed directly. Please contact support.</p>
               </div>
-              <div class="form-group">
-                <label>Phone Number</label>
-                <input type="tel" class="form-input" :value="currentProfile?.phone" />
+
+              <!-- Phone -->
+              <div class="space-y-2">
+                <label class="block text-sm font-semibold text-on-surface">Phone Number</label>
+                <div class="relative">
+                  <span class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-medium">+33</span>
+                  <input 
+                    type="tel" 
+                    :value="currentProfile?.phone" 
+                    placeholder="6 12 34 56 78"
+                    class="w-full pl-12 pr-4 py-3 bg-surface-container-lowest border border-outline-variant/60 rounded-xl text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none"
+                  />
+                </div>
               </div>
-              <div class="form-actions">
-                <button type="submit" class="app-btn app-btn--primary">Save Changes</button>
+
+              <!-- Actions -->
+              <div class="pt-6 border-t border-outline-variant/30 flex justify-end">
+                <button type="submit" class="px-6 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary-container shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5">
+                  Save Changes
+                </button>
               </div>
             </form>
-          </AppCard>
+          </div>
         </main>
       </div>
     </div>
@@ -74,46 +135,3 @@ function saveProfile() {
   alert('Profile updated successfully! (Mock Action)')
 }
 </script>
-
-<style scoped>
-.profile-page { background: var(--color-bg-soft); min-height: 100vh; padding-bottom: var(--spacing-16); }
-
-.page-header { background: var(--color-surface-primary); border-bottom: 1px solid var(--color-border); padding: var(--spacing-8) var(--spacing-6); margin-bottom: var(--spacing-8); }
-.header-content { max-width: 1024px; margin: 0 auto; }
-.page-title { font-family: var(--font-family-heading); font-size: var(--font-size-2xl); font-weight: 700; margin: 0; color: var(--color-text-primary); }
-
-.page-container { max-width: 1024px; margin: 0 auto; padding: 0 var(--spacing-6); }
-
-.profile-grid { display: grid; gap: var(--spacing-8); }
-@media (min-width: 768px) { .profile-grid { grid-template-columns: 300px 1fr; align-items: start; } }
-
-.profile-card { padding: var(--spacing-6); text-align: center; }
-.avatar-section { border-bottom: 1px solid var(--color-border); padding-bottom: var(--spacing-6); margin-bottom: var(--spacing-4); }
-.profile-avatar { width: 100px; height: 100px; border-radius: var(--radius-full); object-fit: cover; margin-bottom: var(--spacing-3); border: 4px solid var(--color-surface-secondary); }
-.profile-name { font-size: var(--font-size-lg); font-weight: 600; margin: 0 0 var(--spacing-1); color: var(--color-text-primary); }
-.profile-email { font-size: var(--font-size-sm); color: var(--color-text-secondary); margin: 0 0 var(--spacing-3); }
-.role-badge { margin: 0 auto; }
-
-.profile-nav { display: flex; flex-direction: column; gap: var(--spacing-1); text-align: left; }
-.profile-nav-item { display: flex; align-items: center; gap: var(--spacing-3); padding: var(--spacing-3); color: var(--color-text-secondary); text-decoration: none; border-radius: var(--radius-md); font-weight: 500; font-size: var(--font-size-sm); transition: all 0.2s; }
-.profile-nav-item:hover { background: var(--color-surface-secondary); color: var(--color-text-primary); }
-.profile-nav-item.active { background: var(--color-primary-50); color: var(--color-primary-600); }
-.profile-nav-item i { font-size: 1.1em; opacity: 0.7; }
-.profile-nav-item.active i { opacity: 1; }
-
-.form-title { font-size: var(--font-size-lg); font-weight: 600; margin: 0; color: var(--color-text-primary); border-bottom: 1px solid var(--color-border); padding-bottom: var(--spacing-4); margin-bottom: var(--spacing-6); }
-
-.profile-form { display: flex; flex-direction: column; gap: var(--spacing-5); }
-.form-row { display: grid; gap: var(--spacing-5); }
-@media (min-width: 640px) { .form-row { grid-template-columns: 1fr 1fr; } }
-.form-group label { display: block; font-size: var(--font-size-sm); font-weight: 600; color: var(--color-text-primary); margin-bottom: var(--spacing-2); }
-.form-input { width: 100%; padding: var(--spacing-3); border: 1px solid var(--color-border); border-radius: var(--radius-md); font-size: var(--font-size-base); transition: border-color 0.2s; background: var(--color-surface-primary); }
-.form-input:focus { outline: none; border-color: var(--color-primary-500); }
-.form-input:disabled { background: var(--color-surface-secondary); color: var(--color-text-muted); cursor: not-allowed; }
-.help-text { display: block; font-size: var(--font-size-xs); color: var(--color-text-muted); margin-top: var(--spacing-1); }
-
-.form-actions { margin-top: var(--spacing-2); display: flex; justify-content: flex-end; }
-.app-btn { padding: var(--spacing-2) var(--spacing-6); border-radius: var(--radius-md); font-weight: 500; cursor: pointer; border: none; font-size: var(--font-size-base); }
-.app-btn--primary { background: var(--color-primary-600); color: white; }
-.app-btn--primary:hover { background: var(--color-primary-700); }
-</style>

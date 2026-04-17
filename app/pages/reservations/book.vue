@@ -1,174 +1,315 @@
 <template>
-  <div>
+  <div class="min-h-[calc(100vh-80px)] bg-surface pb-24">
     <Head>
       <title>Book Your Stay — VoyageHub</title>
       <meta name="description" content="Complete your hotel reservation securely with VoyageHub." />
     </Head>
 
     <!-- Progress header -->
-    <section class="booking-hero">
-      <div class="hero-inner">
-        <NuxtLink :to="`/hotels/${route.query.hotelId || ''}`" class="back-link">
-          <span class="material-symbols-outlined">arrow_back</span> Back to hotel
+    <section class="bg-gradient-to-r from-primary to-primary-container text-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1542314831-c6a4d14d8373?auto=format&fit=crop&q=80&w=2000')] bg-cover bg-center mix-blend-overlay opacity-20"></div>
+      <div class="max-w-7xl mx-auto relative z-10">
+        <NuxtLink :to="`/hotels/${route.query.hotelId || ''}`" class="inline-flex items-center gap-2 text-primary-fixed hover:text-white transition-colors mb-6 font-medium">
+          <span class="material-symbols-outlined text-[20px]">arrow_back</span> Back to hotel
         </NuxtLink>
-        <h1 class="hero-title">Complete Your Reservation</h1>
-        <div class="steps">
-          <div v-for="(step, i) in steps" :key="i" :class="['step', { 'step--active': currentStep === i, 'step--done': currentStep > i }]">
-            <span class="step-num">{{ currentStep > i ? '✓' : i + 1 }}</span>
-            <span class="step-label">{{ step }}</span>
-          </div>
+        <h1 class="text-3xl md:text-4xl font-bold tracking-tight mb-8">Complete Your Reservation</h1>
+        
+        <!-- Stepper -->
+        <div class="flex items-center max-w-3xl">
+          <template v-for="(step, i) in steps" :key="i">
+            <!-- Step Circle -->
+            <div class="flex flex-col items-center relative z-10">
+              <div 
+                class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-colors duration-300 shadow-sm"
+                :class="[
+                  currentStep > i ? 'bg-primary-fixed text-primary' : 
+                  currentStep === i ? 'bg-white text-primary ring-4 ring-primary-fixed/30' : 
+                  'bg-white/20 text-white/70 border border-white/30'
+                ]"
+              >
+                <span v-if="currentStep > i" class="material-symbols-outlined text-[20px]">check</span>
+                <span v-else>{{ i + 1 }}</span>
+              </div>
+              <span 
+                class="absolute -bottom-6 text-xs font-medium whitespace-nowrap transition-colors duration-300"
+                :class="currentStep >= i ? 'text-white' : 'text-white/60'"
+              >
+                {{ step }}
+              </span>
+            </div>
+            
+            <!-- Step Line -->
+            <div v-if="i < steps.length - 1" class="flex-1 h-1 mx-2 rounded-full transition-colors duration-300"
+                 :class="currentStep > i ? 'bg-primary-fixed' : 'bg-white/20'">
+            </div>
+          </template>
         </div>
       </div>
     </section>
 
-    <div class="booking-body">
-      <div class="booking-grid">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
+      <div class="flex flex-col lg:flex-row gap-8 items-start">
         <!-- Left: Form -->
-        <div class="form-side">
+        <div class="flex-1 w-full">
 
           <!-- Step 1: Dates & Guests -->
-          <div v-if="currentStep === 0" class="form-card">
-            <h2 class="form-card-title">
-              <span class="material-symbols-outlined">calendar_month</span> Stay Details
-            </h2>
-            <div class="field-row">
-              <div class="field-group">
-                <label class="field-label" for="book-checkin">Check-in date</label>
-                <input id="book-checkin" v-model="form.checkInDate" class="field-input" type="date" :min="today" required />
+          <transition enter-active-class="transition duration-300 ease-out" enter-from-class="opacity-0 translate-x-4" enter-to-class="opacity-100 translate-x-0" leave-active-class="hidden" leave-from-class="opacity-100" leave-to-class="opacity-0">
+            <div v-if="currentStep === 0" class="bg-white rounded-2xl border border-outline-variant/40 shadow-sm p-6 sm:p-8">
+              <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                  <span class="material-symbols-outlined">calendar_month</span>
+                </div>
+                <h2 class="text-xl font-bold text-on-surface">Stay Details</h2>
               </div>
-              <div class="field-group">
-                <label class="field-label" for="book-checkout">Check-out date</label>
-                <input id="book-checkout" v-model="form.checkOutDate" class="field-input" type="date" :min="form.checkInDate || today" required />
+              
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+                <div class="space-y-2">
+                  <label class="block text-sm font-semibold text-on-surface" for="book-checkin">Check-in Date</label>
+                  <input id="book-checkin" v-model="form.checkInDate" type="date" :min="today" required
+                         class="w-full px-4 py-3 rounded-xl border border-outline-variant/60 bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
+                </div>
+                <div class="space-y-2">
+                  <label class="block text-sm font-semibold text-on-surface" for="book-checkout">Check-out Date</label>
+                  <input id="book-checkout" v-model="form.checkOutDate" type="date" :min="form.checkInDate || today" required
+                         class="w-full px-4 py-3 rounded-xl border border-outline-variant/60 bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
+                </div>
+              </div>
+              
+              <div class="space-y-2 mb-8">
+                <label class="block text-sm font-semibold text-on-surface" for="book-roomtype">Room Type</label>
+                <div class="relative">
+                  <select id="book-roomtype" v-model="form.roomId" required
+                          class="w-full px-4 py-3 rounded-xl border border-outline-variant/60 bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all appearance-none cursor-pointer">
+                    <option value="" disabled>Select a room type</option>
+                    <option v-for="room in rooms" :key="room.id" :value="room.id">
+                      {{ room.type }} — {{ formatCurrency(room.pricePerNight) }} / night
+                    </option>
+                  </select>
+                  <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
+                </div>
+              </div>
+              
+              <div class="flex justify-end pt-4 border-t border-outline-variant/30">
+                <button class="flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary-container hover:-translate-y-0.5 transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                        :disabled="!form.checkInDate || !form.checkOutDate || !form.roomId" 
+                        @click="currentStep = 1">
+                  Continue <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+                </button>
               </div>
             </div>
-            <div class="field-group">
-              <label class="field-label" for="book-roomtype">Room type</label>
-              <select id="book-roomtype" v-model="form.roomId" class="field-input" required>
-                <option value="">Select a room type</option>
-                <option v-for="room in rooms" :key="room.id" :value="room.id">
-                  {{ room.type }} — {{ formatCurrency(room.pricePerNight) }}/night
-                </option>
-              </select>
-            </div>
-            <button class="step-btn" :disabled="!form.checkInDate || !form.checkOutDate || !form.roomId" @click="currentStep = 1">
-              Continue <span class="material-symbols-outlined">arrow_forward</span>
-            </button>
-          </div>
+          </transition>
 
           <!-- Step 2: Guest Info -->
-          <div v-if="currentStep === 1" class="form-card">
-            <h2 class="form-card-title">
-              <span class="material-symbols-outlined">person</span> Guest Information
-            </h2>
-            <div class="field-row">
-              <div class="field-group">
-                <label class="field-label" for="book-fn">First name</label>
-                <input id="book-fn" v-model="guestInfo.firstName" class="field-input" type="text" placeholder="Jean" required />
+          <transition enter-active-class="transition duration-300 ease-out" enter-from-class="opacity-0 translate-x-4" enter-to-class="opacity-100 translate-x-0" leave-active-class="hidden" leave-from-class="opacity-100" leave-to-class="opacity-0">
+            <div v-if="currentStep === 1" class="bg-white rounded-2xl border border-outline-variant/40 shadow-sm p-6 sm:p-8">
+              <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                  <span class="material-symbols-outlined">person</span>
+                </div>
+                <h2 class="text-xl font-bold text-on-surface">Guest Information</h2>
               </div>
-              <div class="field-group">
-                <label class="field-label" for="book-ln">Last name</label>
-                <input id="book-ln" v-model="guestInfo.lastName" class="field-input" type="text" placeholder="Dupont" required />
+              
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+                <div class="space-y-2">
+                  <label class="block text-sm font-semibold text-on-surface" for="book-fn">First Name</label>
+                  <input id="book-fn" v-model="guestInfo.firstName" type="text" placeholder="Jean" required
+                         class="w-full px-4 py-3 rounded-xl border border-outline-variant/60 bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-on-surface-variant/50" />
+                </div>
+                <div class="space-y-2">
+                  <label class="block text-sm font-semibold text-on-surface" for="book-ln">Last Name</label>
+                  <input id="book-ln" v-model="guestInfo.lastName" type="text" placeholder="Dupont" required
+                         class="w-full px-4 py-3 rounded-xl border border-outline-variant/60 bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-on-surface-variant/50" />
+                </div>
+              </div>
+              
+              <div class="space-y-2 mb-6">
+                <label class="block text-sm font-semibold text-on-surface" for="book-email">Email Address</label>
+                <input id="book-email" v-model="guestInfo.email" type="email" placeholder="jean.dupont@example.com" required
+                       class="w-full px-4 py-3 rounded-xl border border-outline-variant/60 bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-on-surface-variant/50" />
+              </div>
+              
+              <div class="space-y-2 mb-6">
+                <label class="block text-sm font-semibold text-on-surface" for="book-phone">Phone Number</label>
+                <input id="book-phone" v-model="guestInfo.phone" type="tel" placeholder="+33 6 12 34 56 78"
+                       class="w-full px-4 py-3 rounded-xl border border-outline-variant/60 bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-on-surface-variant/50" />
+              </div>
+              
+              <div class="space-y-2 mb-8">
+                <label class="block text-sm font-semibold text-on-surface" for="book-requests">Special Requests <span class="text-on-surface-variant font-normal">(Optional)</span></label>
+                <textarea id="book-requests" v-model="guestInfo.requests" rows="3" placeholder="Any special requests, dietary requirements, or notes for the hotel..."
+                          class="w-full px-4 py-3 rounded-xl border border-outline-variant/60 bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-on-surface-variant/50 resize-none"></textarea>
+              </div>
+              
+              <div class="flex items-center justify-between pt-4 border-t border-outline-variant/30">
+                <button class="flex items-center gap-2 px-6 py-3 text-on-surface-variant font-bold rounded-xl hover:bg-surface-container-low transition-colors"
+                        @click="currentStep = 0">
+                  <span class="material-symbols-outlined text-[20px]">arrow_back</span> Back
+                </button>
+                <button class="flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary-container hover:-translate-y-0.5 transition-all shadow-sm hover:shadow"
+                        @click="currentStep = 2">
+                  Continue <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+                </button>
               </div>
             </div>
-            <div class="field-group">
-              <label class="field-label" for="book-email">Email</label>
-              <input id="book-email" v-model="guestInfo.email" class="field-input" type="email" placeholder="jean@email.com" required />
-            </div>
-            <div class="field-group">
-              <label class="field-label" for="book-phone">Phone</label>
-              <input id="book-phone" v-model="guestInfo.phone" class="field-input" type="tel" placeholder="+33 6 00 00 00 00" />
-            </div>
-            <div class="field-group">
-              <label class="field-label" for="book-requests">Special requests</label>
-              <textarea id="book-requests" v-model="guestInfo.requests" class="field-input field-textarea" placeholder="Any special requests or notes for the hotel…"></textarea>
-            </div>
-            <div class="step-row">
-              <button class="step-btn step-btn--ghost" @click="currentStep = 0">
-                <span class="material-symbols-outlined">arrow_back</span> Back
-              </button>
-              <button class="step-btn" @click="currentStep = 2">
-                Continue <span class="material-symbols-outlined">arrow_forward</span>
-              </button>
-            </div>
-          </div>
+          </transition>
 
-          <!-- Step 3: Payment (mock) -->
-          <div v-if="currentStep === 2" class="form-card">
-            <h2 class="form-card-title">
-              <span class="material-symbols-outlined">credit_card</span> Payment Details
-            </h2>
-            <div class="field-group">
-              <label class="field-label" for="book-card">Card number</label>
-              <input id="book-card" v-model="payment.cardNumber" class="field-input" type="text" placeholder="•••• •••• •••• ••••" maxlength="19" />
-            </div>
-            <div class="field-row">
-              <div class="field-group">
-                <label class="field-label" for="book-expiry">Expiry date</label>
-                <input id="book-expiry" v-model="payment.expiry" class="field-input" type="text" placeholder="MM/YY" maxlength="5" />
+          <!-- Step 3: Payment -->
+          <transition enter-active-class="transition duration-300 ease-out" enter-from-class="opacity-0 translate-x-4" enter-to-class="opacity-100 translate-x-0" leave-active-class="hidden" leave-from-class="opacity-100" leave-to-class="opacity-0">
+            <div v-if="currentStep === 2" class="bg-white rounded-2xl border border-outline-variant/40 shadow-sm p-6 sm:p-8">
+              <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                    <span class="material-symbols-outlined">credit_card</span>
+                  </div>
+                  <h2 class="text-xl font-bold text-on-surface">Payment Details</h2>
+                </div>
+                <div class="flex gap-2 opacity-70">
+                  <span class="material-symbols-outlined text-3xl">payments</span>
+                </div>
               </div>
-              <div class="field-group">
-                <label class="field-label" for="book-cvv">CVV</label>
-                <input id="book-cvv" v-model="payment.cvv" class="field-input" type="text" placeholder="•••" maxlength="3" />
+              
+              <div class="space-y-6 mb-8">
+                <div class="space-y-2">
+                  <label class="block text-sm font-semibold text-on-surface" for="book-card">Card Number</label>
+                  <div class="relative">
+                    <input id="book-card" v-model="payment.cardNumber" type="text" placeholder="•••• •••• •••• ••••" maxlength="19"
+                           class="w-full pl-12 pr-4 py-3 rounded-xl border border-outline-variant/60 bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-on-surface-variant/50 font-mono" />
+                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">credit_card</span>
+                  </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-6">
+                  <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-on-surface" for="book-expiry">Expiry Date</label>
+                    <input id="book-expiry" v-model="payment.expiry" type="text" placeholder="MM/YY" maxlength="5"
+                           class="w-full px-4 py-3 rounded-xl border border-outline-variant/60 bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-on-surface-variant/50 font-mono" />
+                  </div>
+                  <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-on-surface" for="book-cvv">CVV</label>
+                    <input id="book-cvv" v-model="payment.cvv" type="text" placeholder="123" maxlength="4"
+                           class="w-full px-4 py-3 rounded-xl border border-outline-variant/60 bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-on-surface-variant/50 font-mono" />
+                  </div>
+                </div>
+                
+                <div class="flex items-center gap-2 p-3 bg-surface-container-lowest border border-outline-variant/40 rounded-xl text-sm text-on-surface-variant">
+                  <span class="material-symbols-outlined text-primary text-[20px]">lock</span>
+                  <span>Your payment information is secured by 256-bit SSL encryption.</span>
+                </div>
+              </div>
+              
+              <div class="flex items-center justify-between pt-4 border-t border-outline-variant/30">
+                <button class="flex items-center gap-2 px-6 py-3 text-on-surface-variant font-bold rounded-xl hover:bg-surface-container-low transition-colors"
+                        @click="currentStep = 1">
+                  <span class="material-symbols-outlined text-[20px]">arrow_back</span> Back
+                </button>
+                <button class="flex items-center gap-2 px-6 py-3 bg-[#D4AF37] text-white font-bold rounded-xl hover:bg-[#C5A028] hover:-translate-y-0.5 transition-all shadow-sm hover:shadow disabled:opacity-70"
+                        :disabled="loading" @click="handleSubmit">
+                  <span v-if="loading" class="material-symbols-outlined animate-spin text-[20px]">progress_activity</span>
+                  <span v-if="!loading" class="material-symbols-outlined text-[20px]">lock</span>
+                  <span>{{ loading ? 'Processing...' : `Pay ${formatCurrency(totalAmount)}` }}</span>
+                </button>
               </div>
             </div>
-            <div class="secure-badge">
-              <span class="material-symbols-outlined">lock</span>
-              Secured by 256-bit SSL encryption
-            </div>
-            <div class="step-row">
-              <button class="step-btn step-btn--ghost" @click="currentStep = 1">
-                <span class="material-symbols-outlined">arrow_back</span> Back
-              </button>
-              <button id="book-confirm-btn" class="step-btn step-btn--gold" :disabled="loading" @click="handleSubmit">
-                <span v-if="loading" class="material-symbols-outlined spin">progress_activity</span>
-                <span v-else>Confirm Booking</span>
-              </button>
-            </div>
-          </div>
+          </transition>
 
           <!-- Step 4: Confirmation -->
-          <div v-if="currentStep === 3" class="confirm-card">
-            <span class="material-symbols-outlined confirm-icon">check_circle</span>
-            <h2 class="confirm-title">Reservation Confirmed!</h2>
-            <p class="confirm-subtitle">Your booking is confirmed. A summary has been sent to your email.</p>
-            <div class="confirm-code">
-              <span>Confirmation Code</span>
-              <strong>{{ confirmationCode }}</strong>
+          <transition enter-active-class="transition duration-500 ease-out" enter-from-class="opacity-0 scale-95" enter-to-class="opacity-100 scale-100" leave-active-class="hidden" leave-from-class="opacity-100" leave-to-class="opacity-0">
+            <div v-if="currentStep === 3" class="bg-white rounded-2xl border border-outline-variant/40 shadow-sm p-8 md:p-12 text-center">
+              <div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <span class="material-symbols-outlined text-[40px] text-primary">check_circle</span>
+              </div>
+              <h2 class="text-3xl font-bold text-on-surface mb-2">Reservation Confirmed!</h2>
+              <p class="text-on-surface-variant mb-8 max-w-md mx-auto">
+                Thank you for choosing VoyageHub. Your booking has been successfully processed, and a confirmation email has been sent to you.
+              </p>
+              
+              <div class="bg-surface-container-lowest border border-outline-variant/40 rounded-xl p-6 mb-8 inline-block mx-auto min-w-[280px]">
+                <p class="text-sm font-semibold text-on-surface-variant mb-1 uppercase tracking-wider">Confirmation Code</p>
+                <p class="text-3xl font-bold text-primary font-mono tracking-widest">{{ confirmationCode }}</p>
+              </div>
+              
+              <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <NuxtLink to="/reservations" class="w-full sm:w-auto px-8 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary-container transition-colors">
+                  View My Bookings
+                </NuxtLink>
+                <NuxtLink to="/hotels" class="w-full sm:w-auto px-8 py-3 border border-outline-variant/60 text-on-surface font-bold rounded-xl hover:border-primary hover:text-primary transition-colors">
+                  Explore More Hotels
+                </NuxtLink>
+              </div>
             </div>
-            <div class="confirm-actions">
-              <NuxtLink to="/reservations" class="step-btn">View My Bookings</NuxtLink>
-              <NuxtLink to="/hotels" class="step-btn step-btn--ghost">Explore More Hotels</NuxtLink>
-            </div>
-          </div>
+          </transition>
         </div>
 
         <!-- Right: Summary -->
-        <aside class="summary-side">
-          <div class="summary-card" v-if="currentStep < 3">
-            <h3 class="summary-title">Booking Summary</h3>
-            <div class="summary-hotel">
-              <span class="material-symbols-outlined">hotel</span>
-              <div>
-                <p class="summary-label">Hotel</p>
-                <p class="summary-value">{{ hotelName }}</p>
+        <aside class="w-full lg:w-96 shrink-0 sticky top-24">
+          <div v-if="currentStep < 3" class="bg-white rounded-2xl border border-outline-variant/40 shadow-sm overflow-hidden">
+            <div class="p-5 border-b border-outline-variant/30 bg-surface-container-lowest">
+              <h3 class="text-lg font-bold text-on-surface">Booking Summary</h3>
+            </div>
+            
+            <div class="p-6 space-y-6">
+              <!-- Hotel Info -->
+              <div class="flex items-start gap-4">
+                <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-primary">apartment</span>
+                </div>
+                <div>
+                  <p class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1">Property</p>
+                  <p class="text-base font-bold text-on-surface">{{ hotelName }}</p>
+                </div>
+              </div>
+              
+              <div class="h-px bg-outline-variant/30"></div>
+              
+              <!-- Dates -->
+              <div class="space-y-4">
+                <div class="flex justify-between items-center" v-if="form.checkInDate">
+                  <span class="text-sm text-on-surface-variant font-medium">Check-in</span>
+                  <span class="text-sm font-bold text-on-surface">{{ formatDate(form.checkInDate) }}</span>
+                </div>
+                <div class="flex justify-between items-center" v-if="form.checkOutDate">
+                  <span class="text-sm text-on-surface-variant font-medium">Check-out</span>
+                  <span class="text-sm font-bold text-on-surface">{{ formatDate(form.checkOutDate) }}</span>
+                </div>
+                <div class="flex justify-between items-center" v-if="nightCount > 0">
+                  <span class="text-sm text-on-surface-variant font-medium">Duration</span>
+                  <span class="text-sm font-bold text-on-surface">{{ nightCount }} Night{{ nightCount > 1 ? 's' : '' }}</span>
+                </div>
+              </div>
+              
+              <div class="h-px bg-outline-variant/30" v-if="selectedRoom"></div>
+              
+              <!-- Room details -->
+              <div class="space-y-4" v-if="selectedRoom">
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-on-surface-variant font-medium">Room Type</span>
+                  <span class="text-sm font-bold text-on-surface">{{ selectedRoom.type }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-on-surface-variant font-medium">Rate per night</span>
+                  <span class="text-sm font-bold text-on-surface">{{ formatCurrency(selectedRoom.pricePerNight) }}</span>
+                </div>
               </div>
             </div>
-            <div v-if="form.checkInDate" class="summary-row">
-              <span>Check-in</span><strong>{{ formatDate(form.checkInDate) }}</strong>
+            
+            <!-- Total -->
+            <div class="p-6 bg-surface-container-lowest border-t border-outline-variant/30">
+              <div class="flex justify-between items-end">
+                <div>
+                  <p class="text-sm font-medium text-on-surface-variant mb-1">Total Amount</p>
+                  <p class="text-xs text-on-surface-variant/70">Includes taxes and fees</p>
+                </div>
+                <span class="text-2xl font-bold text-primary">{{ formatCurrency(totalAmount) }}</span>
+              </div>
             </div>
-            <div v-if="form.checkOutDate" class="summary-row">
-              <span>Check-out</span><strong>{{ formatDate(form.checkOutDate) }}</strong>
-            </div>
-            <div v-if="nightCount > 0" class="summary-row">
-              <span>Nights</span><strong>{{ nightCount }}</strong>
-            </div>
-            <div v-if="selectedRoom" class="summary-row">
-              <span>Room</span><strong>{{ selectedRoom.type }}</strong>
-            </div>
-            <div class="summary-divider"></div>
-            <div class="summary-total">
-              <span>Total</span>
-              <strong>{{ formatCurrency(totalAmount) }}</strong>
+          </div>
+          
+          <!-- Helper Box -->
+          <div v-if="currentStep < 3" class="mt-6 bg-primary/5 rounded-2xl border border-primary/10 p-5 flex items-start gap-3">
+            <span class="material-symbols-outlined text-primary shrink-0 mt-0.5">help</span>
+            <div>
+              <p class="text-sm font-bold text-on-surface mb-1">Need help?</p>
+              <p class="text-sm text-on-surface-variant">Call our 24/7 concierge at <a href="tel:+33100000000" class="text-primary hover:underline">+33 1 00 00 00 00</a></p>
             </div>
           </div>
         </aside>
@@ -201,7 +342,13 @@ const guestInfo = ref({ firstName: '', lastName: '', email: '', phone: '', reque
 const payment = ref({ cardNumber: '', expiry: '', cvv: '' })
 
 const hotelId = computed(() => Number(route.query.hotelId) || 1)
-const hotelName = computed(() => `Hotel #${hotelId.value}`)
+// Mock a hotel name since we don't have the hotel details fetcher mapped directly here 
+// In a real scenario we'd fetch the hotel by ID
+const hotelName = computed(() => {
+  if (hotelId.value === 1) return 'Château de Montrésor'
+  if (hotelId.value === 2) return 'Villa Lumina'
+  return `Luxury Property #${hotelId.value}`
+})
 
 const selectedRoom = computed(() => rooms.value.find(r => r.id === Number(form.value.roomId)) || null)
 
@@ -217,10 +364,11 @@ const totalAmount = computed(() => {
 })
 
 function formatDate(d: string) {
-  return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+  if (!d) return ''
+  return new Date(d).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 function formatCurrency(n: number) {
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(n)
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(n)
 }
 
 async function handleSubmit() {
@@ -238,136 +386,9 @@ async function handleSubmit() {
   if (result) {
     confirmationCode.value = result.confirmationCode
     currentStep.value = 3
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 }
 
 onMounted(() => fetchByHotel(hotelId.value))
 </script>
-
-<style scoped>
-.booking-hero {
-  background: linear-gradient(135deg, #015081 0%, #006768 100%);
-  padding: 2.5rem 2rem 2rem;
-}
-.hero-inner { max-width: 1100px; margin: 0 auto; }
-.back-link {
-  display: inline-flex; align-items: center; gap: 0.375rem;
-  color: rgba(255,255,255,0.7); font-size: 0.8125rem; font-weight: 600;
-  text-decoration: none; margin-bottom: 1rem; transition: color 0.15s;
-}
-.back-link:hover { color: #fff; }
-.back-link .material-symbols-outlined { font-size: 1rem; }
-.hero-title { font-size: 1.75rem; font-weight: 700; color: #fff; margin: 0 0 1.5rem; letter-spacing: -0.02em; }
-
-.steps { display: flex; align-items: center; gap: 0; }
-.step {
-  display: flex; align-items: center; gap: 0.5rem;
-  color: rgba(255,255,255,0.5); font-size: 0.8125rem; font-weight: 600;
-  padding-right: 2rem; position: relative;
-}
-.step:not(:last-child)::after {
-  content: ''; position: absolute; right: 0.75rem;
-  width: 1rem; height: 1px; background: rgba(255,255,255,0.3);
-}
-.step--active { color: #CDAF5D; }
-.step--done { color: rgba(255,255,255,0.8); }
-.step-num {
-  width: 1.5rem; height: 1.5rem; border-radius: 50%;
-  background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center;
-  font-size: 0.75rem; font-weight: 700;
-}
-.step--active .step-num { background: #CDAF5D; color: #015081; }
-.step--done .step-num { background: #006768; }
-
-.booking-body { max-width: 1100px; margin: 0 auto; padding: 2.5rem 2rem; }
-.booking-grid { display: grid; grid-template-columns: 1fr 340px; gap: 2rem; align-items: start; }
-@media (max-width: 768px) { .booking-grid { grid-template-columns: 1fr; } }
-
-.form-card, .summary-card {
-  background: #fff; border-radius: 0.875rem;
-  box-shadow: 0 1px 4px rgba(1,80,129,0.06), 0 4px 16px rgba(1,80,129,0.04);
-  padding: 1.75rem;
-}
-.form-card-title {
-  display: flex; align-items: center; gap: 0.5rem;
-  font-size: 1.0625rem; font-weight: 700; color: #015081; margin: 0 0 1.5rem;
-}
-.form-card-title .material-symbols-outlined { font-size: 1.25rem; color: #006768; }
-
-.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
-.field-group { display: flex; flex-direction: column; gap: 0.375rem; margin-bottom: 1rem; }
-.field-label { font-size: 0.8125rem; font-weight: 600; color: #151d22; }
-.field-input {
-  padding: 0.625rem 0.875rem; border: 1px solid #bcc9c8; border-radius: 0.5rem;
-  font-size: 0.875rem; color: #151d22; background: #fff; outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s; font-family: 'Inter', sans-serif;
-  width: 100%;
-}
-.field-input:focus { border-color: #008F90; box-shadow: 0 0 0 2px rgba(0,143,144,0.15); }
-.field-textarea { min-height: 100px; resize: vertical; }
-
-.secure-badge {
-  display: flex; align-items: center; gap: 0.5rem;
-  background: #e0f2f1; color: #006768;
-  padding: 0.5rem 0.875rem; border-radius: 0.5rem;
-  font-size: 0.8125rem; font-weight: 600; margin: 0.5rem 0 1.25rem;
-}
-.secure-badge .material-symbols-outlined { font-size: 1rem; }
-
-.step-row { display: flex; justify-content: space-between; gap: 1rem; margin-top: 0.5rem; }
-.step-btn {
-  display: inline-flex; align-items: center; gap: 0.5rem;
-  padding: 0.6875rem 1.375rem;
-  background: linear-gradient(135deg, #006768 0%, #008283 100%);
-  color: #fff; font-weight: 700; font-size: 0.875rem;
-  border: none; border-radius: 0.5rem; cursor: pointer;
-  text-decoration: none; transition: opacity 0.15s, transform 0.15s;
-  font-family: 'Inter', sans-serif;
-}
-.step-btn:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
-.step-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.step-btn--ghost {
-  background: transparent; border: 1.5px solid #bcc9c8; color: #006768;
-}
-.step-btn--ghost:hover { background: #edf5fc; }
-.step-btn--gold { background: linear-gradient(135deg, #CDAF5D 0%, #b89a48 100%); color: #015081; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.spin { animation: spin 0.8s linear infinite; }
-
-/* Summary */
-.summary-title { font-size: 1rem; font-weight: 700; color: #015081; margin: 0 0 1.25rem; }
-.summary-hotel {
-  display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem;
-  padding-bottom: 1.25rem; border-bottom: 1px solid #e1e9f0;
-}
-.summary-hotel .material-symbols-outlined { font-size: 2rem; color: #6d7979; }
-.summary-label { font-size: 0.6875rem; color: #6d7979; font-weight: 600; text-transform: uppercase; margin: 0; }
-.summary-value { font-size: 0.9375rem; font-weight: 700; color: #151d22; margin: 0.125rem 0 0; }
-.summary-row {
-  display: flex; justify-content: space-between; align-items: center;
-  font-size: 0.875rem; color: #3d4949; margin-bottom: 0.625rem;
-}
-.summary-row strong { color: #151d22; }
-.summary-divider { height: 1px; background: #e1e9f0; margin: 1rem 0; }
-.summary-total {
-  display: flex; justify-content: space-between; align-items: center;
-  font-size: 1.0625rem; font-weight: 700; color: #015081;
-}
-
-/* Confirmation */
-.confirm-card {
-  background: #fff; border-radius: 0.875rem;
-  box-shadow: 0 1px 4px rgba(1,80,129,0.06), 0 4px 16px rgba(1,80,129,0.04);
-  padding: 3rem 2rem; text-align: center;
-}
-.confirm-icon { font-size: 4rem; color: #006768; display: block; margin-bottom: 1rem; font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-.confirm-title { font-size: 1.5rem; font-weight: 700; color: #151d22; margin: 0 0 0.5rem; }
-.confirm-subtitle { font-size: 0.9375rem; color: #6d7979; margin: 0 0 2rem; }
-.confirm-code {
-  display: inline-flex; flex-direction: column; gap: 0.25rem;
-  background: #edf5fc; border-radius: 0.75rem; padding: 1rem 2rem; margin-bottom: 2rem;
-}
-.confirm-code span { font-size: 0.75rem; color: #6d7979; font-weight: 600; text-transform: uppercase; }
-.confirm-code strong { font-size: 1.5rem; color: #015081; letter-spacing: 0.08em; font-family: monospace; }
-.confirm-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
-</style>
