@@ -33,7 +33,7 @@ export const mockHotels: Hotel[] = [
     images: [
       'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800',
       'https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=800',
-      'https://images.unsplash.com/photo-1590490360182-c33d955e42f4?w=800',
+      'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800',
     ],
     amenities: ['Restaurant', 'Bar', 'Room Service', 'Concierge', 'Wi-Fi', 'Laundry', 'Business Center'],
   },

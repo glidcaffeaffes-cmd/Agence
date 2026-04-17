@@ -1,132 +1,225 @@
 <template>
   <div class="hotel-detail">
     <div v-if="loading" class="loading-state">
-      <i class="pi pi-spinner pi-spin"></i> Loading hotel details...
+      <span class="material-symbols-outlined rotating">progress_activity</span>
+      <p>Chargement de l'établissement...</p>
     </div>
     
     <template v-else-if="hotel">
-      <!-- Image Gallery Header -->
-      <section class="gallery-header">
-        <div class="gallery-grid">
-          <div class="gallery-main">
+      <!-- Top Navigation -->
+      <nav class="detail-nav">
+        <div class="breadcrumbs">
+          <NuxtLink to="/">Accueil</NuxtLink>
+          <span class="material-symbols-outlined separator">chevron_right</span>
+          <NuxtLink to="/hotels">Hôtels</NuxtLink>
+          <span class="material-symbols-outlined separator">chevron_right</span>
+          <span class="active">{{ hotel.name }}</span>
+        </div>
+        <div class="nav-actions">
+          <button class="action-btn"><span class="material-symbols-outlined">ios_share</span> Partager</button>
+          <button class="action-btn"><span class="material-symbols-outlined">favorite</span> Sauvegarder</button>
+        </div>
+      </nav>
+
+      <!-- Header Section -->
+      <header class="detail-header">
+        <div class="header-main">
+          <div class="title-wrap">
+            <h1 class="hotel-title">{{ hotel.name }}</h1>
+            <div class="stars">
+              <span v-for="i in 5" :key="i" class="material-symbols-outlined" :class="{ 'active': i <= hotel.stars }">star</span>
+            </div>
+          </div>
+          <div class="header-meta">
+            <div class="location-badge">
+              <span class="material-symbols-outlined">location_on</span>
+              <span>{{ hotel.city }}, {{ hotel.country }}</span>
+              <a href="#map" class="map-link">Voir sur la carte</a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Custom Simple Grid Gallery -->
+      <section class="advanced-gallery">
+        <div class="gallery-grid" v-if="hotel.images && hotel.images.length >= 3">
+          <div class="main-photo">
             <img :src="hotel.images[0]" :alt="hotel.name">
           </div>
-          <div class="gallery-side">
-            <img v-for="(img, idx) in hotel.images.slice(1, 3)" :key="idx" :src="img" :alt="`${hotel.name} - Image ${idx + 2}`">
+          <div class="side-photos">
+            <div class="photo-wrap">
+              <img :src="hotel.images[1]" alt="Intérieur">
+            </div>
+            <div class="photo-wrap relative">
+              <img :src="hotel.images[2]" alt="Extérieur">
+              <div v-if="hotel.images.length > 3" class="more-photos-overlay">
+                <span class="material-symbols-outlined">photo_library</span>
+                <span>+{{ hotel.images.length - 3 }} photos</span>
+              </div>
+            </div>
           </div>
+        </div>
+        <div v-else class="fallback-gallery">
+          <img v-if="hotel.images && hotel.images.length > 0" :src="hotel.images[0]" :alt="hotel.name">
+          <span v-else class="material-symbols-outlined">image_not_supported</span>
         </div>
       </section>
 
-      <!-- Content -->
-      <div class="detail-container">
-        <div class="detail-layout">
-          <!-- Main Info -->
-          <div class="main-column">
-            <div class="hotel-header">
-              <div class="hotel-badges">
-                <AppBadge color="primary">{{ hotel.stars }} Stars</AppBadge>
-                <AppStarRating :rating="hotel.stars" :count="48" :show-count="true" />
-              </div>
-              <h1 class="hotel-title">{{ hotel.name }}</h1>
-              <p class="hotel-location"><i class="pi pi-map-marker"></i> {{ hotel.address }}, {{ hotel.city }}, {{ hotel.country }}</p>
-            </div>
-
-            <section class="info-section">
-              <h2 class="section-title">About the Hotel</h2>
-              <p class="hotel-description">{{ hotel.description }}</p>
-            </section>
-
-            <section class="info-section">
-              <h2 class="section-title">Amenities</h2>
-              <div class="amenities-grid">
-                <div v-for="amenity in hotel.amenities" :key="amenity" class="amenity-item">
-                  <i class="pi pi-check-circle"></i> {{ amenity }}
-                </div>
-              </div>
-            </section>
-
-            <section id="rooms" class="info-section">
-              <h2 class="section-title">Available Rooms</h2>
-              <div class="rooms-list">
-                <RoomCard 
-                  v-for="room in rooms" 
-                  :key="room.id" 
-                  :room="room" 
-                  @book="handleBooking"
-                />
-              </div>
-            </section>
-          </div>
-
-          <!-- Sticky Sidebar -->
-          <aside class="sidebar-column">
-            <AppCard class="booking-card" variant="elevated">
-              <h3 class="booking-title">Book your stay</h3>
-              <div class="price-wrap">
-                <span class="price-from">From</span>
-                <span class="price-val">€{{ minPrice }}</span>
-                <span class="price-unit">/night</span>
-              </div>
-              
-              <div class="booking-form">
-                <div class="form-group">
-                  <label>Check-in / Check-out</label>
-                  <input type="text" placeholder="Select dates" class="form-input" disabled />
-                </div>
-                <div class="form-group">
-                  <label>Guests</label>
-                  <select class="form-input" disabled>
-                    <option>2 Adults, 1 Room</option>
-                  </select>
-                </div>
-                <!-- Demo action implies redirect to room selection hash -->
-                <button class="book-btn" @click="scrollToRooms">See Availability</button>
-              </div>
-            </AppCard>
+      <!-- Main Layout -->
+      <div class="content-layout">
+        <main class="main-content">
+          <!-- Overview -->
+          <section class="content-section">
+            <h2 class="section-title">À propos de cet établissement</h2>
+            <p class="hotel-description">{{ hotel.description }}</p>
             
-            <div class="map-placeholder">
-              <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?w=400&q=80" alt="Map" />
-              <div class="map-overlay">
-                <i class="pi pi-map"></i> View on map
+            <h3 class="subsection-title">Équipements & Services</h3>
+            <div class="amenities-grid">
+              <div class="amenity-item" v-for="amenity in defaultAmenities" :key="amenity.icon">
+                <span class="material-symbols-outlined">{{ amenity.icon }}</span>
+                <span>{{ amenity.label }}</span>
               </div>
             </div>
-          </aside>
-        </div>
+          </section>
+
+          <!-- Rooms -->
+          <section class="content-section">
+            <h2 class="section-title" id="rooms">Chambres & Disponibilités</h2>
+            <div class="rooms-list">
+              <div v-for="room in rooms" :key="room.id" class="premium-room-card">
+                <div class="room-image">
+                  <img :src="room.image || 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=400&q=80'" alt="Chambre">
+                </div>
+                <div class="room-content">
+                  <div class="room-header">
+                    <h3>{{ room.type }}</h3>
+                    <div class="room-features">
+                      <span><span class="material-symbols-outlined">person</span>Jusqu'à {{ room.capacity }} pers.</span>
+                      <span><span class="material-symbols-outlined">king_bed</span>1 Lit King Size</span>
+                      <span><span class="material-symbols-outlined">aspect_ratio</span>32 m²</span>
+                    </div>
+                  </div>
+                  <div class="room-footer">
+                    <div class="price-block">
+                      <span class="price-val">{{ room.pricePerNight }}€</span>
+                      <span class="price-unit">/ nuit</span>
+                    </div>
+                    <button v-if="room.status === 'AVAILABLE'" class="book-btn-outline">Sélectionner</button>
+                    <button v-else class="book-btn-outline disabled">Indisponible</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Reviews -->
+          <section class="content-section no-border border-0">
+            <div class="reviews-header-advanced">
+              <div>
+                <h2 class="section-title m-0">Avis voyageurs</h2>
+                <p class="reviews-subtitle">Moyenne calculée sur 728 avis vérifiés</p>
+              </div>
+              <div class="global-rating-block">
+                <span class="rating-score">4.8</span>
+                <div class="rating-context">
+                  <div class="stars-gold"><span v-for="i in 5" class="material-symbols-outlined">star</span></div>
+                  <span>Excellent</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="reviews-grid">
+              <div class="review-card" v-for="i in 2" :key="i">
+                <div class="reviewer-prof">
+                  <div class="avatar-circle">JD</div>
+                  <div class="reviewer-meta">
+                    <strong>Jean Dupont</strong>
+                    <span>France • Séjour en Mars 2026</span>
+                  </div>
+                </div>
+                <div class="review-stars-small"><span v-for="s in 5" class="material-symbols-outlined">star</span></div>
+                <p class="review-body">Une expérience exceptionnelle du début à la fin. Le personnel est aux petits soins et les infrastructures sont sublimes. La vue depuis notre chambre sur la baie était à couper le souffle.</p>
+              </div>
+            </div>
+            
+            <button class="show-all-reviews">Lire les 728 avis</button>
+          </section>
+        </main>
+
+        <!-- Sticky Sidebar -->
+        <aside class="sidebar-wrapper">
+          <div class="sticky-booking-widget">
+            <div class="widget-header">
+              <span class="price-display">À partir de <strong>120€</strong> <span>/ nuit</span></span>
+              <div class="rating-small">
+                <span class="material-symbols-outlined">star</span> 4.8
+              </div>
+            </div>
+
+            <div class="booking-inputs">
+              <div class="date-picker-mock">
+                <div class="date-field border-right">
+                  <label>ARRIVÉE</label>
+                  <span>17 Avr. 2026</span>
+                </div>
+                <div class="date-field">
+                  <label>DÉPART</label>
+                  <span>20 Avr. 2026</span>
+                </div>
+              </div>
+              <div class="guest-picker-mock">
+                <label>VOYAGEURS</label>
+                <span>2 adultes, 0 enfant</span>
+                <span class="material-symbols-outlined expand-icon">expand_more</span>
+              </div>
+            </div>
+
+            <button class="primary-checkout-btn">Vérifier les disponibilités</button>
+            <p class="no-charge-text">Aucun montant ne vous sera débité pour le moment</p>
+
+            <div class="price-breakdown">
+              <div class="breakdown-row">
+                <span>120€ x 3 nuits</span>
+                <span>360€</span>
+              </div>
+              <div class="breakdown-row">
+                <span>Taxes de séjour</span>
+                <span>15€</span>
+              </div>
+              <div class="breakdown-row total">
+                <span>Total</span>
+                <span>375€</span>
+              </div>
+            </div>
+          </div>
+        </aside>
       </div>
     </template>
-
-    <AppEmptyState 
-      v-else 
-      icon="pi pi-exclamation-triangle" 
-      title="Hotel not found" 
-      description="The hotel you're looking for doesn't exist or has been removed."
-    >
-      <template #action>
-        <NuxtLink to="/hotels" class="app-btn">Back to Hotels</NuxtLink>
-      </template>
-    </AppEmptyState>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { useHotels } from '~/composables/useHotels'
 import { useRooms } from '~/composables/useRooms'
-import type { Hotel, Room } from '~/types/models'
+import type { Hotel } from '~/types/models'
 
 const route = useRoute()
-const router = useRouter()
 const { getById } = useHotels()
 const { rooms, fetchByHotel } = useRooms()
 
 const hotel = ref<Hotel | null>(null)
 const loading = ref(true)
 
-const minPrice = computed(() => {
-  if (rooms.value.length === 0) return 0
-  return Math.min(...rooms.value.map(r => r.pricePerNight))
-})
+const defaultAmenities = [
+  { icon: 'wifi', label: 'Wi-Fi gratuit très haut débit' },
+  { icon: 'pool', label: 'Piscine extérieure chauffée' },
+  { icon: 'fitness_center', label: 'Centre de remise en forme 24/7' },
+  { icon: 'local_bar', label: 'Lounge bar & Cocktails' },
+  { icon: 'restaurant', label: 'Restaurant Gastronomique' },
+  { icon: 'spa', label: 'Spa et centre de bien-être' }
+]
 
 onMounted(async () => {
   const id = Number(route.params.id)
@@ -139,72 +232,369 @@ onMounted(async () => {
   }
   loading.value = false
 })
-
-function scrollToRooms() {
-  document.getElementById('rooms')?.scrollIntoView({ behavior: 'smooth' })
-}
-
-function handleBooking(room: Room) {
-  // In a real app, go to checkout page or show booking modal
-  // For UI implementation, we'll just redirect to a checkout placeholder or show alert
-  alert(`Booking initiated for ${room.type} at ${hotel.value?.name}`)
-}
 </script>
 
 <style scoped>
-.hotel-detail { padding-bottom: var(--spacing-16); background: var(--color-bg-soft); }
+.hotel-detail {
+  background: #ffffff;
+  min-height: 100vh;
+  padding-bottom: 80px;
+  font-family: 'Inter', sans-serif;
+}
 
-.loading-state { text-align: center; padding: var(--spacing-16); color: var(--color-text-muted); font-size: var(--font-size-lg); }
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 60vh;
+  color: #015081;
+}
+
+.rotating { animation: spin 1s linear infinite; font-size: 40px; margin-bottom: 16px; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+/* Nav */
+.detail-nav {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 24px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.breadcrumbs a { color: #64748b; text-decoration: none; transition: color 0.2s; }
+.breadcrumbs a:hover { color: #015081; text-decoration: underline; }
+.breadcrumbs .active { color: #015081; font-weight: 600; }
+.separator { font-size: 16px; }
+
+.nav-actions { display: flex; gap: 16px; }
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+.action-btn:hover { background: #f1f5f9; }
+.action-btn .material-symbols-outlined { font-size: 18px; }
+
+/* Header */
+.detail-header {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.hotel-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 36px;
+  font-weight: 700;
+  color: #001d34;
+  margin: 0;
+}
+
+.stars { display: flex; gap: 2px; }
+.stars .material-symbols-outlined { font-size: 20px; color: #e2e8f0; font-variation-settings: 'FILL' 1; }
+.stars .active { color: #CDAF5D; }
+
+.location-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #475569;
+}
+.location-badge .material-symbols-outlined { font-size: 18px; color: #015081; }
+.map-link { font-weight: 600; color: #008F90; text-decoration: underline; margin-left: 8px; cursor: pointer; }
 
 /* Gallery */
-.gallery-header { padding: var(--spacing-4) var(--spacing-6); max-width: 1280px; margin: 0 auto; }
-.gallery-grid { display: grid; grid-template-columns: 2fr 1fr; gap: var(--spacing-2); height: 50vh; min-height: 400px; border-radius: var(--radius-xl); overflow: hidden; }
-.gallery-main img { width: 100%; height: 100%; object-fit: cover; }
-.gallery-side { display: grid; grid-template-rows: 1fr 1fr; gap: var(--spacing-2); }
-.gallery-side img { width: 100%; height: 100%; object-fit: cover; }
-@media (max-width: 768px) { .gallery-grid { grid-template-columns: 1fr; } .gallery-side { display: none; } }
+.advanced-gallery {
+  max-width: 1200px;
+  margin: 0 auto 40px;
+  padding: 0 24px;
+}
 
-/* Layout */
-.detail-container { max-width: 1280px; margin: 0 auto; padding: var(--spacing-8) var(--spacing-6); }
-.detail-layout { display: flex; flex-direction: column; gap: var(--spacing-8); }
-@media (min-width: 992px) { .detail-layout { flex-direction: row; } .main-column { flex: 1; } .sidebar-column { width: 340px; flex-shrink: 0; } }
+.gallery-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 12px;
+  border-radius: 16px;
+  overflow: hidden;
+  height: 480px;
+}
 
-/* Main Column */
-.hotel-header { padding-bottom: var(--spacing-6); border-bottom: 1px solid var(--color-border); margin-bottom: var(--spacing-6); }
-.hotel-badges { display: flex; align-items: center; gap: var(--spacing-4); margin-bottom: var(--spacing-3); }
-.hotel-title { font-family: var(--font-family-heading); font-size: var(--font-size-3xl); font-weight: 700; color: var(--color-text-primary); margin: 0 0 var(--spacing-2); }
-.hotel-location { font-size: var(--font-size-sm); color: var(--color-text-muted); display: flex; align-items: center; gap: var(--spacing-2); }
+.main-photo { height: 100%; }
+.main-photo img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; cursor: pointer; }
+.main-photo:hover img { transform: scale(1.02); }
 
-.info-section { margin-bottom: var(--spacing-8); }
-.section-title { font-family: var(--font-family-heading); font-size: var(--font-size-xl); font-weight: 600; margin: 0 0 var(--spacing-4); border-bottom: 1px solid var(--color-border); padding-bottom: var(--spacing-2); }
-.hotel-description { font-size: var(--font-size-base); color: var(--color-text-secondary); line-height: 1.7; }
+.side-photos {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 12px;
+}
 
-.amenities-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--spacing-4); }
-.amenity-item { display: flex; align-items: center; gap: var(--spacing-2); font-size: var(--font-size-sm); color: var(--color-text-primary); }
-.amenity-item i { color: var(--color-success); font-size: 1.2rem; }
+.photo-wrap { overflow: hidden; position: relative; cursor: pointer; height: 100%; border-radius: 8px;}
+.photo-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.photo-wrap:hover img { transform: scale(1.02); }
 
-.rooms-list { display: flex; flex-direction: column; gap: var(--spacing-6); }
+.relative { position: relative; }
 
-/* Sidebar */
-.sidebar-column { position: sticky; top: 100px; }
-.booking-card { padding: var(--spacing-6); margin-bottom: var(--spacing-6); }
-.booking-title { font-size: var(--font-size-lg); font-weight: 600; margin: 0 0 var(--spacing-4); }
-.price-wrap { display: flex; align-items: baseline; gap: 4px; margin-bottom: var(--spacing-6); padding-bottom: var(--spacing-4); border-bottom: 1px solid var(--color-border); }
-.price-from { font-size: var(--font-size-sm); color: var(--color-text-muted); }
-.price-val { font-size: var(--font-size-2xl); font-weight: 700; color: var(--color-primary-600); font-family: var(--font-family-heading); }
-.price-unit { font-size: var(--font-size-sm); color: var(--color-text-muted); }
+.more-photos-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-weight: 700;
+  font-size: 16px;
+  gap: 8px;
+  transition: background 0.3s;
+}
+.more-photos-overlay:hover { background: rgba(0,0,0,0.5); }
+.more-photos-overlay .material-symbols-outlined { font-size: 32px; }
 
-.form-group { margin-bottom: var(--spacing-4); }
-.form-group label { display: block; font-size: var(--font-size-xs); font-weight: 600; color: var(--color-text-muted); margin-bottom: var(--spacing-1); text-transform: uppercase; }
-.form-input { width: 100%; padding: var(--spacing-3); border: 1px solid var(--color-border); border-radius: var(--radius-md); font-size: var(--font-size-sm); background: var(--color-bg-soft); }
+.fallback-gallery {
+  height: 480px;
+  background: #f8fafc;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #cbd5e1;
+}
+.fallback-gallery img { width: 100%; height: 100%; object-fit: cover; }
+.fallback-gallery .material-symbols-outlined { font-size: 64px; }
 
-.book-btn { width: 100%; padding: var(--spacing-3); background: var(--color-accent-500); color: white; border: none; border-radius: var(--radius-md); font-size: var(--font-size-base); font-weight: 600; cursor: pointer; transition: background 0.2s; margin-top: var(--spacing-2); }
-.book-btn:hover { background: var(--color-accent-600); }
+/* Content Layout */
+.content-layout {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 48px;
+}
 
-.map-placeholder { position: relative; height: 160px; border-radius: var(--radius-lg); overflow: hidden; cursor: pointer; }
-.map-placeholder img { width: 100%; height: 100%; object-fit: cover; }
-.map-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; gap: var(--spacing-2); transition: background 0.2s; }
-.map-placeholder:hover .map-overlay { background: rgba(0,0,0,0.5); }
+@media (max-width: 1024px) {
+  .content-layout { grid-template-columns: 1fr; }
+}
 
-.app-btn { display: inline-block; padding: var(--spacing-2) var(--spacing-4); background: var(--color-primary-600); color: white; text-decoration: none; border-radius: var(--radius-md); font-weight: 500; }
+.content-section {
+  padding-bottom: 24px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  color: #001d34;
+  margin-bottom: 16px;
+  font-weight: 700;
+}
+
+.hotel-description {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #334155;
+  margin-bottom: 24px;
+}
+
+.subsection-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #015081;
+  margin-bottom: 20px;
+}
+
+.amenities-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.amenity-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  color: #334155;
+}
+.amenity-item .material-symbols-outlined { color: #008F90; font-size: 24px; }
+
+/* Rooms List */
+.premium-room-card {
+  display: flex;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  background: white;
+}
+.premium-room-card:hover {
+  box-shadow: 0 4px 12px rgba(1, 80, 129, 0.08); /* Reduced hover intensity */
+  border-color: #cbd5e1;
+}
+
+.room-image { width: 220px; flex-shrink: 0; }
+.room-image img { width: 100%; height: 100%; object-fit: cover; }
+
+.room-content {
+  padding: 16px 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.room-header h3 { font-size: 18px; color: #015081; margin: 0 0 12px 0; font-weight: 700; }
+.room-features { display: flex; gap: 16px; flex-wrap: wrap; }
+.room-features span { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #475569; }
+.room-features .material-symbols-outlined { font-size: 18px; color: #94a3b8; }
+
+.room-footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 24px; }
+.price-val { font-size: 24px; font-weight: 800; color: #008F90; }
+.price-unit { font-size: 13px; color: #64748b; margin-left: 4px; }
+
+.book-btn-outline {
+  padding: 10px 24px;
+  border: 2px solid #008F90;
+  background: white;
+  color: #008F90;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.book-btn-outline:hover { background: #008F90; color: white; }
+.book-btn-outline.disabled { border-color: #cbd5e1; color: #94a3b8; cursor: not-allowed; }
+.book-btn-outline.disabled:hover { background: white; color: #94a3b8; }
+
+/* Reviews & Ratings (Notes) */
+.reviews-header-advanced {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.reviews-subtitle { color: #64748b; font-size: 13px; margin-top: 4px; }
+.m-0 { margin: 0; }
+
+.global-rating-block { display: flex; align-items: center; gap: 12px; background: #fdfbf7; padding: 12px 16px; border-radius: 12px; border: 1px solid #f6ecd6; }
+.rating-score { font-size: 36px; font-weight: 800; color: #001d34; line-height: 1; }
+.stars-gold { display: flex; margin-bottom: 2px; }
+.stars-gold .material-symbols-outlined { color: #CDAF5D; font-variation-settings: 'FILL' 1; font-size: 16px; }
+.rating-context { display: flex; flex-direction: column; }
+.rating-context span { font-weight: 700; font-size: 13px; color: #334155; }
+
+.reviews-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.review-card { padding: 16px; background: #f8fafc; border-radius: 10px; border: 1px solid #f1f5f9; transition: box-shadow 0.2s ease; }
+.review-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+.reviewer-prof { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.avatar-circle { width: 36px; height: 36px; background: #015081; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;}
+.reviewer-meta strong { display: block; font-size: 14px; color: #001d34; }
+.reviewer-meta span { font-size: 12px; color: #64748b; }
+.review-stars-small { margin-bottom: 8px; }
+.review-stars-small .material-symbols-outlined { font-size: 14px; color: #CDAF5D; font-variation-settings: 'FILL' 1; }
+.review-body { font-size: 13px; line-height: 1.5; color: #334155; margin: 0; }
+
+.show-all-reviews {
+  padding: 12px 24px;
+  background: white;
+  border: 1px solid #001d34;
+  color: #001d34;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+.show-all-reviews:hover { background: #f1f5f9; }
+
+/* Sticky Sidebar Widget */
+.sidebar-wrapper { position: relative; }
+.sticky-booking-widget {
+  position: sticky;
+  top: 32px;
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 20px 40px rgba(1, 80, 129, 0.08);
+  border: 1px solid #e2e8f0;
+}
+
+.widget-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.price-display { font-size: 14px; color: #334155; }
+.price-display strong { font-size: 24px; font-weight: 800; color: #001d34; margin: 0 2px; }
+.rating-small { display: flex; align-items: center; gap: 4px; font-weight: 700; font-size: 14px; }
+.rating-small .material-symbols-outlined { font-size: 16px; color: #CDAF5D; font-variation-settings: 'FILL' 1; }
+
+.booking-inputs { border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
+.date-picker-mock { display: flex; border-bottom: 1px solid #cbd5e1; }
+.date-field { flex: 1; padding: 12px; cursor: pointer; transition: background 0.2s; }
+.date-field:hover { background: #f8fafc; }
+.border-right { border-right: 1px solid #cbd5e1; }
+.date-field label { display: block; font-size: 10px; font-weight: 800; color: #015081; margin-bottom: 4px; cursor: pointer;}
+.date-field span { font-size: 14px; color: #334155; font-weight: 500; }
+
+.guest-picker-mock { padding: 12px; display: flex; flex-direction: column; position: relative; cursor: pointer; transition: background 0.2s; }
+.guest-picker-mock:hover { background: #f8fafc; }
+.guest-picker-mock label { font-size: 10px; font-weight: 800; color: #015081; margin-bottom: 4px; cursor: pointer;}
+.guest-picker-mock span { font-size: 14px; color: #334155; font-weight: 500; }
+.expand-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+
+.primary-checkout-btn {
+  width: 100%;
+  padding: 14px;
+  background: #008F90;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.primary-checkout-btn:hover { opacity: 0.9; }
+
+.no-charge-text { text-align: center; font-size: 12px; color: #64748b; margin: 16px 0; }
+
+.price-breakdown { padding-top: 16px; border-top: 1px solid #e2e8f0; }
+.breakdown-row { display: flex; justify-content: space-between; font-size: 14px; color: #475569; margin-bottom: 12px; }
+.breakdown-row.total { margin-top: 16px; padding-top: 16px; border-top: 1px dashed #cbd5e1; font-weight: 800; color: #001d34; font-size: 16px; }
+
 </style>
