@@ -1,30 +1,68 @@
 <template>
-  <div>
+  <div class="landing-page">
     <Head>
       <title>VoyageHub — Premium Hotel Booking</title>
       <meta name="description" content="Discover exceptional hotel stays across France. Book your perfect luxury getaway with VoyageHub." />
     </Head>
 
-    <!-- Hero Section -->
-    <section class="hero">
-      <div class="hero-overlay"></div>
-      <div class="hero-content">
-        <h1 class="hero-title">
-          Discover <span class="hero-accent">Extraordinary</span> Stays
-        </h1>
-        <p class="hero-subtitle">Curated luxury hotels across France. Unforgettable experiences, one booking away.</p>
-        <div class="hero-actions">
-          <NuxtLink to="/hotels" class="hero-btn hero-btn--primary">Explore Hotels</NuxtLink>
-          <NuxtLink to="/offers" class="hero-btn hero-btn--outline">View Offers</NuxtLink>
+    <!-- Hero Section: Editorial Asymmetry -->
+    <section class="hero-premium">
+      <div class="hero-layout">
+        <div class="hero-text-side">
+          <p class="hero-label">Curated Hospitality</p>
+          <h1 class="hero-title">
+            The New Era of <span class="text-primary">Exceptional</span> Stays
+          </h1>
+          <p class="hero-lead">
+            Experience France through a lens of architectural authority and personalized luxury. 
+            From the bustling streets of Paris to the serene shores of Nice.
+          </p>
+          <div class="hero-cta-group">
+            <NuxtLink to="/hotels" class="btn-primary">Explore Collection</NuxtLink>
+            <NuxtLink to="/offers" class="btn-ghost">Seasonal Offers</NuxtLink>
+          </div>
+        </div>
+        <div class="hero-image-side">
+          <div class="image-nest">
+            <img src="/images/hero.png" alt="Luxury Hotel" class="main-hero-img" />
+            <div class="floating-badge">
+              <span class="badge-num">24/7</span>
+              <span class="badge-txt">Concierge Support</span>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- Featured Hotels -->
-    <section class="section">
+    <!-- Top Destinations: Staggered Grid -->
+    <section class="destinations-section">
+      <div class="section-container">
+        <div class="section-header-left">
+          <p class="section-tag">Explore France</p>
+          <h2 class="section-title-large">Top Destinations</h2>
+        </div>
+        
+        <div class="destinations-grid">
+          <div v-for="dest in destinations" :key="dest.name" class="dest-card" :class="dest.size">
+            <div class="dest-image-wrap">
+              <img :src="dest.image" :alt="dest.name" />
+              <div class="dest-overlay">
+                <div class="dest-content">
+                  <h3 class="dest-name">{{ dest.name }}</h3>
+                  <p class="dest-count">{{ dest.hotels }} Collections</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Featured Hotels: Tonal Background -->
+    <section class="section-featured">
       <div class="section-container">
         <div class="section-header">
-          <h2 class="section-title">Featured Hotels</h2>
+          <h2 class="section-title">Featured Collections</h2>
           <p class="section-subtitle">Handpicked 5-star destinations for an exceptional experience</p>
         </div>
         <div class="hotels-grid">
@@ -37,14 +75,29 @@
         </div>
         <div class="section-action">
           <NuxtLink to="/hotels" class="view-all-link">
-            View all hotels <i class="pi pi-arrow-right"></i>
+            Explore All Hotels <span class="material-symbols-outlined">arrow_forward</span>
           </NuxtLink>
         </div>
       </div>
     </section>
 
+    <!-- Why VoyageHub: Benefits -->
+    <section class="benefits-section">
+      <div class="section-container">
+        <div class="benefits-grid">
+          <div v-for="benefit in benefits" :key="benefit.title" class="benefit-item">
+            <div class="benefit-icon-wrap">
+              <span class="material-symbols-outlined">{{ benefit.icon }}</span>
+            </div>
+            <h4 class="benefit-title">{{ benefit.title }}</h4>
+            <p class="benefit-text">{{ benefit.text }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Special Offers -->
-    <section class="section section--alt">
+    <section class="section-offers">
       <div class="section-container">
         <div class="section-header">
           <h2 class="section-title">Special Offers</h2>
@@ -52,30 +105,6 @@
         </div>
         <div class="offers-grid">
           <OfferCard v-for="offer in activeOffers" :key="offer.id" :offer="offer" />
-        </div>
-      </div>
-    </section>
-
-    <!-- Stats Bar -->
-    <section class="stats-bar">
-      <div class="section-container">
-        <div class="stats-grid">
-          <div class="stat-item">
-            <span class="stat-number">6</span>
-            <span class="stat-label">Premium Hotels</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-number">24</span>
-            <span class="stat-label">Luxury Rooms</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-number">5</span>
-            <span class="stat-label">French Cities</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-number">4.8</span>
-            <span class="stat-label">Average Rating</span>
-          </div>
         </div>
       </div>
     </section>
@@ -92,51 +121,231 @@ const { featured, fetchFeatured } = useHotels()
 const { offers: activeOffers, fetchActive } = useOffers()
 const { rooms, fetchAll: fetchAllRooms } = useRooms()
 
+const destinations = [
+  { name: 'Paris', image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34', hotels: 12, size: 'large' },
+  { name: 'Nice', image: 'https://images.unsplash.com/photo-1533104816931-20fa691ff6ca', hotels: 8, size: 'small' },
+  { name: 'Lyon', image: 'https://images.unsplash.com/photo-1509600110300-21b9d5fedeb7', hotels: 5, size: 'small' },
+  { name: 'Bordeaux', image: 'https://images.unsplash.com/photo-1563214815-38f382b6831d', hotels: 7, size: 'medium' }
+]
+
+const benefits = [
+  { icon: 'hotel', title: 'Handpicked Hotels', text: 'Every property in our collection is personally vetted for architectural merit and service excellence.' },
+  { icon: 'support_agent', title: 'Concierge Service', text: 'Our travel experts are available 24/7 to handle your requests, from dinner reservations to private transfers.' },
+  { icon: 'verified', title: 'Best Rate Guarantee', text: 'Book with confidence knowing you are receiving the most competitive rates available online.' }
+]
+
+onMounted(async () => {
+  await fetchFeatured()
+  await fetchActive()
+  await fetchAllRooms()
+})
+
 function getMinPrice(hotelId: number): number {
   const hotelRooms = rooms.value.filter(r => r.hotelId === hotelId)
   if (hotelRooms.length === 0) return 120
   return Math.min(...hotelRooms.map(r => r.pricePerNight))
 }
-
-onMounted(async () => {
-  await Promise.all([fetchFeatured(), fetchActive(), fetchAllRooms()])
-})
 </script>
 
 <style scoped>
-/* Hero */
-.hero {
-  position: relative;
-  height: 75vh;
-  min-height: 500px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: url('https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1600') center/cover no-repeat;
+.landing-page {
+  background: white;
 }
-.hero-overlay {
+
+/* Hero Premium */
+.hero-premium {
+  padding: 80px 0;
+  background: linear-gradient(to bottom, #f8fafc 0%, white 100%);
+}
+
+.hero-layout {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 80px;
+  padding: 0 40px;
+}
+
+.hero-label {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--color-primary-600);
+  margin-bottom: 24px;
+}
+
+.hero-title {
+  font-size: 64px;
+  line-height: 1.1;
+  font-weight: 800;
+  margin-bottom: 32px;
+  letter-spacing: -0.03em;
+  color: #1e293b;
+}
+
+.hero-lead {
+  font-size: 20px;
+  line-height: 1.6;
+  color: #64748b;
+  margin-bottom: 48px;
+  max-width: 540px;
+}
+
+.hero-cta-group {
+  display: flex;
+  gap: 20px;
+}
+
+.btn-primary {
+  background: var(--color-primary-600);
+  color: white;
+  padding: 18px 36px;
+  border-radius: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+}
+
+.btn-primary:hover {
+  background: var(--color-primary-700);
+  transform: translateY(-2px);
+}
+
+.btn-ghost {
+  color: #1e293b;
+  padding: 18px 36px;
+  border-radius: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.btn-ghost:hover {
+  background: #f1f5f9;
+}
+
+.image-nest {
+  position: relative;
+}
+
+.main-hero-img {
+  width: 100%;
+  height: 600px;
+  object-fit: cover;
+  border-radius: 40px;
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.1);
+}
+
+.floating-badge {
+  position: absolute;
+  bottom: 40px;
+  left: -40px;
+  background: white;
+  padding: 24px;
+  border-radius: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.badge-num {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--color-primary-600);
+}
+
+.badge-txt {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+/* Destinations Section */
+.destinations-section {
+  padding: 120px 0;
+}
+
+.section-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+.section-header-left {
+  margin-bottom: 60px;
+}
+
+.section-tag {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #64748b;
+  margin-bottom: 12px;
+}
+
+.section-title-large {
+  font-size: 40px;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.destinations-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: 400px;
+  gap: 24px;
+}
+
+.dest-card {
+  border-radius: 24px;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+}
+
+.dest-card.large { grid-column: span 2; }
+
+.dest-image-wrap {
+  width: 100%;
+  height: 100%;
+}
+
+.dest-image-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.dest-card:hover img {
+  transform: scale(1.1);
+}
+
+.dest-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.75) 0%, rgba(15, 23, 42, 0.45) 100%);
+  background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%);
+  display: flex;
+  align-items: flex-end;
+  padding: 32px;
 }
-.hero-content {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  max-width: 680px;
-  padding: var(--spacing-6);
-}
-.hero-title {
-  font-family: var(--font-family-heading);
-  font-size: clamp(2rem, 5vw, 3.5rem);
-  font-weight: 700;
+
+.dest-name {
   color: white;
-  line-height: 1.15;
-  margin-bottom: var(--spacing-4);
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 4px;
 }
-.hero-accent { color: var(--color-accent-400); }
-.hero-subtitle {
-  font-size: var(--font-size-lg);
+
+.dest-count {
   color: rgba(255, 255, 255, 0.8);
   margin-bottom: var(--spacing-8);
   line-height: 1.6;
