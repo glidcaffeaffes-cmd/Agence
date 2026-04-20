@@ -31,14 +31,14 @@
           <div class="checkbox-group">
             <div v-for="star in [5, 4, 3]" :key="star" class="checkbox-field">
               <Checkbox v-model="selectedStars" :inputId="`star-${star}`" :value="star" />
-              <label :for="`star-${star}`" class="checkbox-label">
-                {{ star }} <span class="material-symbols-outlined star-icon-small">star</span>
+              <label :for="`star-${star}`" class="checkbox-label checkbox-label--rating">
+                <Rating :modelValue="star" readonly :cancel="false" class="filter-rating" />
               </label>
             </div>
           </div>
         </div>
 
-        <div class="filter-section">
+        <div class="filter-section filter-section--destination">
           <label class="filter-label">Destination</label>
           <Select 
             v-model="selectedCity" 
@@ -237,6 +237,7 @@ onMounted(async () => {
   height: fit-content;
   position: sticky;
   top: 24px;
+  overflow: visible;
 }
 
 .sidebar-header {
@@ -255,6 +256,11 @@ onMounted(async () => {
 
 .filter-section {
   margin-bottom: 28px;
+  position: relative;
+}
+
+.filter-section--destination {
+  z-index: 20;
 }
 
 .filter-label {
@@ -300,10 +306,8 @@ onMounted(async () => {
   cursor: pointer;
 }
 
-.star-icon-small {
-  color: #CDAF5D;
-  font-size: 14px;
-  font-variation-settings: 'FILL' 1;
+.checkbox-label--rating {
+  gap: 0;
 }
 
 /* Removed Toggle Switch CSS */
@@ -366,7 +370,10 @@ onMounted(async () => {
   border: 2px solid #008F90 !important;
   width: 16px;
   height: 16px;
-  margin-top: -6px;
+  top: 50%;
+  margin-left: 0;
+  margin-top: 0;
+  transform: translate(-50%, -50%);
   border-radius: 50%;
   cursor: pointer;
   box-shadow: 0 0 0 2px white;
@@ -376,8 +383,8 @@ onMounted(async () => {
   border: 1.5px solid #cbd5e1;
   border-radius: 4px;
   background: white;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   transition: all 0.2s;
 }
 
@@ -387,9 +394,32 @@ onMounted(async () => {
 }
 
 :deep(.p-checkbox-icon) {
-  width: 12px !important;
-  height: 12px !important;
+  width: 10px !important;
+  height: 10px !important;
   color: white !important;
+}
+
+:deep(.filter-rating.p-rating) {
+  gap: 10px;
+}
+
+:deep(.filter-rating .p-rating-option) {
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:deep(.filter-rating .p-rating-icon) {
+  color: #94a3b8;
+  width: 16px !important;
+  height: 16px !important;
+  display: block;
+}
+
+:deep(.filter-rating .p-rating-on-icon) {
+  color: #B8860B;
 }
 
 :deep(.full-width-select.p-select) {
@@ -406,6 +436,20 @@ onMounted(async () => {
   font-weight: 500;
 }
 
+:deep(.destination-dropdown.p-select) {
+  position: relative;
+  z-index: 20;
+}
+
+:deep(.destination-dropdown .p-select-label) {
+  padding: 8px 12px;
+}
+
+:deep(.destination-dropdown .p-select-dropdown) {
+  width: 36px;
+  color: #64748b;
+}
+
 :deep(.p-select-overlay) {
   background: white;
   border: 1px solid #e2e8f0;
@@ -414,6 +458,16 @@ onMounted(async () => {
   margin-top: 8px;
   overflow: hidden;
   z-index: 1000;
+}
+
+:deep(.destination-dropdown .p-select-overlay) {
+  top: 100% !important;
+  left: 0 !important;
+  min-width: 100%;
+  margin-top: 0;
+  border-radius: 8px;
+  box-shadow: 0 16px 30px rgba(15, 23, 42, 0.12);
+  z-index: 1100;
 }
 
 :deep(.p-select-list) {
@@ -495,6 +549,8 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 8px;
+  position: relative;
+  z-index: 20;
 }
 
 .sort-label { 
@@ -526,6 +582,16 @@ onMounted(async () => {
 :deep(.sort-select-small .p-select-dropdown) {
   width: 32px;
   color: #64748b;
+}
+
+:deep(.sort-select-small .p-select-overlay) {
+  top: 100% !important;
+  left: 0 !important;
+  min-width: 100%;
+  margin-top: 0;
+  border-radius: 8px;
+  box-shadow: 0 16px 30px rgba(15, 23, 42, 0.12);
+  z-index: 1100;
 }
 
 .results-info {
@@ -576,9 +642,9 @@ onMounted(async () => {
 :deep(a), 
 :deep(.p-slider-handle), 
 :deep(.p-checkbox-box), 
+:deep(.p-rating-option), 
 :deep(.p-select), 
 :deep(.p-select-item), 
-:deep(.checkbox-label),
 .reset-btn,
 .apply-btn,
 .hotel-card,
