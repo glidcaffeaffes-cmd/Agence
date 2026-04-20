@@ -5,7 +5,7 @@
       <div class="hotel-card__image-shade"></div>
 
       <div class="hotel-card__image-top">
-        <span class="hotel-card__chip">{{ hotel.stars }}-star stay</span>
+        <span class="hotel-card__chip">{{ hotel.city }}</span>
         <button class="hotel-card__favorite" @click.stop="toggleFavorite" aria-label="Toggle favorite">
           <span class="material-symbols-outlined" :class="{ filled: isFavorite }">favorite</span>
         </button>
@@ -13,33 +13,30 @@
 
       <div class="hotel-card__image-bottom">
         <h3 class="hotel-card__name">{{ hotel.name }}</h3>
-        <div class="hotel-card__location">
-          <span class="material-symbols-outlined">location_on</span>
-          <span>{{ hotel.city }}, {{ hotel.country }}</span>
-        </div>
       </div>
     </div>
 
     <div class="hotel-card__body">
-      <div class="hotel-card__rating-row">
+      <div class="hotel-card__meta">
+        <div class="hotel-card__location">
+          <span class="material-symbols-outlined">location_on</span>
+          <span>{{ hotel.city }}, {{ hotel.country }}</span>
+        </div>
         <div class="hotel-card__rating">
           <span v-for="i in 5" :key="i" class="material-symbols-outlined star-icon" :class="{ active: i <= hotel.stars }">star</span>
         </div>
-        <span class="hotel-card__rating-text">Refined hospitality collection</span>
       </div>
-
-      <p class="hotel-card__description">{{ truncatedDesc }}</p>
 
       <div class="hotel-card__footer">
         <div class="hotel-card__price-info">
           <span class="price-label">From</span>
-          <div class="price-value-wrap">
-            <span class="price-amount">{{ minPrice }}</span>
-            <span class="price-unit">EUR / night</span>
+          <div class="price-inline">
+            <span class="price-amount">{{ minPrice }}€</span>
+            <span class="price-unit">/ night</span>
           </div>
         </div>
         <button class="hotel-card__btn-primary" @click.stop="reserveHotel">
-          View Stay
+          View
         </button>
       </div>
     </div>
@@ -47,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import type { Hotel } from '~/types/models'
 
 const props = defineProps<{ hotel: Hotel; minPrice?: number }>()
@@ -60,11 +57,6 @@ const toggleFavorite = () => {
   isFavorite.value = !isFavorite.value
 }
 
-const truncatedDesc = computed(() => {
-  const description = props.hotel.description || ''
-  return description.length > 92 ? `${description.substring(0, 92)}...` : description
-})
-
 const reserveHotel = () => {
   navigateTo(`/hotels/${props.hotel.id}`)
 }
@@ -73,7 +65,7 @@ const reserveHotel = () => {
 <style scoped>
 .hotel-card {
   background: #ffffff;
-  border-radius: 24px;
+  border-radius: 18px;
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
@@ -85,14 +77,14 @@ const reserveHotel = () => {
 }
 
 .hotel-card:hover {
-  transform: translateY(-6px);
+  transform: translateY(-4px);
   border-color: rgba(188, 201, 200, 0.9);
-  box-shadow: 0 22px 44px rgba(15, 23, 42, 0.1);
+  box-shadow: 0 18px 34px rgba(15, 23, 42, 0.1);
 }
 
 .hotel-card__image-container {
   position: relative;
-  height: 236px;
+  height: 182px;
   overflow: hidden;
 }
 
@@ -111,35 +103,35 @@ const reserveHotel = () => {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(15, 23, 42, 0.06) 0%, rgba(15, 23, 42, 0.04) 28%, rgba(15, 23, 42, 0.62) 100%);
+    linear-gradient(180deg, rgba(15, 23, 42, 0.05) 0%, rgba(15, 23, 42, 0.02) 36%, rgba(15, 23, 42, 0.68) 100%);
 }
 
 .hotel-card__image-top,
 .hotel-card__image-bottom {
   position: absolute;
-  left: 18px;
-  right: 18px;
+  left: 14px;
+  right: 14px;
   z-index: 2;
 }
 
 .hotel-card__image-top {
-  top: 16px;
+  top: 14px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .hotel-card__image-bottom {
-  bottom: 18px;
+  bottom: 14px;
 }
 
 .hotel-card__chip {
   display: inline-flex;
   align-items: center;
-  padding: 7px 11px;
+  padding: 6px 10px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.18);
   border: 1px solid rgba(255, 255, 255, 0.18);
   backdrop-filter: blur(12px);
   color: #ffffff;
@@ -150,8 +142,8 @@ const reserveHotel = () => {
 }
 
 .hotel-card__favorite {
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.94);
   border: 1px solid rgba(255, 255, 255, 0.94);
@@ -180,49 +172,49 @@ const reserveHotel = () => {
 }
 
 .hotel-card__name {
-  margin: 0 0 8px;
+  margin: 0;
   color: #ffffff;
-  font-size: 22px;
-  line-height: 1.08;
+  font-size: 21px;
+  line-height: 1.1;
   font-weight: 800;
   letter-spacing: -0.025em;
 }
 
 .hotel-card__location {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 6px;
-  color: rgba(255, 255, 255, 0.9);
+  color: #64748b;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .hotel-card__location .material-symbols-outlined {
-  font-size: 16px;
+  font-size: 15px;
 }
 
 .hotel-card__body {
-  padding: 18px 18px 16px;
+  padding: 14px 14px 14px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
   flex: 1;
 }
 
-.hotel-card__rating-row {
+.hotel-card__meta {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
 }
 
 .hotel-card__rating {
   display: flex;
-  gap: 2px;
+  gap: 1px;
 }
 
 .star-icon {
-  font-size: 14px;
+  font-size: 15px;
   color: #d8e1e8;
   font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 20;
 }
@@ -231,29 +223,14 @@ const reserveHotel = () => {
   color: #cdaf5d;
 }
 
-.hotel-card__rating-text {
-  color: #64748b;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.hotel-card__description {
-  margin: 0;
-  color: #475569;
-  font-size: 13px;
-  line-height: 1.65;
-  flex: 1;
-}
-
 .hotel-card__footer {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 14px;
-  padding-top: 14px;
+  gap: 12px;
+  padding-top: 12px;
   border-top: 1px solid #eef2f6;
+  margin-top: auto;
 }
 
 .hotel-card__price-info {
@@ -270,14 +247,14 @@ const reserveHotel = () => {
   text-transform: uppercase;
 }
 
-.price-value-wrap {
+.price-inline {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: baseline;
+  gap: 6px;
 }
 
 .price-amount {
-  font-size: 26px;
+  font-size: 24px;
   line-height: 1;
   font-weight: 800;
   color: #0f172a;
@@ -287,16 +264,16 @@ const reserveHotel = () => {
 .price-unit {
   font-size: 12px;
   color: #64748b;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .hotel-card__btn-primary {
-  padding: 11px 16px;
+  padding: 10px 14px;
   background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-600));
   color: white;
   border: none;
-  border-radius: 14px;
-  font-size: 13px;
+  border-radius: 12px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.01em;
   cursor: pointer;
@@ -312,15 +289,15 @@ const reserveHotel = () => {
 
 @media (max-width: 768px) {
   .hotel-card__image-container {
-    height: 220px;
+    height: 170px;
   }
 
   .hotel-card__name {
-    font-size: 20px;
+    font-size: 18px;
   }
 
   .price-amount {
-    font-size: 24px;
+    font-size: 22px;
   }
 }
 </style>

@@ -144,7 +144,7 @@
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(15, 23, 42, 0.06) 0%, rgba(15, 23, 42, 0.12) 36%, rgba(15, 23, 42, 0.64) 100%),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.08) 0%, rgba(15, 23, 42, 0.18) 34%, rgba(15, 23, 42, 0.78) 100%),
     linear-gradient(140deg, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0.02) 38%, rgba(255, 255, 255, 0) 55%);
 }
 
@@ -178,6 +178,10 @@
   line-height: 1.08;
   font-weight: 800;
   letter-spacing: -0.03em;
+  color: #f4e7cf;
+  text-shadow:
+    0 4px 14px rgba(15, 23, 42, 0.42),
+    0 1px 0 rgba(15, 23, 42, 0.3);
 }
 
 .photo-plane__caption p {
@@ -186,6 +190,7 @@
   color: rgba(255, 255, 255, 0.88);
   font-size: 13px;
   line-height: 1.5;
+  text-shadow: 0 4px 14px rgba(15, 23, 42, 0.4);
 }
 
 .hotel-model {
