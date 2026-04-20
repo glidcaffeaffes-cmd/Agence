@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex bg-surface">
+  <div class="min-h-[calc(100dvh-61px)] flex bg-surface overflow-hidden">
     <Head>
       <title>Create Account — VoyageHub</title>
       <meta name="description" content="Create your VoyageHub account and start discovering exceptional hotel stays across France." />
@@ -21,27 +21,27 @@
     </div>
 
     <!-- Left Side: Auth Form -->
-    <div class="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-10 lg:p-16 relative">
+    <div class="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-8 lg:p-10 relative">
       <!-- Mobile Brand Header -->
       <div class="absolute top-8 left-8 flex lg:hidden items-center gap-2">
         <span class="material-symbols-outlined text-2xl text-primary">travel_explore</span>
         <span class="font-bold text-xl text-secondary-container">VoyageHub</span>
       </div>
 
-      <div class="w-full max-w-md space-y-5">
+      <div class="w-full max-w-md space-y-5 lg:space-y-4">
         <div>
           <h2 class="text-3xl font-bold text-on-surface mb-2 tracking-tight">Create your account</h2>
           <p class="text-on-surface-variant text-sm">Join thousands of travelers discovering France's best stays.</p>
         </div>
 
-        <form @submit.prevent="handleRegister" novalidate class="space-y-3">
+        <form @submit.prevent="handleRegister" novalidate class="space-y-3 lg:space-y-2.5">
           <!-- Error Alert -->
           <div v-if="error" class="flex items-center gap-3 bg-error-container/30 border-l-4 border-error text-on-error-container p-4 rounded-r-lg text-sm font-medium">
             <span class="material-symbols-outlined text-error">error</span>
             {{ error }}
           </div>
 
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-2 gap-4 lg:gap-3">
             <div class="space-y-2">
               <label class="block text-sm font-semibold text-on-surface" for="firstName">First name <span class="text-error">*</span></label>
               <div class="relative">
@@ -93,22 +93,55 @@
           <div class="space-y-2">
             <label class="block text-sm font-semibold text-on-surface" for="password">Password <span class="text-error">*</span></label>
             <div class="relative">
-              <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors" :class="submitted && (!password || password.length < 8) ? 'text-error' : 'text-outline'">lock</span>
+              <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors" :class="submitted && !isPasswordValid ? 'text-error' : 'text-outline'">lock</span>
               <input
                 id="password"
                 v-model="password"
                 :type="showPassword ? 'text' : 'password'"
                 placeholder="Min. 8 characters"
                 autocomplete="new-password"
+                @focus="passwordFocused = true"
+                @blur="passwordFocused = false"
                 class="w-full pl-11 pr-12 py-2 text-sm bg-white border rounded-xl text-on-surface placeholder:text-outline/60 focus:ring-2 focus:ring-primary/20 transition-all outline-none"
-                :class="submitted && (!password || password.length < 8) ? 'border-error focus:border-error' : 'border-outline-variant/50 focus:border-primary'"
+                :class="submitted && !isPasswordValid ? 'border-error focus:border-error' : 'border-outline-variant/50 focus:border-primary'"
               />
               <button type="button" @click="showPassword = !showPassword" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-outline hover:text-primary transition-colors flex items-center justify-center">
                 <span class="material-symbols-outlined text-xl">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
               </button>
             </div>
+            <div v-if="showPasswordHelper" class="rounded-xl border border-outline-variant/30 bg-surface-container-low px-3 py-2.5">
+              <div class="flex items-center justify-between gap-3">
+                <p class="text-sm font-semibold text-on-surface">Choose a strong password</p>
+                <span class="text-xs font-semibold" :class="passwordStrength.textClass">{{ passwordStrength.label }}</span>
+              </div>
+              <div class="mt-2 h-2 overflow-hidden rounded-full bg-outline-variant/30">
+                <div
+                  class="h-full rounded-full transition-all duration-300"
+                  :class="passwordStrength.barClass"
+                  :style="{ width: `${passwordStrength.percent}%` }"
+                ></div>
+              </div>
+              <div class="mt-3 grid grid-cols-1 gap-x-4 gap-y-1.5 text-xs sm:grid-cols-2">
+                <div class="flex items-center gap-2" :class="hasLowercase ? 'text-primary' : 'text-on-surface-variant'">
+                  <span class="material-symbols-outlined text-sm">{{ hasLowercase ? 'check_circle' : 'radio_button_unchecked' }}</span>
+                  <span>At least one lowercase letter</span>
+                </div>
+                <div class="flex items-center gap-2" :class="hasUppercase ? 'text-primary' : 'text-on-surface-variant'">
+                  <span class="material-symbols-outlined text-sm">{{ hasUppercase ? 'check_circle' : 'radio_button_unchecked' }}</span>
+                  <span>At least one uppercase letter</span>
+                </div>
+                <div class="flex items-center gap-2" :class="hasNumber ? 'text-primary' : 'text-on-surface-variant'">
+                  <span class="material-symbols-outlined text-sm">{{ hasNumber ? 'check_circle' : 'radio_button_unchecked' }}</span>
+                  <span>At least one number</span>
+                </div>
+                <div class="flex items-center gap-2" :class="hasMinLength ? 'text-primary' : 'text-on-surface-variant'">
+                  <span class="material-symbols-outlined text-sm">{{ hasMinLength ? 'check_circle' : 'radio_button_unchecked' }}</span>
+                  <span>Minimum 8 characters</span>
+                </div>
+              </div>
+            </div>
             <p v-if="submitted && !password" class="text-xs text-error font-medium flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">error</span> Password is required</p>
-            <p v-else-if="submitted && password.length < 8" class="text-xs text-error font-medium flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">error</span> Password must be at least 8 characters</p>
+            <p v-else-if="submitted && !isPasswordValid" class="text-xs text-error font-medium flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">error</span> Use 8+ characters, uppercase, lowercase, and a number</p>
           </div>
 
           <div class="space-y-2">
@@ -130,7 +163,7 @@
           </div>
 
           <div>
-            <label class="flex items-start gap-3 cursor-pointer pt-2">
+            <label class="flex items-start gap-3 cursor-pointer pt-1">
               <input v-model="agreed" type="checkbox" class="mt-1 w-4 h-4 transition-colors rounded focus:ring-primary focus:ring-2 accent-primary" :class="submitted && !agreed ? 'border-error ring-1 ring-error' : 'border-outline-variant'" />
               <span class="text-sm text-on-surface-variant leading-snug">
                 I agree to the <a href="#" class="font-semibold text-primary hover:underline">Terms of Service</a> and <a href="#" class="font-semibold text-primary hover:underline">Privacy Policy</a> <span class="text-error">*</span>
@@ -145,7 +178,7 @@
           </button>
         </form>
 
-        <p class="text-center text-sm text-on-surface-variant pt-2">
+        <p class="text-center text-sm text-on-surface-variant pt-1">
           Already have an account? 
           <NuxtLink to="/login" class="font-bold text-primary hover:text-primary-container hover:underline underline-offset-4 transition-all">Sign in</NuxtLink>
         </p>
@@ -172,19 +205,74 @@ const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 const showPassword = ref(false)
+const passwordFocused = ref(false)
 const agreed = ref(false)
 
+const hasMinLength = computed(() => password.value.length >= 8)
+const hasUppercase = computed(() => /[A-Z]/.test(password.value))
+const hasLowercase = computed(() => /[a-z]/.test(password.value))
+const hasNumber = computed(() => /\d/.test(password.value))
+const isPasswordValid = computed(() =>
+  hasMinLength.value && hasUppercase.value && hasLowercase.value && hasNumber.value
+)
 const passwordMismatch = computed(() =>
   confirmPassword.value.length > 0 && password.value !== confirmPassword.value
 )
-
 const isValidEmail = computed(() => /.+@.+\..+/.test(email.value))
+const passwordStrengthScore = computed(() =>
+  [hasMinLength.value, hasUppercase.value, hasLowercase.value, hasNumber.value].filter(Boolean).length
+)
+const showPasswordHelper = computed(() => passwordFocused.value || password.value.length > 0)
+const passwordStrength = computed(() => {
+  if (!password.value) {
+    return {
+      label: 'Start typing',
+      percent: 0,
+      barClass: 'bg-outline-variant',
+      textClass: 'text-on-surface-variant'
+    }
+  }
+
+  if (passwordStrengthScore.value <= 1) {
+    return {
+      label: 'Weak',
+      percent: 25,
+      barClass: 'bg-error',
+      textClass: 'text-error'
+    }
+  }
+
+  if (passwordStrengthScore.value === 2) {
+    return {
+      label: 'Fair',
+      percent: 50,
+      barClass: 'bg-[#f59e0b]',
+      textClass: 'text-[#d97706]'
+    }
+  }
+
+  if (passwordStrengthScore.value === 3) {
+    return {
+      label: 'Good',
+      percent: 75,
+      barClass: 'bg-secondary',
+      textClass: 'text-secondary'
+    }
+  }
+
+  return {
+    label: 'Strong',
+    percent: 100,
+    barClass: 'bg-primary',
+    textClass: 'text-primary'
+  }
+})
 const submitted = ref(false)
 
 async function handleRegister() {
   submitted.value = true
   
-  if (!firstName.value || !email.value || !isValidEmail.value || !password.value || password.value.length < 8 || !confirmPassword.value || passwordMismatch.value || !agreed.value) {
+  if (!firstName.value || !email.value || !isValidEmail.value || !password.value || !isPasswordValid.value || !confirmPassword.value || passwordMismatch.value || !agreed.value) {
     return
   }
   

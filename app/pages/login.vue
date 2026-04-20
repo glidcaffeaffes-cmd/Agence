@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex bg-surface">
+  <div class="min-h-[calc(100dvh-61px)] flex bg-surface overflow-hidden">
     <Head>
       <title>Sign In — VoyageHub</title>
       <meta name="description" content="Sign in to your VoyageHub account to manage bookings and explore exclusive hotel offers." />
@@ -21,21 +21,21 @@
     </div>
 
     <!-- Right Side: Auth Form -->
-    <div class="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-10 lg:p-16 relative">
+    <div class="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-8 lg:p-10 relative">
       <!-- Mobile Brand Header -->
       <div class="absolute top-8 left-8 flex lg:hidden items-center gap-2">
         <span class="material-symbols-outlined text-2xl text-primary">travel_explore</span>
         <span class="font-bold text-xl text-secondary-container">VoyageHub</span>
       </div>
 
-      <div class="w-full max-w-md space-y-6">
+      <div class="w-full max-w-md space-y-5 lg:space-y-4">
         <div>
           <h2 class="text-3xl font-bold text-on-surface mb-2 tracking-tight">Welcome back</h2>
           <p class="text-on-surface-variant text-sm">Please sign in to access your dashboard.</p>
         </div>
 
         <!-- Demo Shortcuts -->
-        <div class="flex flex-wrap items-center gap-3 bg-surface-container-low p-4 rounded-xl border border-outline-variant/30">
+        <div class="flex flex-wrap items-center gap-3 bg-surface-container-low p-4 lg:p-3 rounded-xl border border-outline-variant/30">
           <span class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Demo Access</span>
           <button @click="handleDemoClient" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-outline-variant/50 text-sm font-medium text-primary hover:bg-surface hover:border-primary transition-colors">
             <span class="material-symbols-outlined text-[18px]">person</span> Client
@@ -45,7 +45,7 @@
           </button>
         </div>
 
-        <form @submit.prevent="handleLogin" class="space-y-4">
+        <form @submit.prevent="handleLogin" class="space-y-4 lg:space-y-3">
           <!-- Error Alert -->
           <div v-if="error" class="flex items-center gap-3 bg-error-container/30 border-l-4 border-error text-on-error-container p-4 rounded-r-lg text-sm font-medium">
             <span class="material-symbols-outlined text-error">error</span>
@@ -96,7 +96,7 @@
           </button>
         </form>
 
-        <p class="text-center text-sm text-on-surface-variant pt-4">
+        <p class="text-center text-sm text-on-surface-variant pt-2">
           Don't have an account? 
           <NuxtLink to="/register" class="font-bold text-primary hover:text-primary-container hover:underline underline-offset-4 transition-all">Create one free</NuxtLink>
         </p>
