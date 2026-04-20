@@ -61,12 +61,12 @@
 <style scoped>
 .hotel-scene {
   position: relative;
-  min-height: 560px;
+  min-height: 500px;
 }
 
 .scene-shell {
   position: relative;
-  min-height: 560px;
+  min-height: 500px;
   perspective: 1800px;
   transform-style: preserve-3d;
   isolation: isolate;
@@ -80,18 +80,18 @@
 }
 
 .scene-glow--teal {
-  top: 28px;
-  right: 42px;
-  width: 210px;
-  height: 210px;
+  top: 22px;
+  right: 34px;
+  width: 180px;
+  height: 180px;
   background: radial-gradient(circle, rgba(0, 103, 104, 0.22) 0%, rgba(0, 103, 104, 0) 72%);
 }
 
 .scene-glow--blue {
-  bottom: 26px;
+  bottom: 20px;
   left: 18px;
-  width: 220px;
-  height: 190px;
+  width: 190px;
+  height: 160px;
   background: radial-gradient(circle, rgba(35, 98, 148, 0.18) 0%, rgba(35, 98, 148, 0) 72%);
 }
 
@@ -99,8 +99,8 @@
   position: absolute;
   left: 82px;
   right: 18px;
-  bottom: 18px;
-  height: 92px;
+  bottom: 14px;
+  height: 78px;
   border-radius: 999px;
   background: radial-gradient(circle, rgba(15, 23, 42, 0.24) 0%, rgba(15, 23, 42, 0) 70%);
   filter: blur(26px);
@@ -114,20 +114,20 @@
 }
 
 .photo-plane--back {
-  inset: 52px 22px 48px 110px;
+  inset: 44px 20px 40px 96px;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.76), rgba(226, 240, 251, 0.58));
   border: 1px solid rgba(255, 255, 255, 0.7);
-  box-shadow: 0 34px 74px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 28px 60px rgba(15, 23, 42, 0.08);
   transform: rotateY(-18deg) rotateX(8deg) translateY(16px);
   z-index: 1;
 }
 
 .photo-plane--front {
-  inset: 12px 34px 34px 40px;
+  inset: 12px 28px 28px 34px;
   border: 1px solid rgba(255, 255, 255, 0.52);
   box-shadow:
-    0 44px 90px rgba(15, 23, 42, 0.16),
-    0 14px 26px rgba(15, 23, 42, 0.08);
+    0 34px 72px rgba(15, 23, 42, 0.16),
+    0 12px 22px rgba(15, 23, 42, 0.08);
   transform: rotateY(-14deg) rotateX(7deg);
   z-index: 2;
   animation: planeFloat 7.8s ease-in-out infinite;
@@ -150,17 +150,17 @@
 
 .photo-plane__caption {
   position: absolute;
-  left: 28px;
-  right: 28px;
-  bottom: 24px;
+  left: 22px;
+  right: 22px;
+  bottom: 18px;
   z-index: 2;
   color: white;
 }
 
 .photo-plane__tag {
   display: inline-block;
-  margin-bottom: 12px;
-  padding: 7px 12px;
+  margin-bottom: 10px;
+  padding: 6px 10px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.18);
@@ -172,9 +172,9 @@
 }
 
 .photo-plane__caption h3 {
-  margin: 0 0 10px;
-  max-width: 440px;
-  font-size: 30px;
+  margin: 0 0 8px;
+  max-width: 380px;
+  font-size: 26px;
   line-height: 1.08;
   font-weight: 800;
   letter-spacing: -0.03em;
@@ -182,16 +182,16 @@
 
 .photo-plane__caption p {
   margin: 0;
-  max-width: 420px;
+  max-width: 360px;
   color: rgba(255, 255, 255, 0.88);
-  font-size: 14px;
-  line-height: 1.6;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .hotel-model {
   position: absolute;
-  right: 38px;
-  bottom: 74px;
+  right: 24px;
+  bottom: 54px;
   width: 205px;
   height: 188px;
   z-index: 3;
@@ -353,9 +353,9 @@
 .float-card {
   position: absolute;
   z-index: 4;
-  max-width: 210px;
-  padding: 18px 20px;
-  border-radius: 28px;
+  max-width: 190px;
+  padding: 14px 16px;
+  border-radius: 24px;
   background: rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.68);
   backdrop-filter: blur(20px);
@@ -365,20 +365,20 @@
 }
 
 .float-card--rating {
-  top: 58px;
+  top: 44px;
   left: -4px;
   animation: cardFloatLeft 8s ease-in-out infinite;
 }
 
 .float-card--service {
   right: 2px;
-  bottom: 34px;
+  bottom: 26px;
   animation: cardFloatRight 8.8s ease-in-out infinite;
 }
 
 .float-card__kicker {
   display: block;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   color: var(--color-primary-700);
   font-size: 11px;
   font-weight: 800;
@@ -389,27 +389,27 @@
 .float-card__metric {
   display: flex;
   align-items: baseline;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .float-card__metric strong {
   color: #0f172a;
-  font-size: 30px;
+  font-size: 26px;
   line-height: 1;
 }
 
 .float-card__metric span {
   color: var(--color-secondary-500);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
 }
 
 .float-card p {
   margin: 0;
   color: #64748b;
-  font-size: 13px;
-  line-height: 1.6;
+  font-size: 12px;
+  line-height: 1.5;
 }
 
 .float-card__list {
@@ -417,14 +417,14 @@
   padding: 0;
   list-style: none;
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .float-card__list li {
   position: relative;
   padding-left: 16px;
   color: #334155;
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.5;
 }
 
@@ -486,20 +486,20 @@
 @media (max-width: 1200px) {
   .hotel-scene,
   .scene-shell {
-    min-height: 520px;
+    min-height: 460px;
   }
 
   .photo-plane--front {
-    inset: 18px 28px 30px 34px;
+    inset: 16px 24px 24px 28px;
   }
 
   .photo-plane__caption h3 {
-    font-size: 26px;
+    font-size: 24px;
   }
 
   .hotel-model {
     right: 10px;
-    bottom: 54px;
+    bottom: 42px;
     transform: scale(0.84);
     transform-origin: bottom right;
   }
@@ -508,7 +508,7 @@
 @media (max-width: 768px) {
   .hotel-scene,
   .scene-shell {
-    min-height: 500px;
+    min-height: 420px;
   }
 
   .scene-glow--teal {
@@ -524,11 +524,11 @@
   }
 
   .photo-plane--back {
-    inset: 42px 12px 36px 56px;
+    inset: 32px 10px 28px 42px;
   }
 
   .photo-plane--front {
-    inset: 12px 18px 24px 14px;
+    inset: 10px 14px 18px 12px;
     transform: none;
     animation: none;
   }
@@ -540,23 +540,23 @@
   }
 
   .photo-plane__caption h3 {
-    font-size: 22px;
+    font-size: 20px;
   }
 
   .photo-plane__caption p {
-    font-size: 14px;
+    font-size: 12px;
   }
 
   .hotel-model {
     right: 8px;
-    bottom: 42px;
-    transform: scale(0.72);
+    bottom: 28px;
+    transform: scale(0.62);
     transform-origin: bottom right;
     animation: none;
   }
 
   .float-card--rating {
-    top: 34px;
+    top: 22px;
     left: 8px;
   }
 
@@ -565,13 +565,13 @@
   }
 
   .float-card {
-    max-width: 170px;
-    padding: 18px 18px;
+    max-width: 150px;
+    padding: 12px 14px;
     animation: none;
   }
 
   .float-card__metric strong {
-    font-size: 28px;
+    font-size: 22px;
   }
 }
 </style>

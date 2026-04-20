@@ -148,7 +148,7 @@ function getMinPrice(hotelId: number): number {
 
 /* Hero Premium */
 .hero-premium {
-  padding: 54px 0 48px;
+  padding: 36px 0 28px;
   background: linear-gradient(to bottom, #f8fafc 0%, white 100%);
 }
 
@@ -158,8 +158,8 @@ function getMinPrice(hotelId: number): number {
   display: grid;
   grid-template-columns: 1fr 1fr;
   align-items: center;
-  gap: 56px;
-  padding: 0 40px;
+  gap: 40px;
+  padding: 0 32px;
 }
 
 .hero-label {
@@ -168,36 +168,36 @@ function getMinPrice(hotelId: number): number {
   text-transform: uppercase;
   letter-spacing: 0.18em;
   color: var(--color-primary-600);
-  margin-bottom: 18px;
+  margin-bottom: 12px;
 }
 
 .hero-title {
-  font-size: clamp(48px, 5vw, 58px);
+  font-size: clamp(42px, 4.4vw, 52px);
   line-height: 1.02;
   font-weight: 800;
-  margin-bottom: 22px;
+  margin-bottom: 16px;
   letter-spacing: -0.03em;
   color: #1e293b;
 }
 
 .hero-lead {
-  font-size: 18px;
-  line-height: 1.7;
+  font-size: 16px;
+  line-height: 1.6;
   color: #64748b;
-  margin-bottom: 32px;
-  max-width: 500px;
+  margin-bottom: 24px;
+  max-width: 460px;
 }
 
 .hero-cta-group {
   display: flex;
-  gap: 14px;
+  gap: 12px;
 }
 
 .btn-primary {
   background: var(--color-primary-600);
   color: white;
-  padding: 14px 24px;
-  border-radius: 14px;
+  padding: 12px 20px;
+  border-radius: 12px;
   font-size: 14px;
   font-weight: 800;
   text-decoration: none;
@@ -212,8 +212,8 @@ function getMinPrice(hotelId: number): number {
 
 .btn-ghost {
   color: #1e293b;
-  padding: 14px 24px;
-  border-radius: 14px;
+  padding: 12px 20px;
+  border-radius: 12px;
   font-size: 14px;
   font-weight: 800;
   text-decoration: none;
@@ -226,17 +226,17 @@ function getMinPrice(hotelId: number): number {
 
 /* Destinations Section */
 .destinations-section {
-  padding: 42px 0 34px;
+  padding: 24px 0 18px;
 }
 
 .section-container {
   max-width: 1320px;
   margin: 0 auto;
-  padding: 0 40px;
+  padding: 0 32px;
 }
 
 .section-header-left {
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .section-tag {
@@ -245,11 +245,11 @@ function getMinPrice(hotelId: number): number {
   text-transform: uppercase;
   letter-spacing: 0.14em;
   color: #64748b;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .section-title-large {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 800;
   color: #1e293b;
   letter-spacing: -0.03em;
@@ -258,16 +258,16 @@ function getMinPrice(hotelId: number): number {
 .destinations-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: 288px;
-  gap: 18px;
+  grid-template-rows: 248px;
+  gap: 14px;
 }
 
 .dest-card {
-  border-radius: 24px;
+  border-radius: 20px;
   overflow: hidden;
   position: relative;
   cursor: pointer;
-  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
 }
 
 .dest-card.large { grid-column: span 2; }
@@ -294,12 +294,12 @@ function getMinPrice(hotelId: number): number {
   background: linear-gradient(to top, rgba(15, 23, 42, 0.72) 0%, rgba(15, 23, 42, 0.16) 55%, transparent 80%);
   display: flex;
   align-items: flex-end;
-  padding: 20px;
+  padding: 16px;
 }
 
 .dest-name {
   color: white;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 800;
   margin: 0 0 2px;
 }
@@ -315,39 +315,39 @@ function getMinPrice(hotelId: number): number {
 .section-featured,
 .benefits-section,
 .section-offers {
-  padding: 34px 0 46px;
+  padding: 22px 0 30px;
 }
 
 .section-header {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 18px;
 }
 
 .section-title {
   font-family: var(--font-family-heading);
-  font-size: 30px;
+  font-size: 26px;
   font-weight: 800;
   color: var(--color-text-primary);
   letter-spacing: -0.03em;
-  margin: 0 0 6px;
+  margin: 0 0 4px;
 }
 
 .section-subtitle {
-  max-width: 560px;
+  max-width: 520px;
   margin: 0 auto;
-  font-size: 14px;
-  line-height: 1.6;
+  font-size: 13px;
+  line-height: 1.5;
   color: var(--color-text-secondary);
 }
 
 .hotels-grid, .offers-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 18px;
+  gap: 14px;
   align-items: stretch;
 }
 
-.section-action { text-align: center; margin-top: 20px; }
+.section-action { text-align: center; margin-top: 16px; }
 .view-all-link {
   display: inline-flex;
   align-items: center;
@@ -363,25 +363,25 @@ function getMinPrice(hotelId: number): number {
 .benefits-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
+  gap: 14px;
 }
 
 .benefit-item {
-  padding: 22px 20px;
-  border-radius: 22px;
+  padding: 18px 16px;
+  border-radius: 18px;
   background: linear-gradient(180deg, #ffffff 0%, #f8fbfe 100%);
   border: 1px solid rgba(225, 232, 240, 0.92);
   box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
 }
 
 .benefit-icon-wrap {
-  width: 42px;
-  height: 42px;
+  width: 38px;
+  height: 38px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 14px;
-  margin-bottom: 14px;
+  border-radius: 12px;
+  margin-bottom: 10px;
   background: rgba(0, 103, 104, 0.08);
   color: var(--color-primary-600);
 }
@@ -391,9 +391,9 @@ function getMinPrice(hotelId: number): number {
 }
 
 .benefit-title {
-  margin: 0 0 8px;
+  margin: 0 0 6px;
   color: #0f172a;
-  font-size: 18px;
+  font-size: 16px;
   line-height: 1.2;
   font-weight: 800;
   letter-spacing: -0.02em;
@@ -403,7 +403,7 @@ function getMinPrice(hotelId: number): number {
   margin: 0;
   color: #64748b;
   font-size: 13px;
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 /* Stats Bar */
@@ -436,12 +436,12 @@ function getMinPrice(hotelId: number): number {
 @media (max-width: 1024px) {
   .hero-layout {
     grid-template-columns: 1fr;
-    gap: 34px;
+    gap: 28px;
   }
 
   .destinations-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-rows: 248px 248px;
+    grid-template-rows: 220px 220px;
   }
 
   .benefits-grid {
@@ -451,22 +451,22 @@ function getMinPrice(hotelId: number): number {
 
 @media (max-width: 768px) {
   .hero-premium {
-    padding: 40px 0 42px;
+    padding: 28px 0 30px;
   }
 
   .hero-layout {
     grid-template-columns: 1fr;
-    gap: 28px;
-    padding: 0 20px;
+    gap: 22px;
+    padding: 0 18px;
   }
 
   .hero-title {
-    font-size: 42px;
+    font-size: 36px;
   }
 
   .hero-lead {
-    font-size: 17px;
-    margin-bottom: 24px;
+    font-size: 16px;
+    margin-bottom: 20px;
   }
 
   .hero-cta-group {
@@ -475,7 +475,7 @@ function getMinPrice(hotelId: number): number {
   }
 
   .section-container {
-    padding: 0 20px;
+    padding: 0 18px;
   }
 
   .destinations-grid {
@@ -488,12 +488,19 @@ function getMinPrice(hotelId: number): number {
   }
 
   .dest-card {
-    min-height: 240px;
+    min-height: 200px;
   }
 
   .hotels-grid,
   .offers-grid {
     grid-template-columns: 1fr;
+  }
+
+  .destinations-section,
+  .section-featured,
+  .benefits-section,
+  .section-offers {
+    padding: 18px 0 24px;
   }
 
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
