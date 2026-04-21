@@ -111,16 +111,29 @@ import { useHotels } from '~/composables/useHotels'
 import { useOffers } from '~/composables/useOffers'
 import { useRooms } from '~/composables/useRooms'
 
-const { featured, fetchFeatured } = useHotels()
+const { hotels, featured, fetchAll, fetchFeatured } = useHotels()
 const { offers: activeOffers, fetchActive } = useOffers()
 const { rooms, fetchAll: fetchAllRooms } = useRooms()
 
-const destinations = [
-  { name: 'Paris', image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34', hotels: 12, size: 'large' },
-  { name: 'Nice', image: 'https://images.unsplash.com/photo-1533104816931-20fa691ff6ca', hotels: 8, size: 'small' },
-  { name: 'Lyon', image: 'https://images.unsplash.com/photo-1509600110300-21b9d5fedeb7', hotels: 5, size: 'small' },
-  { name: 'Bordeaux', image: 'https://images.unsplash.com/photo-1563214815-38f382b6831d', hotels: 7, size: 'medium' }
-]
+const destinations = computed(() => {
+  const cities = [...new Set(hotels.value.map(h => h.city))]
+  return cities.slice(0, 4).map((city, index) => {
+    const sizes = ['large', 'small', 'small', 'medium']
+    const images = [
+      'https://images.unsplash.com/photo-1502602898657-3e91760cbb34',
+      'https://images.unsplash.com/photo-1533104816931-20fa691ff6ca',
+      'https://images.unsplash.com/photo-1509600110300-21b9d5fedeb7',
+      'https://images.unsplash.com/photo-1563214815-38f382b6831d'
+    ]
+    const hotelCount = hotels.value.filter(h => h.city === city).length
+    return {
+      name: city,
+      image: images[index] || images[0],
+      hotels: hotelCount,
+      size: sizes[index] || 'small'
+    }
+  })
+})
 
 const benefits = [
   { icon: 'hotel', title: 'Handpicked Hotels', text: 'Every property in our collection is personally vetted for architectural merit and service excellence.' },
@@ -129,6 +142,7 @@ const benefits = [
 ]
 
 onMounted(async () => {
+  await fetchAll()
   await fetchFeatured()
   await fetchActive()
   await fetchAllRooms()

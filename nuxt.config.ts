@@ -4,14 +4,20 @@ export default defineNuxtConfig({
   buildDir: '.nuxt-build',
   devtools: { enabled: true },
   runtimeConfig: {
+    apiServerBase: process.env.NUXT_SERVER_API_BASE || 'http://127.0.0.1:3001/api',
     public: {
       apiBase: '/api'
     }
   },
   routeRules: {
+    // Local Nitro handlers for review filters (avoid backend 404 on /avis/hotel/:id)
+    '/api/avis/hotel/**': {},
+    '/api/avis/account/**': {},
     '/api/**': {
       proxy: {
-        to: 'https://2805-102-173-202-155.ngrok-free.app/api/**',
+        // Point API calls to local Nest backend by default to avoid ngrok loop/403.
+        // Override with NUXT_API_PROXY_TARGET when you really need a remote target.
+        to: process.env.NUXT_API_PROXY_TARGET || 'http://127.0.0.1:3001/api/**',
         changeOrigin: true
       }
     }

@@ -75,9 +75,9 @@
             
             <h3 class="subsection-title">Équipements & Services</h3>
             <div class="amenities-grid">
-              <div class="amenity-item" v-for="amenity in defaultAmenities" :key="amenity.icon">
-                <span class="material-symbols-outlined">{{ amenity.icon }}</span>
-                <span>{{ amenity.label }}</span>
+              <div class="amenity-item" v-for="amenity in hotel?.amenities || defaultAmenities.map(a => a.label)" :key="amenity">
+                <span class="material-symbols-outlined">{{ getAmenityIcon(amenity) }}</span>
+                <span>{{ amenity }}</span>
               </div>
             </div>
           </section>
@@ -117,10 +117,10 @@
             <div class="reviews-header-advanced">
               <div>
                 <h2 class="section-title m-0">Avis voyageurs</h2>
-                <p class="reviews-subtitle">Moyenne calculée sur 728 avis vérifiés</p>
+                <p class="reviews-subtitle">Moyenne calculée sur {{ reviews.length }} avis vérifiés</p>
               </div>
               <div class="global-rating-block">
-                <span class="rating-score">4.8</span>
+                <span class="rating-score">{{ (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length || 0).toFixed(1) }}</span>
                 <div class="rating-context">
                   <div class="stars-gold"><span v-for="i in 5" class="material-symbols-outlined">star</span></div>
                   <span>Excellent</span>
@@ -129,20 +129,20 @@
             </div>
 
             <div class="reviews-grid">
-              <div class="review-card" v-for="i in 2" :key="i">
+              <div class="review-card" v-for="review in reviews.slice(0, 2)" :key="review.id">
                 <div class="reviewer-prof">
-                  <div class="avatar-circle">JD</div>
+                  <div class="avatar-circle">{{ review.accountId }}</div>
                   <div class="reviewer-meta">
-                    <strong>Jean Dupont</strong>
-                    <span>France • Séjour en Mars 2026</span>
+                    <strong>Client {{ review.accountId }}</strong>
+                    <span>{{ new Date(review.publicationDate).toLocaleDateString('fr-FR') }}</span>
                   </div>
                 </div>
-                <div class="review-stars-small"><span v-for="s in 5" class="material-symbols-outlined">star</span></div>
-                <p class="review-body">Une expérience exceptionnelle du début à la fin. Le personnel est aux petits soins et les infrastructures sont sublimes. La vue depuis notre chambre sur la baie était à couper le souffle.</p>
+                <div class="review-stars-small"><span v-for="s in 5" :key="s" class="material-symbols-outlined" :class="{ 'active': s <= review.rating }">star</span></div>
+                <p class="review-body">{{ review.comment }}</p>
               </div>
             </div>
             
-            <button class="show-all-reviews">Lire les 728 avis</button>
+            <button class="show-all-reviews">Lire les {{ reviews.length }} avis</button>
           </section>
         </main>
 
@@ -203,11 +203,13 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useHotels } from '~/composables/useHotels'
 import { useRooms } from '~/composables/useRooms'
+import { useReviews } from '~/composables/useReviews'
 import type { Hotel } from '~/types/models'
 
 const route = useRoute()
 const { getById } = useHotels()
 const { rooms, fetchByHotel } = useRooms()
+const { reviews, fetchByHotel: fetchReviews } = useReviews()
 
 const hotel = ref<Hotel | null>(null)
 const loading = ref(true)
@@ -221,13 +223,25 @@ const defaultAmenities = [
   { icon: 'spa', label: 'Spa et centre de bien-être' }
 ]
 
+function getAmenityIcon(amenity: string) {
+  const amenityMap: Record<string, string> = {
+    'Wi-Fi gratuit très haut débit': 'wifi',
+    'Piscine extérieure chauffée': 'pool',
+    'Centre de remise en forme 24/7': 'fitness_center',
+    'Lounge bar & Cocktails': 'local_bar',
+    'Restaurant Gastronomique': 'restaurant',
+    'Spa et centre de bien-être': 'spa'
+  }
+  return amenityMap[amenity] || 'check_circle'
+}
+
 onMounted(async () => {
   const id = Number(route.params.id)
   if (!isNaN(id)) {
     const data = await getById(id)
     if (data) {
       hotel.value = data
-      await fetchByHotel(id)
+      await Promise.all([fetchByHotel(id), fetchReviews(id)])
     }
   }
   loading.value = false

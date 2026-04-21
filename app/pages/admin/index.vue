@@ -9,7 +9,7 @@
           <span class="material-symbols-outlined text-primary/30 group-hover:text-primary transition-colors">calendar_month</span>
         </div>
         <div>
-          <h3 class="text-2xl font-bold text-secondary">{{ reservations.length }}</h3>
+          <h3 class="text-2xl font-bold text-secondary">{{ totalReservations }}</h3>
           <p class="text-[10px] text-teal-600 font-medium flex items-center gap-1 mt-1">
             <span class="material-symbols-outlined text-[12px]">trending_up</span> +12% vs last month
           </p>
@@ -23,7 +23,7 @@
           <span class="material-symbols-outlined text-secondary/30 group-hover:text-secondary transition-colors">payments</span>
         </div>
         <div>
-          <h3 class="text-2xl font-bold text-secondary">42.500 €</h3>
+          <h3 class="text-2xl font-bold text-secondary">{{ totalRevenue.toFixed(0) }} €</h3>
           <p class="text-[10px] text-teal-600 font-medium flex items-center gap-1 mt-1">
             <span class="material-symbols-outlined text-[12px]">trending_up</span> +8.4% vs last month
           </p>
@@ -37,7 +37,7 @@
           <span class="material-symbols-outlined text-tertiary/30 group-hover:text-tertiary transition-colors">apartment</span>
         </div>
         <div>
-          <h3 class="text-2xl font-bold text-secondary">{{ hotels.filter(h => h.active).length }}</h3>
+          <h3 class="text-2xl font-bold text-secondary">{{ activeHotels }}</h3>
           <p class="text-[10px] text-slate-500 font-medium flex items-center gap-1 mt-1">
             Stable since last week
           </p>
@@ -73,15 +73,11 @@
             <button class="px-3 py-1 text-xs font-medium text-slate-500 hover:bg-slate-50 rounded active:scale-95 transition-transform">30D</button>
           </div>
         </div>
-        <!-- Chart Placeholder UI -->
+        <!-- Dynamic Chart -->
         <div class="h-64 flex items-end justify-between gap-4">
-          <div class="w-full bg-slate-100 rounded-t-lg relative group h-[40%] hover:bg-primary transition-all duration-300 cursor-pointer"><div class="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 text-[10px] font-bold text-primary">12</div></div>
-          <div class="w-full bg-slate-100 rounded-t-lg relative group h-[65%] hover:bg-primary transition-all duration-300 cursor-pointer"><div class="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 text-[10px] font-bold text-primary">24</div></div>
-          <div class="w-full bg-slate-100 rounded-t-lg relative group h-[55%] hover:bg-primary transition-all duration-300 cursor-pointer"><div class="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 text-[10px] font-bold text-primary">18</div></div>
-          <div class="w-full bg-slate-100 rounded-t-lg relative group h-[90%] hover:bg-primary transition-all duration-300 cursor-pointer"><div class="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 text-[10px] font-bold text-primary">35</div></div>
-          <div class="w-full bg-slate-100 rounded-t-lg relative group h-[45%] hover:bg-primary transition-all duration-300 cursor-pointer"><div class="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 text-[10px] font-bold text-primary">15</div></div>
-          <div class="w-full bg-slate-100 rounded-t-lg relative group h-[75%] hover:bg-primary transition-all duration-300 cursor-pointer"><div class="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 text-[10px] font-bold text-primary">28</div></div>
-          <div class="w-full bg-slate-100 rounded-t-lg relative group h-[85%] hover:bg-primary transition-all duration-300 cursor-pointer"><div class="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 text-[10px] font-bold text-primary">32</div></div>
+          <div v-for="(count, index) in reservationChart" :key="index" class="w-full bg-slate-100 rounded-t-lg relative group transition-all duration-300 cursor-pointer" :style="{ height: `${Math.max(10, (count / Math.max(...reservationChart)) * 100)}%` }" :class="count > 0 ? 'hover:bg-primary' : ''">
+            <div class="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 text-[10px] font-bold text-primary">{{ count }}</div>
+          </div>
         </div>
         <div class="flex justify-between mt-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">
           <span>Lun</span><span>Mar</span><span>Mer</span><span>Jeu</span><span>Ven</span><span>Sam</span><span>Dim</span>
@@ -191,24 +187,36 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { MockHotelRepository } from '~/repositories/mock/MockHotelRepository'
-import { MockReservationRepository } from '~/repositories/mock/MockReservationRepository'
+import { ApiHotelRepository } from '~/repositories/api'
+import { useStats } from '~/composables/useStats'
 
 definePageMeta({
   layout: 'admin'
 })
 
-const hotelRepo = new MockHotelRepository()
-const reservationRepo = new MockReservationRepository()
+const hotelRepo = new ApiHotelRepository()
+const reservationRepo = new ApiReservationRepository()
+const { dashboardStats, fetchDashboard } = useStats()
 
 const { data: hotelsData } = useAsyncData('dashboard-hotels', () => hotelRepo.getAll())
 const { data: reservationsData } = useAsyncData('dashboard-reservations', () => reservationRepo.getAll())
+const { data: chartData } = useAsyncData('reservation-chart', () => $fetch('/api/stats/chart/reservations'))
 
 const hotels = computed(() => hotelsData.value || [])
 const reservations = computed(() => reservationsData.value || [])
+const reservationChart = computed(() => chartData.value || [0, 0, 0, 0, 0, 0, 0])
+
+// Use stats from backend
+const totalReservations = computed(() => dashboardStats.value?.totalReservations || 0)
+const totalRevenue = computed(() => dashboardStats.value?.totalRevenue || 0)
+const activeHotels = computed(() => dashboardStats.value?.activeHotels || 0)
 
 // Get top 3 rated hotels
 const topHotels = computed(() => {
   return [...hotels.value].sort((a, b) => b.stars - a.stars).slice(0, 3)
+})
+
+onMounted(async () => {
+  await fetchDashboard()
 })
 </script>

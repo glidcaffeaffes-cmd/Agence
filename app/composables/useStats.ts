@@ -1,8 +1,10 @@
 import { ref } from 'vue'
 import type { DashboardStats } from '~/types/models'
-import { MockStatsRepository } from '~/repositories/mock'
+import { $fetch } from 'ofetch'
 
-const repo = new MockStatsRepository()
+const repo = {
+  getDashboardStats: () => $fetch<DashboardStats>('/api/stats/dashboard')
+}
 
 export function useStats() {
   const dashboardStats = ref<DashboardStats | null>(null)

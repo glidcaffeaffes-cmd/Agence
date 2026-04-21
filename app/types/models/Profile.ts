@@ -10,4 +10,6 @@ export interface Profile {
   address: string
   phone: string
   photo: string
+  notificationsReservation: boolean
+  notificationsPromotion: boolean
 }

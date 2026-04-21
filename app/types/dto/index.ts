@@ -15,15 +15,22 @@
 // ─── Hotel ───────────────────────────────────────────────────────────────────
 export interface HotelDTO {
   id: number
-  name: string
-  address: string
-  city: string
-  country: string
-  stars: number
-  description: string
+  name?: string
+  address?: string
+  city?: string
+  country?: string
+  stars?: number
+  description?: string
+  nom?: string
+  adresse?: string
+  ville?: string
+  pays?: string
+  etoiles?: number
   email: string
-  phone: string
-  is_active: boolean           // API uses snake_case + is_ prefix
+  phone?: string
+  telephone?: string
+  is_active?: boolean           // API uses snake_case + is_ prefix
+  actif?: boolean
   images: string[]
   amenities: string[]
   created_at: string
@@ -33,9 +40,11 @@ export interface HotelDTO {
 export interface AccountDTO {
   id: number
   email: string
-  role: 'client' | 'admin'
-  is_active: boolean
-  created_at: string           // API uses created_at instead of registrationDate
+  role?: 'client' | 'admin'
+  is_active?: boolean
+  actif?: boolean
+  created_at?: string           // API uses created_at instead of registrationDate
+  dateInscription?: string
   password?: string            // never returned on GET in real APIs — only on create
 }
 
@@ -49,6 +58,8 @@ export interface ProfileDTO {
   photo: string | null
   date_of_birth: string | null
   nationality: string | null
+  notifications_reservation: boolean | null
+  notifications_promotion: boolean | null
 }
 
 // ─── Reservation ─────────────────────────────────────────────────────────────
@@ -70,13 +81,19 @@ export interface ReservationDTO {
 // ─── Offer ───────────────────────────────────────────────────────────────────
 export interface OfferDTO {
   id: number
-  hotel_id: number
-  title: string
-  description: string
-  discount_rate: number
-  start_date: string
-  end_date: string
-  is_active: boolean
+  hotel_id?: number
+  hotelId?: number
+  title?: string
+  titre?: string
+  description?: string
+  discount_rate?: number
+  tauxRemise?: number
+  start_date?: string
+  dateDebut?: string
+  end_date?: string
+  dateFin?: string
+  is_active?: boolean
+  active?: boolean
   image: string | null
 }
 
@@ -96,12 +113,18 @@ export interface ComplaintDTO {
 // ─── Room ─────────────────────────────────────────────────────────────────────
 export interface RoomDTO {
   id: number
-  hotel_id: number
-  room_type_id: number
-  room_number: string
-  price_per_night: number
-  is_available: boolean
-  floor: number
+  hotel_id?: number
+  hotelId?: number
+  room_type_id?: number
+  typeChambreId?: number
+  room_number?: string
+  numero?: string
+  price_per_night?: number
+  prixParNuit?: number
+  is_available?: boolean
+  disponible?: boolean
+  floor?: number
+  etage?: number
   capacity: number
   images: string[]
   amenities: string[]

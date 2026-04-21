@@ -81,7 +81,7 @@
                 </div>
               </div>
               <div class="flex justify-end pt-6">
-                <button type="button" class="group flex items-center gap-3 px-10 py-5 bg-neutral-900 text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-neutral-800 transition-all shadow-xl shadow-neutral-900/10 active:scale-95">
+                <button @click="changePassword" type="button" class="group flex items-center gap-3 px-10 py-5 bg-neutral-900 text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-neutral-800 transition-all shadow-xl shadow-neutral-900/10 active:scale-95">
                   Rotate Credentials <span class="material-symbols-outlined text-[20px] group-hover:translate-x-1 transition-transform">sync_lock</span>
                 </button>
               </div>
@@ -121,7 +121,7 @@
                   <span class="text-xs text-neutral-500 font-medium">Real-time confirmation of changes and cancellations.</span>
                 </div>
                 <div class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" checked class="sr-only peer">
+                  <input type="checkbox" v-model="notificationSettings.reservation" class="sr-only peer">
                   <div class="w-11 h-6 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-neutral-900"></div>
                 </div>
               </label>
@@ -132,10 +132,22 @@
                   <span class="text-xs text-neutral-500 font-medium">Exclusive invitations to new architectural listings.</span>
                 </div>
                 <div class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" class="sr-only peer">
+                  <input type="checkbox" v-model="notificationSettings.promotion" class="sr-only peer">
                   <div class="w-11 h-6 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-neutral-900"></div>
                 </div>
               </label>
+
+              <div class="flex justify-end pt-6">
+                <button
+                  @click="updateNotifications"
+                  :disabled="loading"
+                  class="group flex items-center gap-3 px-10 py-4 bg-neutral-900 text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-neutral-800 transition-all shadow-xl shadow-neutral-900/10 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span v-if="loading">Updating...</span>
+                  <span v-else>Save Preferences</span>
+                  <span v-if="!loading" class="material-symbols-outlined text-[20px] group-hover:translate-x-1 transition-transform">save</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -174,8 +186,39 @@
 
 <script setup lang="ts">
 import { useAuth } from '~/composables/useAuth'
+import { ref, watch } from 'vue'
 
-const { currentProfile } = useAuth()
+const { currentProfile, updateProfile, loading } = useAuth()
+
+const notificationSettings = ref({
+  reservation: true,
+  promotion: false
+})
+
+watch(currentProfile, (profile) => {
+  if (profile) {
+    notificationSettings.value = {
+      reservation: profile.notificationsReservation,
+      promotion: profile.notificationsPromotion
+    }
+  }
+}, { immediate: true })
+
+async function updateNotifications() {
+  const success = await updateProfile({
+    notificationsReservation: notificationSettings.value.reservation,
+    notificationsPromotion: notificationSettings.value.promotion
+  })
+  if (success) {
+    alert('Notification preferences updated successfully!')
+  } else {
+    alert('Failed to update notification preferences. Please try again.')
+  }
+}
+
+function changePassword() {
+  alert('Password change functionality coming soon!')
+}
 </script>
 
 <style scoped>

@@ -1,8 +1,8 @@
 import { ref } from 'vue'
 import type { Review } from '~/types/models'
-import { MockReviewRepository } from '~/repositories/mock'
+import { ApiReviewRepository } from '~/repositories/api'
 
-const repo = new MockReviewRepository()
+const repo = new ApiReviewRepository()
 
 export function useReviews() {
   const reviews = ref<Review[]>([])

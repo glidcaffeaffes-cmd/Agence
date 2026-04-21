@@ -1,8 +1,8 @@
 import { ref, computed } from 'vue'
 import type { AppNotification } from '~/types/models'
-import { MockNotificationRepository } from '~/repositories/mock'
+import { ApiNotificationRepository } from '~/repositories/api'
 
-const repo = new MockNotificationRepository()
+const repo = new ApiNotificationRepository()
 
 export function useNotifications() {
   const notifications = ref<AppNotification[]>([])

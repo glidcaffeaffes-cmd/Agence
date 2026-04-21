@@ -19,15 +19,20 @@ import type { IReservationRepository } from '~/types/interfaces/IReservationRepo
 import type { IOfferRepository } from '~/types/interfaces/IOfferRepository'
 import type { IComplaintRepository } from '~/types/interfaces/IComplaintRepository'
 import type { IRoomRepository } from '~/types/interfaces/IRoomRepository'
+import type { IReviewRepository } from '~/types/interfaces/IReviewRepository'
+import type { INotificationRepository } from '~/types/interfaces/INotificationRepository'
+import type { ISystemConfigRepository } from '~/types/interfaces/ISystemConfigRepository'
+import type { SystemConfig } from '~/types/models'
 
-import type { Hotel, Account, Profile, Reservation, Offer, Complaint, Room, RoomType } from '~/types/models'
-import type { HotelDTO, AccountDTO, ReservationDTO, OfferDTO, ComplaintDTO, RoomDTO } from '~/types/dto'
+import type { Hotel, Account, Profile, Reservation, Offer, Complaint, Room, RoomType, Review, AppNotification } from '~/types/models'
+import type { HotelDTO, AccountDTO, ReservationDTO, OfferDTO, ComplaintDTO, RoomDTO, ReviewDTO, NotificationDTO } from '~/types/dto'
 import type { ReservationStatus } from '~/types/enums/ReservationStatus'
 import type { ComplaintStatus } from '~/types/enums/ComplaintStatus'
 
 import {
   HotelMapper, AccountMapper, ProfileMapper,
-  ReservationMapper, OfferMapper, ComplaintMapper, RoomMapper
+  ReservationMapper, OfferMapper, ComplaintMapper, RoomMapper,
+  ReviewMapper, NotificationMapper
 } from '~/mappers'
 
 // ---------------------------------------------------------------------------
@@ -116,9 +121,10 @@ export class ApiAccountRepository implements IAccountRepository {
 
   async getByEmail(email: string): Promise<Account | null> {
     try {
-      const dtos = await $fetch<AccountDTO[]>(`${this.base}?email=${encodeURIComponent(email)}`)
-      const list = Array.isArray(dtos) ? dtos : []
-      return list.length > 0 ? AccountMapper.fromDto(list[0]!) : null
+      const raw = await $fetch<AccountDTO[] | AccountDTO>(`${this.base}?email=${encodeURIComponent(email)}`)
+      const list = Array.isArray(raw) ? raw : [raw]
+      const found = list.find(acc => acc?.email?.toLowerCase() === email.toLowerCase())
+      return found ? AccountMapper.fromDto(found) : null
     } catch { return null }
   }
 
@@ -133,11 +139,27 @@ export class ApiAccountRepository implements IAccountRepository {
   }
 
   async create(account: Omit<Account, 'id' | 'registrationDate'>): Promise<Account> {
-    const dto = await $fetch<AccountDTO>(`${useBase()}/auth/register`, {
-      method: 'POST',
-      body: AccountMapper.toDto(account),
-    })
-    return AccountMapper.fromDto(dto)
+    // Backend currently expects French field names (motDePasse, actif)
+    // while legacy frontend payload uses (password, is_active, role).
+    // Try backend-native payload first, then fallback for compatibility.
+    try {
+      const dto = await $fetch<AccountDTO>(`${useBase()}/auth/register`, {
+        method: 'POST',
+        body: {
+          email: account.email,
+          motDePasse: account.password,
+          actif: account.active,
+        },
+      })
+      return AccountMapper.fromDto(dto)
+    }
+    catch {
+      const dto = await $fetch<AccountDTO>(`${useBase()}/auth/register`, {
+        method: 'POST',
+        body: AccountMapper.toDto(account),
+      })
+      return AccountMapper.fromDto(dto)
+    }
   }
 
   async update(id: number, data: Partial<Account>): Promise<Account> {
@@ -226,10 +248,138 @@ export class ApiReservationRepository implements IReservationRepository {
 }
 
 // ============================================================================
+// ApiSystemConfigRepository
+// ============================================================================
+export class ApiSystemConfigRepository implements ISystemConfigRepository {
+  private get base() { return `${useBase()}/system-config` }
+
+  async getAll(): Promise<SystemConfig[]> {
+    const dtos = await $fetch<any[]>(this.base)
+    return dtos.map(d => ({ id: d.id, key: d.cle, value: d.valeur, description: d.description }))
+  }
+
+  async getByKey(key: string): Promise<SystemConfig | null> {
+    try {
+      const dto = await $fetch<any>(`${this.base}/${key}`)
+      return { id: dto.id, key: dto.cle, value: dto.valeur, description: dto.description }
+    } catch { return null }
+  }
+
+  async update(key: string, value: string): Promise<SystemConfig> {
+    // Backend updates by id, but since key is unique, perhaps find by key first
+    // For simplicity, assume update by key works if backend supports it
+    const dto = await $fetch<any>(`${this.base}/${key}`, {
+      method: 'PATCH',
+      body: { valeur: value },
+    })
+    return { id: dto.id, key: dto.cle, value: dto.valeur, description: dto.description }
+  }
+}
+
+// ============================================================================
+// ApiReviewRepository
+// ============================================================================
+export class ApiReviewRepository implements IReviewRepository {
+  private get base() { return `${useBase()}/avis` }
+
+  async getAll(): Promise<Review[]> {
+    const dtos = await $fetch<any[]>(this.base)
+    return dtos.map(ReviewMapper.fromDto)
+  }
+
+  async getByHotel(hotelId: number): Promise<Review[]> {
+    try {
+      const dtos = await $fetch<any[]>(`${this.base}/hotel/${hotelId}`)
+      return dtos.map(ReviewMapper.fromDto)
+    } catch {
+      // Some backend builds don't expose /avis/hotel/:id.
+      // Fallback to all reviews and filter locally.
+      const all = await this.getAll()
+      return all.filter(r => r.hotelId === hotelId)
+    }
+  }
+
+  async getByAccount(accountId: number): Promise<Review[]> {
+    try {
+      const dtos = await $fetch<any[]>(`${this.base}/account/${accountId}`)
+      return dtos.map(ReviewMapper.fromDto)
+    } catch {
+      const all = await this.getAll()
+      return all.filter(r => r.accountId === accountId)
+    }
+  }
+
+  async create(review: Omit<Review, 'id' | 'publicationDate'>): Promise<Review> {
+    const dto = await $fetch<any>(this.base, {
+      method: 'POST',
+      body: ReviewMapper.toDto(review),
+    })
+    return ReviewMapper.fromDto(dto)
+  }
+
+  async update(id: number, data: Partial<Review>): Promise<Review> {
+    const dto = await $fetch<any>(`${this.base}/${id}`, {
+      method: 'PATCH',
+      body: ReviewMapper.toDto(data as Review),
+    })
+    return ReviewMapper.fromDto(dto)
+  }
+
+  async delete(id: number): Promise<void> {
+    await $fetch(`${this.base}/${id}`, { method: 'DELETE' })
+  }
+}
+
+// ============================================================================
+// ApiNotificationRepository
+// ============================================================================
+export class ApiNotificationRepository implements INotificationRepository {
+  private get base() { return `${useBase()}/notifications` }
+
+  async getAll(): Promise<AppNotification[]> {
+    const dtos = await $fetch<NotificationDTO[]>(this.base)
+    return dtos.map(NotificationMapper.fromDto)
+  }
+
+  async getByAccount(accountId: number): Promise<AppNotification[]> {
+    const dtos = await $fetch<NotificationDTO[]>(`${this.base}/account/${accountId}`)
+    return dtos.map(NotificationMapper.fromDto)
+  }
+
+  async getUnread(accountId: number): Promise<AppNotification[]> {
+    // TODO: backend doesn't have this endpoint, filter on frontend
+    const all = await this.getByAccount(accountId)
+    return all.filter(n => !n.read)
+  }
+
+  async markAsRead(id: number): Promise<void> {
+    await $fetch(`${this.base}/${id}/read`, {
+      method: 'PATCH',
+    })
+  }
+
+  async markAllAsRead(accountId: number): Promise<void> {
+    // TODO: backend doesn't have this endpoint
+    // For now, get unread and mark each
+    const unread = await this.getUnread(accountId)
+    await Promise.all(unread.map(n => this.markAsRead(n.id)))
+  }
+
+  async create(notification: Omit<AppNotification, 'id'>): Promise<AppNotification> {
+    // TODO: backend doesn't have create endpoint
+    throw new Error('Create notification not implemented')
+  }
+
+  async delete(id: number): Promise<void> {
+    await $fetch(`${this.base}/${id}`, { method: 'DELETE' })
+  }
+}
+
+// ============================================================================
 // ApiOfferRepository
 // ============================================================================
 export class ApiOfferRepository implements IOfferRepository {
-  private get base() { return `${useBase()}/offers` }
+  private get base() { return `${useBase()}/offres` }
 
   async getAll(): Promise<Offer[]> {
     const dtos = await $fetch<OfferDTO[]>(this.base)
@@ -244,13 +394,13 @@ export class ApiOfferRepository implements IOfferRepository {
   }
 
   async getActive(): Promise<Offer[]> {
-    const dtos = await $fetch<OfferDTO[]>(`${this.base}?is_active=true`)
-    return dtos.map(OfferMapper.fromDto)
+    const dtos = await $fetch<OfferDTO[]>(this.base)
+    return dtos.map(OfferMapper.fromDto).filter(o => o.active)
   }
 
   async getByHotel(hotelId: number): Promise<Offer[]> {
-    const dtos = await $fetch<OfferDTO[]>(`${this.base}?hotel_id=${hotelId}`)
-    return dtos.map(OfferMapper.fromDto)
+    const dtos = await $fetch<OfferDTO[]>(`${this.base}?hotelId=${hotelId}`)
+    return dtos.map(OfferMapper.fromDto).filter(o => o.hotelId === hotelId)
   }
 
   async create(offer: Omit<Offer, 'id'>): Promise<Offer> {
@@ -278,7 +428,7 @@ export class ApiOfferRepository implements IOfferRepository {
 // ApiComplaintRepository
 // ============================================================================
 export class ApiComplaintRepository implements IComplaintRepository {
-  private get base() { return `${useBase()}/complaints` }
+  private get base() { return `${useBase()}/reclamations` }
 
   async getAll(): Promise<Complaint[]> {
     const dtos = await $fetch<ComplaintDTO[]>(this.base)
@@ -327,7 +477,7 @@ export class ApiComplaintRepository implements IComplaintRepository {
 // ApiRoomRepository
 // ============================================================================
 export class ApiRoomRepository implements IRoomRepository {
-  private get base() { return `${useBase()}/rooms` }
+  private get base() { return `${useBase()}/chambres` }
 
   async getAll(): Promise<Room[]> {
     const dtos = await $fetch<RoomDTO[]>(this.base)
@@ -335,7 +485,7 @@ export class ApiRoomRepository implements IRoomRepository {
   }
 
   async getByHotel(hotelId: number): Promise<Room[]> {
-    const dtos = await $fetch<RoomDTO[]>(`${this.base}?hotel_id=${hotelId}`)
+    const dtos = await $fetch<RoomDTO[]>(`${this.base}?hotelId=${hotelId}`)
     return dtos.map(RoomMapper.fromDto)
   }
 
@@ -347,13 +497,13 @@ export class ApiRoomRepository implements IRoomRepository {
   }
 
   async getAvailable(hotelId: number, checkIn: string, checkOut: string): Promise<Room[]> {
-    const dtos = await $fetch<RoomDTO[]>(`${this.base}?hotel_id=${hotelId}&available=true`)
-    return dtos.map(RoomMapper.fromDto)
+    const rooms = await this.getByHotel(hotelId)
+    return rooms.filter(r => r.available)
   }
 
   async getRoomTypes(): Promise<RoomType[]> {
     try {
-      return await $fetch<RoomType[]>(`${useBase()}/room-types`)
+      return await $fetch<RoomType[]>(`${useBase()}/types-chambre`)
     } catch { return [] }
   }
 

@@ -1,9 +1,9 @@
 import { ref } from 'vue'
 import type { Reservation } from '~/types/models'
 import type { ReservationStatus } from '~/types/enums'
-import { MockReservationRepository } from '~/repositories/mock'
+import { ApiReservationRepository } from '~/repositories/api'
 
-const repo = new MockReservationRepository()
+const repo = new ApiReservationRepository()
 
 export function useReservations() {
   const reservations = ref<Reservation[]>([])
@@ -55,5 +55,20 @@ export function useReservations() {
     finally { loading.value = false }
   }
 
-  return { reservations, reservation, loading, error, fetchAll, fetchByAccount, fetchById, create, updateStatus }
+  async function finalizeReservation(data: { hotelId: number; checkIn: string; checkOut: string; guests: number }) {
+    // For now, just create the reservation
+    return create({
+      accountId: 1, // TODO: get from auth
+      roomId: 1, // TODO: select room
+      hotelId: data.hotelId,
+      reservationDate: new Date().toISOString(),
+      checkInDate: data.checkIn,
+      checkOutDate: data.checkOut,
+      numberOfNights: 1, // TODO: calculate
+      totalAmount: 100, // TODO: calculate
+      status: 'CONFIRMED' as ReservationStatus,
+    })
+  }
+
+  return { reservations, reservation, loading, error, fetchAll, fetchByAccount, fetchById, create, updateStatus, finalizeReservation }
 }

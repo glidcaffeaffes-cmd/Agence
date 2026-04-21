@@ -68,18 +68,18 @@
                 <!-- First Name -->
                 <div class="space-y-3">
                   <label class="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Given Name</label>
-                  <input 
-                    type="text" 
-                    :value="currentProfile?.firstName" 
+                  <input
+                    type="text"
+                    v-model="formData.firstName"
                     class="w-full px-6 py-5 bg-neutral-50 border-none rounded-2xl text-neutral-900 font-semibold focus:ring-2 focus:ring-neutral-900/5 focus:bg-white transition-all outline-none shadow-sm"
                   />
                 </div>
                 <!-- Last Name -->
                 <div class="space-y-3">
                   <label class="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Surname</label>
-                  <input 
-                    type="text" 
-                    :value="currentProfile?.lastName" 
+                  <input
+                    type="text"
+                    v-model="formData.lastName"
                     class="w-full px-6 py-5 bg-neutral-50 border-none rounded-2xl text-neutral-900 font-semibold focus:ring-2 focus:ring-neutral-900/5 focus:bg-white transition-all outline-none shadow-sm"
                   />
                 </div>
@@ -108,9 +108,9 @@
                 <label class="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Communication Line</label>
                 <div class="relative group">
                   <span class="absolute left-6 top-1/2 -translate-y-1/2 text-neutral-400 font-bold text-sm">+33</span>
-                  <input 
-                    type="tel" 
-                    :value="currentProfile?.phone" 
+                  <input
+                    type="tel"
+                    v-model="formData.phone"
                     placeholder="6 12 34 56 78"
                     class="w-full pl-16 pr-6 py-5 bg-neutral-50 border-none rounded-2xl text-neutral-900 font-semibold focus:ring-2 focus:ring-neutral-900/5 focus:bg-white transition-all outline-none shadow-sm"
                   />
@@ -119,8 +119,14 @@
 
               <!-- Actions -->
               <div class="pt-10 border-t border-neutral-50 flex justify-end">
-                <button type="submit" class="group flex items-center gap-3 px-12 py-5 bg-neutral-900 text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-neutral-800 transition-all shadow-xl shadow-neutral-900/10 active:scale-95">
-                  Secure Changes <span class="material-symbols-outlined text-[20px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                <button
+                  type="submit"
+                  :disabled="loading"
+                  class="group flex items-center gap-3 px-12 py-5 bg-neutral-900 text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-neutral-800 transition-all shadow-xl shadow-neutral-900/10 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span v-if="loading">Processing...</span>
+                  <span v-else>Secure Changes</span>
+                  <span v-if="!loading" class="material-symbols-outlined text-[20px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
                 </button>
               </div>
             </form>
@@ -133,11 +139,33 @@
 
 <script setup lang="ts">
 import { useAuth } from '~/composables/useAuth'
+import { ref, watch } from 'vue'
 
-const { currentProfile } = useAuth()
+const { currentProfile, updateProfile, loading } = useAuth()
 
-function saveProfile() {
-  alert('Profile updated successfully! (Mock Action)')
+const formData = ref({
+  firstName: '',
+  lastName: '',
+  phone: ''
+})
+
+watch(currentProfile, (profile) => {
+  if (profile) {
+    formData.value = {
+      firstName: profile.firstName || '',
+      lastName: profile.lastName || '',
+      phone: profile.phone || ''
+    }
+  }
+}, { immediate: true })
+
+async function saveProfile() {
+  const success = await updateProfile(formData.value)
+  if (success) {
+    alert('Profile updated successfully!')
+  } else {
+    alert('Failed to update profile. Please try again.')
+  }
 }
 </script>
 

@@ -1,8 +1,8 @@
 import { ref, computed } from 'vue'
 import type { Account, Profile } from '~/types/models'
-import { MockAccountRepository } from '~/repositories/mock'
+import { ApiAccountRepository } from '~/repositories/api'
 
-const repo = new MockAccountRepository()
+const repo = new ApiAccountRepository()
 
 /** Shared singleton auth state */
 const currentAccount = ref<Account | null>(null)
@@ -47,6 +47,19 @@ export function useAuth() {
     currentProfile.value = null
   }
 
+  async function updateProfile(data: Partial<Profile>) {
+    if (!currentAccount.value) return false
+    loading.value = true
+    error.value = null
+    try {
+      const updatedProfile = await repo.updateProfile(currentAccount.value.id, data)
+      currentProfile.value = updatedProfile
+      return true
+    }
+    catch (e: any) { error.value = e.message; return false }
+    finally { loading.value = false }
+  }
+
   /** Auto-login as client for demo */
   async function demoLoginClient() {
     return login('jean.dupont@email.com', 'demo')
@@ -61,6 +74,6 @@ export function useAuth() {
     currentAccount, currentProfile,
     isAuthenticated, isAdmin, accountId,
     loading, error,
-    login, register, logout, demoLoginClient, demoLoginAdmin,
+    login, register, logout, updateProfile, demoLoginClient, demoLoginAdmin,
   }
 }
