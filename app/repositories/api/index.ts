@@ -9,7 +9,7 @@
  *   or set NUXT_PUBLIC_USE_API=true and the factory picks the right impl.
  *
  * All methods use $fetch (Nuxt's isomorphic HTTP client).
- * BASE_URL is read from runtime config — set NUXT_PUBLIC_API_BASE in .env
+ * BASE_URL points to the local Nuxt proxy to avoid browser CORS issues.
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
@@ -31,11 +31,10 @@ import {
 } from '~/mappers'
 
 // ---------------------------------------------------------------------------
-// Helper — resolve base URL from Nuxt runtime config
+// Helper — resolve the same-origin API base from Nuxt runtime config
 // ---------------------------------------------------------------------------
 function useBase(): string {
-  // Configured to point to the shared ngrok endpoint
-  return 'https://4126-41-224-5-209.ngrok-free.app/api'
+  return useRuntimeConfig().public.apiBase || '/api'
 }
 
 // ============================================================================

@@ -3,6 +3,19 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   buildDir: '.nuxt-build',
   devtools: { enabled: true },
+  runtimeConfig: {
+    public: {
+      apiBase: '/api'
+    }
+  },
+  routeRules: {
+    '/api/**': {
+      proxy: {
+        to: 'https://2805-102-173-202-155.ngrok-free.app/api/**',
+        changeOrigin: true
+      }
+    }
+  },
   modules: ['@primevue/nuxt-module'],
   components: [
     { path: '~/components', pathPrefix: false },
