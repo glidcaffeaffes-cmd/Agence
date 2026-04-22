@@ -69,19 +69,19 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="space-y-3">
                   <label class="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Current Passcode</label>
-                  <input type="password" class="w-full px-6 py-5 bg-neutral-50 border-none rounded-2xl text-neutral-900 font-semibold focus:ring-2 focus:ring-neutral-900/5 focus:bg-white transition-all outline-none shadow-sm" />
+                  <input v-model="passwordForm.currentPassword" type="password" class="w-full px-6 py-5 bg-neutral-50 border-none rounded-2xl text-neutral-900 font-semibold focus:ring-2 focus:ring-neutral-900/5 focus:bg-white transition-all outline-none shadow-sm" />
                 </div>
                 <div class="space-y-3">
                   <label class="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">New Passcode</label>
-                  <input type="password" class="w-full px-6 py-5 bg-neutral-50 border-none rounded-2xl text-neutral-900 font-semibold focus:ring-2 focus:ring-neutral-900/5 focus:bg-white transition-all outline-none shadow-sm" />
+                  <input v-model="passwordForm.newPassword" type="password" class="w-full px-6 py-5 bg-neutral-50 border-none rounded-2xl text-neutral-900 font-semibold focus:ring-2 focus:ring-neutral-900/5 focus:bg-white transition-all outline-none shadow-sm" />
                 </div>
                 <div class="space-y-3 md:col-span-2">
                   <label class="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">Verify New Passcode</label>
-                  <input type="password" class="w-full px-6 py-5 bg-neutral-50 border-none rounded-2xl text-neutral-900 font-semibold focus:ring-2 focus:ring-neutral-900/5 focus:bg-white transition-all outline-none shadow-sm" />
+                  <input v-model="passwordForm.confirmPassword" type="password" class="w-full px-6 py-5 bg-neutral-50 border-none rounded-2xl text-neutral-900 font-semibold focus:ring-2 focus:ring-neutral-900/5 focus:bg-white transition-all outline-none shadow-sm" />
                 </div>
               </div>
               <div class="flex justify-end pt-6">
-                <button @click="changePassword" type="button" class="group flex items-center gap-3 px-10 py-5 bg-neutral-900 text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-neutral-800 transition-all shadow-xl shadow-neutral-900/10 active:scale-95">
+                <button @click="changePasswordHandler" type="button" class="group flex items-center gap-3 px-10 py-5 bg-neutral-900 text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-neutral-800 transition-all shadow-xl shadow-neutral-900/10 active:scale-95">
                   Rotate Credentials <span class="material-symbols-outlined text-[20px] group-hover:translate-x-1 transition-transform">sync_lock</span>
                 </button>
               </div>
@@ -188,11 +188,16 @@
 import { useAuth } from '~/composables/useAuth'
 import { ref, watch } from 'vue'
 
-const { currentProfile, updateProfile, loading } = useAuth()
+const { currentProfile, updateProfile, changePassword, loading, error } = useAuth()
 
 const notificationSettings = ref({
   reservation: true,
   promotion: false
+})
+const passwordForm = ref({
+  currentPassword: '',
+  newPassword: '',
+  confirmPassword: ''
 })
 
 watch(currentProfile, (profile) => {
@@ -216,8 +221,24 @@ async function updateNotifications() {
   }
 }
 
-function changePassword() {
-  alert('Password change functionality coming soon!')
+async function changePasswordHandler() {
+  if (!passwordForm.value.currentPassword || !passwordForm.value.newPassword) {
+    alert('Please complete all password fields.')
+    return
+  }
+
+  if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
+    alert('The new password confirmation does not match.')
+    return
+  }
+
+  const success = await changePassword(passwordForm.value.currentPassword, passwordForm.value.newPassword)
+  if (success) {
+    passwordForm.value = { currentPassword: '', newPassword: '', confirmPassword: '' }
+    alert('Password updated successfully!')
+  } else {
+    alert(error.value || 'Failed to update password. Please try again.')
+  }
 }
 </script>
 

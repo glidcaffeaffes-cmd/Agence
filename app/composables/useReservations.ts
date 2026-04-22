@@ -1,9 +1,12 @@
 import { ref } from 'vue'
 import type { Reservation } from '~/types/models'
 import type { ReservationStatus } from '~/types/enums'
-import { ApiReservationRepository } from '~/repositories/api'
+import { ApiReservationRepository, ApiRoomRepository } from '~/repositories/api'
+import { ReservationStatus as ReservationStatusEnum } from '~/types/enums'
+import { useAuth } from '~/composables/useAuth'
 
 const repo = new ApiReservationRepository()
+const roomRepo = new ApiRoomRepository()
 
 export function useReservations() {
   const reservations = ref<Reservation[]>([])
@@ -32,7 +35,7 @@ export function useReservations() {
     finally { loading.value = false }
   }
 
-  async function create(data: Omit<Reservation, 'id' | 'confirmationCode'>) {
+  async function create(data: Omit<Reservation, 'id' | 'confirmationCode'> & { numberOfGuests?: number }) {
     loading.value = true
     try {
       const created = await repo.create(data)
@@ -56,17 +59,46 @@ export function useReservations() {
   }
 
   async function finalizeReservation(data: { hotelId: number; checkIn: string; checkOut: string; guests: number }) {
-    // For now, just create the reservation
+    const { accountId } = useAuth()
+    if (!accountId.value) {
+      error.value = 'You must be signed in to finalize a reservation.'
+      return null
+    }
+
+    const checkInDate = new Date(data.checkIn)
+    const checkOutDate = new Date(data.checkOut)
+    if (Number.isNaN(checkInDate.getTime()) || Number.isNaN(checkOutDate.getTime())) {
+      error.value = 'Invalid reservation dates.'
+      return null
+    }
+
+    const availableRooms = await roomRepo.getAvailable(
+      data.hotelId,
+      checkInDate.toISOString(),
+      checkOutDate.toISOString(),
+    )
+    const room = availableRooms[0]
+    if (!room) {
+      error.value = 'No available room was found for this hotel.'
+      return null
+    }
+
+    const nights = Math.max(
+      1,
+      Math.round((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)),
+    )
+
     return create({
-      accountId: 1, // TODO: get from auth
-      roomId: 1, // TODO: select room
+      accountId: accountId.value,
+      roomId: room.id,
       hotelId: data.hotelId,
       reservationDate: new Date().toISOString(),
-      checkInDate: data.checkIn,
-      checkOutDate: data.checkOut,
-      numberOfNights: 1, // TODO: calculate
-      totalAmount: 100, // TODO: calculate
-      status: 'CONFIRMED' as ReservationStatus,
+      checkInDate: checkInDate.toISOString(),
+      checkOutDate: checkOutDate.toISOString(),
+      numberOfNights: nights,
+      totalAmount: room.pricePerNight * nights,
+      status: ReservationStatusEnum.PENDING as ReservationStatus,
+      numberOfGuests: data.guests,
     })
   }
 

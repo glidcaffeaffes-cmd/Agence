@@ -186,8 +186,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { ApiHotelRepository } from '~/repositories/api'
+import { computed, onMounted } from 'vue'
+import { ApiHotelRepository, ApiReservationRepository } from '~/repositories/api'
 import { useStats } from '~/composables/useStats'
 
 definePageMeta({
@@ -209,7 +209,7 @@ const reservationChart = computed(() => chartData.value || [0, 0, 0, 0, 0, 0, 0]
 // Use stats from backend
 const totalReservations = computed(() => dashboardStats.value?.totalReservations || 0)
 const totalRevenue = computed(() => dashboardStats.value?.totalRevenue || 0)
-const activeHotels = computed(() => dashboardStats.value?.activeHotels || 0)
+const activeHotels = computed(() => dashboardStats.value?.totalHotels || 0)
 
 // Get top 3 rated hotels
 const topHotels = computed(() => {

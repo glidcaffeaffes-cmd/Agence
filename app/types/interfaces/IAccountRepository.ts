@@ -9,5 +9,7 @@ export interface IAccountRepository {
   update(id: number, data: Partial<Account>): Promise<Account>
   deactivate(id: number): Promise<void>
   getProfile(accountId: number): Promise<Profile | null>
+  createProfile(accountId: number, data: Partial<Profile>): Promise<Profile>
   updateProfile(accountId: number, data: Partial<Profile>): Promise<Profile>
+  changePassword(accountId: number, oldPassword: string, newPassword: string): Promise<void>
 }

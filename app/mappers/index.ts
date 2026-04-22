@@ -1,298 +1,531 @@
-/**
- * ─── Admin Mappers ────────────────────────────────────────────────────────────
- * Pure functions: DTO (API JSON) ↔ Domain Model
- * No side-effects. No imports from services/composables.
- * ─────────────────────────────────────────────────────────────────────────────
- */
-
 import type {
-  HotelDTO, AccountDTO, ProfileDTO, ReservationDTO,
-  OfferDTO, ComplaintDTO, RoomDTO, NotificationDTO, ReviewDTO
+  HotelDTO,
+  AccountDTO,
+  ProfileDTO,
+  ReservationDTO,
+  OfferDTO,
+  ComplaintDTO,
+  RoomDTO,
+  RoomTypeDTO,
+  NotificationDTO,
+  ReviewDTO,
 } from '~/types/dto'
 import type {
-  Hotel, Account, Profile, Reservation,
-  Offer, Complaint, Room, AppNotification, Review
+  Hotel,
+  Account,
+  Profile,
+  Reservation,
+  Offer,
+  Complaint,
+  Room,
+  RoomType,
+  AppNotification,
+  Review,
 } from '~/types/models'
 import { ReservationStatus } from '~/types/enums/ReservationStatus'
 import { ComplaintStatus } from '~/types/enums/ComplaintStatus'
+import { NotificationType } from '~/types/enums/NotificationType'
 
-// ─── Hotel ────────────────────────────────────────────────────────────────────
+const hotelFallbackImages = [
+  'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=1200',
+  'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=1200',
+  'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&q=80&w=1200',
+  'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=1200',
+]
+
+function inferRole(email: string): 'client' | 'admin' {
+  return email.toLowerCase().includes('admin') ? 'admin' : 'client'
+}
+
+function fallbackHotelImages(id: number) {
+  return [hotelFallbackImages[id % hotelFallbackImages.length]]
+}
+
+function defaultHotelAmenities(): string[] {
+  return ['Wi-Fi', 'Breakfast', 'Room service', 'Air conditioning']
+}
+
+function mapReservationStatus(status?: string | null): ReservationStatus {
+  switch (status) {
+    case 'CONFIRMEE':
+      return ReservationStatus.CONFIRMED
+    case 'BLOQUEE':
+      return ReservationStatus.BLOCKED
+    case 'ANNULEE':
+      return ReservationStatus.CANCELLED
+    case 'REFUSEE':
+      return ReservationStatus.REFUSED
+    case 'TERMINEE':
+      return ReservationStatus.COMPLETED
+    case 'EN_ATTENTE':
+    default:
+      return ReservationStatus.PENDING
+  }
+}
+
+function toReservationStatus(status?: ReservationStatus) {
+  switch (status) {
+    case ReservationStatus.CONFIRMED:
+      return 'CONFIRMEE'
+    case ReservationStatus.BLOCKED:
+      return 'BLOQUEE'
+    case ReservationStatus.CANCELLED:
+      return 'ANNULEE'
+    case ReservationStatus.REFUSED:
+      return 'REFUSEE'
+    case ReservationStatus.COMPLETED:
+      return 'TERMINEE'
+    case ReservationStatus.PENDING:
+    default:
+      return 'EN_ATTENTE'
+  }
+}
+
+function mapComplaintStatus(status?: string | null): ComplaintStatus {
+  switch (status) {
+    case 'EN_COURS':
+      return ComplaintStatus.IN_PROGRESS
+    case 'RESOLUE':
+      return ComplaintStatus.RESOLVED
+    case 'FERMEE':
+      return ComplaintStatus.CLOSED
+    case 'OUVERTE':
+    default:
+      return ComplaintStatus.OPEN
+  }
+}
+
+function toComplaintStatus(status?: ComplaintStatus) {
+  switch (status) {
+    case ComplaintStatus.IN_PROGRESS:
+      return 'EN_COURS'
+    case ComplaintStatus.RESOLVED:
+      return 'RESOLUE'
+    case ComplaintStatus.CLOSED:
+      return 'FERMEE'
+    case ComplaintStatus.OPEN:
+    default:
+      return 'OUVERTE'
+  }
+}
+
+function mapNotificationType(type?: string | null): NotificationType {
+  switch (type) {
+    case 'ANNULATION_RESERVATION':
+      return NotificationType.RESERVATION_CANCELLATION
+    case 'CONFIRMATION_ANNULATION':
+      return NotificationType.MODIFICATION_CONFIRMATION
+    case 'RAPPEL':
+      return NotificationType.REMINDER
+    case 'PROMOTION':
+      return NotificationType.PROMOTION
+    case 'RECLAMATION':
+      return NotificationType.COMPLAINT
+    case 'CONFIRMATION_RESERVATION':
+    default:
+      return NotificationType.RESERVATION_CONFIRMATION
+  }
+}
+
+function toNotificationType(type?: NotificationType) {
+  switch (type) {
+    case NotificationType.RESERVATION_CANCELLATION:
+      return 'ANNULATION_RESERVATION'
+    case NotificationType.MODIFICATION_CONFIRMATION:
+      return 'CONFIRMATION_ANNULATION'
+    case NotificationType.REMINDER:
+      return 'RAPPEL'
+    case NotificationType.PROMOTION:
+      return 'PROMOTION'
+    case NotificationType.COMPLAINT:
+      return 'RECLAMATION'
+    case NotificationType.RESERVATION_CONFIRMATION:
+    default:
+      return 'CONFIRMATION_RESERVATION'
+  }
+}
+
 export const HotelMapper = {
   fromDto(dto: HotelDTO): Hotel {
-    const name = dto.name ?? dto.nom ?? 'Unknown Hotel'
-    const address = dto.address ?? dto.adresse ?? ''
-    const city = dto.city ?? dto.ville ?? ''
-    const country = dto.country ?? dto.pays ?? ''
-    const stars = dto.stars ?? dto.etoiles ?? 0
-    const description = dto.description ?? ''
-    const phone = dto.phone ?? dto.telephone ?? ''
-    const active = dto.is_active ?? dto.actif ?? false
+    const images =
+      dto.chambres?.flatMap((room) => room.photos ?? []).filter(Boolean) ?? []
+    const amenities =
+      dto.chambres?.flatMap((room) => room.typeChambre?.equipements ?? []) ?? []
 
     return {
-      id:          dto.id,
-      name,
-      address,
-      city,
-      country,
-      stars,
-      description,
-      email:       dto.email,
-      phone,
-      active,
-      images:      dto.images ?? [],
-      amenities:   dto.amenities ?? [],
+      id: dto.id,
+      name: dto.nom,
+      address: dto.adresse,
+      city: dto.ville,
+      country: dto.pays,
+      stars: dto.etoiles,
+      description: dto.description ?? '',
+      email: dto.email,
+      phone: dto.telephone,
+      active: dto.actif,
+      partner: dto.estPartenaire ?? false,
+      agencyVoyageId: dto.agenceVoyageId,
+      images: images.length > 0 ? images : fallbackHotelImages(dto.id),
+      amenities: amenities.length > 0 ? [...new Set(amenities)] : defaultHotelAmenities(),
     }
   },
 
-  toDto(model: Omit<Hotel, 'id'>): Omit<HotelDTO, 'id' | 'created_at'> {
+  toCreateDto(model: Omit<Hotel, 'id'>) {
     return {
-      name:        model.name,
-      address:     model.address,
-      city:        model.city,
-      country:     model.country,
-      stars:       model.stars,
-      description: model.description,
-      email:       model.email,
-      phone:       model.phone,
-      is_active:   model.active,
-      images:      model.images,
-      amenities:   model.amenities,
+      nom: model.name,
+      adresse: model.address,
+      ville: model.city,
+      pays: model.country,
+      etoiles: model.stars,
+      description: model.description || undefined,
+      email: model.email,
+      telephone: model.phone,
+      actif: model.active,
+      estPartenaire: model.partner ?? false,
+      agenceVoyageId: model.agencyVoyageId ?? 1,
+    }
+  },
+
+  toUpdateDto(model: Partial<Hotel>) {
+    return {
+      ...(model.name !== undefined && { nom: model.name }),
+      ...(model.address !== undefined && { adresse: model.address }),
+      ...(model.city !== undefined && { ville: model.city }),
+      ...(model.country !== undefined && { pays: model.country }),
+      ...(model.stars !== undefined && { etoiles: model.stars }),
+      ...(model.description !== undefined && { description: model.description }),
+      ...(model.email !== undefined && { email: model.email }),
+      ...(model.phone !== undefined && { telephone: model.phone }),
+      ...(model.active !== undefined && { actif: model.active }),
+      ...(model.partner !== undefined && { estPartenaire: model.partner }),
+      ...(model.agencyVoyageId !== undefined && { agenceVoyageId: model.agencyVoyageId }),
     }
   },
 }
 
-// ─── Account ──────────────────────────────────────────────────────────────────
 export const AccountMapper = {
   fromDto(dto: AccountDTO): Account {
-    const registrationDate = dto.created_at ?? dto.dateInscription ?? new Date().toISOString()
-    const active = dto.is_active ?? dto.actif ?? true
-    const role = dto.role ?? 'client'
-
     return {
-      id:               dto.id,
-      email:            dto.email,
-      password:         '', // never returned from API
-      registrationDate,
-      active,
-      role,
+      id: dto.id,
+      email: dto.email,
+      password: '',
+      registrationDate: dto.dateInscription,
+      active: dto.actif,
+      role: inferRole(dto.email),
     }
   },
 
-  toDto(model: Omit<Account, 'id' | 'registrationDate'>): Omit<AccountDTO, 'id' | 'created_at'> {
+  toCreateDto(model: Omit<Account, 'id' | 'registrationDate'>) {
     return {
-      email:     model.email,
-      role:      model.role,
-      is_active: model.active,
-      password:  model.password,
+      email: model.email,
+      motDePasse: model.password,
+      actif: model.active,
+    }
+  },
+
+  toUpdateDto(model: Partial<Account>) {
+    return {
+      ...(model.email !== undefined && { email: model.email }),
+      ...(model.password !== undefined && { motDePasse: model.password }),
+      ...(model.active !== undefined && { actif: model.active }),
     }
   },
 }
 
-// ─── Profile ──────────────────────────────────────────────────────────────────
-// Profile model: { id, accountId, firstName, lastName, address, phone, photo }
 export const ProfileMapper = {
-  fromDto(dto: ProfileDTO): Profile {
+  fromDto(dto: ProfileDTO, account?: Pick<Account, 'email' | 'role'>): Profile {
     return {
-      id:                       dto.id,
-      accountId:                dto.account_id,
-      firstName:                dto.first_name,
-      lastName:                 dto.last_name,
-      address:                  dto.nationality ?? '', // DTO has no address — map nationality as fallback
-      phone:                    dto.phone ?? '',
-      photo:                    dto.photo ?? '',
-      notificationsReservation: dto.notifications_reservation ?? true,
-      notificationsPromotion:   dto.notifications_promotion ?? false,
+      id: dto.id,
+      accountId: dto.accountId,
+      firstName: dto.prenom,
+      lastName: dto.nom,
+      address: dto.adresse ?? '',
+      phone: dto.telephone ?? '',
+      photo: dto.photo ?? '',
+      notificationsReservation: dto.notificationsReservation ?? true,
+      notificationsPromotion: dto.notificationsPromotion ?? false,
+      email: account?.email,
+      role: account?.role,
     }
   },
 
-  toDto(model: Partial<Profile>): Partial<ProfileDTO> {
+  toCreateDto(accountId: number, model: Partial<Profile>) {
     return {
-      ...(model.id        !== undefined && { id:          model.id }),
-      ...(model.accountId !== undefined && { account_id: model.accountId }),
-      ...(model.firstName !== undefined && { first_name: model.firstName }),
-      ...(model.lastName  !== undefined && { last_name:  model.lastName }),
-      ...(model.phone     !== undefined && { phone:      model.phone }),
-      ...(model.photo     !== undefined && { photo:      model.photo }),
+      accountId,
+      nom: model.lastName?.trim() || 'User',
+      prenom: model.firstName?.trim() || 'Guest',
+      ...(model.phone !== undefined && { telephone: model.phone }),
+      ...(model.address !== undefined && { adresse: model.address }),
+      ...(model.photo !== undefined && { photo: model.photo }),
+    }
+  },
+
+  toUpdateDto(model: Partial<Profile>) {
+    return {
+      ...(model.firstName !== undefined && { prenom: model.firstName }),
+      ...(model.lastName !== undefined && { nom: model.lastName }),
+      ...(model.phone !== undefined && { telephone: model.phone }),
+      ...(model.address !== undefined && { adresse: model.address }),
+      ...(model.photo !== undefined && { photo: model.photo }),
+      ...(model.notificationsReservation !== undefined && {
+        notificationsReservation: model.notificationsReservation,
+      }),
+      ...(model.notificationsPromotion !== undefined && {
+        notificationsPromotion: model.notificationsPromotion,
+      }),
+    }
+  },
+
+  merge(profile: Profile | null, account: Account | null): Profile | null {
+    if (!profile && !account) {
+      return null
+    }
+
+    return {
+      id: profile?.id ?? 0,
+      accountId: profile?.accountId ?? account?.id ?? 0,
+      firstName: profile?.firstName ?? '',
+      lastName: profile?.lastName ?? '',
+      address: profile?.address ?? '',
+      phone: profile?.phone ?? '',
+      photo: profile?.photo ?? '',
+      notificationsReservation: profile?.notificationsReservation ?? true,
+      notificationsPromotion: profile?.notificationsPromotion ?? false,
+      email: account?.email ?? profile?.email,
+      role: account?.role ?? profile?.role,
     }
   },
 }
 
-// ─── Reservation ──────────────────────────────────────────────────────────────
 export const ReservationMapper = {
   fromDto(dto: ReservationDTO): Reservation {
     return {
-      id:               dto.id,
-      accountId:        dto.account_id,
-      roomId:           dto.room_id,
-      hotelId:          dto.hotel_id,
-      reservationDate:  dto.reservation_date,
-      checkInDate:      dto.check_in_date,
-      checkOutDate:     dto.check_out_date,
-      numberOfNights:   dto.number_of_nights,
-      totalAmount:      dto.total_amount,
-      confirmationCode: dto.confirmation_code,
-      status:           (dto.status as ReservationStatus) ?? ReservationStatus.PENDING,
-      blockReason:      dto.block_reason ?? undefined,
+      id: dto.id,
+      accountId: dto.accountId,
+      roomId: dto.chambreId,
+      hotelId: dto.chambre?.hotelId ?? 0,
+      reservationDate: dto.dateCreation,
+      checkInDate: dto.dateArrivee,
+      checkOutDate: dto.dateDepart,
+      numberOfNights: dto.nombreNuits,
+      totalAmount: dto.montantTotal,
+      confirmationCode: dto.codeConfirmation,
+      status: mapReservationStatus(dto.statut),
+      blockReason: dto.motifBlocage ?? undefined,
     }
   },
 
-  toDto(model: Omit<Reservation, 'id' | 'confirmationCode'>): Partial<ReservationDTO> {
+  toCreateDto(
+    model: Omit<Reservation, 'id' | 'confirmationCode'> & { numberOfGuests?: number },
+  ) {
     return {
-      account_id:       model.accountId,
-      room_id:          model.roomId,
-      hotel_id:         model.hotelId,
-      check_in_date:    model.checkInDate,
-      check_out_date:   model.checkOutDate,
-      number_of_nights: model.numberOfNights,
-      total_amount:     model.totalAmount,
-      status:           model.status,
-      block_reason:     model.blockReason ?? null,
+      accountId: model.accountId,
+      chambreId: model.roomId,
+      dateArrivee: model.checkInDate,
+      dateDepart: model.checkOutDate,
+      nombrePersonnes: model.numberOfGuests ?? 1,
+      nombreNuits: model.numberOfNights,
+      montantTotal: model.totalAmount,
+      codeConfirmation: `VH-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
+      statut: toReservationStatus(model.status),
+      ...(model.blockReason ? { motifBlocage: model.blockReason } : {}),
+    }
+  },
+
+  toUpdateDto(status: ReservationStatus, reason?: string) {
+    return {
+      statut: toReservationStatus(status),
+      ...(reason !== undefined ? { motifBlocage: reason } : {}),
     }
   },
 }
 
-// ─── Offer ────────────────────────────────────────────────────────────────────
 export const OfferMapper = {
   fromDto(dto: OfferDTO): Offer {
-    const hotelId = dto.hotel_id ?? dto.hotelId ?? 0
-    const title = dto.title ?? dto.titre ?? ''
-    const description = dto.description ?? ''
-    const discountRate = dto.discount_rate ?? dto.tauxRemise ?? 0
-    const startDate = dto.start_date ?? dto.dateDebut ?? ''
-    const endDate = dto.end_date ?? dto.dateFin ?? ''
-    const active = dto.is_active ?? dto.active ?? false
-
     return {
-      id:           dto.id,
-      hotelId,
-      title,
-      description,
-      discountRate,
-      startDate,
-      endDate,
-      active,
-      image:        dto.image ?? undefined,
+      id: dto.id,
+      hotelId: dto.hotelId,
+      title: dto.titre,
+      description: dto.description ?? '',
+      discountRate: dto.tauxRemise,
+      startDate: dto.dateDebut,
+      endDate: dto.dateFin,
+      active: dto.active,
     }
   },
 
-  toDto(model: Omit<Offer, 'id'>): Omit<OfferDTO, 'id'> {
+  toCreateDto(model: Omit<Offer, 'id'>) {
     return {
-      hotel_id:      model.hotelId,
-      title:         model.title,
-      description:   model.description,
-      discount_rate: model.discountRate,
-      start_date:    model.startDate,
-      end_date:      model.endDate,
-      is_active:     model.active,
-      image:         model.image ?? null,
+      titre: model.title,
+      description: model.description || undefined,
+      tauxRemise: model.discountRate,
+      dateDebut: model.startDate,
+      dateFin: model.endDate,
+      active: model.active,
+      hotelId: model.hotelId,
+    }
+  },
+
+  toUpdateDto(model: Partial<Offer>) {
+    return {
+      ...(model.title !== undefined && { titre: model.title }),
+      ...(model.description !== undefined && { description: model.description }),
+      ...(model.discountRate !== undefined && { tauxRemise: model.discountRate }),
+      ...(model.startDate !== undefined && { dateDebut: model.startDate }),
+      ...(model.endDate !== undefined && { dateFin: model.endDate }),
+      ...(model.active !== undefined && { active: model.active }),
+      ...(model.hotelId !== undefined && { hotelId: model.hotelId }),
     }
   },
 }
 
-// ─── Complaint ────────────────────────────────────────────────────────────────
 export const ComplaintMapper = {
-  fromDto(dto: any): Complaint {
+  fromDto(dto: ComplaintDTO): Complaint {
     return {
-      id:             dto.id,
-      reservationId:  dto.reservationId || dto.reservation_id,
-      accountId:      dto.accountId || dto.account_id || 0, // backend doesn't have accountId directly
-      subject:        dto.subject || dto.sujet,
-      description:    dto.description,
-      complaintDate:  dto.complaint_date || dto.dateOuverture,
-      resolutionDate: (dto.resolution_date || dto.dateResolution) ?? undefined,
-      agencyResponse: (dto.agency_response || dto.reponseAgence) ?? undefined,
-      status:         (dto.status as ComplaintStatus) ?? ComplaintStatus.OPEN,
+      id: dto.id,
+      reservationId: dto.reservationId,
+      accountId: dto.reservation?.accountId ?? 0,
+      subject: dto.sujet,
+      description: dto.description,
+      complaintDate: dto.dateOuverture,
+      resolutionDate: dto.dateResolution ?? undefined,
+      agencyResponse: dto.reponseAgence ?? undefined,
+      status: mapComplaintStatus(dto.statut),
     }
   },
 
-  toDto(model: Omit<Complaint, 'id' | 'complaintDate'>): any {
+  toCreateDto(model: Omit<Complaint, 'id' | 'complaintDate'> & { agencyVoyageId?: number }) {
     return {
-      reservationId:  model.reservationId,
-      sujet:          model.subject,
-      description:    model.description,
-      reponseAgence:  model.agencyResponse ?? null,
-      statut:         model.status,
+      reservationId: model.reservationId,
+      agenceVoyageId: model.agencyVoyageId ?? 1,
+      sujet: model.subject,
+      description: model.description,
+      statut: toComplaintStatus(model.status),
+    }
+  },
+
+  toUpdateDto(status: ComplaintStatus, response?: string) {
+    return {
+      statut: toComplaintStatus(status),
+      ...(response !== undefined ? { reponseAgence: response } : {}),
     }
   },
 }
 
-// ─── Room ─────────────────────────────────────────────────────────────────────
-// Room model: { id, hotelId, number, floor, pricePerNight, capacity, available, photos, roomTypeId, type?, description?, amenities? }
+export const RoomTypeMapper = {
+  fromDto(dto: RoomTypeDTO): RoomType {
+    return {
+      id: dto.id,
+      label: dto.libelle,
+      description: dto.description ?? '',
+      basePrice: 0,
+      areaSqm: dto.superficieM2,
+      amenities: dto.equipements ?? [],
+    }
+  },
+}
+
 export const RoomMapper = {
   fromDto(dto: RoomDTO): Room {
-    const hotelId = dto.hotel_id ?? dto.hotelId ?? 0
-    const number = dto.room_number ?? dto.numero ?? ''
-    const floor = dto.floor ?? dto.etage ?? 0
-    const pricePerNight = dto.price_per_night ?? dto.prixParNuit ?? 0
-    const available = dto.is_available ?? dto.disponible ?? false
-    const roomTypeId = dto.room_type_id ?? dto.typeChambreId ?? 0
+    const amenities = dto.typeChambre?.equipements ?? []
+    const photos = dto.photos?.length ? dto.photos : fallbackHotelImages(dto.hotelId)
+    const type = dto.typeChambre?.libelle ?? `Room ${dto.numero}`
 
     return {
-      id:            dto.id,
-      hotelId,
-      number,           // DTO: room_number → Model: number
-      floor,
-      pricePerNight,
-      capacity:      dto.capacity,
-      available,          // DTO: is_available → Model: available
-      photos:        dto.images ?? [],          // DTO: images → Model: photos
-      roomTypeId,
-      amenities:     dto.amenities ?? [],
+      id: dto.id,
+      hotelId: dto.hotelId,
+      number: dto.numero,
+      floor: dto.etage,
+      pricePerNight: dto.prixParNuit,
+      capacity: dto.capacite,
+      available: dto.disponible,
+      photos,
+      roomTypeId: dto.typeChambreId,
+      type,
+      description: dto.typeChambre?.description ?? '',
+      amenities,
+      image: photos[0],
+      status: dto.disponible ? 'AVAILABLE' : 'UNAVAILABLE',
     }
   },
 
-  toDto(model: Omit<Room, 'id'>): Omit<RoomDTO, 'id'> {
+  toCreateDto(model: Omit<Room, 'id'>) {
     return {
-      hotel_id:        model.hotelId,
-      room_type_id:    model.roomTypeId,
-      room_number:     model.number,
-      price_per_night: model.pricePerNight,
-      is_available:    model.available,
-      floor:           model.floor,
-      capacity:        model.capacity,
-      images:          model.photos,
-      amenities:       model.amenities ?? [],
+      numero: model.number,
+      etage: model.floor,
+      prixParNuit: model.pricePerNight,
+      capacite: model.capacity,
+      disponible: model.available,
+      photos: model.photos,
+      hotelId: model.hotelId,
+      typeChambreId: model.roomTypeId,
+    }
+  },
+
+  toUpdateDto(model: Partial<Room>) {
+    return {
+      ...(model.number !== undefined && { numero: model.number }),
+      ...(model.floor !== undefined && { etage: model.floor }),
+      ...(model.pricePerNight !== undefined && { prixParNuit: model.pricePerNight }),
+      ...(model.capacity !== undefined && { capacite: model.capacity }),
+      ...(model.available !== undefined && { disponible: model.available }),
+      ...(model.photos !== undefined && { photos: model.photos }),
+      ...(model.hotelId !== undefined && { hotelId: model.hotelId }),
+      ...(model.roomTypeId !== undefined && { typeChambreId: model.roomTypeId }),
     }
   },
 }
 
-// ─── Notification ─────────────────────────────────────────────────────────────
-// AppNotification model: { id, accountId, message, type, sentDate, read }
 export const NotificationMapper = {
   fromDto(dto: NotificationDTO): AppNotification {
     return {
-      id:        dto.id,
-      accountId: dto.account_id,
-      message:   dto.message,                  // DTO has title+message; model has only message
-      type:      dto.type as AppNotification['type'],
-      sentDate:  dto.sent_at,                  // DTO: sent_at → Model: sentDate
-      read:      dto.is_read,                  // DTO: is_read → Model: read
+      id: dto.id,
+      accountId: dto.accountId,
+      message: dto.message,
+      type: mapNotificationType(dto.type),
+      sentDate: dto.dateEnvoi,
+      read: dto.lu,
+    }
+  },
+
+  toCreateDto(model: Omit<AppNotification, 'id'>) {
+    return {
+      accountId: model.accountId,
+      message: model.message,
+      type: toNotificationType(model.type),
     }
   },
 }
 
-// ─── Review ───────────────────────────────────────────────────────────────────
-// Review model: { id, reservationId, accountId, hotelId, rating, comment, publicationDate, visible }
 export const ReviewMapper = {
-  fromDto(dto: any): Review {
+  fromDto(dto: ReviewDTO): Review {
     return {
-      id:              dto.id,
-      reservationId:   dto.reservationId || dto.reservation?.id || 0,
-      hotelId:         dto.hotel_id || dto.reservation?.hotelId || dto.reservation?.hotel_id || 0,
-      accountId:       dto.account_id || dto.reservation?.accountId || dto.reservation?.account_id || 0,
-      rating:          dto.rating || dto.note,
-      comment:         dto.comment || dto.commentaire,
-      publicationDate: dto.published_at || dto.datePublication,
-      visible:         dto.is_visible || dto.valide,
+      id: dto.id,
+      reservationId: dto.reservationId,
+      accountId: dto.reservation?.accountId ?? 0,
+      hotelId: dto.reservation?.chambre?.hotelId ?? 0,
+      rating: dto.note,
+      comment: dto.commentaire ?? '',
+      publicationDate: dto.datePublication,
+      visible: dto.valide,
     }
   },
 
-  toDto(model: Omit<Review, 'id' | 'publicationDate'>): any {
+  toCreateDto(model: Omit<Review, 'id' | 'publicationDate'>) {
     return {
       reservationId: model.reservationId,
-      note:          model.rating,
-      commentaire:   model.comment,
-      valide:        model.visible,
+      note: model.rating,
+      commentaire: model.comment,
+      valide: model.visible,
+    }
+  },
+
+  toUpdateDto(model: Partial<Review>) {
+    return {
+      ...(model.reservationId !== undefined && { reservationId: model.reservationId }),
+      ...(model.rating !== undefined && { note: model.rating }),
+      ...(model.comment !== undefined && { commentaire: model.comment }),
+      ...(model.visible !== undefined && { valide: model.visible }),
     }
   },
 }

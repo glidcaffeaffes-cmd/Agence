@@ -71,13 +71,13 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { MockHotelRepository } from '~/repositories/mock/MockHotelRepository'
+import { ApiHotelRepository } from '~/repositories/api'
 
 definePageMeta({
   layout: 'admin'
 })
 
-const hotelRepo = new MockHotelRepository()
+const hotelRepo = new ApiHotelRepository()
 const { data: hotelsData } = useAsyncData('admin-partners', () => hotelRepo.getAll())
 
 const hotels = computed(() => hotelsData.value || [])

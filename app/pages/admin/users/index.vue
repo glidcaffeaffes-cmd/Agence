@@ -122,7 +122,10 @@ async function toggleActive(acc: Account) {
 
 async function saveEdit() {
   if (!editing.value) return
-  const updated = await service.update(editing.value.id, editing.value)
+  const updated = await service.update(editing.value.id, {
+    email: editing.value.email,
+    active: editing.value.active,
+  })
   const i = accounts.value.findIndex(a => a.id === updated.id)
   if (i !== -1) accounts.value[i] = updated
   editing.value = null

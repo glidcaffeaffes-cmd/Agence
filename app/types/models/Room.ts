@@ -15,4 +15,6 @@ export interface Room {
   type?: string
   description?: string
   amenities?: string[]
+  image?: string
+  status?: 'AVAILABLE' | 'UNAVAILABLE'
 }

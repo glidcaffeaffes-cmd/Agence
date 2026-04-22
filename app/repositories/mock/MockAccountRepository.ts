@@ -50,10 +50,32 @@ export class MockAccountRepository implements IAccountRepository {
     return this.profiles.find(p => p.accountId === accountId) ?? null
   }
 
+  async createProfile(accountId: number, data: Partial<Profile>): Promise<Profile> {
+    const newProfile: Profile = {
+      id: Date.now(),
+      accountId,
+      firstName: data.firstName ?? '',
+      lastName: data.lastName ?? '',
+      address: data.address ?? '',
+      phone: data.phone ?? '',
+      photo: data.photo ?? '',
+      notificationsReservation: data.notificationsReservation ?? true,
+      notificationsPromotion: data.notificationsPromotion ?? false,
+      email: data.email,
+      role: data.role,
+    }
+    this.profiles.push(newProfile)
+    return newProfile
+  }
+
   async updateProfile(accountId: number, data: Partial<Profile>): Promise<Profile> {
     const index = this.profiles.findIndex(p => p.accountId === accountId)
     if (index === -1) throw new Error(`Profile for account ${accountId} not found`)
     this.profiles[index] = { ...this.profiles[index], ...data }
     return this.profiles[index]
+  }
+
+  async changePassword(_accountId: number, _oldPassword: string, _newPassword: string): Promise<void> {
+    return
   }
 }

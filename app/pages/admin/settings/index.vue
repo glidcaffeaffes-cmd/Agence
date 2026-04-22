@@ -102,17 +102,17 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import type { SystemConfig } from '~/types/models'
-import { MockSystemConfigRepository } from '~/repositories/mock'
+import { SystemConfigService } from '~/services'
 
 definePageMeta({ layout: 'admin' })
 
-const repo = new MockSystemConfigRepository()
+const service = new SystemConfigService()
 const configs = ref<SystemConfig[]>([])
 const saved = ref(false)
 
-const general = computed(() => configs.value.filter(c => c.key.startsWith('app_') || c.key.startsWith('site_') || c.key.startsWith('agency_')))
-const policies = computed(() => configs.value.filter(c => c.key.startsWith('booking_') || c.key.startsWith('cancellation_') || c.key.startsWith('max_') || c.key.startsWith('min_')))
 const toggles = computed(() => configs.value.filter(c => c.value === 'true' || c.value === 'false'))
+const policies = computed(() => configs.value.filter(c => /booking|cancellation|max_|min_/i.test(c.key) && !toggles.value.includes(c)))
+const general = computed(() => configs.value.filter(c => !toggles.value.includes(c) && !policies.value.includes(c)))
 
 function formatKey(k: string) {
   return k.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
@@ -120,13 +120,13 @@ function formatKey(k: string) {
 
 async function saveAll() {
   for (const c of configs.value) {
-    await repo.update(c.key, c.value)
+    await service.update(c.key, c.value)
   }
   saved.value = true
   setTimeout(() => (saved.value = false), 3000)
 }
 
-onMounted(async () => { configs.value = await repo.getAll() })
+onMounted(async () => { configs.value = await service.getAll() })
 </script>
 
 <style scoped>

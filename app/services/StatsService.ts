@@ -1,6 +1,6 @@
 import type { IStatsRepository } from '~/types/interfaces'
 import type { DashboardStats, HotelStats } from '~/types/models'
-import { MockStatsRepository } from '~/repositories/mock'
+import { ApiStatsRepository } from '~/repositories/api'
 
 /**
  * StatsService — KPI and analytics aggregation.
@@ -8,7 +8,7 @@ import { MockStatsRepository } from '~/repositories/mock'
 export class StatsService {
   private repo: IStatsRepository
 
-  constructor(repo: IStatsRepository = new MockStatsRepository()) {
+  constructor(repo: IStatsRepository = new ApiStatsRepository()) {
     this.repo = repo
   }
 

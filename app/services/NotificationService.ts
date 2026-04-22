@@ -1,6 +1,6 @@
 import type { INotificationRepository } from '~/types/interfaces'
 import type { AppNotification } from '~/types/models'
-import { MockNotificationRepository } from '~/repositories/mock'
+import { ApiNotificationRepository } from '~/repositories/api'
 
 /**
  * NotificationService — In-app notification management.
@@ -8,7 +8,7 @@ import { MockNotificationRepository } from '~/repositories/mock'
 export class NotificationService {
   private repo: INotificationRepository
 
-  constructor(repo: INotificationRepository = new MockNotificationRepository()) {
+  constructor(repo: INotificationRepository = new ApiNotificationRepository()) {
     this.repo = repo
   }
 

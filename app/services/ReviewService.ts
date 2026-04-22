@@ -1,6 +1,6 @@
 import type { IReviewRepository } from '~/types/interfaces'
 import type { Review } from '~/types/models'
-import { MockReviewRepository } from '~/repositories/mock'
+import { ApiReviewRepository } from '~/repositories/api'
 
 /**
  * ReviewService — Hotel review / rating logic.
@@ -8,7 +8,7 @@ import { MockReviewRepository } from '~/repositories/mock'
 export class ReviewService {
   private repo: IReviewRepository
 
-  constructor(repo: IReviewRepository = new MockReviewRepository()) {
+  constructor(repo: IReviewRepository = new ApiReviewRepository()) {
     this.repo = repo
   }
 

@@ -13,6 +13,8 @@ export interface Hotel {
   email: string
   phone: string
   active: boolean
+  partner?: boolean
+  agencyVoyageId?: number
   images: string[]
   amenities: string[]
 }

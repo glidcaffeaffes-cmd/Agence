@@ -1,21 +1,19 @@
 <template>
   <div class="p-8 max-w-7xl mx-auto font-['Inter'] antialiased">
-    <!-- Header -->
     <div class="flex justify-between items-end mb-8">
       <div>
-        <h2 class="text-3xl font-bold text-[#015081] tracking-tight mb-1">Gestion des Hôtels</h2>
-        <p class="text-outline text-sm font-medium">Gérez votre inventaire hôtelier.</p>
+        <h2 class="text-3xl font-bold text-[#015081] tracking-tight mb-1">Gestion des Hotels</h2>
+        <p class="text-outline text-sm font-medium">Gerez votre inventaire hotelier.</p>
       </div>
       <button
         @click="isModalOpen = true"
         class="bg-[#008F90] text-white px-6 py-2.5 rounded-lg font-semibold flex items-center gap-2 hover:bg-[#007a7a] active:scale-95 transition-all shadow-sm"
       >
         <span class="material-symbols-outlined">add_circle</span>
-        Ajouter un hôtel
+        Ajouter un hotel
       </button>
     </div>
 
-    <!-- Table -->
     <div class="bg-white rounded-xl overflow-hidden shadow-[0_4px_20px_rgba(1,80,129,0.06)]">
       <table class="w-full text-left border-collapse">
         <thead>
@@ -23,7 +21,7 @@
             <th class="px-6 py-4 text-[11px] font-bold text-outline uppercase tracking-widest">ID</th>
             <th class="px-6 py-4 text-[11px] font-bold text-outline uppercase tracking-widest">Nom</th>
             <th class="px-6 py-4 text-[11px] font-bold text-outline uppercase tracking-widest">Ville / Pays</th>
-            <th class="px-6 py-4 text-[11px] font-bold text-outline uppercase tracking-widest">Étoiles</th>
+            <th class="px-6 py-4 text-[11px] font-bold text-outline uppercase tracking-widest">Etoiles</th>
             <th class="px-6 py-4 text-[11px] font-bold text-outline uppercase tracking-widest">Statut</th>
             <th class="px-6 py-4 text-[11px] font-bold text-outline uppercase tracking-widest text-right">Actions</th>
           </tr>
@@ -49,20 +47,16 @@
               <button @click="handleDelete(hotel.id)" class="p-2 hover:bg-white rounded-lg text-error transition-all active:scale-90 shadow-sm border border-transparent hover:border-surface-variant/30">
                 <span class="material-symbols-outlined text-lg">delete</span>
               </button>
-              <button @click="handleView(hotel.id)" class="p-2 hover:bg-white rounded-lg text-primary transition-all active:scale-90 shadow-sm border border-transparent hover:border-surface-variant/30">
-                <span class="material-symbols-outlined text-lg">visibility</span>
-              </button>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- Add Modal -->
     <div v-if="isModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-on-surface/40 backdrop-blur-sm px-4" @click.self="isModalOpen = false">
-      <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden">
+      <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden">
         <div class="bg-[#015081] px-6 py-4 flex items-center justify-between">
-          <h3 class="text-white font-bold tracking-tight">Ajouter un Nouvel Hôtel</h3>
+          <h3 class="text-white font-bold tracking-tight">Ajouter un nouvel hotel</h3>
           <button @click="isModalOpen = false" class="text-white/60 hover:text-white">
             <span class="material-symbols-outlined">close</span>
           </button>
@@ -70,27 +64,47 @@
         <div class="p-8 space-y-4">
           <div class="grid grid-cols-2 gap-4">
             <div class="space-y-1">
-              <label class="text-[11px] font-bold text-outline uppercase">Nom de l'hôtel</label>
-              <input v-model="form.name" class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" placeholder="ex: Palace de la Mer" type="text">
+              <label class="text-[11px] font-bold text-outline uppercase">Nom</label>
+              <input v-model="form.name" class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" type="text">
             </div>
             <div class="space-y-1">
-              <label class="text-[11px] font-bold text-outline uppercase">Étoiles</label>
-              <select v-model="form.stars" class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none">
-                <option :value="5">5 Étoiles</option>
-                <option :value="4">4 Étoiles</option>
-                <option :value="3">3 Étoiles</option>
-              </select>
+              <label class="text-[11px] font-bold text-outline uppercase">Etoiles</label>
+              <input v-model.number="form.stars" class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" type="number" min="1" max="5">
             </div>
           </div>
           <div class="grid grid-cols-2 gap-4">
             <div class="space-y-1">
-              <label class="text-[11px] font-bold text-outline uppercase">Ville</label>
-              <input v-model="form.city" class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" placeholder="Paris" type="text">
+              <label class="text-[11px] font-bold text-outline uppercase">Adresse</label>
+              <input v-model="form.address" class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" type="text">
             </div>
             <div class="space-y-1">
-              <label class="text-[11px] font-bold text-outline uppercase">Pays</label>
-              <input v-model="form.country" class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" placeholder="France" type="text">
+              <label class="text-[11px] font-bold text-outline uppercase">Ville</label>
+              <input v-model="form.city" class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" type="text">
             </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-1">
+              <label class="text-[11px] font-bold text-outline uppercase">Pays</label>
+              <input v-model="form.country" class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" type="text">
+            </div>
+            <div class="space-y-1">
+              <label class="text-[11px] font-bold text-outline uppercase">Agence ID</label>
+              <input v-model.number="form.agencyVoyageId" class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" type="number" min="1">
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-1">
+              <label class="text-[11px] font-bold text-outline uppercase">Email</label>
+              <input v-model="form.email" class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" type="email">
+            </div>
+            <div class="space-y-1">
+              <label class="text-[11px] font-bold text-outline uppercase">Telephone</label>
+              <input v-model="form.phone" class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" type="text">
+            </div>
+          </div>
+          <div class="space-y-1">
+            <label class="text-[11px] font-bold text-outline uppercase">Description</label>
+            <textarea v-model="form.description" rows="3" class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none resize-none"></textarea>
           </div>
           <div class="pt-4 flex gap-3">
             <button @click="isModalOpen = false" class="flex-1 py-2.5 rounded-lg font-bold text-outline hover:bg-surface-container-low transition-colors">Annuler</button>
@@ -100,11 +114,10 @@
       </div>
     </div>
 
-    <!-- Edit Modal -->
     <div v-if="editingHotel" class="fixed inset-0 z-[100] flex items-center justify-center bg-on-surface/40 backdrop-blur-sm px-4" @click.self="editingHotel = null">
       <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden">
         <div class="bg-[#015081] px-6 py-4 flex items-center justify-between">
-          <h3 class="text-white font-bold tracking-tight">Modifier l'Hôtel</h3>
+          <h3 class="text-white font-bold tracking-tight">Modifier l'hotel</h3>
           <button @click="editingHotel = null" class="text-white/60 hover:text-white">
             <span class="material-symbols-outlined">close</span>
           </button>
@@ -116,10 +129,8 @@
               <input v-model="editingHotel.name" class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" type="text">
             </div>
             <div class="space-y-1">
-              <label class="text-[11px] font-bold text-outline uppercase">Étoiles</label>
-              <select v-model="editingHotel.stars" class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none">
-                <option :value="5">5</option><option :value="4">4</option><option :value="3">3</option>
-              </select>
+              <label class="text-[11px] font-bold text-outline uppercase">Etoiles</label>
+              <input v-model.number="editingHotel.stars" class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" type="number" min="1" max="5">
             </div>
           </div>
           <div class="grid grid-cols-2 gap-4">
@@ -155,14 +166,47 @@ const hotels = computed(() => hotelsData.value || [])
 
 const isModalOpen = ref(false)
 const editingHotel = ref<Hotel | null>(null)
-const form = ref({ name: '', city: '', country: '', stars: 5 })
+const form = ref<Omit<Hotel, 'id'>>({
+  name: '',
+  address: '',
+  city: '',
+  country: '',
+  stars: 5,
+  description: '',
+  email: '',
+  phone: '',
+  active: true,
+  partner: false,
+  agencyVoyageId: 1,
+  images: [],
+  amenities: [],
+})
 
-function openEdit(hotel: Hotel) { editingHotel.value = { ...hotel } }
+function resetForm() {
+  form.value = {
+    name: '',
+    address: '',
+    city: '',
+    country: '',
+    stars: 5,
+    description: '',
+    email: '',
+    phone: '',
+    active: true,
+    partner: false,
+    agencyVoyageId: 1,
+    images: [],
+    amenities: [],
+  }
+}
+
+function openEdit(hotel: Hotel) {
+  editingHotel.value = { ...hotel }
+}
 
 async function handleSave() {
-  if (!form.value.name.trim()) return
-  await service.create({ ...form.value, address: '', description: '', email: '', phone: '', active: true, images: [], amenities: [] })
-  form.value = { name: '', city: '', country: '', stars: 5 }
+  await service.create(form.value)
+  resetForm()
   isModalOpen.value = false
   await refresh()
 }
@@ -175,12 +219,8 @@ async function saveEdit() {
 }
 
 async function handleDelete(id: number) {
-  if (!confirm('Supprimer cet hôtel ?')) return
+  if (!confirm('Supprimer cet hotel ?')) return
   await service.delete(id)
   await refresh()
-}
-
-function handleView(id: number) {
-  navigateTo(`/admin/hotels/${id}`)
 }
 </script>

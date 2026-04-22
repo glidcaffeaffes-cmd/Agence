@@ -1,6 +1,6 @@
 import type { ISystemConfigRepository } from '~/types/interfaces'
 import type { SystemConfig } from '~/types/models'
-import { MockSystemConfigRepository } from '~/repositories/mock'
+import { ApiSystemConfigRepository } from '~/repositories/api'
 
 /**
  * SystemConfigService — Application settings and configuration management.
@@ -8,7 +8,7 @@ import { MockSystemConfigRepository } from '~/repositories/mock'
 export class SystemConfigService {
   private repo: ISystemConfigRepository
 
-  constructor(repo: ISystemConfigRepository = new MockSystemConfigRepository()) {
+  constructor(repo: ISystemConfigRepository = new ApiSystemConfigRepository()) {
     this.repo = repo
   }
 

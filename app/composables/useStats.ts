@@ -1,20 +1,26 @@
 import { ref } from 'vue'
 import type { DashboardStats } from '~/types/models'
-import { $fetch } from 'ofetch'
+import { StatsService } from '~/services'
 
-const repo = {
-  getDashboardStats: () => $fetch<DashboardStats>('/api/stats/dashboard')
-}
+const service = new StatsService()
 
 export function useStats() {
   const dashboardStats = ref<DashboardStats | null>(null)
   const loading = ref(false)
+  const error = ref<string | null>(null)
 
   async function fetchDashboard() {
     loading.value = true
-    try { dashboardStats.value = await repo.getDashboardStats() }
-    finally { loading.value = false }
+    error.value = null
+    try {
+      dashboardStats.value = await service.getDashboardStats()
+    } catch (e: any) {
+      error.value = e.message
+      dashboardStats.value = null
+    } finally {
+      loading.value = false
+    }
   }
 
-  return { dashboardStats, loading, fetchDashboard }
+  return { dashboardStats, loading, error, fetchDashboard }
 }

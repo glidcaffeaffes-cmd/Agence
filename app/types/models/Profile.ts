@@ -12,4 +12,6 @@ export interface Profile {
   photo: string
   notificationsReservation: boolean
   notificationsPromotion: boolean
+  email?: string
+  role?: 'client' | 'admin'
 }

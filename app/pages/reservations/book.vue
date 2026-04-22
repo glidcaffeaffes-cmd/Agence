@@ -239,14 +239,21 @@ const checkIn = 'Oct 24, 2026'
 const checkOut = 'Oct 28, 2026'
 
 async function finalizeBooking() {
+  if (!selectedHotel.value) {
+    alert('Please select a hotel before finalizing the reservation.')
+    return
+  }
+
   confirmationCode.value = 'VH-' + Math.random().toString(36).substr(2, 6).toUpperCase()
-  await finalizeReservation({
-    hotelId: selectedHotel.value?.id || 1,
+  const reservation = await finalizeReservation({
+    hotelId: selectedHotel.value.id,
     checkIn,
     checkOut,
     guests: 2
   })
-  currentStep.value = 3
+  if (reservation) {
+    currentStep.value = 3
+  }
 }
 </script>
 

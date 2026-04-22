@@ -296,7 +296,7 @@ function badgeColor(s: string) {
 
 onMounted(async () => {
   await Promise.all([
-    fetchByAccount(accountId.value || 1),
+    accountId.value ? fetchByAccount(accountId.value) : Promise.resolve(),
     fetchHotels()
   ])
 })
