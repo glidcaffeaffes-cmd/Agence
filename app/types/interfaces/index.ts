@@ -1,4 +1,4 @@
-export type { IHotelRepository } from './IHotelRepository'
+export type { IHotelRepository, HotelAvailabilityFilters } from './IHotelRepository'
 export type { IReservationRepository } from './IReservationRepository'
 export type { IAccountRepository } from './IAccountRepository'
 export type { IOfferRepository } from './IOfferRepository'

@@ -3,6 +3,14 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   buildDir: '.nuxt-build',
   devtools: { enabled: true },
+  vite: {
+    optimizeDeps: {
+      include: [
+        '@vue/devtools-core',
+        '@vue/devtools-kit',
+      ]
+    }
+  },
   runtimeConfig: {
     apiServerBase: process.env.NUXT_SERVER_API_BASE || 'http://127.0.0.1:3001/api',
     public: {

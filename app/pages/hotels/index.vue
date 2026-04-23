@@ -99,13 +99,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useHotels } from '~/composables/useHotels'
 import { useRooms } from '~/composables/useRooms'
 
 // Props/Data
-const { hotels, fetchAll: fetchHotels } = useHotels()
+const { hotels, fetchAll: fetchHotels, fetchAvailable: fetchAvailableHotels } = useHotels()
 const { rooms, fetchAll: fetchRooms } = useRooms()
+const route = useRoute()
 
 // State
 const priceRange = ref([0, 1000])
@@ -113,6 +114,8 @@ const selectedStars = ref<number[]>([3, 4, 5])
 const selectedCity = ref<string | null>(null)
 const searchQuery = ref('')
 const sortBy = ref('note')
+const requiredGuests = ref(0)
+const requiredRooms = ref(1)
 
 // Options
 const cityOptions = computed(() => {
@@ -146,6 +149,13 @@ const filteredHotels = computed(() => {
     
     // City
     if (selectedCity.value && h.city !== selectedCity.value) return false
+
+    // Capacity
+    if (requiredGuests.value > 0) {
+      const capacityPerRoom = Math.max(1, Math.ceil(requiredGuests.value / Math.max(requiredRooms.value, 1)))
+      const validRooms = rooms.value.filter(room => room.hotelId === h.id && room.available && room.capacity >= capacityPerRoom)
+      if (validRooms.length < requiredRooms.value) return false
+    }
     
     // Price
     const minP = getHotelMinPrice(h.id)
@@ -173,11 +183,56 @@ function resetFilters() {
   selectedCity.value = null
   searchQuery.value = ''
   sortBy.value = 'note'
+  requiredGuests.value = 0
+  requiredRooms.value = 1
+}
+
+function applyRouteFilters() {
+  const city = typeof route.query.city === 'string' ? route.query.city : null
+  const query = typeof route.query.q === 'string' ? route.query.q : ''
+  const adults = Number.parseInt(typeof route.query.adults === 'string' ? route.query.adults : '0', 10)
+  const children = Number.parseInt(typeof route.query.children === 'string' ? route.query.children : '0', 10)
+  const roomCount = Number.parseInt(typeof route.query.rooms === 'string' ? route.query.rooms : '1', 10)
+
+  selectedCity.value = city
+  searchQuery.value = query
+  requiredGuests.value = Math.max(0, (Number.isNaN(adults) ? 0 : adults) + (Number.isNaN(children) ? 0 : children))
+  requiredRooms.value = Math.max(1, Number.isNaN(roomCount) ? 1 : roomCount)
+}
+
+async function loadHotelsFromRoute() {
+  const city = typeof route.query.city === 'string' ? route.query.city : null
+  const checkIn = typeof route.query.checkIn === 'string' ? route.query.checkIn : undefined
+  const checkOut = typeof route.query.checkOut === 'string' ? route.query.checkOut : undefined
+  const adults = Number.parseInt(typeof route.query.adults === 'string' ? route.query.adults : '0', 10)
+  const children = Number.parseInt(typeof route.query.children === 'string' ? route.query.children : '0', 10)
+  const roomCount = Number.parseInt(typeof route.query.rooms === 'string' ? route.query.rooms : '1', 10)
+  const guests = Math.max(0, (Number.isNaN(adults) ? 0 : adults) + (Number.isNaN(children) ? 0 : children))
+  const hasAvailabilityQuery = Boolean(city || checkIn || checkOut || guests > 0 || roomCount > 1)
+
+  if (hasAvailabilityQuery) {
+    await fetchAvailableHotels({
+      city,
+      checkIn,
+      checkOut,
+      guests: guests || undefined,
+      rooms: Number.isNaN(roomCount) ? 1 : roomCount,
+    })
+    return
+  }
+
+  await fetchHotels()
 }
 
 onMounted(async () => {
-  await Promise.all([fetchHotels(), fetchRooms()])
+  applyRouteFilters()
+  await Promise.all([loadHotelsFromRoute(), fetchRooms()])
 })
+
+watch(() => route.query, async () => {
+  applyRouteFilters()
+  await loadHotelsFromRoute()
+}, { deep: true })
 </script>
 
 <style scoped>

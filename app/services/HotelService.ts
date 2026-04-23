@@ -1,4 +1,4 @@
-import type { IHotelRepository } from '~/types/interfaces'
+import type { IHotelRepository, HotelAvailabilityFilters } from '~/types/interfaces'
 import type { Hotel } from '~/types/models'
 import { AdminRepositoryFactory } from '~/repositories/factory'
 
@@ -35,6 +35,11 @@ export class HotelService {
   async search(query: string): Promise<Hotel[]> {
     if (!query.trim()) return this.repo.getAll()
     return this.repo.search(query.trim())
+  }
+
+  /** Search hotels by availability and occupancy needs */
+  async searchAvailability(filters: HotelAvailabilityFilters): Promise<Hotel[]> {
+    return this.repo.searchAvailability(filters)
   }
 
   /** Filter hotels by city */
