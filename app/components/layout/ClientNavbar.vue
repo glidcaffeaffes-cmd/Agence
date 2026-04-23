@@ -85,7 +85,7 @@
               </div>
               <div
                 v-else
-                class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm"
+                class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-bold text-[10px] brand-text"
               >
                 {{ avatarLetter }}
               </div>
@@ -261,8 +261,9 @@ const isTransparentHeader = computed(
 );
 
 const avatarLetter = computed(() => {
-  const name = currentProfile.value?.firstName || "";
-  return name.trim().charAt(0).toUpperCase() || "?";
+  const first = currentProfile.value?.firstName?.trim().charAt(0).toUpperCase() || "";
+  const last = currentProfile.value?.lastName?.trim().charAt(0).toUpperCase() || "";
+  return (first + last) || "?";
 });
 
 function handleLogout() {

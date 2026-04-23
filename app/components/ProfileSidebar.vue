@@ -109,8 +109,9 @@ const avatarDashOffset = computed(() => {
 
 const avatarLetter = computed(() => {
   if (!isMounted.value) return "?";
-  const name = currentProfile.value?.firstName || "";
-  return name.trim().charAt(0).toUpperCase() || "?";
+  const first = currentProfile.value?.firstName?.trim().charAt(0).toUpperCase() || "";
+  const last = currentProfile.value?.lastName?.trim().charAt(0).toUpperCase() || "";
+  return (first + last) || "?";
 });
 </script>
 
@@ -163,7 +164,7 @@ const avatarLetter = computed(() => {
     var(--color-primary-700)
   );
   color: #ffffff;
-  font-size: 2.2rem;
+  font-size: 1.8rem;
   font-weight: 800;
   display: flex;
   align-items: center;
@@ -173,6 +174,7 @@ const avatarLetter = computed(() => {
   border: 4px solid #ffffff;
   position: relative;
   z-index: 2;
+  font-family: var(--font-family-heading) !important;
 }
 
 .avatar-progress-svg {

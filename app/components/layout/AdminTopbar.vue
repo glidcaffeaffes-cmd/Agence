@@ -38,14 +38,15 @@
 
       <!-- User pill (same pattern as ClientNavbar's nav-avatar-btn) -->
       <button class="user-pill" @click="showMenu = !showMenu">
-        <img
-          src="https://i.pravatar.cc/40?u=admin"
-          alt="Admin"
-          class="user-avatar"
-        />
+        <div v-if="currentProfile?.photo" class="user-avatar-wrap">
+          <img :src="currentProfile.photo" alt="Avatar" class="user-avatar" />
+        </div>
+        <div v-else class="user-avatar-placeholder brand-text">
+          {{ avatarLetter }}
+        </div>
         <div class="user-info">
-          <span class="user-name">Admin</span>
-          <span class="user-role">Super Admin</span>
+          <span class="user-name">{{ currentProfile?.firstName || 'Admin' }}</span>
+          <span class="user-role">{{ currentProfile?.role || 'Staff' }}</span>
         </div>
         <span class="material-symbols-outlined chevron" :class="{ 'rotate-180': showMenu }">expand_more</span>
       </button>
@@ -54,10 +55,15 @@
       <Transition name="dropdown">
         <div v-if="showMenu" class="user-dropdown" @click.outside="showMenu = false">
           <div class="dropdown-header">
-            <img src="https://i.pravatar.cc/40?u=admin" alt="Admin" class="dropdown-avatar" />
+            <div v-if="currentProfile?.photo" class="dropdown-avatar-wrap">
+              <img :src="currentProfile.photo" alt="Avatar" class="dropdown-avatar" />
+            </div>
+            <div v-else class="dropdown-avatar-placeholder brand-text">
+              {{ avatarLetter }}
+            </div>
             <div>
-              <p class="dropdown-name">Admin</p>
-              <p class="dropdown-email">admin@voyagehub.com</p>
+              <p class="dropdown-name">{{ currentProfile?.firstName }} {{ currentProfile?.lastName }}</p>
+              <p class="dropdown-email">{{ currentProfile?.email }}</p>
             </div>
           </div>
           <div class="dropdown-divider"></div>
@@ -81,11 +87,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useAuth } from '~/composables/useAuth'
 
+const { currentProfile, logout } = useAuth()
 const searchQuery = ref('')
 const showMenu = ref(false)
 const notifCount = ref(3)
+
+const avatarLetter = computed(() => {
+  const first = currentProfile.value?.firstName?.trim().charAt(0).toUpperCase() || "";
+  const last = currentProfile.value?.lastName?.trim().charAt(0).toUpperCase() || "";
+  return (first + last) || "A";
+});
+
+function handleLogout() {
+  logout()
+  navigateTo('/login')
+}
 
 function handleSearch() {
   // placeholder — wire to real search when ready
@@ -223,10 +242,18 @@ onMounted(() => {
   border-color: var(--color-primary-400);
   box-shadow: var(--shadow-sm);
 }
-.user-avatar {
+.user-avatar-wrap { width: 32px; height: 32px; border-radius: 50%; overflow: hidden; }
+.user-avatar { width: 100%; height: 100%; object-fit: cover; }
+.user-avatar-placeholder {
   width: 32px; height: 32px;
   border-radius: 50%;
-  object-fit: cover;
+  background: var(--color-primary-600);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
 }
 .user-info { display: flex; flex-direction: column; text-align: left; line-height: 1.2; }
 .user-name { font-size: var(--font-size-sm); font-weight: var(--font-weight-bold); color: var(--color-text); }
@@ -257,7 +284,19 @@ onMounted(() => {
   gap: var(--spacing-3);
   padding: var(--spacing-3) var(--spacing-3) var(--spacing-2);
 }
-.dropdown-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+.dropdown-avatar-wrap { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; }
+.dropdown-avatar { width: 100%; height: 100%; object-fit: cover; }
+.dropdown-avatar-placeholder {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: var(--color-primary-600);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 800;
+}
 .dropdown-name { font-size: var(--font-size-base); font-weight: var(--font-weight-bold); color: var(--color-heading); margin: 0; }
 .dropdown-email { font-size: var(--font-size-sm); color: var(--color-text-muted); margin: 0; }
 .dropdown-divider { height: 1px; background: var(--color-border-soft); margin: var(--spacing-2) 0; }
