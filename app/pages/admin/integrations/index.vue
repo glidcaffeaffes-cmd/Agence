@@ -179,12 +179,12 @@ function deleteKey(key: any) { apiKeys.value = apiKeys.value.filter(k => k.id !=
 </script>
 
 <style scoped>
-.admin-page { padding: 2.5rem; font-family: 'Inter', sans-serif; }
+.admin-page { padding: 2.5rem; }
 .page-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
 .page-eyebrow { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.08em; color: #6d7979; font-weight: 600; margin: 0; }
 .page-title { font-size: 1.625rem; font-weight: 700; color: #015081; margin: 0.25rem 0; letter-spacing: -0.02em; }
 .page-desc { font-size: 0.875rem; color: #3d4949; margin: 0; }
-.btn-primary { display: flex; align-items: center; gap: 0.375rem; padding: 0.625rem 1.25rem; background: linear-gradient(135deg,#006768,#008283); color: #fff; border: none; border-radius: 0.5rem; font-weight: 700; font-size: 0.875rem; cursor: pointer; font-family: 'Inter', sans-serif; }
+.btn-primary { display: flex; align-items: center; gap: 0.375rem; padding: 0.625rem 1.25rem; background: linear-gradient(135deg,#006768,#008283); color: #fff; border: none; border-radius: 0.5rem; font-weight: 700; font-size: 0.875rem; cursor: pointer; }
 
 .new-key-banner { display: flex; align-items: center; gap: 1rem; background: #fff8e1; border: 1.5px solid #CDAF5D; border-radius: 0.75rem; padding: 1rem 1.25rem; margin-bottom: 1.5rem; }
 .new-key-banner .material-symbols-outlined { font-size: 1.5rem; color: #735c10; flex-shrink: 0; }
@@ -240,8 +240,8 @@ function deleteKey(key: any) { apiKeys.value = apiKeys.value.filter(k => k.id !=
 .integ-name { font-size: 0.9375rem; font-weight: 700; color: #151d22; margin: 0; }
 .integ-desc { font-size: 0.75rem; color: #6d7979; margin: 0.125rem 0 0; }
 .integ-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 0.375rem; }
-.btn-integ { padding: 0.25rem 0.625rem; border: 1px solid #bcc9c8; border-radius: 0.375rem; background: transparent; color: #006768; font-size: 0.75rem; font-weight: 600; cursor: pointer; white-space: nowrap; font-family: 'Inter', sans-serif; }
+.btn-integ { padding: 0.25rem 0.625rem; border: 1px solid #bcc9c8; border-radius: 0.375rem; background: transparent; color: #006768; font-size: 0.75rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
 .btn-integ:hover { background: #edf5fc; }
-.btn-ghost-sm { display: flex; align-items: center; gap: 0.25rem; padding: 0.375rem 0.75rem; border: 1px solid #bcc9c8; border-radius: 0.375rem; background: transparent; color: #006768; font-size: 0.8125rem; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
+.btn-ghost-sm { display: flex; align-items: center; gap: 0.25rem; padding: 0.375rem 0.75rem; border: 1px solid #bcc9c8; border-radius: 0.375rem; background: transparent; color: #006768; font-size: 0.8125rem; font-weight: 600; cursor: pointer; }
 .btn-ghost-sm:hover { background: #edf5fc; }
 </style>

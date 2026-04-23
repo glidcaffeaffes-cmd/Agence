@@ -170,8 +170,8 @@
   font-size: 24px;
   font-weight: 800;
   color: var(--color-gray-900);
-  font-family: var(--font-family-heading);
   letter-spacing: -0.02em;
+  font-family: var(--font-family-heading) !important;
 }
 
 .footer-brand .brand-accent {

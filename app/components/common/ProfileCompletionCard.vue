@@ -162,7 +162,6 @@ function scrollToForm() {
   gap: 2px;
 }
 .radial-pct {
-  font-family: var(--font-family-heading);
   font-size: 2.5rem;
   font-weight: 700;
   color: var(--color-heading);
@@ -193,7 +192,6 @@ function scrollToForm() {
   gap: 4px;
 }
 .completion-title {
-  font-family: var(--font-family-heading);
   font-size: var(--font-size-title-lg);
   font-weight: 700;
   color: var(--color-heading);

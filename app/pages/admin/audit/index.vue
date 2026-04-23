@@ -135,7 +135,7 @@ function loadLogs() {
 </script>
 
 <style scoped>
-.admin-page { padding: 2.5rem; font-family: 'Inter', sans-serif; }
+.admin-page { padding: 2.5rem; }
 .page-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
 .page-eyebrow { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.08em; color: #6d7979; font-weight: 600; margin: 0; }
 .page-title { font-size: 1.625rem; font-weight: 700; color: #015081; margin: 0.25rem 0; letter-spacing: -0.02em; }
@@ -143,8 +143,8 @@ function loadLogs() {
 .header-actions { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
 .search-box { display: flex; align-items: center; gap: 0.5rem; background: #fff; border: 1px solid #bcc9c8; border-radius: 0.5rem; padding: 0.5rem 0.875rem; min-width: 200px; }
 .search-box .material-symbols-outlined { font-size: 1.125rem; color: #6d7979; }
-.search-box input { border: none; outline: none; background: transparent; font-size: 0.875rem; color: #151d22; font-family: 'Inter', sans-serif; width: 100%; }
-.filter-select { padding: 0.5rem 0.875rem; border: 1px solid #bcc9c8; border-radius: 0.5rem; font-size: 0.875rem; background: #fff; outline: none; cursor: pointer; font-family: 'Inter', sans-serif; }
+.search-box input { border: none; outline: none; background: transparent; font-size: 0.875rem; color: #151d22; width: 100%; }
+.filter-select { padding: 0.5rem 0.875rem; border: 1px solid #bcc9c8; border-radius: 0.5rem; font-size: 0.875rem; background: #fff; outline: none; cursor: pointer; }
 .btn-refresh { width: 2.25rem; height: 2.25rem; border: 1px solid #bcc9c8; border-radius: 0.5rem; background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #3d4949; transition: all 0.15s; }
 .btn-refresh:hover { background: #edf5fc; color: #006768; }
 .btn-refresh .material-symbols-outlined { font-size: 1.125rem; }

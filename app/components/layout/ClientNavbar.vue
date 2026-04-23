@@ -8,7 +8,7 @@
           <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary-container flex items-center justify-center shadow-sm">
             <span class="material-symbols-outlined text-white text-2xl" style="font-variation-settings: 'FILL' 1;">bolt</span>
           </div>
-          <span class="text-xl font-bold text-on-surface tracking-tight">Voyage<span class="text-primary">Hub</span></span>
+          <span class="text-xl font-bold text-on-surface tracking-tight brand-text">Voyage<span class="text-primary">Hub</span></span>
         </NuxtLink>
 
         <!-- Desktop Links -->

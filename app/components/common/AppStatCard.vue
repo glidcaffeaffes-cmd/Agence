@@ -72,7 +72,7 @@ const trendClass = computed(() => ({
 
 .stat-content { display: flex; flex-direction: column; gap: 2px; }
 .stat-label { font-size: var(--font-size-xs); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 500; }
-.stat-value { font-size: var(--font-size-xl); font-weight: 700; color: var(--color-text-primary); font-family: var(--font-family-heading); }
+.stat-value { font-size: var(--font-size-xl); font-weight: 700; color: var(--color-text-primary); }
 .stat-trend { font-size: var(--font-size-xs); font-weight: 600; display: flex; align-items: center; gap: 2px; }
 .stat-trend--up { color: #16a34a; }
 .stat-trend--down { color: #dc2626; }

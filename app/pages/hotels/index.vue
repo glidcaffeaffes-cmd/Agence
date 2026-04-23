@@ -184,7 +184,6 @@ onMounted(async () => {
 .hotels-page {
   background: white;
   min-height: 100vh;
-  font-family: 'Inter', sans-serif;
 }
 
 .page-header {
@@ -204,7 +203,6 @@ onMounted(async () => {
   font-weight: 800;
   color: #015081;
   margin: 0 0 4px 0;
-  font-family: 'Playfair Display', serif;
 }
 
 .page-subtitle {

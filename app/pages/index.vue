@@ -338,7 +338,6 @@ function getMinPrice(hotelId: number): number {
 }
 
 .section-title {
-  font-family: var(--font-family-heading);
   font-size: 26px;
   font-weight: 800;
   color: var(--color-text-primary);
@@ -433,7 +432,6 @@ function getMinPrice(hotelId: number): number {
 }
 .stat-item { display: flex; flex-direction: column; gap: var(--spacing-1); }
 .stat-number {
-  font-family: var(--font-family-heading);
   font-size: var(--font-size-3xl);
   font-weight: 700;
   color: white;

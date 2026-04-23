@@ -222,14 +222,14 @@ onMounted(fetchDashboard)
 </script>
 
 <style scoped>
-.admin-page { padding: 2.5rem; font-family: 'Inter', sans-serif; }
+.admin-page { padding: 2.5rem; }
 .page-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
 .page-eyebrow { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.08em; color: #6d7979; font-weight: 600; margin: 0; }
 .page-title { font-size: 1.625rem; font-weight: 700; color: #015081; margin: 0.25rem 0; letter-spacing: -0.02em; }
 .page-desc { font-size: 0.875rem; color: #3d4949; margin: 0; }
 .header-actions { display: flex; gap: 0.75rem; align-items: center; }
-.filter-select { padding: 0.5rem 0.875rem; border: 1px solid #bcc9c8; border-radius: 0.5rem; font-size: 0.875rem; background: #fff; outline: none; cursor: pointer; font-family: 'Inter', sans-serif; }
-.btn-export { display: flex; align-items: center; gap: 0.375rem; padding: 0.5rem 1rem; border: 1.5px solid #CDAF5D; border-radius: 0.5rem; background: transparent; color: #735c10; font-weight: 600; font-size: 0.875rem; cursor: pointer; font-family: 'Inter', sans-serif; }
+.filter-select { padding: 0.5rem 0.875rem; border: 1px solid #bcc9c8; border-radius: 0.5rem; font-size: 0.875rem; background: #fff; outline: none; cursor: pointer; }
+.btn-export { display: flex; align-items: center; gap: 0.375rem; padding: 0.5rem 1rem; border: 1.5px solid #CDAF5D; border-radius: 0.5rem; background: transparent; color: #735c10; font-weight: 600; font-size: 0.875rem; cursor: pointer; }
 .btn-export:hover { background: #CDAF5D; color: #015081; }
 
 .loading-state { text-align: center; padding: 4rem; color: #6d7979; }

@@ -137,7 +137,6 @@
   color: var(--sidebar-text);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  font-family: var(--font-family-base);
   border-radius: var(--radius-md);
   transition: all var(--motion-duration-fast) var(--motion-ease-default);
   text-decoration: none;

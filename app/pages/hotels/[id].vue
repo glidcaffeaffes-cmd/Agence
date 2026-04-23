@@ -253,7 +253,6 @@ onMounted(async () => {
   background: #ffffff;
   min-height: 100vh;
   padding-bottom: 80px;
-  font-family: 'Inter', sans-serif;
 }
 
 .loading-state {
@@ -329,7 +328,6 @@ onMounted(async () => {
 }
 
 .hotel-title {
-  font-family: 'Playfair Display', serif;
   font-size: 36px;
   font-weight: 700;
   color: #001d34;
@@ -433,7 +431,6 @@ onMounted(async () => {
 }
 
 .section-title {
-  font-family: 'Playfair Display', serif;
   font-size: 22px;
   color: #001d34;
   margin-bottom: 16px;

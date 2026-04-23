@@ -130,12 +130,12 @@ onMounted(async () => { configs.value = await service.getAll() })
 </script>
 
 <style scoped>
-.admin-page { padding: 2.5rem; font-family: 'Inter', sans-serif; }
+.admin-page { padding: 2.5rem; }
 .page-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
 .page-eyebrow { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.08em; color: #6d7979; font-weight: 600; margin: 0; }
 .page-title { font-size: 1.625rem; font-weight: 700; color: #015081; margin: 0.25rem 0; letter-spacing: -0.02em; }
 .page-desc { font-size: 0.875rem; color: #3d4949; margin: 0; }
-.btn-save { display: flex; align-items: center; gap: 0.375rem; padding: 0.625rem 1.25rem; background: linear-gradient(135deg,#006768,#008283); color: #fff; border: none; border-radius: 0.5rem; font-weight: 700; font-size: 0.875rem; cursor: pointer; font-family: 'Inter', sans-serif; }
+.btn-save { display: flex; align-items: center; gap: 0.375rem; padding: 0.625rem 1.25rem; background: linear-gradient(135deg,#006768,#008283); color: #fff; border: none; border-radius: 0.5rem; font-weight: 700; font-size: 0.875rem; cursor: pointer; }
 .btn-save:hover { opacity: 0.9; }
 
 .alert-success { display: flex; align-items: center; gap: 0.5rem; background: #e0f2f1; border-left: 3px solid #006768; color: #006768; padding: 0.75rem 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; font-weight: 600; font-size: 0.875rem; }
@@ -155,7 +155,7 @@ onMounted(async () => { configs.value = await service.getAll() })
 .config-info { flex: 1; }
 .config-key { font-size: 0.875rem; font-weight: 600; color: #151d22; margin: 0; }
 .config-desc { font-size: 0.75rem; color: #6d7979; margin: 0.125rem 0 0; }
-.config-input { padding: 0.5rem 0.875rem; border: 1px solid #bcc9c8; border-radius: 0.5rem; font-size: 0.875rem; color: #151d22; width: 180px; outline: none; font-family: 'Inter', sans-serif; flex-shrink: 0; }
+.config-input { padding: 0.5rem 0.875rem; border: 1px solid #bcc9c8; border-radius: 0.5rem; font-size: 0.875rem; color: #151d22; width: 180px; outline: none; flex-shrink: 0; }
 .config-input:focus { border-color: #008F90; box-shadow: 0 0 0 2px rgba(0,143,144,0.15); }
 
 .toggle-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }

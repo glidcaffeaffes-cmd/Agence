@@ -117,7 +117,7 @@ defineEmits(['toggle'])
   text-decoration: none;
 }
 .sidebar-brand .brand-icon { font-size: 1.4rem; }
-.sidebar-brand .brand-text { font-size: var(--font-size-base); font-weight: 700; color: white; font-family: var(--font-family-heading); white-space: nowrap; }
+.sidebar-brand .brand-text { font-size: var(--font-size-base); font-weight: 700; color: white; white-space: nowrap; font-family: var(--font-family-heading) !important; }
 .sidebar-brand .brand-accent { color: var(--color-primary-400); }
 
 .sidebar-collapse-btn {

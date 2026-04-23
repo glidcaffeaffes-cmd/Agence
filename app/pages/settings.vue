@@ -11,10 +11,6 @@
     <div class="profile-container">
       <header class="page-header">
         <p class="page-header__label">Account</p>
-        <h1 class="page-header__title">Settings</h1>
-        <p class="page-header__sub">
-          Manage your security protocols and platform preferences.
-        </p>
       </header>
 
       <div class="profile-body">
@@ -30,10 +26,7 @@
                 <span class="material-symbols-outlined">shield</span>
               </div>
               <div>
-                <h3 class="card-header__title">Authentication</h3>
-                <p class="card-header__sub">
-                  Keep your account secure by updating your credentials regularly.
-                </p>
+                <h2 class="card-header__title">Authentication</h2>
               </div>
             </div>
             <div class="card-body">
@@ -72,7 +65,9 @@
                   type="button"
                   class="btn-primary-action"
                 >
-                  <span class="material-symbols-outlined btn-icon">lock_reset</span>
+                  <span class="material-symbols-outlined btn-icon"
+                    >lock_reset</span
+                  >
                   Update Password
                 </button>
               </div>
@@ -137,7 +132,6 @@ async function changePasswordHandler() {
 .profile-page {
   min-height: 100vh;
   background: var(--color-bg-soft);
-  font-family: var(--font-family-base);
 }
 .profile-container {
   max-width: 1200px;
@@ -145,20 +139,16 @@ async function changePasswordHandler() {
   padding: 48px 32px 80px;
 }
 
-/* Header */
-.page-header {
-  margin-bottom: 40px;
-}
 .page-header__label {
   font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.18em;
   color: var(--color-primary-600);
-  margin-bottom: 8px;
+  letter-spacing: 0.12em;
+  margin-bottom: 12px;
+  padding: 4px 12px;
 }
 .page-header__title {
-  font-family: var(--font-family-heading);
   font-size: clamp(32px, 4vw, 44px);
   font-weight: 700;
   color: var(--color-heading);
@@ -210,33 +200,23 @@ async function changePasswordHandler() {
 .card-header {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 24px 28px;
+  gap: 12px;
+  padding: 16px 24px;
   background: var(--color-bg-soft);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border-soft);
 }
 .card-header__icon {
-  width: 44px;
-  height: 44px;
-  flex-shrink: 0;
-  border-radius: var(--radius-xl);
-  background: var(--color-primary-25);
-  border: 1px solid var(--color-primary-100);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-size: 20px;
   color: var(--color-primary-600);
 }
 .card-header__icon .material-symbols-outlined {
-  font-size: 24px;
+  font-size: 20px;
 }
 .card-header__title {
-  font-family: var(--font-family-heading);
-  font-size: var(--font-size-title-lg);
+  font-size: 14px;
   font-weight: 700;
   color: var(--color-heading);
-  letter-spacing: -0.01em;
-  margin-bottom: 2px;
+  margin: 0;
 }
 .card-header__sub {
   font-size: var(--font-size-body-sm);
@@ -277,7 +257,6 @@ async function changePasswordHandler() {
   background: var(--color-bg-soft);
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-xl);
-  font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
   font-weight: 500;
   color: var(--color-text);
@@ -311,7 +290,6 @@ async function changePasswordHandler() {
   border: none;
   border-radius: var(--radius-xl);
   cursor: pointer;
-  font-family: var(--font-family-base);
   font-size: 12px;
   font-weight: 800;
   text-transform: uppercase;
@@ -345,7 +323,6 @@ async function changePasswordHandler() {
   border-radius: var(--radius-xl);
   background: transparent;
   cursor: pointer;
-  font-family: var(--font-family-base);
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;

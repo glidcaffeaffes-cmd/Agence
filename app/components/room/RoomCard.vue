@@ -91,10 +91,10 @@ defineEmits<{ (e: 'book', room: Room): void }>()
 }
 .room-card__badge-row { display: flex; align-items: center; gap: var(--spacing-3); margin-bottom: var(--spacing-2); }
 .room-card__capacity { font-size: var(--font-size-xs); color: var(--color-text-muted); display: flex; align-items: center; gap: 4px; }
-.room-card__title { font-family: var(--font-family-heading); font-size: var(--font-size-lg); font-weight: 600; color: var(--color-text-primary); margin: 0; }
+.room-card__title { font-size: var(--font-size-lg); font-weight: 600; color: var(--color-text-primary); margin: 0; }
 
 .room-card__price-box { display: flex; flex-direction: column; align-items: flex-end; }
-.price-value { font-size: var(--font-size-xl); font-weight: 700; color: var(--color-primary-600); font-family: var(--font-family-heading); line-height: 1; }
+.price-value { font-size: var(--font-size-xl); font-weight: 700; color: var(--color-primary-600); line-height: 1; }
 .price-unit { font-size: var(--font-size-xs); color: var(--color-text-muted); }
 
 .room-card__desc { font-size: var(--font-size-sm); color: var(--color-text-secondary); line-height: 1.5; margin: 0 0 var(--spacing-4); flex: 1; }

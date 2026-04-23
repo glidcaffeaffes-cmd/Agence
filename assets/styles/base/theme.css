@@ -5,7 +5,10 @@
  * Ensure this file is imported globally in the Nuxt application (e.g. via nuxt.config.ts css array).
  */
 
-/* 1. Tokens Imports */
+/* 1. Global Fonts & Icons */
+@import './fonts.css';
+
+/* 2. Tokens Imports */
 @import '../tokens/colors.css';
 @import '../tokens/typography.css';
 @import '../tokens/spacing.css';
@@ -45,13 +48,41 @@ body {
   min-height: 100vh;
 }
 
+/* Form Elements Reset */
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-family-heading);
+  font-family: var(--font-family-heading) !important;
   color: var(--color-heading);
   line-height: var(--line-height-heading);
   margin-top: 0;
   margin-bottom: var(--space-4);
   font-weight: var(--font-weight-bold);
+}
+
+/* Typography Utility Classes */
+.font-heading {
+  font-family: var(--font-family-heading) !important;
+}
+
+.font-base {
+  font-family: var(--font-family-base) !important;
+}
+
+.hero-title,
+.section-title,
+.card-title,
+.display-text,
+.brand-text {
+  font-family: var(--font-family-heading) !important;
+}
+
+p, span, li, label, div {
+  /* Defaulting to base font, but usually inherited from html */
 }
 
 p {

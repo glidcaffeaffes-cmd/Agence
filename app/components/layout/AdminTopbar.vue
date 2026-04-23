@@ -121,7 +121,6 @@ onMounted(() => {
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--topbar-border);
   box-shadow: var(--shadow-sm);
-  font-family: var(--font-family-base);
 }
 
 /* ─── Search (center) ────────────────────────────────── */
@@ -148,7 +147,6 @@ onMounted(() => {
   border-radius: var(--radius-md); /* Standard rectangle shape */
   font-size: var(--font-size-sm);
   color: var(--color-text);
-  font-family: var(--font-family-base);
   outline: none;
   transition: border-color var(--motion-duration-fast), box-shadow var(--motion-duration-fast);
 }
@@ -278,7 +276,6 @@ onMounted(() => {
   border: none;
   cursor: pointer;
   transition: background var(--motion-duration-fast);
-  font-family: var(--font-family-base);
 }
 .dropdown-item .material-symbols-outlined { font-size: 1.25rem; color: var(--color-text-muted); }
 .dropdown-item:hover { background: var(--color-bg-soft); color: var(--color-primary-700); }

@@ -11,7 +11,7 @@
     <div class="profile-container">
       <!-- Page Header -->
       <header class="profile-header">
-        <h1 class="profile-header__title">My Profile</h1>
+        <span class="profile-header__title">My Profile</span>
       </header>
 
       <div class="profile-body">
@@ -407,10 +407,17 @@
                     <div class="payment-methods-empty">
                       <div class="empty-vault">
                         <div class="empty-vault__icon">
-                          <span class="material-symbols-outlined">credit_card_off</span>
+                          <span class="material-symbols-outlined"
+                            >credit_card_off</span
+                          >
                         </div>
-                        <h3 class="empty-vault__title">No payment methods added yet</h3>
-                        <p class="empty-vault__sub">Securely manage your payment options for faster bookings.</p>
+                        <h3 class="empty-vault__title">
+                          No payment methods added yet
+                        </h3>
+                        <p class="empty-vault__sub">
+                          Securely manage your payment options for faster
+                          bookings.
+                        </p>
                         <button class="btn-update">
                           <span class="material-symbols-outlined">add</span>
                           Add Payment Method
@@ -428,14 +435,19 @@
                     <span class="material-symbols-outlined section-icon"
                       >notifications</span
                     >
-                    <h2 class="settings-section__title">Notification Settings</h2>
+                    <h2 class="settings-section__title">
+                      Notification Settings
+                    </h2>
                   </div>
                   <div class="settings-section__body">
                     <div class="toggle-list">
                       <label class="toggle-row">
                         <div class="toggle-info">
                           <span class="toggle-title">Reservation Updates</span>
-                          <span class="toggle-sub">Real-time confirmation of changes and cancellations.</span>
+                          <span class="toggle-sub"
+                            >Real-time confirmation of changes and
+                            cancellations.</span
+                          >
                         </div>
                         <div class="toggle-wrap">
                           <input
@@ -450,7 +462,10 @@
                       <label class="toggle-row">
                         <div class="toggle-info">
                           <span class="toggle-title">Exclusive Offers</span>
-                          <span class="toggle-sub">Invitations to new collections and seasonal deals.</span>
+                          <span class="toggle-sub"
+                            >Invitations to new collections and seasonal
+                            deals.</span
+                          >
                         </div>
                         <div class="toggle-wrap">
                           <input
@@ -479,9 +494,7 @@
 
               <!-- Empty Tabs for now -->
               <div
-                v-if="
-                  ['Documents'].includes(activeTab)
-                "
+                v-if="['Documents'].includes(activeTab)"
                 class="tab-pane tab-pane--empty"
               >
                 <div class="empty-state">
@@ -519,11 +532,14 @@ onMounted(() => {
   }
 });
 
-watch(() => route.query.tab, (newTab) => {
-  if (newTab) {
-    activeTab.value = newTab.toString();
-  }
-});
+watch(
+  () => route.query.tab,
+  (newTab) => {
+    if (newTab) {
+      activeTab.value = newTab.toString();
+    }
+  },
+);
 
 const notificationSettings = ref({ reservation: true, promotion: false });
 
@@ -644,7 +660,7 @@ function getFieldIcon(key: string, value: any) {
 .profile-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 60px 24px 80px;
+  padding: 48px 32px 80px;
 }
 
 /* ──────────────────────────────────────────
@@ -850,7 +866,6 @@ function getFieldIcon(key: string, value: any) {
   background: var(--color-bg-soft);
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-xl);
-  font-family: var(--font-family-base);
   font-size: 14px;
   color: var(--color-text);
   transition: all 0.2s ease;
@@ -1003,6 +1018,26 @@ input[type="date"] ~ .state-icon {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.profile-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.profile-header__title {
+  display: inline-block;
+  padding: 4px 12px;
+  background: var(--color-primary-25);
+  color: var(--color-primary-700);
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 12px;
 }
 
 .toggle-row {

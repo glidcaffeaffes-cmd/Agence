@@ -126,12 +126,12 @@ function savePermissions() {
 </script>
 
 <style scoped>
-.admin-page { padding: 2.5rem; font-family: 'Inter', sans-serif; }
+.admin-page { padding: 2.5rem; }
 .page-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
 .page-eyebrow { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.08em; color: #6d7979; font-weight: 600; margin: 0; }
 .page-title { font-size: 1.625rem; font-weight: 700; color: #015081; margin: 0.25rem 0; letter-spacing: -0.02em; }
 .page-desc { font-size: 0.875rem; color: #3d4949; margin: 0; }
-.btn-primary { display: flex; align-items: center; gap: 0.375rem; padding: 0.625rem 1.25rem; background: linear-gradient(135deg,#006768,#008283); color: #fff; border: none; border-radius: 0.5rem; font-weight: 700; font-size: 0.875rem; cursor: pointer; font-family: 'Inter', sans-serif; }
+.btn-primary { display: flex; align-items: center; gap: 0.375rem; padding: 0.625rem 1.25rem; background: linear-gradient(135deg,#006768,#008283); color: #fff; border: none; border-radius: 0.5rem; font-weight: 700; font-size: 0.875rem; cursor: pointer; }
 
 .roles-grid { display: grid; grid-template-columns: 280px 1fr; gap: 1.5rem; align-items: start; }
 @media (max-width: 800px) { .roles-grid { grid-template-columns: 1fr; } }
@@ -173,9 +173,9 @@ function savePermissions() {
 .perm-check input { accent-color: #006768; cursor: pointer; }
 
 .perm-footer { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #e1e9f0; }
-.btn-ghost { padding: 0.5rem 1rem; border: 1.5px solid #bcc9c8; border-radius: 0.5rem; background: transparent; color: #3d4949; font-size: 0.875rem; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
+.btn-ghost { padding: 0.5rem 1rem; border: 1.5px solid #bcc9c8; border-radius: 0.5rem; background: transparent; color: #3d4949; font-size: 0.875rem; font-weight: 600; cursor: pointer; }
 .btn-ghost:hover { background: #f5faff; }
-.btn-save-perm { padding: 0.5rem 1.25rem; background: linear-gradient(135deg,#006768,#008283); border: none; border-radius: 0.5rem; color: #fff; font-size: 0.875rem; font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif; }
+.btn-save-perm { padding: 0.5rem 1.25rem; background: linear-gradient(135deg,#006768,#008283); border: none; border-radius: 0.5rem; color: #fff; font-size: 0.875rem; font-weight: 700; cursor: pointer; }
 .btn-save-perm:hover { opacity: 0.9; }
 
 .perm-empty { text-align: center; padding: 4rem 2rem; color: #6d7979; }

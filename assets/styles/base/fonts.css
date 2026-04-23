@@ -1,0 +1,10 @@
+/* 
+ * FONTS SYSTEM
+ * Centralized import for external fonts used in the VoyageHub design system.
+ */
+
+/* Google Fonts - Inter (Body) & Playfair Display (Headings) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&display=swap');
+
+/* Icon System - Material Symbols Outlined */
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');

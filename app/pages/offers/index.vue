@@ -42,7 +42,7 @@ onMounted(() => {
 
 .page-header { background: var(--color-surface-primary); border-bottom: 1px solid var(--color-border); padding: var(--spacing-10) var(--spacing-6); margin-bottom: var(--spacing-8); text-align: center; }
 .header-content { max-width: 800px; margin: 0 auto; }
-.page-title { font-family: var(--font-family-heading); font-size: var(--font-size-2xl); font-weight: 700; margin: 0 0 var(--spacing-2); color: var(--color-text-primary); }
+.page-title { font-size: var(--font-size-2xl); font-weight: 700; margin: 0 0 var(--spacing-2); color: var(--color-text-primary); }
 .page-subtitle { font-size: var(--font-size-base); color: var(--color-text-secondary); margin: 0; }
 
 .page-container { max-width: 1280px; margin: 0 auto; padding: 0 var(--spacing-6); }

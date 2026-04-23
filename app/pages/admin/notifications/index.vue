@@ -153,12 +153,12 @@ function previewTemplate() {
 </script>
 
 <style scoped>
-.admin-page { padding: 2.5rem; font-family: 'Inter', sans-serif; }
+.admin-page { padding: 2.5rem; }
 .page-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
 .page-eyebrow { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.08em; color: #6d7979; font-weight: 600; margin: 0; }
 .page-title { font-size: 1.625rem; font-weight: 700; color: #015081; margin: 0.25rem 0; letter-spacing: -0.02em; }
 .page-desc { font-size: 0.875rem; color: #3d4949; margin: 0; }
-.btn-preview { display: flex; align-items: center; gap: 0.375rem; padding: 0.625rem 1.25rem; border: 1.5px solid #006768; background: transparent; color: #006768; font-weight: 700; font-size: 0.875rem; border-radius: 0.5rem; cursor: pointer; font-family: 'Inter', sans-serif; }
+.btn-preview { display: flex; align-items: center; gap: 0.375rem; padding: 0.625rem 1.25rem; border: 1.5px solid #006768; background: transparent; color: #006768; font-weight: 700; font-size: 0.875rem; border-radius: 0.5rem; cursor: pointer; }
 .btn-preview:hover { background: #e0f2f1; }
 
 .notif-layout { display: grid; grid-template-columns: 300px 1fr; gap: 1.5rem; align-items: start; }
@@ -187,9 +187,9 @@ function previewTemplate() {
 
 .field-group { display: flex; flex-direction: column; gap: 0.375rem; margin-bottom: 1.25rem; }
 .field-label { font-size: 0.8125rem; font-weight: 600; color: #151d22; }
-.field-input { padding: 0.625rem 0.875rem; border: 1px solid #bcc9c8; border-radius: 0.5rem; font-size: 0.875rem; color: #151d22; outline: none; transition: border-color 0.15s; font-family: 'Inter', sans-serif; }
+.field-input { padding: 0.625rem 0.875rem; border: 1px solid #bcc9c8; border-radius: 0.5rem; font-size: 0.875rem; color: #151d22; outline: none; transition: border-color 0.15s; }
 .field-input:focus { border-color: #008F90; box-shadow: 0 0 0 2px rgba(0,143,144,0.15); }
-.field-textarea { resize: vertical; min-height: 220px; font-family: 'Inter', sans-serif; line-height: 1.6; }
+.field-textarea { resize: vertical; min-height: 220px; line-height: 1.6; }
 
 .tokens-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 0.375rem; margin-bottom: 0.5rem; }
 .token-label { font-size: 0.6875rem; color: #6d7979; font-weight: 600; }
@@ -197,9 +197,9 @@ function previewTemplate() {
 .token:hover { background: #006768; color: #fff; }
 
 .editor-footer { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #e1e9f0; }
-.btn-ghost { padding: 0.5rem 1rem; border: 1.5px solid #bcc9c8; border-radius: 0.5rem; background: transparent; color: #3d4949; font-size: 0.875rem; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
+.btn-ghost { padding: 0.5rem 1rem; border: 1.5px solid #bcc9c8; border-radius: 0.5rem; background: transparent; color: #3d4949; font-size: 0.875rem; font-weight: 600; cursor: pointer; }
 .btn-ghost:hover { background: #f5faff; }
-.btn-save { display: flex; align-items: center; gap: 0.375rem; padding: 0.5rem 1.25rem; background: linear-gradient(135deg,#006768,#008283); border: none; border-radius: 0.5rem; color: #fff; font-size: 0.875rem; font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif; }
+.btn-save { display: flex; align-items: center; gap: 0.375rem; padding: 0.5rem 1.25rem; background: linear-gradient(135deg,#006768,#008283); border: none; border-radius: 0.5rem; color: #fff; font-size: 0.875rem; font-weight: 700; cursor: pointer; }
 .btn-save:hover { opacity: 0.9; }
 
 .editor-empty { text-align: center; padding: 4rem 2rem; color: #6d7979; }
