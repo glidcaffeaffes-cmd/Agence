@@ -1,4 +1,4 @@
-import type { IHotelRepository } from '~/types/interfaces/IHotelRepository'
+import type { IHotelRepository, HotelAvailabilityFilters } from '~/types/interfaces/IHotelRepository'
 import type { IAccountRepository } from '~/types/interfaces/IAccountRepository'
 import type { IReservationRepository } from '~/types/interfaces/IReservationRepository'
 import type { IOfferRepository } from '~/types/interfaces/IOfferRepository'
@@ -156,6 +156,20 @@ export class ApiHotelRepository implements IHotelRepository {
         .toLowerCase()
         .includes(needle),
     )
+  }
+
+  async searchAvailability(filters: HotelAvailabilityFilters): Promise<Hotel[]> {
+    const params = new URLSearchParams()
+
+    if (filters.city) params.set('city', filters.city)
+    if (filters.checkIn) params.set('checkIn', filters.checkIn)
+    if (filters.checkOut) params.set('checkOut', filters.checkOut)
+    if (filters.guests) params.set('guests', String(filters.guests))
+    if (filters.rooms) params.set('rooms', String(filters.rooms))
+
+    const suffix = params.toString() ? `?${params.toString()}` : ''
+    const dtos = await apiFetch<HotelDTO[]>(`/hotels/search/availability${suffix}`)
+    return dtos.map(HotelMapper.fromDto)
   }
 
   async create(hotel: Omit<Hotel, 'id'>): Promise<Hotel> {

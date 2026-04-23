@@ -1,6 +1,9 @@
-import type { IHotelRepository } from '~/types/interfaces'
+import type { IHotelRepository, HotelAvailabilityFilters } from '~/types/interfaces'
 import type { Hotel } from '~/types/models'
 import { mockHotels } from './data/hotels'
+import { mockRooms } from './data/rooms'
+import { mockReservations } from './data/reservations'
+import { ReservationStatus } from '~/types/enums'
 
 /**
  * Mock implementation of IHotelRepository.
@@ -31,6 +34,36 @@ export class MockHotelRepository implements IHotelRepository {
         h.description.toLowerCase().includes(q)
       )
     )
+  }
+
+  async searchAvailability(filters: HotelAvailabilityFilters): Promise<Hotel[]> {
+    const roomsRequested = Math.max(1, filters.rooms ?? 1)
+    const guests = Math.max(1, filters.guests ?? 1)
+    const capacityPerRoom = Math.max(1, Math.ceil(guests / roomsRequested))
+    const hasDates = Boolean(filters.checkIn && filters.checkOut)
+    const start = hasDates ? new Date(`${filters.checkIn}T00:00:00`) : null
+    const end = hasDates ? new Date(`${filters.checkOut}T00:00:00`) : null
+
+    return this.hotels.filter((hotel) => {
+      if (!hotel.active) return false
+      if (filters.city && hotel.city.toLowerCase() !== filters.city.toLowerCase()) return false
+
+      const availableRooms = mockRooms.filter((room) => {
+        if (room.hotelId !== hotel.id || !room.available || room.capacity < capacityPerRoom) return false
+        if (!start || !end) return true
+
+        const hasBlockingReservation = mockReservations.some((reservation) =>
+          reservation.roomId === room.id &&
+          ![ReservationStatus.CANCELLED, ReservationStatus.REFUSED].includes(reservation.status) &&
+          new Date(reservation.checkInDate) < end &&
+          new Date(reservation.checkOutDate) > start
+        )
+
+        return !hasBlockingReservation
+      })
+
+      return availableRooms.length >= roomsRequested
+    })
   }
 
   async getFeatured(): Promise<Hotel[]> {

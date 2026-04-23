@@ -1,5 +1,6 @@
 import { ref } from 'vue'
 import type { Hotel } from '~/types/models'
+import type { HotelAvailabilityFilters } from '~/types/interfaces'
 import { ApiHotelRepository } from '~/repositories/api'
 
 const apiRepo = new ApiHotelRepository()
@@ -56,10 +57,32 @@ export function useHotels() {
     } finally { loading.value = false }
   }
 
+  async function findAvailable(filters: HotelAvailabilityFilters) {
+    loading.value = true
+    error.value = null
+    try {
+      return await apiRepo.searchAvailability(filters)
+    } catch (e: any) {
+      error.value = e.message
+      return []
+    } finally { loading.value = false }
+  }
+
+  async function fetchAvailable(filters: HotelAvailabilityFilters) {
+    loading.value = true
+    error.value = null
+    try {
+      hotels.value = await apiRepo.searchAvailability(filters)
+    } catch (e: any) {
+      error.value = e.message
+      hotels.value = []
+    } finally { loading.value = false }
+  }
+
   async function getById(id: number) {
     await fetchById(id)
     return hotel.value
   }
 
-  return { hotels, hotel, featured, selectedHotel, loading, error, fetchAll, fetchById, getById, fetchFeatured, search }
+  return { hotels, hotel, featured, selectedHotel, loading, error, fetchAll, fetchById, getById, fetchFeatured, search, findAvailable, fetchAvailable }
 }
