@@ -394,10 +394,93 @@
                 </form>
               </div>
 
+              <!-- Billing Tab -->
+              <div v-if="activeTab === 'Billing'" class="tab-pane">
+                <section class="settings-section">
+                  <div class="settings-section__header">
+                    <span class="material-symbols-outlined section-icon"
+                      >payments</span
+                    >
+                    <h2 class="settings-section__title">Payment Methods</h2>
+                  </div>
+                  <div class="settings-section__body">
+                    <div class="payment-methods-empty">
+                      <div class="empty-vault">
+                        <div class="empty-vault__icon">
+                          <span class="material-symbols-outlined">credit_card_off</span>
+                        </div>
+                        <h3 class="empty-vault__title">No payment methods added yet</h3>
+                        <p class="empty-vault__sub">Securely manage your payment options for faster bookings.</p>
+                        <button class="btn-update">
+                          <span class="material-symbols-outlined">add</span>
+                          Add Payment Method
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              </div>
+
+              <!-- Notifications Tab -->
+              <div v-if="activeTab === 'Notifications'" class="tab-pane">
+                <section class="settings-section">
+                  <div class="settings-section__header">
+                    <span class="material-symbols-outlined section-icon"
+                      >notifications</span
+                    >
+                    <h2 class="settings-section__title">Notification Settings</h2>
+                  </div>
+                  <div class="settings-section__body">
+                    <div class="toggle-list">
+                      <label class="toggle-row">
+                        <div class="toggle-info">
+                          <span class="toggle-title">Reservation Updates</span>
+                          <span class="toggle-sub">Real-time confirmation of changes and cancellations.</span>
+                        </div>
+                        <div class="toggle-wrap">
+                          <input
+                            type="checkbox"
+                            v-model="notificationSettings.reservation"
+                            class="sr-only peer"
+                          />
+                          <div class="toggle-track"></div>
+                        </div>
+                      </label>
+
+                      <label class="toggle-row">
+                        <div class="toggle-info">
+                          <span class="toggle-title">Exclusive Offers</span>
+                          <span class="toggle-sub">Invitations to new collections and seasonal deals.</span>
+                        </div>
+                        <div class="toggle-wrap">
+                          <input
+                            type="checkbox"
+                            v-model="notificationSettings.promotion"
+                            class="sr-only peer"
+                          />
+                          <div class="toggle-track"></div>
+                        </div>
+                      </label>
+                    </div>
+
+                    <div class="form-actions">
+                      <button
+                        @click="updateNotifications"
+                        :disabled="loading"
+                        class="btn-update"
+                      >
+                        <span class="material-symbols-outlined">save</span>
+                        {{ loading ? "Saving..." : "Save Preferences" }}
+                      </button>
+                    </div>
+                  </div>
+                </section>
+              </div>
+
               <!-- Empty Tabs for now -->
               <div
                 v-if="
-                  ['Documents', 'Billing', 'Notifications'].includes(activeTab)
+                  ['Documents'].includes(activeTab)
                 "
                 class="tab-pane tab-pane--empty"
               >
@@ -420,11 +503,29 @@
 <script setup lang="ts">
 definePageMeta({ middleware: "auth" });
 import { useAuth } from "~/composables/useAuth";
-import { ref, watch, computed } from "vue";
+import { ref, watch, computed, onMounted } from "vue";
+import { useRoute } from "vue-router";
 import { useProfileCompletion } from "~/composables/useProfileCompletion";
 
+const route = useRoute();
 const { currentProfile, updateProfile, loading } = useAuth();
 const activeTab = ref("Account Settings");
+
+// Handle query param for tabs
+onMounted(() => {
+  const tabParam = route.query.tab?.toString();
+  if (tabParam) {
+    activeTab.value = tabParam;
+  }
+});
+
+watch(() => route.query.tab, (newTab) => {
+  if (newTab) {
+    activeTab.value = newTab.toString();
+  }
+});
+
+const notificationSettings = ref({ reservation: true, promotion: false });
 
 const travelPrefOptions = [
   "Luxury",
@@ -464,6 +565,10 @@ watch(
         preferredDestinations: profile.preferredDestinations || [],
         travelPreferences: profile.travelPreferences || [],
       };
+      notificationSettings.value = {
+        reservation: profile.notificationsReservation,
+        promotion: profile.notificationsPromotion,
+      };
     }
   },
   { immediate: true },
@@ -475,6 +580,18 @@ async function saveProfile() {
     alert("Profile updated successfully!");
   } else {
     alert("Failed to update profile. Please try again.");
+  }
+}
+
+async function updateNotifications() {
+  const success = await updateProfile({
+    notificationsReservation: notificationSettings.value.reservation,
+    notificationsPromotion: notificationSettings.value.promotion,
+  });
+  if (success) {
+    alert("Notification preferences updated successfully!");
+  } else {
+    alert("Failed to update preferences. Please try again.");
   }
 }
 
@@ -623,6 +740,9 @@ function getFieldIcon(key: string, value: any) {
 }
 
 .btn-update {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   padding: 12px 32px;
   background: var(--color-primary-600);
   color: #ffffff;
@@ -638,6 +758,10 @@ function getFieldIcon(key: string, value: any) {
 .btn-update:hover {
   background: var(--color-primary-700);
   transform: translateY(-1px);
+}
+
+.btn-update .material-symbols-outlined {
+  font-size: 18px;
 }
 
 /* ──────────────────────────────────────────
@@ -824,6 +948,134 @@ input[type="date"] ~ .state-icon {
   border-top: 1px solid var(--color-border-soft);
   display: flex;
   justify-content: flex-end;
+}
+
+/* ──────────────────────────────────────────
+   Billing Styles (Empty Vault)
+────────────────────────────────────────── */
+.empty-vault {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 24px;
+  text-align: center;
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-bg-soft);
+  gap: 16px;
+}
+
+.empty-vault__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+}
+
+.empty-vault__icon .material-symbols-outlined {
+  font-size: 28px;
+}
+
+.empty-vault__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-heading);
+  margin: 0;
+}
+
+.empty-vault__sub {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  max-width: 280px;
+  margin: 0;
+}
+
+/* ──────────────────────────────────────────
+   Toggle Styles
+────────────────────────────────────────── */
+.toggle-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+  border-radius: var(--radius-xl);
+  background: var(--color-bg-soft);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toggle-row:hover {
+  background: #ffffff;
+  border-color: var(--color-border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.toggle-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.toggle-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.toggle-sub {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.toggle-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.toggle-track {
+  width: 44px;
+  height: 24px;
+  background: var(--color-gray-200);
+  border-radius: 20px;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toggle-track::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.peer:checked + .toggle-track {
+  background: var(--color-primary-600);
+}
+
+.peer:checked + .toggle-track::after {
+  transform: translateX(20px);
 }
 
 /* Chips */
