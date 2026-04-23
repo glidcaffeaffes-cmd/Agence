@@ -31,10 +31,6 @@
             class="client-navbar__brand-text text-xl font-bold tracking-tight"
             >Voyage<span class="text-primary">Hub</span></span
           >
-          <span
-            class="text-xl font-bold text-on-surface tracking-tight brand-text"
-            >Voyage<span class="text-primary">Hub</span></span
-          >
         </NuxtLink>
 
         <!-- Desktop Links -->
