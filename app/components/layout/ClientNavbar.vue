@@ -26,12 +26,17 @@
             <span v-if="unreadCount > 0" class="absolute top-1 right-1 w-4 h-4 bg-error text-white text-[10px] font-bold flex items-center justify-center rounded-full">{{ unreadCount }}</span>
           </button>
           
-          <NuxtLink to="/reservations" class="px-4 py-2 rounded-lg text-sm font-semibold text-on-surface-variant hover:text-primary hover:bg-primary/5 transition-all" active-class="text-primary bg-primary/5">My Bookings</NuxtLink>
+
           
           <div class="relative">
             <button class="flex items-center gap-2 pl-1 pr-3 py-1 border border-outline-variant/50 rounded-full hover:border-primary/50 hover:bg-surface-container-lowest transition-all focus:outline-none" @click="showUserMenu = !showUserMenu">
-              <img :src="currentProfile?.photo || 'https://i.pravatar.cc/40'" alt="Avatar" class="w-8 h-8 rounded-full object-cover" />
-              <span class="text-sm font-bold text-on-surface">{{ currentProfile?.firstName || 'User' }}</span>
+              <div v-if="currentProfile?.photo" class="w-8 h-8 rounded-full overflow-hidden">
+                <img :src="currentProfile.photo" alt="Avatar" class="w-full h-full object-cover" />
+              </div>
+              <div v-else class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm">
+                {{ avatarLetter }}
+              </div>
+              <span class="text-sm font-bold text-on-surface">{{ currentProfile?.firstName || '' }}</span>
               <span class="material-symbols-outlined text-[18px] text-on-surface-variant">expand_more</span>
             </button>
             
@@ -72,7 +77,7 @@
         
         <template v-if="isAuthenticated">
           <div class="h-px bg-outline-variant/30 my-4"></div>
-          <NuxtLink to="/reservations" class="block px-4 py-3 rounded-xl text-base font-bold text-on-surface hover:bg-surface-container-lowest transition-colors" @click="mobileOpen = false">My Bookings</NuxtLink>
+
           <NuxtLink to="/profile" class="block px-4 py-3 rounded-xl text-base font-bold text-on-surface hover:bg-surface-container-lowest transition-colors" @click="mobileOpen = false">Profile</NuxtLink>
           <button class="block w-full text-left px-4 py-3 rounded-xl text-base font-bold text-error hover:bg-error-container/30 transition-colors" @click="handleLogout">Logout</button>
         </template>
@@ -87,7 +92,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useAuth } from '~/composables/useAuth'
 import { useNotifications } from '~/composables/useNotifications'
 
@@ -96,6 +101,11 @@ const { unreadCount } = useNotifications()
 
 const showUserMenu = ref(false)
 const mobileOpen = ref(false)
+
+const avatarLetter = computed(() => {
+  const name = currentProfile.value?.firstName || ''
+  return name.trim().charAt(0).toUpperCase() || '?'
+})
 
 function handleLogout() {
   logout()

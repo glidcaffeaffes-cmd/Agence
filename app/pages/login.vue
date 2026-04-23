@@ -111,7 +111,7 @@ import { useRouter } from 'vue-router'
 import { useAuth } from '~/composables/useAuth'
 
 definePageMeta({
-  // using default layout
+  middleware: 'guest'
 })
 
 const router = useRouter()

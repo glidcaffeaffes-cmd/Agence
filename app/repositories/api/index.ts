@@ -72,7 +72,12 @@ function extractErrorMessage(error: unknown, fallback: string) {
 async function apiFetch<T>(path: string, options?: Parameters<typeof $fetch<T>>[1]) {
   try {
     return await $fetch<T>(`${useBase()}${path}`, options)
-  } catch (error) {
+  } catch (error: any) {
+    if (error.status === 401) {
+      const { logout } = useAuth()
+      logout()
+      navigateTo('/login')
+    }
     throw new Error(extractErrorMessage(error, `Request failed: ${path}`))
   }
 }

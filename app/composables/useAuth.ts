@@ -1,7 +1,8 @@
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import type { Account, Profile } from '~/types/models'
 import { ApiAccountRepository } from '~/repositories/api'
 import { ProfileMapper } from '~/mappers'
+import { useCookie } from '#app'
 
 const repo = new ApiAccountRepository()
 
@@ -36,8 +37,18 @@ export function useAuth() {
         return false
       }
 
+      const profile = await repo.getProfile(account.id)
+      const mergedProfile = ProfileMapper.merge(profile, account)
+      
+      currentProfile.value = mergedProfile
       currentAccount.value = account
-      await hydrateProfile(account)
+      
+      const authCookie = useCookie<{ account: Account, profile: Profile | null } | null>('voyagehub_auth', {
+        maxAge: 60 * 60 * 24 * 7,
+        path: '/',
+      })
+      authCookie.value = { account, profile: mergedProfile }
+
       return true
     } catch (e: any) {
       error.value = e.message
@@ -58,7 +69,6 @@ export function useAuth() {
         role: 'client',
       })
 
-      currentAccount.value = account
       const profile = await repo.createProfile(account.id, {
         firstName,
         lastName,
@@ -67,7 +77,16 @@ export function useAuth() {
         email: account.email,
         role: account.role,
       })
-      currentProfile.value = ProfileMapper.merge(profile, account)
+      const mergedProfile = ProfileMapper.merge(profile, account)
+      currentProfile.value = mergedProfile
+      currentAccount.value = account
+      
+      const authCookie = useCookie<{ account: Account, profile: Profile | null } | null>('voyagehub_auth', {
+        maxAge: 60 * 60 * 24 * 7,
+        path: '/',
+      })
+      authCookie.value = { account, profile: mergedProfile }
+
       return true
     } catch (e: any) {
       error.value = e.message
@@ -80,6 +99,8 @@ export function useAuth() {
   function logout() {
     currentAccount.value = null
     currentProfile.value = null
+    const authCookie = useCookie('voyagehub_auth')
+    authCookie.value = null
   }
 
   async function updateProfile(data: Partial<Profile>) {
@@ -129,6 +150,25 @@ export function useAuth() {
     return false
   }
 
+  async function initAuth() {
+    const authCookie = useCookie<{ account: Account, profile: Profile | null } | null>('voyagehub_auth', {
+      maxAge: 60 * 60 * 24 * 7,
+      path: '/',
+    })
+
+    if (authCookie.value && !currentAccount.value) {
+      const data = authCookie.value as any
+      const account = data.account || data
+      const profile = data.profile || null
+      
+      currentAccount.value = account
+      currentProfile.value = profile
+      
+      // Refresh in background
+      hydrateProfile(account).catch(() => {})
+    }
+  }
+
   return {
     currentAccount,
     currentProfile,
@@ -144,5 +184,6 @@ export function useAuth() {
     changePassword,
     demoLoginClient,
     demoLoginAdmin,
+    initAuth,
   }
 }

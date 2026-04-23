@@ -14,4 +14,11 @@ export interface Profile {
   notificationsPromotion: boolean
   email?: string
   role?: 'client' | 'admin'
+  // Extended completion fields
+  dateOfBirth?: string
+  passportNumber?: string
+  preferredDestinations?: string[]
+  travelPreferences?: string[]
+  bio?: string
+  paymentMethod?: string
 }
