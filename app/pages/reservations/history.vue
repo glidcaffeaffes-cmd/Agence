@@ -1,11 +1,11 @@
 <template>
-  <div class="history-page">
+  <div class="profile-page">
     <Head>
       <title>Reservation History — VoyageHub</title>
       <meta name="description" content="View your complete reservation history and past stays with VoyageHub." />
     </Head>
 
-    <div class="history-container">
+    <div class="profile-container">
       <header class="page-header">
         <div>
           <p class="page-header__label">Account</p>
@@ -18,34 +18,13 @@
         </NuxtLink>
       </header>
 
-      <div class="page-body">
+      <div class="profile-body">
         <!-- Sidebar -->
-        <aside class="page-sidebar">
-          <div class="sidebar-card">
-            <div class="sidebar-hero">
-              <div class="avatar-letter" :title="currentProfile?.firstName">{{ avatarLetter }}</div>
-              <h2 class="sidebar-name">{{ currentProfile?.firstName || 'Guest' }} {{ currentProfile?.lastName || '' }}</h2>
+        <ProfileSidebar />
 
-            </div>
-            <nav class="sidebar-nav">
-              <NuxtLink to="/profile" class="sidebar-nav__link">
-                <span class="material-symbols-outlined">person</span>
-                Identity
-              </NuxtLink>
-              <NuxtLink to="/reservations/history" class="sidebar-nav__link sidebar-nav__link--active">
-                <span class="material-symbols-outlined">history</span>
-                Reservations
-              </NuxtLink>
-              <NuxtLink to="/settings" class="sidebar-nav__link">
-                <span class="material-symbols-outlined">settings</span>
-                Settings
-              </NuxtLink>
-            </nav>
-          </div>
-        </aside>
 
         <!-- Main -->
-        <main class="page-main">
+        <main class="profile-main">
 
           <!-- Filters -->
           <div class="filters-card">
@@ -174,14 +153,6 @@ const { reservations, loading: rLoading, fetchByAccount } = useReservations()
 const { hotels, fetchAll: fetchHotels, loading: hLoading } = useHotels()
 
 const search = ref('')
-const statusFilter = ref('')
-const yearFilter = ref('')
-const loading = computed(() => rLoading.value || hLoading.value)
-
-const avatarLetter = computed(() => {
-  const name = currentProfile.value?.firstName || ''
-  return name.trim().charAt(0).toUpperCase() || '?'
-})
 
 const statuses = [
   { value: '', label: 'All' },
@@ -252,8 +223,8 @@ onMounted(async () => {
 .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
 
 /* Page shell */
-.history-page { min-height: 100vh; background: var(--color-bg-soft); font-family: var(--font-family-base); }
-.history-container { max-width: 1200px; margin: 0 auto; padding: 48px 32px 80px; }
+.profile-page { min-height: 100vh; background: var(--color-bg-soft); font-family: var(--font-family-base); }
+.profile-container { max-width: 1200px; margin: 0 auto; padding: 48px 32px 80px; }
 
 /* Header */
 .page-header { margin-bottom: 40px; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
@@ -271,37 +242,10 @@ onMounted(async () => {
 .btn-book .material-symbols-outlined { font-size: 20px; }
 
 /* Layout */
-.page-body { display: flex; gap: 28px; align-items: flex-start; }
-.page-sidebar { width: 264px; flex-shrink: 0; position: sticky; top: 88px; }
-.page-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+.profile-body { display: flex; gap: 28px; align-items: flex-start; }
+.profile-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
 
-/* Sidebar card */
-.sidebar-card { background: var(--color-card); border: 1px solid var(--color-border-soft); border-radius: var(--radius-2xl); box-shadow: var(--shadow-card); overflow: hidden; }
-.sidebar-hero {
-  padding: 32px 24px 28px;
-  background: linear-gradient(135deg, var(--color-navy-700) 0%, var(--color-primary-600) 100%);
-  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px;
-  position: relative; overflow: hidden;
-}
-.sidebar-hero::before {
-  content: ''; position: absolute; inset: 0; pointer-events: none;
-  background: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Ccircle cx='20' cy='20' r='15'/%3E%3C/g%3E%3C/svg%3E") repeat;
-}
-.avatar-letter {
-  position: relative; z-index: 1; width: 88px; height: 88px; border-radius: 50%;
-  background: rgba(255,255,255,0.15); border: 3px solid rgba(255,255,255,0.35);
-  backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-family-heading); font-size: 2.4rem; font-weight: 700; color: #fff;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.2); transition: transform 0.3s, box-shadow 0.3s;
-}
-.avatar-letter:hover { transform: scale(1.05); box-shadow: 0 12px 32px rgba(0,0,0,0.3); }
-.sidebar-name { position: relative; z-index: 1; font-family: var(--font-family-heading); font-size: var(--font-size-title-md); font-weight: 700; color: #fff; line-height: 1.2; }
-.sidebar-role { position: relative; z-index: 1; display: inline-block; padding: 4px 14px; border-radius: 999px; background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.28); color: rgba(255,255,255,0.92); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; }
-.sidebar-nav { padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
-.sidebar-nav__link { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: var(--radius-xl); text-decoration: none; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-text-muted); transition: all 0.2s; }
-.sidebar-nav__link:hover { background: var(--color-bg-soft); color: var(--color-text); }
-.sidebar-nav__link--active { background: var(--color-primary-50); color: var(--color-primary-700); box-shadow: inset 0 0 0 1px var(--color-primary-200); }
-.sidebar-nav__link .material-symbols-outlined { font-size: 20px; }
+/* ProfileSidebar.vue handles sidebar styles */
 
 /* Filters */
 .filters-card { background: var(--color-card); border: 1px solid var(--color-border-soft); border-radius: var(--radius-2xl); box-shadow: var(--shadow-card); padding: 20px 24px; display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
@@ -372,10 +316,10 @@ onMounted(async () => {
 .status-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 999px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; }
 .status-badge .material-symbols-outlined { font-size: 13px; }
 .status-badge--mobile { display: none; }
-.badge--confirmed { background: var(--color-primary-50); color: var(--color-primary-700); border: 1px solid var(--color-primary-200); }
-.badge--completed { background: var(--color-success-50); color: var(--color-success-700); border: 1px solid var(--color-success-200); }
-.badge--cancelled { background: var(--color-danger-50); color: var(--color-danger-700); border: 1px solid var(--color-danger-200); }
-.badge--pending   { background: var(--color-warning-50); color: var(--color-warning-700); border: 1px solid var(--color-warning-200); }
+.badge--confirmed { background: var(--color-primary-25); color: var(--color-primary-700); border: 1px solid var(--color-primary-200); }
+.badge--completed { background: var(--color-success-25); color: var(--color-success-700); border: 1px solid var(--color-success-200); }
+.badge--cancelled { background: var(--color-danger-25); color: var(--color-danger-700); border: 1px solid var(--color-danger-200); }
+.badge--pending   { background: var(--color-warning-25); color: var(--color-warning-700); border: 1px solid var(--color-warning-200); }
 .badge--blocked   { background: var(--color-gray-100); color: var(--color-gray-600); border: 1px solid var(--color-gray-300); }
 
 .btn-view-hotel { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border: 1.5px solid var(--color-border); border-radius: var(--radius-xl); text-decoration: none; font-size: 12px; font-weight: 700; color: var(--color-primary-600); transition: all 0.2s; white-space: nowrap; }
@@ -384,10 +328,7 @@ onMounted(async () => {
 
 /* Responsive */
 @media (max-width: 900px) {
-  .page-body { flex-direction: column; }
-  .page-sidebar { width: 100%; position: static; }
-  .sidebar-hero { flex-direction: row; text-align: left; padding: 20px; gap: 16px; }
-  .avatar-letter { width: 64px; height: 64px; font-size: 1.8rem; flex-shrink: 0; }
+  .profile-body { flex-direction: column; }
   .status-badge--desktop { display: none; }
   .status-badge--mobile { display: inline-flex; }
 }

@@ -8,6 +8,7 @@
    */
 
   /* PRIMARY (Teal) */
+  --color-primary-25:  #f0f9f8;
   --color-primary-50:  #e0f2f1;
   --color-primary-100: #b2dfdb;
   --color-primary-200: #80cbc4;
@@ -24,6 +25,7 @@
   --color-primary-dark:  var(--color-primary-700);
 
   /* ACCENT (Gold) */
+  --color-accent-25:  #fefdfa;
   --color-accent-50:  #fcfaf5;
   --color-accent-100: #f8f4e9;
   --color-accent-200: #eee2c8;
@@ -40,6 +42,7 @@
   --color-accent-dark:  var(--color-accent-700);
 
   /* SECONDARY (Blue/Deep Sea) */
+  --color-secondary-25:  #f3f7fa;
   --color-secondary-50:  #e7eff6;
   --color-secondary-100: #cfe5ff;
   --color-secondary-200: #99cbff;
@@ -56,6 +59,7 @@
   --color-secondary-dark:  var(--color-secondary-700);
 
   /* NAVY */
+  --color-navy-25:  #f2f6f9;
   --color-navy-50:  #e6eef3;
   --color-navy-100: #ccdce6;
   --color-navy-200: #99b9cd;
@@ -96,6 +100,7 @@
    */
   
   /* SUCCESS (Emerald leaning) */
+  --color-success-25:  #f6fefb;
   --color-success-50:  #ecfdf5;
   --color-success-100: #d1fae5;
   --color-success-200: #a7f3d0;
@@ -110,6 +115,7 @@
   --color-success: var(--color-success-500);
 
   /* WARNING (Amber) */
+  --color-warning-25:  #fffdf5;
   --color-warning-50:  #fffbeb;
   --color-warning-100: #fef3c7;
   --color-warning-200: #fde68a;
@@ -124,6 +130,7 @@
   --color-warning: var(--color-warning-500);
 
   /* DANGER (Rose) */
+  --color-danger-25:  #fff8f9;
   --color-danger-50:  #fff1f2;
   --color-danger-100: #ffe4e6;
   --color-danger-200: #fecdd3;
@@ -138,6 +145,7 @@
   --color-danger: var(--color-danger-500);
 
   /* INFO (Sky) */
+  --color-info-25:  #f8fcff;
   --color-info-50:  #f0f9ff;
   --color-info-100: #e0f2fe;
   --color-info-200: #bae6fd;

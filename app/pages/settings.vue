@@ -1,45 +1,24 @@
 <template>
-  <div class="settings-page">
+  <div class="profile-page">
     <Head>
       <title>Settings &amp; Security — VoyageHub</title>
       <meta name="description" content="Manage your VoyageHub account settings and security." />
     </Head>
 
-    <div class="settings-container">
+    <div class="profile-container">
       <header class="page-header">
         <p class="page-header__label">Account</p>
         <h1 class="page-header__title">Settings</h1>
         <p class="page-header__sub">Manage your security protocols and platform preferences.</p>
       </header>
 
-      <div class="page-body">
+      <div class="profile-body">
         <!-- Sidebar -->
-        <aside class="page-sidebar">
-          <div class="profile-card sidebar-card">
-            <div class="sidebar-hero">
-              <div class="avatar-letter" :title="currentProfile?.firstName">{{ avatarLetter }}</div>
-              <h2 class="sidebar-name">{{ currentProfile?.firstName || 'Guest' }} {{ currentProfile?.lastName || '' }}</h2>
+        <ProfileSidebar />
 
-            </div>
-            <nav class="sidebar-nav">
-              <NuxtLink to="/profile" class="sidebar-nav__link">
-                <span class="material-symbols-outlined">person</span>
-                Identity
-              </NuxtLink>
-              <NuxtLink to="/reservations/history" class="sidebar-nav__link">
-                <span class="material-symbols-outlined">history</span>
-                Reservations
-              </NuxtLink>
-              <NuxtLink to="/settings" class="sidebar-nav__link sidebar-nav__link--active">
-                <span class="material-symbols-outlined">settings</span>
-                Settings
-              </NuxtLink>
-            </nav>
-          </div>
-        </aside>
 
         <!-- Main -->
-        <main class="page-main">
+        <main class="profile-main">
 
           <!-- Authentication Card -->
           <div class="content-card">
@@ -171,11 +150,6 @@ const { currentProfile, updateProfile, changePassword, loading, error } = useAut
 const notificationSettings = ref({ reservation: true, promotion: false })
 const passwordForm = ref({ currentPassword: '', newPassword: '', confirmPassword: '' })
 
-const avatarLetter = computed(() => {
-  const name = currentProfile.value?.firstName || ''
-  return name.trim().charAt(0).toUpperCase() || '?'
-})
-
 watch(currentProfile, (profile) => {
   if (profile) {
     notificationSettings.value = {
@@ -219,12 +193,12 @@ async function changePasswordHandler() {
 }
 
 /* Page shell */
-.settings-page {
+.profile-page {
   min-height: 100vh;
   background: var(--color-bg-soft);
   font-family: var(--font-family-base);
 }
-.settings-container {
+.profile-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 48px 32px 80px;
@@ -244,67 +218,10 @@ async function changePasswordHandler() {
 .page-header__sub { font-size: var(--font-size-body-md); color: var(--color-text-muted); }
 
 /* Layout */
-.page-body { display: flex; gap: 28px; align-items: flex-start; }
-.page-sidebar { width: 264px; flex-shrink: 0; position: sticky; top: 88px; }
-.page-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 24px; }
+.profile-body { display: flex; gap: 28px; align-items: flex-start; }
+.profile-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 24px; }
 
-/* Base card */
-.profile-card, .content-card {
-  background: var(--color-card);
-  border: 1px solid var(--color-border-soft);
-  border-radius: var(--radius-2xl);
-  box-shadow: var(--shadow-card);
-  overflow: hidden;
-}
-
-/* Sidebar */
-.sidebar-card { display: flex; flex-direction: column; }
-.sidebar-hero {
-  padding: 32px 24px 28px;
-  background: linear-gradient(135deg, var(--color-navy-700) 0%, var(--color-primary-600) 100%);
-  display: flex; flex-direction: column; align-items: center;
-  text-align: center; gap: 12px; position: relative; overflow: hidden;
-}
-.sidebar-hero::before {
-  content: ''; position: absolute; inset: 0;
-  background: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Ccircle cx='20' cy='20' r='15'/%3E%3C/g%3E%3C/svg%3E") repeat;
-  pointer-events: none;
-}
-.avatar-letter {
-  width: 88px; height: 88px; border-radius: var(--radius-full);
-  background: rgba(255,255,255,0.15); border: 3px solid rgba(255,255,255,0.35);
-  backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-family-heading); font-size: 2.4rem; font-weight: 700;
-  color: #fff; letter-spacing: -0.02em;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-  transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative; z-index: 1;
-}
-.avatar-letter:hover { transform: scale(1.05); box-shadow: 0 12px 32px rgba(0,0,0,0.3); }
-.sidebar-name {
-  position: relative; z-index: 1;
-  font-family: var(--font-family-heading); font-size: var(--font-size-title-md);
-  font-weight: 700; color: #fff; letter-spacing: -0.01em; line-height: 1.2;
-}
-.sidebar-role {
-  position: relative; z-index: 1; display: inline-block;
-  padding: 4px 14px; border-radius: var(--radius-pill);
-  background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.28);
-  color: rgba(255,255,255,0.92); font-size: 10px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.14em;
-}
-.sidebar-nav { padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
-.sidebar-nav__link {
-  display: flex; align-items: center; gap: 10px; padding: 12px 16px;
-  border-radius: var(--radius-xl); text-decoration: none;
-  font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
-  color: var(--color-text-muted); transition: all 0.2s ease;
-}
-.sidebar-nav__link:hover { background: var(--color-bg-soft); color: var(--color-text); }
-.sidebar-nav__link--active {
-  background: var(--color-primary-50); color: var(--color-primary-700);
-  box-shadow: inset 0 0 0 1px var(--color-primary-200);
-}
-.sidebar-nav__link .material-symbols-outlined { font-size: 20px; }
+/* ProfileSidebar.vue handles sidebar styles */
 
 /* Content cards */
 .card-header {
@@ -314,7 +231,7 @@ async function changePasswordHandler() {
 }
 .card-header__icon {
   width: 44px; height: 44px; flex-shrink: 0; border-radius: var(--radius-xl);
-  background: var(--color-primary-50); border: 1px solid var(--color-primary-100);
+  background: var(--color-primary-25); border: 1px solid var(--color-primary-100);
   display: flex; align-items: center; justify-content: center;
   color: var(--color-primary-600);
 }
@@ -443,14 +360,10 @@ input[type="checkbox"]:checked ~ .toggle-wrap .toggle-track::after {
 
 /* Responsive */
 @media (max-width: 900px) {
-  .page-body { flex-direction: column; }
-  .page-sidebar { width: 100%; position: static; }
-  .sidebar-hero { flex-direction: row; text-align: left; padding: 20px; gap: 16px; }
-  .avatar-letter { width: 64px; height: 64px; font-size: 1.8rem; flex-shrink: 0; }
-  .sidebar-name, .sidebar-role { position: static; }
+  .profile-body { flex-direction: column; }
 }
 @media (max-width: 600px) {
-  .settings-container { padding: 28px 16px 60px; }
+  .profile-container { padding: 28px 16px 60px; }
   .form-row { grid-template-columns: 1fr; }
   .mfa-block { flex-direction: column; align-items: flex-start; }
 }

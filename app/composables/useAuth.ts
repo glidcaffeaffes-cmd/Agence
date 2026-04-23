@@ -6,20 +6,20 @@ import { useCookie } from '#app'
 
 const repo = new ApiAccountRepository()
 
-const currentAccount = ref<Account | null>(null)
-const currentProfile = ref<Profile | null>(null)
+export function useAuth() {
+  const currentAccount = useState<Account | null>('auth_account', () => null)
+  const currentProfile = useState<Profile | null>('auth_profile', () => null)
 
-async function hydrateProfile(account: Account | null) {
-  if (!account) {
-    currentProfile.value = null
-    return
+  async function hydrateProfile(account: Account | null) {
+    if (!account) {
+      currentProfile.value = null
+      return
+    }
+
+    const profile = await repo.getProfile(account.id)
+    currentProfile.value = ProfileMapper.merge(profile, account)
   }
 
-  const profile = await repo.getProfile(account.id)
-  currentProfile.value = ProfileMapper.merge(profile, account)
-}
-
-export function useAuth() {
   const loading = ref(false)
   const error = ref<string | null>(null)
 
