@@ -17,31 +17,43 @@
           </div>
         </div>
 
-        <div ref="heroFilterRef" class="hero-filter-shell">
+        <div ref="heroFilterRef" class="hero-filter-shell" :class="{ 'hero-filter-shell--panel-open': activeFilterPanel !== null || destinationOverlayOpen }">
           <div class="hero-filter-bar">
-            <div class="hero-filter-field hero-filter-field--destination">
+            <div class="hero-filter-field hero-filter-field--destination" :class="{ 'hero-filter-field--open': destinationOverlayOpen }" @click="activeFilterPanel = null">
               <span class="material-symbols-outlined hero-filter-field__icon">bed</span>
-              <Select
-                v-model="selectedCity"
-                :options="cityOptions"
-                optionLabel="label"
-                optionValue="value"
-                placeholder="Choose a city"
-                filter
-                showClear
-                class="hero-filter-select"
-              />
+              <div class="hero-filter-field__copy">
+                <span class="hero-filter-field__label">Destination</span>
+                <Select
+                  v-model="selectedCity"
+                  :options="cityOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Choose a city"
+                  filter
+                  appendTo="self"
+                  @show="handleDestinationShow"
+                  @hide="handleDestinationHide"
+                  class="hero-filter-select"
+                />
+              </div>
+              <span class="material-symbols-outlined hero-filter-field__chevron">expand_more</span>
             </div>
 
             <button type="button" class="hero-filter-trigger" :class="{ 'hero-filter-trigger--open': activeFilterPanel === 'dates' }" @click="toggleFilterPanel('dates')">
               <span class="material-symbols-outlined hero-filter-trigger__icon">calendar_month</span>
-              <span class="hero-filter-trigger__value">{{ dateRangeLabel }}</span>
+              <span class="hero-filter-trigger__copy">
+                <span class="hero-filter-trigger__label">Dates</span>
+                <span class="hero-filter-trigger__value">{{ dateRangeLabel }}</span>
+              </span>
               <span class="material-symbols-outlined hero-filter-trigger__chevron">expand_more</span>
             </button>
 
             <button type="button" class="hero-filter-trigger" :class="{ 'hero-filter-trigger--open': activeFilterPanel === 'guests' }" @click="toggleFilterPanel('guests')">
               <span class="material-symbols-outlined hero-filter-trigger__icon">person</span>
-              <span class="hero-filter-trigger__value">{{ guestSummary }}</span>
+              <span class="hero-filter-trigger__copy">
+                <span class="hero-filter-trigger__label">Guests & rooms</span>
+                <span class="hero-filter-trigger__value">{{ guestSummary }}</span>
+              </span>
               <span class="material-symbols-outlined hero-filter-trigger__chevron">expand_more</span>
             </button>
 
@@ -67,7 +79,7 @@
               :minDate="today"
               :numberOfMonths="calendarMonths"
               :manualInput="false"
-              class="hero-datepicker"
+              :class="['hero-datepicker', { 'hero-datepicker--two-months': calendarMonths === 2 }]"
             />
 
             <div class="hero-filter-chip-row">
@@ -226,6 +238,7 @@ const benefits = [
 
 const heroFilterRef = ref<HTMLElement | null>(null)
 const activeFilterPanel = ref<'dates' | 'guests' | null>(null)
+const destinationOverlayOpen = ref(false)
 const today = startOfDay(new Date())
 const selectedCity = ref<string | null>(null)
 const stayDates = ref<(Date | null)[] | null>([today, addDays(today, 7)])
@@ -299,7 +312,17 @@ watch(children, (count) => {
 }, { immediate: true })
 
 function toggleFilterPanel(panel: 'dates' | 'guests') {
+  destinationOverlayOpen.value = false
   activeFilterPanel.value = activeFilterPanel.value === panel ? null : panel
+}
+
+function handleDestinationShow() {
+  activeFilterPanel.value = null
+  destinationOverlayOpen.value = true
+}
+
+function handleDestinationHide() {
+  destinationOverlayOpen.value = false
 }
 
 function updateGuestCount(type: 'adults' | 'children' | 'rooms', delta: number) {
@@ -317,6 +340,7 @@ function applyQuickStay(days: number) {
 function submitHeroSearch() {
   const [checkIn, checkOut] = selectedDateRange.value
   activeFilterPanel.value = null
+  destinationOverlayOpen.value = false
 
   router.push({
     path: '/hotels',
@@ -337,6 +361,7 @@ function handleClickOutside(event: MouseEvent) {
   if (!heroFilterRef.value) return
   if (!heroFilterRef.value.contains(event.target as Node)) {
     activeFilterPanel.value = null
+    destinationOverlayOpen.value = false
   }
 }
 
@@ -448,123 +473,168 @@ function formatDateForQuery(date: Date) {
   bottom: -24px;
   max-width: 1120px;
   margin: 0 auto;
-  z-index: 2;
+  z-index: 12;
+  isolation: isolate;
+  font-family: var(--font-family-base);
+}
+
+.hero-filter-shell--panel-open::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 22, 34, 0.18);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  pointer-events: none;
+  z-index: 24;
 }
 
 .hero-filter-bar {
+  position: relative;
+  z-index: 26;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  grid-template-columns: minmax(0, 1.1fr) repeat(2, minmax(0, 1fr)) auto;
   gap: 0;
-  align-items: stretch;
-  background: white;
-  border: 1px solid var(--color-border);
-  border-radius: 100px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
-  padding: 6px 6px 6px 12px;
+  align-items: center;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(250, 253, 255, 0.98) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid color-mix(in srgb, var(--color-border) 88%, white 12%);
+  border-radius: 1.6rem;
+  box-shadow:
+    0 20px 42px rgba(15, 23, 42, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  padding: 0.6rem;
   overflow: visible;
 }
 
 .hero-filter-field,
 .hero-filter-trigger {
-  position: relative;
-  min-height: 3.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.82rem;
+  min-height: 4.18rem;
+  padding: 0 1.18rem;
   background: transparent;
-  border-radius: 100px;
+  border: 0;
+  border-right: 1px solid var(--color-divider);
+  border-radius: 1.2rem;
+  transition: background 0.25s ease, box-shadow 0.25s ease;
 }
 
-.hero-filter-trigger::before,
-.hero-filter-search::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 15%;
-  height: 70%;
-  width: 1px;
-  background: var(--color-divider);
-  transition: opacity 0.2s;
-}
-
-.hero-filter-field:hover + .hero-filter-trigger::before,
-.hero-filter-trigger:hover::before,
-.hero-filter-trigger:hover + .hero-filter-trigger::before,
-.hero-filter-trigger:hover + .hero-filter-search::before,
-.hero-filter-trigger--open::before,
-.hero-filter-trigger--open + .hero-filter-trigger::before,
-.hero-filter-trigger--open + .hero-filter-search::before {
-  opacity: 0;
+.hero-filter-field:hover,
+.hero-filter-trigger:hover,
+.hero-filter-trigger--open,
+.hero-filter-field--open {
+  background: color-mix(in srgb, var(--color-primary-25) 70%, white 30%);
 }
 
 .hero-filter-field__icon,
 .hero-filter-trigger__icon {
-  position: absolute;
-  top: 50%;
-  left: 1.1rem;
-  transform: translateY(-50%);
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.45rem;
+  height: 1.45rem;
+  color: var(--color-primary-600);
+  font-size: 1.28rem;
+}
+
+.hero-filter-field__copy,
+.hero-filter-trigger__copy {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.16rem;
+}
+
+.hero-filter-field__label,
+.hero-filter-trigger__label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--color-text-secondary);
-  font-size: 1.3rem;
+}
+
+.hero-filter-select {
+  width: 100%;
 }
 
 .hero-filter-field :deep(.p-select) {
   width: 100%;
-  height: 100%;
-  min-height: 3.5rem;
-  padding-left: 2.9rem;
+  min-width: 0;
   border: none !important;
-  border-radius: 100px;
+  border-radius: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0 !important;
+}
+
+.hero-filter-field :deep(.p-select-label-container) {
+  min-width: 0;
+  flex: 1;
 }
 
 .hero-filter-field :deep(.p-select-label) {
-  display: flex;
-  align-items: center;
-  min-height: 3.5rem;
-  padding: 0 2.8rem 0 0;
-  font-size: 0.95rem;
+  display: block;
+  padding: 0 !important;
+  min-height: 0;
+  font-size: 0.98rem;
   font-weight: 700;
+  line-height: 1.3;
   color: var(--color-heading);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .hero-filter-field :deep(.p-placeholder) {
   color: var(--color-text-secondary);
+  font-weight: 600;
 }
 
 .hero-filter-field :deep(.p-select-dropdown),
 .hero-filter-field :deep(.p-select-clear-icon) {
-  color: var(--color-text-secondary);
+  display: none !important;
 }
 
-.hero-filter-field:hover {
-  background: rgba(0, 0, 0, 0.04);
+.hero-filter-field__chevron {
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--color-text-secondary);
+  font-size: 1.16rem;
+  transition: transform 0.24s ease;
+}
+
+.hero-filter-field--open .hero-filter-field__chevron {
+  transform: rotate(180deg);
 }
 
 .hero-filter-field :deep(.p-select-header) {
-  padding: 0.75rem;
+  padding: 0.8rem;
   background: var(--color-surface-secondary);
 }
 
 .hero-filter-trigger {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
   width: 100%;
-  padding: 0 3rem 0 1.1rem;
-  border: none;
-  border-radius: 100px;
   cursor: pointer;
   text-align: left;
-  transition: background 0.25s ease;
-}
-
-.hero-filter-trigger:hover,
-.hero-filter-trigger--open {
-  background: rgba(0, 0, 0, 0.04);
 }
 
 .hero-filter-trigger__value {
   min-width: 0;
-  font-size: 0.95rem;
+  display: block;
+  font-size: 0.98rem;
   font-weight: 700;
+  line-height: 1.3;
   color: var(--color-heading);
   white-space: nowrap;
   overflow: hidden;
@@ -572,12 +642,15 @@ function formatDateForQuery(date: Date) {
 }
 
 .hero-filter-trigger__chevron {
-  position: absolute;
-  right: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
+  flex-shrink: 0;
+  margin-left: auto;
   color: var(--color-text-secondary);
-  font-size: 1.2rem;
+  font-size: 1.16rem;
+  transition: transform 0.24s ease;
+}
+
+.hero-filter-trigger--open .hero-filter-trigger__chevron {
+  transform: rotate(180deg);
 }
 
 .hero-filter-search {
@@ -585,19 +658,42 @@ function formatDateForQuery(date: Date) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.6rem;
-  min-width: 9rem;
+  gap: 0.52rem;
+  min-width: 10.65rem;
+  min-height: 4.1rem;
+  padding: 0 1.55rem;
   border: none;
-  border-radius: 100px;
-  background: var(--color-primary-600);
+  border-radius: 1.2rem;
+  margin-left: 0.3rem;
+  background: linear-gradient(135deg, #0a7677 0%, var(--color-primary-600) 45%, var(--color-primary-700) 100%);
   color: white;
-  font-size: 1rem;
+  font-size: 0.98rem;
   font-weight: 700;
-  margin-left: 4px;
+  letter-spacing: 0.01em;
+  box-shadow: 0 14px 28px rgba(0, 80, 81, 0.32);
+  transition: transform 0.24s ease, box-shadow 0.24s ease, filter 0.24s ease;
 }
 
 .hero-filter-search:hover {
-  background: var(--color-primary-800);
+  transform: translateY(-1px);
+  filter: brightness(1.02);
+  box-shadow: 0 18px 32px rgba(0, 80, 81, 0.38);
+}
+
+.hero-filter-search :deep(.p-button-label),
+.hero-filter-search :deep(.p-button-icon),
+.hero-filter-search .material-symbols-outlined {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-filter-search .material-symbols-outlined {
+  font-size: 1.16rem;
+}
+
+.hero-filter-search:active {
+  transform: translateY(0);
 }
 
 .hero-filter-search:focus-visible,
@@ -610,31 +706,32 @@ function formatDateForQuery(date: Date) {
 
 .hero-filter-panel {
   position: absolute;
-  top: calc(100% + 0.9rem);
+  top: calc(100% + 1rem);
+  z-index: 27;
   background: var(--color-surface-primary);
-  border: 1px solid var(--color-border);
+  border: 1px solid color-mix(in srgb, var(--color-border) 88%, white 12%);
   border-radius: 1.5rem;
-  box-shadow: var(--shadow-card-hover);
-  padding: 1.15rem;
+  box-shadow: 0 34px 62px rgba(5, 17, 32, 0.28);
+  padding: 1.45rem;
 }
 
 .hero-filter-panel--dates {
   left: 50%;
   transform: translateX(-50%);
-  width: min(820px, calc(100vw - 72px));
+  width: min(760px, calc(100vw - 72px));
 }
 
 .hero-filter-panel--guests {
-  right: 10rem;
+  right: 0;
   width: min(420px, calc(100vw - 72px));
 }
 
 .hero-filter-panel__header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.15rem;
 }
 
 .hero-filter-panel__header strong,
@@ -657,10 +754,12 @@ function formatDateForQuery(date: Date) {
   display: inline-flex;
   align-items: center;
   min-height: 2.2rem;
-  padding: 0.35rem 0.8rem;
+  padding: 0.32rem 0.82rem;
   border-radius: var(--radius-pill);
-  background: var(--color-surface-secondary);
-  border: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-primary-25) 75%, white 25%);
+  border: 1px solid color-mix(in srgb, var(--color-primary-200) 70%, white 30%);
+  color: var(--color-primary-700);
+  font-weight: 700;
   white-space: nowrap;
 }
 
@@ -671,37 +770,311 @@ function formatDateForQuery(date: Date) {
 .hero-datepicker :deep(.p-datepicker) {
   border: none;
   background: transparent;
+  padding: 0;
 }
 
 .hero-datepicker :deep(.p-datepicker-group-container) {
-  gap: 2rem;
+  position: relative;
+  gap: 1.65rem;
+  align-items: flex-start;
+}
+
+.hero-datepicker :deep(.p-datepicker-group) {
+  display: grid;
+  gap: 0.24rem;
+  min-width: 0;
+}
+
+.hero-datepicker--two-months :deep(.p-datepicker-group-container) {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 0;
+  align-items: stretch;
+}
+
+.hero-datepicker--two-months :deep(.p-datepicker-group-container > .p-datepicker-calendar-container:first-of-type),
+.hero-datepicker--two-months :deep(.p-datepicker-group-container > .p-datepicker-group:first-of-type) {
+  padding-right: 22px !important;
+}
+
+.hero-datepicker--two-months :deep(.p-datepicker-group-container > .p-datepicker-calendar-container:last-of-type),
+.hero-datepicker--two-months :deep(.p-datepicker-group-container > .p-datepicker-group:last-of-type) {
+  padding-left: 22px !important;
+}
+
+.hero-datepicker--two-months :deep(.p-datepicker-group-container > .p-datepicker-calendar-container:first-of-type .p-datepicker-day-view),
+.hero-datepicker--two-months :deep(.p-datepicker-group-container > .p-datepicker-group:first-of-type .p-datepicker-day-view) {
+  border-right: 2px solid #374151 !important;
+}
+
+.hero-datepicker :deep(.p-datepicker-calendar-container) {
+  min-width: 0;
+  flex: 1;
 }
 
 .hero-datepicker :deep(.p-datepicker-header) {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
   border-bottom: 1px solid var(--color-divider);
-  padding: 0.6rem 0.25rem 1rem;
+  padding: 0.42rem 2.05rem 0.7rem;
+  margin-bottom: 0.24rem;
 }
 
-.hero-datepicker :deep(.p-datepicker-panel) {
-  border: none;
+.hero-datepicker :deep(.p-datepicker-header > *) {
+  min-width: 0;
+}
+
+.hero-datepicker :deep(.p-datepicker-title) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  font-size: 0.93rem;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--color-heading);
+  margin: 0 auto;
+  text-align: center;
+}
+
+.hero-datepicker :deep(.p-datepicker-prev-button),
+.hero-datepicker :deep(.p-datepicker-next-button) {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 0;
+  width: 1.72rem;
+  height: 1.72rem;
+  border-radius: 999px;
+  color: var(--color-text-secondary);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.hero-datepicker :deep(.p-datepicker-prev-button .p-icon),
+.hero-datepicker :deep(.p-datepicker-next-button .p-icon),
+.hero-datepicker :deep(.p-datepicker-prev-button svg),
+.hero-datepicker :deep(.p-datepicker-next-button svg) {
+  width: 0.96rem;
+  height: 0.96rem;
+  display: block;
+  margin: 0;
+}
+
+.hero-datepicker :deep(.p-datepicker-prev-button) {
+  left: 0.2rem;
+}
+
+.hero-datepicker :deep(.p-datepicker-next-button) {
+  right: 0.2rem;
+}
+
+.hero-datepicker :deep(.p-datepicker-prev-button:hover),
+.hero-datepicker :deep(.p-datepicker-next-button:hover) {
+  background: color-mix(in srgb, var(--color-primary-50) 70%, white 30%);
+  color: var(--color-primary-700);
+}
+
+.hero-datepicker :deep(.p-datepicker-day-view) {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.hero-datepicker :deep(.p-datepicker-weekday-cell),
+.hero-datepicker :deep(.p-datepicker-day-cell) {
+  width: 14.2857%;
+}
+
+.hero-datepicker :deep(.p-datepicker-weekday) {
+  display: inline-flex;
+  width: 100%;
+  justify-content: center;
+}
+
+.hero-datepicker :deep(.p-datepicker-day-view th) {
+  padding: 0.14rem 0 0.28rem;
+  text-align: center;
+  font-size: 0.69rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--color-text-secondary);
+}
+
+.hero-datepicker :deep(.p-datepicker-day-view td) {
+  padding: 0.08rem 0;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.hero-datepicker :deep(.p-datepicker-day) {
+  width: 2.06rem;
+  height: 2.06rem;
+  border-radius: 0.66rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hero-datepicker :deep(.p-datepicker-day-cell.p-datepicker-other-month .p-datepicker-day) {
+  color: color-mix(in srgb, var(--color-text-secondary) 72%, white 28%);
+}
+
+.hero-datepicker :deep(.p-datepicker-day:not(.p-disabled):hover) {
+  background: color-mix(in srgb, var(--color-primary-50) 72%, white 28%);
+  color: var(--color-primary-700);
+}
+
+.hero-datepicker :deep(.p-datepicker-day-selected-range) {
+  background: color-mix(in srgb, var(--color-primary-200) 55%, white 45%);
+  color: var(--color-primary-700);
+  border-radius: 0.68rem;
 }
 
 .hero-datepicker :deep(.p-datepicker-day-selected),
-.hero-datepicker :deep(.p-datepicker-day-selected-range) {
-  background: var(--color-primary-600);
+.hero-datepicker :deep(.p-datepicker-day-selected-start),
+.hero-datepicker :deep(.p-datepicker-day-selected-end) {
+  background: linear-gradient(145deg, #0a7677 0%, var(--color-primary-600) 100%);
   color: white;
+  box-shadow: 0 8px 18px rgba(0, 80, 81, 0.34);
 }
 
 .hero-filter-chip-row {
   display: flex;
   flex-wrap: wrap;
   gap: 0.65rem;
-  margin-top: 1rem;
+  margin-top: 1.25rem;
+  padding: 0.34rem;
+  border-radius: 0.95rem;
+  background: color-mix(in srgb, var(--color-primary-25) 55%, white 45%);
 }
 
 .hero-filter-chip {
-  border-radius: var(--radius-pill);
+  min-height: 2rem;
+  padding: 0.42rem 0.88rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--color-primary-200) 52%, white 48%) !important;
+  background: white !important;
+  color: var(--color-primary-700) !important;
+  font-size: 0.89rem;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 3px 10px rgba(0, 80, 81, 0.08);
+  transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hero-filter-chip:hover {
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--color-primary-50) 66%, white 34%) !important;
+  color: var(--color-primary-800) !important;
+  box-shadow: 0 6px 14px rgba(0, 80, 81, 0.14);
+}
+
+.hero-filter-chip:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary-100) 62%, transparent 38%);
+}
+
+.hero-filter-chip :deep(.p-button-label) {
+  font-weight: 700;
+}
+
+.hero-filter-field--destination {
+  position: relative;
+}
+
+.hero-filter-field--destination :deep(.p-select-overlay) {
+  min-width: max(100%, 21rem);
+  margin-top: 0.95rem;
+  border-radius: 1.35rem;
+  border: 1px solid color-mix(in srgb, var(--color-border) 88%, white 12%);
+  background: var(--color-surface-primary);
+  box-shadow: 0 34px 62px rgba(5, 17, 32, 0.28);
+  padding: 0.5rem;
+  overflow: hidden;
+  z-index: 40;
+}
+
+.hero-filter-field--destination :deep(.p-select-header) {
+  padding: 0.45rem;
+  margin-bottom: 0.2rem;
+  border: none;
+  background: transparent;
+}
+
+.hero-filter-field--destination :deep(.p-select-filter-container) {
+  position: relative;
+}
+
+.hero-filter-field--destination :deep(.p-select-filter) {
+  width: 100%;
+  min-height: 2.4rem;
+  border: 1px solid color-mix(in srgb, var(--color-primary-200) 55%, white 45%);
+  border-radius: 0.75rem;
+  background: white;
   color: var(--color-heading);
+  font-size: 0.92rem;
+  font-weight: 600;
+  padding: 0.5rem 0.75rem 0.5rem 2.15rem;
+  outline: none;
+  box-shadow: none;
+}
+
+.hero-filter-field--destination :deep(.p-select-filter:focus) {
+  border-color: var(--color-primary-400);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary-100) 60%, transparent 40%);
+}
+
+.hero-filter-field--destination :deep(.p-select-filter-icon) {
+  top: 50%;
+  transform: translateY(-50%);
+  left: 0.7rem;
+  color: var(--color-primary-600);
+  font-size: 0.93rem;
+}
+
+.hero-filter-field--destination :deep(.p-select-list-container) {
+  max-height: 16.8rem;
+  padding: 0.2rem;
+  border-radius: 1rem;
+}
+
+.hero-filter-field--destination :deep(.p-select-list) {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.12rem;
+}
+
+.hero-filter-field--destination :deep(.p-select-option) {
+  padding: 0.7rem 0.9rem;
+  border-radius: 0.8rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-heading);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.hero-filter-field--destination :deep(.p-select-option.p-focus) {
+  background: color-mix(in srgb, var(--color-primary-50) 70%, white 30%);
+  color: var(--color-primary-700);
+}
+
+.hero-filter-field--destination :deep(.p-select-option.p-select-option-selected) {
+  background: color-mix(in srgb, var(--color-primary-100) 58%, white 42%);
+  color: var(--color-primary-800);
 }
 
 .guest-counter-row {
@@ -940,18 +1313,30 @@ function formatDateForQuery(date: Date) {
 
   .hero-filter-bar {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+    border-radius: 1.4rem;
+    padding: 0.6rem;
+  }
+
+  .hero-filter-field,
+  .hero-filter-trigger {
+    min-height: 3.92rem;
+    border: 1px solid color-mix(in srgb, var(--color-border) 82%, white 18%);
+    border-right: 1px solid color-mix(in srgb, var(--color-border) 82%, white 18%);
   }
 
   .hero-filter-search {
-    min-height: 3.5rem;
+    min-height: 3.92rem;
     grid-column: 1 / -1;
-    border-radius: 0 0 1.2rem 1.2rem;
+    border-radius: 1rem;
+    margin-left: 0;
   }
 
   .hero-filter-panel--dates,
   .hero-filter-panel--guests {
     left: 0;
     right: 0;
+    transform: none;
     width: auto;
   }
 
@@ -1002,37 +1387,48 @@ function formatDateForQuery(date: Date) {
     max-width: none;
   }
 
-  .hero-filter-bar {
-    grid-template-columns: 1fr;
-    border-radius: 1.15rem;
-    padding: 0;
-  }
-
-  .hero-filter-trigger::before,
-  .hero-filter-search::before {
+  .hero-filter-shell--panel-open::after {
     display: none;
   }
 
-  .hero-filter-field + .hero-filter-trigger,
-  .hero-filter-trigger + .hero-filter-trigger,
-  .hero-filter-trigger + .hero-filter-search {
-    border-top: 1px solid var(--color-divider);
+  .hero-filter-bar {
+    grid-template-columns: 1fr;
+    gap: 0.46rem;
+    border-radius: 1.15rem;
+    padding: 0.56rem;
   }
 
   .hero-filter-field,
   .hero-filter-trigger {
-    min-height: 3.5rem;
+    min-height: 3.55rem;
+    padding: 0 0.95rem;
+    border: 1px solid color-mix(in srgb, var(--color-border) 80%, white 20%);
+    border-right: 1px solid color-mix(in srgb, var(--color-border) 80%, white 20%);
+    border-radius: 0.95rem;
   }
 
-  .hero-filter-field :deep(.p-select),
-  .hero-filter-field :deep(.p-select-label) {
-    min-height: 3.5rem;
+  .hero-filter-field__label,
+  .hero-filter-trigger__label {
+    font-size: 0.64rem;
+  }
+
+  .hero-filter-field :deep(.p-select-label),
+  .hero-filter-trigger__value {
+    font-size: 0.92rem;
+  }
+
+  .hero-filter-field__chevron {
+    font-size: 1.05rem;
+  }
+
+  .hero-filter-trigger__chevron {
+    font-size: 1.05rem;
   }
 
   .hero-filter-search {
     min-width: 0;
-    min-height: 3.5rem;
-    border-radius: 0 0 1.15rem 1.15rem;
+    min-height: 3.55rem;
+    border-radius: 0.95rem;
     margin-left: 0;
   }
 
@@ -1041,10 +1437,12 @@ function formatDateForQuery(date: Date) {
     width: 100%;
     margin-top: 0.85rem;
     border-radius: 1.15rem;
+    padding: 1rem;
   }
 
   .hero-datepicker :deep(.p-datepicker) {
     display: block;
+    padding: 0;
   }
 
   .hero-datepicker :deep(.p-datepicker-calendar-container) {
@@ -1053,6 +1451,12 @@ function formatDateForQuery(date: Date) {
 
   .hero-datepicker :deep(.p-datepicker-day-view) {
     min-width: 0;
+  }
+
+  .hero-datepicker :deep(.p-datepicker-day) {
+    width: 1.96rem;
+    height: 1.96rem;
+    border-radius: 0.62rem;
   }
 
   .guest-counter-row,
