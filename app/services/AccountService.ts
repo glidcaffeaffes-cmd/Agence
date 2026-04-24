@@ -34,6 +34,13 @@ export class AccountService {
   }
 
   /**
+   * Authenticate user via Google.
+   */
+  async loginGoogle(data: { email: string; firstName: string; lastName: string; uid: string }): Promise<Account | null> {
+    return this.repo.authenticateGoogle(data)
+  }
+
+  /**
    * Register a new client account.
    * Business rule: email must be unique.
    */

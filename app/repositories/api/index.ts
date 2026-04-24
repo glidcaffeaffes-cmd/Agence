@@ -211,6 +211,18 @@ export class ApiAccountRepository implements IAccountRepository {
     }
   }
 
+  async authenticateGoogle(data: { email: string; firstName: string; lastName: string; uid: string }): Promise<Account | null> {
+    try {
+      const dto = await apiRequest<AccountDTO>('/auth/google', {
+        method: 'POST',
+        body: data,
+      })
+      return AccountMapper.fromDto(dto)
+    } catch {
+      return null
+    }
+  }
+
   async create(account: Omit<Account, 'id' | 'registrationDate'>): Promise<Account> {
     const dto = await apiRequest<AccountDTO>('/auth/register', {
       method: 'POST',

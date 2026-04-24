@@ -59,6 +59,37 @@ export function useAuth() {
     }
   }
 
+  async function loginGoogle(data: { email: string; firstName: string; lastName: string; uid: string }) {
+    loading.value = true
+    error.value = null
+    try {
+      const account = await service.loginGoogle(data)
+      if (!account) {
+        error.value = 'Failed to sign in with Google'
+        return false
+      }
+
+      const profile = await service.getProfile(account.id)
+      const mergedProfile = ProfileMapper.merge(profile, account)
+      
+      currentProfile.value = mergedProfile
+      currentAccount.value = account
+      
+      const authCookie = useCookie<{ account: Account, profile: Profile | null } | null>('voyagehub_auth', {
+        maxAge: 60 * 60 * 24 * 7,
+        path: '/',
+      })
+      authCookie.value = { account, profile: mergedProfile }
+
+      return true
+    } catch (e: any) {
+      error.value = e.message
+      return false
+    } finally {
+      loading.value = false
+    }
+  }
+
   async function register(email: string, password: string, firstName: string, lastName: string) {
     loading.value = true
     error.value = null
@@ -175,6 +206,7 @@ export function useAuth() {
     loading,
     error,
     login,
+    loginGoogle,
     register,
     logout,
     updateProfile,
