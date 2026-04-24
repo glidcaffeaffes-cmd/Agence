@@ -87,7 +87,7 @@
           </div>
         </div>
 
-        <div class="filter-section filter-section--guests">
+        <div class="filter-section filter-section--guests" :class="{ 'filter-section--guests-open': activeFilterPanel === 'guests' }">
           <label class="filter-label">Guests & rooms</label>
           <button
             type="button"
@@ -627,6 +627,10 @@ watch(() => route.query, async () => {
   z-index: 15;
 }
 
+.filter-section--guests-open {
+  z-index: 80;
+}
+
 .filter-label {
   display: block;
   font-size: 14px;
@@ -801,18 +805,40 @@ watch(() => route.query, async () => {
 
 :deep(.full-width-select.p-select) {
   width: 100%;
-  background: white;
-  border: 1px solid var(--color-gray-200);
+  background: linear-gradient(180deg, white 0%, color-mix(in srgb, var(--color-gray-50) 72%, white 28%) 100%);
+  border: 1px solid color-mix(in srgb, var(--color-gray-200) 74%, white 26%);
   border-radius: 16px;
-  padding: 2px 4px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
+  min-height: 2.85rem;
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
   cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+:deep(.full-width-select.p-select:hover),
+:deep(.full-width-select.p-select.p-focus),
+:deep(.full-width-select.p-select[data-p-focused="true"]) {
+  border-color: color-mix(in srgb, var(--color-primary-200) 68%, white 32%) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary-50) 60%, transparent 40%), inset 0 1px 0 rgba(255, 255, 255, 0.78) !important;
 }
 
 :deep(.full-width-select .p-select-label) {
-  color: var(--color-gray-700);
-  font-size: 14px;
-  font-weight: 500;
+  color: var(--color-heading);
+  font-size: 0.95rem;
+  font-weight: 700;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0 0.75rem !important;
+  min-height: 0;
+  line-height: 1.3;
+}
+
+:deep(.full-width-select .p-placeholder) {
+  color: var(--color-gray-500);
+  font-weight: 600;
 }
 
 :deep(.destination-dropdown.p-select) {
@@ -820,14 +846,19 @@ watch(() => route.query, async () => {
   z-index: 20;
 }
 
-:deep(.destination-dropdown .p-select-label) {
-  padding: 8px 12px;
-}
-
 :deep(.destination-dropdown .p-select-dropdown) {
   width: 36px;
   color: var(--color-gray-500);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+  transition: transform 0.24s ease;
+}
+
+:deep(.destination-dropdown.p-select[data-p-overlay-visible="true"] .p-select-dropdown),
+:deep(.destination-dropdown.p-select-open .p-select-dropdown) {
+  transform: rotate(180deg);
 }
 
 :deep(.p-select-overlay) {
@@ -893,13 +924,13 @@ watch(() => route.query, async () => {
 
 :deep(.filter-date-picker .p-inputtext) {
   width: 100%;
-  min-height: 3.15rem;
+  min-height: 2.85rem;
   border: 0;
   background: transparent;
-  color: var(--color-navy-500);
+  color: var(--color-heading);
   font-size: 0.95rem;
   font-weight: 700;
-  padding: 0.95rem 3.45rem 0.95rem 2.65rem;
+  padding: 0.75rem 3.45rem 0.75rem 2.65rem;
   cursor: pointer;
 }
 
@@ -1066,27 +1097,7 @@ watch(() => route.query, async () => {
   box-shadow: 0 8px 18px rgba(0, 80, 81, 0.34);
 }
 
-:deep(.destination-dropdown.p-select) {
-  position: relative;
-  z-index: 20;
-}
 
-:deep(.destination-dropdown .p-select-label) {
-  padding: 8px 12px;
-}
-
-:deep(.destination-dropdown .p-select-dropdown) {
-  width: 36px;
-  color: var(--color-gray-500);
-}
-
-:deep(.destination-dropdown .p-select-overlay) {
-  top: 100% !important;
-  left: 0 !important;
-  min-width: 100%;
-  margin-top: 0;
-  z-index: 1100;
-}
 
 :deep(.p-select-list) {
   padding: 4px 0;
@@ -1114,7 +1125,7 @@ watch(() => route.query, async () => {
   display: flex;
   align-items: center;
   gap: 0.8rem;
-  padding: 0.95rem 1rem;
+  padding: 0.75rem 1rem;
   background: white;
   border: 1px solid color-mix(in srgb, var(--color-gray-200) 76%, white 24%);
   border-radius: 16px;
@@ -1125,9 +1136,8 @@ watch(() => route.query, async () => {
 
 .guest-trigger:hover,
 .guest-trigger--open {
-  background: color-mix(in srgb, var(--color-primary-25) 62%, white 38%);
-  border-color: color-mix(in srgb, var(--color-primary-200) 64%, white 36%);
-  box-shadow: 0 10px 22px rgba(0, 79, 81, 0.08);
+  border-color: color-mix(in srgb, var(--color-primary-200) 68%, white 32%);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary-50) 60%, transparent 40%), inset 0 1px 0 rgba(255, 255, 255, 0.78);
 }
 
 .guest-trigger__icon {
@@ -1146,7 +1156,7 @@ watch(() => route.query, async () => {
 
 .guest-trigger__copy strong {
   display: block;
-  color: var(--color-gray-700);
+  color: var(--color-heading);
   font-size: 0.95rem;
   font-weight: 700;
   white-space: nowrap;
@@ -1172,12 +1182,17 @@ watch(() => route.query, async () => {
 }
 
 .guest-panel {
-  margin-top: 0.9rem;
+  position: absolute;
+  bottom: calc(100% + 0.5rem);
+  top: auto;
+  left: -1rem;
+  width: calc(100% + 2rem);
   padding: 1rem;
   background: white;
   border: 1px solid color-mix(in srgb, var(--color-gray-200) 76%, white 24%);
   border-radius: 20px;
-  box-shadow: 0 24px 42px rgba(15, 23, 42, 0.12);
+  box-shadow: 0 -12px 42px rgba(15, 23, 42, 0.12);
+  z-index: 1000;
 }
 
 .guest-counter-row {
@@ -1191,7 +1206,7 @@ watch(() => route.query, async () => {
 .guest-age-grid,
 .guest-pets-row,
 .guest-done-button {
-  margin-top: 1rem;
+  margin-top: 0.85rem;
 }
 
 .guest-counter-copy {
@@ -1214,10 +1229,10 @@ watch(() => route.query, async () => {
 
 .guest-counter-control {
   display: grid;
-  grid-template-columns: 2.2rem 2.8rem 2.2rem;
+  grid-template-columns: 2rem 2.2rem 2rem;
   align-items: center;
   border: 1px solid var(--color-gray-200);
-  border-radius: 0.9rem;
+  border-radius: 0.8rem;
   background: var(--color-gray-50);
   overflow: hidden;
 }
@@ -1231,7 +1246,7 @@ watch(() => route.query, async () => {
 
 .guest-counter-btn {
   border: none;
-  min-height: 2.4rem;
+  min-height: 2.1rem;
   color: var(--color-primary-600);
   cursor: pointer;
 }
@@ -1242,7 +1257,7 @@ watch(() => route.query, async () => {
 
 .guest-age-grid {
   display: grid;
-  gap: 0.85rem;
+  gap: 0.6rem;
 }
 
 .guest-age-item {
