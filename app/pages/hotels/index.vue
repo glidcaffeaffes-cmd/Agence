@@ -182,16 +182,36 @@
             <span class="material-symbols-outlined">search</span>
             <input type="text" v-model="searchQuery" placeholder="Rechercher un hôtel..." />
           </div>
-          <div class="sort-wrap">
-            <span class="sort-label">TRIER PAR</span>
-            <Select 
-              v-model="sortBy" 
-              :options="sortOptions" 
-              optionLabel="label" 
-              optionValue="value" 
-              appendTo="self"
-              class="sort-select-small" 
-            />
+          <div class="sort-view-container">
+            <div class="sort-wrap">
+              <span class="sort-label">Trier par:</span>
+              <Select 
+                v-model="sortBy" 
+                :options="sortOptions" 
+                optionLabel="label" 
+                optionValue="value" 
+                appendTo="self"
+                class="sort-select-small" 
+              />
+            </div>
+            <div class="view-toggles">
+              <button 
+                class="view-toggle-btn" 
+                :class="{ active: viewMode === 'grid' }" 
+                @click="viewMode = 'grid'"
+                aria-label="Vue grille"
+              >
+                <span class="material-symbols-outlined">grid_view</span>
+              </button>
+              <button 
+                class="view-toggle-btn" 
+                :class="{ active: viewMode === 'list' }" 
+                @click="viewMode = 'list'"
+                aria-label="Vue liste"
+              >
+                <span class="material-symbols-outlined">menu</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -199,12 +219,14 @@
           <strong>{{ filteredHotels.length }}</strong> hôtels trouvés
         </div>
 
-        <div v-if="filteredHotels.length > 0" class="hotels-grid">
+        <div v-if="filteredHotels.length > 0" :class="['hotels-container', `hotels-container--${viewMode}`]">
           <HotelCard 
             v-for="hotel in filteredHotels" 
             :key="hotel.id" 
             :hotel="hotel" 
             :min-price="getHotelMinPrice(hotel.id)" 
+            :room-count="getHotelRoomCount(hotel.id)"
+            :view-mode="viewMode"
           />
         </div>
         <div v-else class="empty-results-state">
@@ -237,6 +259,7 @@ const selectedStars = ref<number[]>([3, 4, 5])
 const selectedCity = ref<string | null>(null)
 const searchQuery = ref('')
 const sortBy = ref('note')
+const viewMode = useCookie<'grid' | 'list'>('hotel-view-mode', { default: () => 'grid' })
 const activeFilterPanel = ref<'guests' | null>(null)
 const checkInDate = ref<Date | null>(null)
 const checkOutDate = ref<Date | null>(null)
@@ -280,6 +303,10 @@ function getHotelMinPrice(hotelId: number) {
   const hotelRooms = rooms.value.filter(r => r.hotelId === hotelId)
   if (hotelRooms.length === 0) return 0
   return Math.min(...hotelRooms.map(r => r.pricePerNight))
+}
+
+function getHotelRoomCount(hotelId: number) {
+  return rooms.value.filter(r => r.hotelId === hotelId).length
 }
 
 const filteredHotels = computed(() => {
@@ -1384,22 +1411,67 @@ watch(() => route.query, async () => {
 
 .results-info strong { color: var(--color-navy-500); font-weight: 800; }
 
-.hotels-grid {
+.sort-view-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.view-toggles {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: white;
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid var(--color-gray-200);
+}
+
+.view-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  color: var(--color-gray-400);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.view-toggle-btn:hover {
+  color: var(--color-navy-500);
+}
+
+.view-toggle-btn.active {
+  background: var(--color-primary-50);
+  color: var(--color-primary-600);
+}
+
+.hotels-container--grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
 }
 
 @media (max-width: 1200px) {
-  .hotels-grid {
+  .hotels-container--grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 800px) {
-  .hotels-grid {
+  .hotels-container--grid {
     grid-template-columns: 1fr;
   }
+}
+
+.hotels-container--list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .empty-results-state {

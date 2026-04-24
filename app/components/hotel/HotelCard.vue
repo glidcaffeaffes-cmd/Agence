@@ -1,23 +1,42 @@
 <template>
-  <div class="hotel-card" @click="navigateTo(`/hotels/${hotel.id}`)">
+  <div class="hotel-card" :class="[`hotel-card--${viewMode || 'grid'}`]" @click="navigateTo(`/hotels/${hotel.id}`)">
     <div class="hotel-card__image-container">
       <img :src="hotel.images[0] || fallbackImage" :alt="hotel.name" class="hotel-card__image" loading="lazy" />
       <div class="hotel-card__image-shade"></div>
 
       <div class="hotel-card__image-top">
-        <span class="hotel-card__chip">{{ hotel.city }}</span>
-        <button class="hotel-card__favorite" @click.stop="toggleFavorite" aria-label="Toggle favorite">
+        <div class="hotel-card__chips">
+          <span v-if="viewMode !== 'list'" class="hotel-card__chip">{{ hotel.city }}</span>
+          <span v-if="viewMode === 'list'" class="hotel-card__chip hotel-card__chip--rating">
+            {{ hotel.stars }} <span class="material-symbols-outlined star-icon active" style="font-size: 17px; margin-left: 2px;">star</span>
+          </span>
+        </div>
+        <button v-if="viewMode !== 'list'" class="hotel-card__favorite" @click.stop="toggleFavorite" aria-label="Toggle favorite">
           <span class="material-symbols-outlined" :class="{ filled: isFavorite }">favorite</span>
         </button>
       </div>
 
-      <div class="hotel-card__image-bottom">
+      <div v-if="viewMode !== 'list'" class="hotel-card__image-bottom">
         <h3 class="hotel-card__name">{{ hotel.name }}</h3>
       </div>
     </div>
 
     <div class="hotel-card__body">
-      <div class="hotel-card__meta">
+      <div v-if="viewMode === 'list'" class="hotel-card__header-list">
+        <div class="hotel-card__title-wrap">
+          <h3 class="hotel-card__name-list">{{ hotel.name }}</h3>
+          <div class="hotel-card__location-list">
+            <span class="material-symbols-outlined">location_on</span>
+            <span>{{ hotel.city }}, {{ hotel.country }}</span>
+          </div>
+        </div>
+        <div class="hotel-card__price-list">
+          <span class="price-amount">{{ minPrice }}€</span>
+          <span class="price-unit">/ night</span>
+        </div>
+      </div>
+
+      <div v-if="viewMode !== 'list'" class="hotel-card__meta">
         <div class="hotel-card__location">
           <span class="material-symbols-outlined">location_on</span>
           <span>{{ hotel.city }}, {{ hotel.country }}</span>
@@ -27,15 +46,50 @@
         </div>
       </div>
 
+
+      <div v-if="viewMode === 'list'" class="hotel-card__info-grid">
+        <div class="info-grid-item">
+          <span class="material-symbols-outlined">meeting_room</span>
+          <span>{{ roomCount || 0 }} Rooms</span>
+        </div>
+        <div class="info-grid-item">
+          <span class="material-symbols-outlined">call</span>
+          <span>{{ hotel.phone || 'N/A' }}</span>
+        </div>
+        <div class="info-grid-item">
+          <span class="material-symbols-outlined">mail</span>
+          <span class="truncate">{{ hotel.email || 'N/A' }}</span>
+        </div>
+        <div class="info-grid-item" v-if="hotel.amenities && hotel.amenities.length > 0">
+          <span class="material-symbols-outlined">star</span>
+          <span class="truncate">{{ hotel.amenities.slice(0, 2).join(', ') }}</span>
+        </div>
+        <div class="info-grid-item" v-else>
+          <span class="material-symbols-outlined">star</span>
+          <span>Standard</span>
+        </div>
+      </div>
+
       <div class="hotel-card__footer">
-        <div class="hotel-card__price-info">
+        <div v-if="viewMode !== 'list'" class="hotel-card__price-info">
           <span class="price-label">From</span>
           <div class="price-inline">
             <span class="price-amount">{{ minPrice }}€</span>
             <span class="price-unit">/ night</span>
           </div>
         </div>
-        <button class="hotel-card__btn-primary" @click.stop="reserveHotel">
+
+        <div v-if="viewMode === 'list'" class="hotel-card__action-link">
+          <span class="material-symbols-outlined">arrow_forward</span>
+          <span>Voir Détails</span>
+        </div>
+
+        <button v-if="viewMode === 'list'" class="hotel-card__favorite-btn-list" @click.stop="toggleFavorite">
+          <span class="material-symbols-outlined" :class="{ filled: isFavorite }">favorite</span>
+          <span>Enregistrer</span>
+        </button>
+
+        <button v-if="viewMode !== 'list'" class="hotel-card__btn-primary" @click.stop="reserveHotel">
           View
         </button>
       </div>
@@ -48,7 +102,7 @@ import { computed } from 'vue'
 import type { Hotel } from '~/types/models'
 import { useWishlist } from '~/composables/useWishlist'
 
-const props = defineProps<{ hotel: Hotel; minPrice?: number }>()
+const props = defineProps<{ hotel: Hotel; minPrice?: number; viewMode?: 'grid' | 'list'; roomCount?: number }>()
 
 const fallbackImage =
   'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=1200'
@@ -126,6 +180,23 @@ const reserveHotel = () => {
 
 .hotel-card__image-bottom {
   bottom: 14px;
+}
+
+.hotel-card__chips {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.hotel-card__chip--rating {
+  gap: 2px;
+  background: rgba(15, 23, 42, 0.4);
+}
+
+.hotel-card__chip--rating .star-icon-small {
+  font-size: 10px;
+  color: #cdaf5d;
+  font-variation-settings: 'FILL' 1;
 }
 
 .hotel-card__chip {
@@ -301,5 +372,147 @@ const reserveHotel = () => {
   .price-amount {
     font-size: 22px;
   }
+
+  .hotel-card--list {
+    flex-direction: column;
+    height: auto;
+  }
+  
+  .hotel-card--list .hotel-card__image-container {
+    width: 100%;
+    height: 180px;
+  }
+}
+
+.hotel-card--list {
+  flex-direction: row;
+  height: 240px;
+}
+
+.hotel-card--list .hotel-card__image-container {
+  width: 320px;
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.hotel-card--list .hotel-card__body {
+  padding: 24px;
+  justify-content: flex-start;
+  gap: 16px;
+}
+
+.hotel-card__header-list {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.hotel-card__name-list {
+  margin: 0 0 8px 0;
+  color: var(--color-navy-500);
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.hotel-card__location-list {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-gray-600);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.hotel-card__location-list .material-symbols-outlined {
+  font-size: 18px;
+}
+
+.hotel-card__price-list {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+
+.hotel-card--list .hotel-card__footer {
+  border-top: none;
+  padding-top: 0;
+  margin-top: auto;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hotel-card__action-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-navy-500);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.hotel-card__action-link .material-symbols-outlined {
+  font-size: 18px;
+  color: var(--color-gray-400);
+}
+
+.hotel-card__favorite-btn-list {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  color: var(--color-primary-600);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.hotel-card__favorite-btn-list:hover {
+  background: var(--color-primary-50);
+}
+
+.hotel-card__favorite-btn-list .material-symbols-outlined {
+  font-size: 20px;
+  font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 20;
+}
+
+.hotel-card__favorite-btn-list .material-symbols-outlined.filled {
+  color: #ef4444;
+  font-variation-settings: 'FILL' 1;
+}
+
+.hotel-card__info-grid {
+  display: grid;
+  grid-template-columns: max-content max-content;
+  column-gap: 64px;
+  row-gap: 16px;
+  margin-top: 24px;
+}
+
+.info-grid-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-gray-600);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.info-grid-item .material-symbols-outlined {
+  font-size: 16px;
+  color: var(--color-gray-400);
+}
+
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
 }
 </style>
