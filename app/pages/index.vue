@@ -1491,12 +1491,14 @@ function formatDateForQuery(date: Date) {
 <style>
 /* ── Hero city-select overlay ────────────────────────────── */
 .p-select-overlay {
+  margin-top: 0.9rem !important;
   border-radius: 1.5rem !important;
   border: 1px solid var(--color-border) !important;
   box-shadow: 0 16px 48px rgba(15, 23, 42, 0.14) !important;
   overflow: hidden;
-  min-width: 260px !important;
+  min-width: 280px !important;
   background: var(--color-surface-primary) !important;
+  padding: 0.35rem 0 0.5rem !important;
 }
 
 /* Search input inside the overlay header */

@@ -24,6 +24,14 @@ export class MockAccountRepository implements IAccountRepository {
     return this.accounts.find(a => a.email === email && a.active) ?? null
   }
 
+  async authenticateGoogle(data: { email: string; firstName: string; lastName: string; uid: string }): Promise<Account | null> {
+    const existing = this.accounts.find(a => a.email === data.email && a.active)
+    if (existing) return existing
+    
+    // Create mock account if it doesn't exist
+    return this.create({ email: data.email, password: data.uid, active: true, role: 'client' })
+  }
+
   async create(account: Omit<Account, 'id' | 'registrationDate'>): Promise<Account> {
     const newAccount: Account = {
       ...account,
