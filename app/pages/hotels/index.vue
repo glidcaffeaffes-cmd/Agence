@@ -9,7 +9,7 @@
 
     <div class="main-container">
       <!-- Filters Sidebar -->
-      <aside class="filters-sidebar">
+      <aside ref="filtersSidebarRef" class="filters-sidebar">
         <div class="sidebar-header">
           <span class="material-symbols-outlined">filter_list</span>
           <span>Filtres</span>
@@ -49,6 +49,124 @@
             appendTo="self"
             class="full-width-select destination-dropdown" 
           />
+        </div>
+
+        <div class="filter-section filter-section--date">
+          <label class="filter-label">Check-in</label>
+          <div class="date-picker-shell">
+            <DatePicker
+              v-model="checkInDate"
+              showIcon
+              iconDisplay="input"
+              :manualInput="false"
+              :minDate="today"
+              appendTo="self"
+              placeholder="Choose check-in"
+              dateFormat="D, MMM d"
+              class="filter-date-picker"
+            />
+            <span class="material-symbols-outlined date-picker-shell__chevron">expand_more</span>
+          </div>
+        </div>
+
+        <div class="filter-section filter-section--date">
+          <label class="filter-label">Check-out</label>
+          <div class="date-picker-shell">
+            <DatePicker
+              v-model="checkOutDate"
+              showIcon
+              iconDisplay="input"
+              :manualInput="false"
+              :minDate="checkOutMinDate"
+              appendTo="self"
+              placeholder="Choose check-out"
+              dateFormat="D, MMM d"
+              class="filter-date-picker"
+            />
+            <span class="material-symbols-outlined date-picker-shell__chevron">expand_more</span>
+          </div>
+        </div>
+
+        <div class="filter-section filter-section--guests">
+          <label class="filter-label">Guests & rooms</label>
+          <button
+            type="button"
+            class="guest-trigger"
+            :class="{ 'guest-trigger--open': activeFilterPanel === 'guests' }"
+            @click="toggleGuestPanel"
+          >
+            <span class="material-symbols-outlined guest-trigger__icon">person</span>
+            <span class="guest-trigger__copy">
+              <strong>{{ guestSummary }}</strong>
+              <span>Adults, children, rooms</span>
+            </span>
+            <span class="material-symbols-outlined guest-trigger__chevron">expand_more</span>
+          </button>
+
+          <div v-if="activeFilterPanel === 'guests'" class="guest-panel">
+            <div class="guest-counter-row">
+              <div class="guest-counter-copy">
+                <strong>Adults</strong>
+                <span>Ages 18 or above</span>
+              </div>
+              <div class="guest-counter-control">
+                <Button type="button" text class="guest-counter-btn" @click="updateGuestCount('adults', -1)" :disabled="adults <= 1">−</Button>
+                <span>{{ adults }}</span>
+                <Button type="button" text class="guest-counter-btn" @click="updateGuestCount('adults', 1)">+</Button>
+              </div>
+            </div>
+
+            <div class="guest-counter-row">
+              <div class="guest-counter-copy">
+                <strong>Children</strong>
+                <span>Age 0 to 17 years</span>
+              </div>
+              <div class="guest-counter-control">
+                <Button type="button" text class="guest-counter-btn" @click="updateGuestCount('children', -1)" :disabled="children <= 0">−</Button>
+                <span>{{ children }}</span>
+                <Button type="button" text class="guest-counter-btn" @click="updateGuestCount('children', 1)">+</Button>
+              </div>
+            </div>
+
+            <div v-if="children > 0" class="guest-age-grid">
+              <div v-for="(_, index) in childAges" :key="`child-age-${index}`" class="guest-age-item">
+                <label class="guest-age-label">Child {{ index + 1 }} age</label>
+                <Select
+                  v-model="childAges[index]"
+                  :options="childAgeOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                  class="guest-age-select"
+                />
+              </div>
+            </div>
+
+            <p v-if="children > 0" class="guest-age-note">
+              We use each child age to estimate the correct room options and rates for your stay.
+            </p>
+
+            <div class="guest-counter-row">
+              <div class="guest-counter-copy">
+                <strong>Rooms</strong>
+                <span>Choose what you need</span>
+              </div>
+              <div class="guest-counter-control">
+                <Button type="button" text class="guest-counter-btn" @click="updateGuestCount('rooms', -1)" :disabled="roomsRequested <= 1">−</Button>
+                <span>{{ roomsRequested }}</span>
+                <Button type="button" text class="guest-counter-btn" @click="updateGuestCount('rooms', 1)">+</Button>
+              </div>
+            </div>
+
+            <div class="guest-pets-row">
+              <div class="guest-counter-copy">
+                <strong>Traveling with pets?</strong>
+                <span>We will keep that in your search details.</span>
+              </div>
+              <ToggleSwitch v-model="travelWithPets" />
+            </div>
+
+            <Button type="button" label="Done" outlined class="guest-done-button" @click="activeFilterPanel = null" />
+          </div>
         </div>
 
         <div class="filter-actions">
@@ -99,30 +217,55 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onBeforeUnmount, onMounted, watch } from 'vue'
+import { useDestinations } from '~/composables/useDestinations'
 import { useHotels } from '~/composables/useHotels'
 import { useRooms } from '~/composables/useRooms'
 
 // Props/Data
 const { hotels, fetchAll: fetchHotels, fetchAvailable: fetchAvailableHotels } = useHotels()
 const { rooms, fetchAll: fetchRooms } = useRooms()
+const { destinations, fetchDestinations } = useDestinations()
 const route = useRoute()
+const router = useRouter()
 
 // State
+const filtersSidebarRef = ref<HTMLElement | null>(null)
+const today = startOfDay(new Date())
 const priceRange = ref([0, 1000])
 const selectedStars = ref<number[]>([3, 4, 5])
 const selectedCity = ref<string | null>(null)
 const searchQuery = ref('')
 const sortBy = ref('note')
-const requiredGuests = ref(0)
-const requiredRooms = ref(1)
+const activeFilterPanel = ref<'guests' | null>(null)
+const checkInDate = ref<Date | null>(null)
+const checkOutDate = ref<Date | null>(null)
+const adults = ref(2)
+const children = ref(1)
+const roomsRequested = ref(2)
+const childAges = ref<number[]>([14])
+const travelWithPets = ref(false)
+const childAgeOptions = Array.from({ length: 17 }, (_, index) => ({
+  label: `${index + 1} years old`,
+  value: index + 1,
+}))
+const checkOutMinDate = computed(() => {
+  if (!checkInDate.value) {
+    return today
+  }
+
+  return addDays(startOfDay(checkInDate.value), 1)
+})
 
 // Options
 const cityOptions = computed(() => {
-  const cities = [...new Set(hotels.value.map(h => h.city))]
+  const cityEntries = [...destinations.value]
+  if (selectedCity.value && !cityEntries.some((destination) => destination.ville === selectedCity.value)) {
+    cityEntries.push({ ville: selectedCity.value, count: 0 })
+  }
   return [
     { label: 'Toutes les villes', value: null },
-    ...cities.map(c => ({ label: c, value: c }))
+    ...cityEntries.map((destination) => ({ label: destination.ville, value: destination.ville }))
   ]
 })
 
@@ -141,40 +284,33 @@ function getHotelMinPrice(hotelId: number) {
 
 const filteredHotels = computed(() => {
   let list = hotels.value.filter(h => {
-    // Name Search
     if (searchQuery.value && !h.name.toLowerCase().includes(searchQuery.value.toLowerCase()) && !h.city.toLowerCase().includes(searchQuery.value.toLowerCase())) return false
-    
-    // Rating
+
     if (selectedStars.value.length > 0 && !selectedStars.value.includes(h.stars)) return false
-    
-    // City
+
     if (selectedCity.value && h.city !== selectedCity.value) return false
 
-    // Capacity
-    if (requiredGuests.value > 0) {
-      const capacityPerRoom = Math.max(1, Math.ceil(requiredGuests.value / Math.max(requiredRooms.value, 1)))
-      const validRooms = rooms.value.filter(room => room.hotelId === h.id && room.available && room.capacity >= capacityPerRoom)
-      if (validRooms.length < requiredRooms.value) return false
-    }
-    
-    // Price
     const minP = getHotelMinPrice(h.id)
     if (minP < priceRange.value[0] || minP > priceRange.value[1]) return false
-    
+
     return true
   })
-  
-  // Sort
+
   if (sortBy.value === 'note') list.sort((a, b) => b.stars - a.stars)
   else if (sortBy.value === 'price_asc') list.sort((a, b) => getHotelMinPrice(a.id) - getHotelMinPrice(b.id))
   else if (sortBy.value === 'price_desc') list.sort((a, b) => getHotelMinPrice(b.id) - getHotelMinPrice(a.id))
-  
+
   return list
 })
 
 function applyFilters() {
-  // Mobile only feature usually or just a visual trigger.
-  // Reactive Vue updates automatically.
+  normalizeStayDates()
+  activeFilterPanel.value = null
+
+  router.replace({
+    path: '/hotels',
+    query: buildRouteQuery(),
+  })
 }
 
 function resetFilters() {
@@ -183,21 +319,39 @@ function resetFilters() {
   selectedCity.value = null
   searchQuery.value = ''
   sortBy.value = 'note'
-  requiredGuests.value = 0
-  requiredRooms.value = 1
+  checkInDate.value = null
+  checkOutDate.value = null
+  adults.value = 2
+  children.value = 1
+  roomsRequested.value = 2
+  childAges.value = [14]
+  travelWithPets.value = false
+  activeFilterPanel.value = null
+
+  router.replace({ path: '/hotels' })
 }
 
 function applyRouteFilters() {
   const city = typeof route.query.city === 'string' ? route.query.city : null
   const query = typeof route.query.q === 'string' ? route.query.q : ''
-  const adults = Number.parseInt(typeof route.query.adults === 'string' ? route.query.adults : '0', 10)
-  const children = Number.parseInt(typeof route.query.children === 'string' ? route.query.children : '0', 10)
-  const roomCount = Number.parseInt(typeof route.query.rooms === 'string' ? route.query.rooms : '1', 10)
+  const checkIn = typeof route.query.checkIn === 'string' ? parseDate(route.query.checkIn) : null
+  const checkOut = typeof route.query.checkOut === 'string' ? parseDate(route.query.checkOut) : null
+  const adultsQuery = Number.parseInt(typeof route.query.adults === 'string' ? route.query.adults : '2', 10)
+  const childrenQuery = Number.parseInt(typeof route.query.children === 'string' ? route.query.children : '1', 10)
+  const roomCount = Number.parseInt(typeof route.query.rooms === 'string' ? route.query.rooms : '2', 10)
+  const childAgesQuery = typeof route.query.childAges === 'string' ? route.query.childAges : ''
 
   selectedCity.value = city
   searchQuery.value = query
-  requiredGuests.value = Math.max(0, (Number.isNaN(adults) ? 0 : adults) + (Number.isNaN(children) ? 0 : children))
-  requiredRooms.value = Math.max(1, Number.isNaN(roomCount) ? 1 : roomCount)
+  checkInDate.value = checkIn
+  checkOutDate.value = checkOut
+  adults.value = Math.max(1, Number.isNaN(adultsQuery) ? 2 : adultsQuery)
+  children.value = Math.max(0, Number.isNaN(childrenQuery) ? 1 : childrenQuery)
+  roomsRequested.value = Math.max(1, Number.isNaN(roomCount) ? 2 : roomCount)
+  childAges.value = parseChildAges(childAgesQuery, children.value)
+  travelWithPets.value = typeof route.query.pets === 'string' && route.query.pets === '1'
+
+  normalizeStayDates()
 }
 
 async function loadHotelsFromRoute() {
@@ -208,7 +362,8 @@ async function loadHotelsFromRoute() {
   const children = Number.parseInt(typeof route.query.children === 'string' ? route.query.children : '0', 10)
   const roomCount = Number.parseInt(typeof route.query.rooms === 'string' ? route.query.rooms : '1', 10)
   const guests = Math.max(0, (Number.isNaN(adults) ? 0 : adults) + (Number.isNaN(children) ? 0 : children))
-  const hasAvailabilityQuery = Boolean(city || checkIn || checkOut || guests > 0 || roomCount > 1)
+  const hasDateQuery = Boolean(checkIn && checkOut)
+  const hasAvailabilityQuery = Boolean(city || hasDateQuery || guests > 0 || roomCount > 1)
 
   if (hasAvailabilityQuery) {
     await fetchAvailableHotels({
@@ -224,27 +379,148 @@ async function loadHotelsFromRoute() {
   await fetchHotels()
 }
 
+function buildRouteQuery() {
+  const query: Record<string, string> = {}
+
+  if (selectedCity.value) {
+    query.city = selectedCity.value
+  }
+
+  if (checkInDate.value && checkOutDate.value) {
+    query.checkIn = formatDateForQuery(checkInDate.value)
+    query.checkOut = formatDateForQuery(checkOutDate.value)
+  }
+
+  query.adults = String(adults.value)
+  query.children = String(children.value)
+  query.rooms = String(roomsRequested.value)
+
+  if (children.value > 0 && childAges.value.length > 0) {
+    query.childAges = childAges.value.join(',')
+  }
+
+  if (travelWithPets.value) {
+    query.pets = '1'
+  }
+
+  return query
+}
+
+function parseDate(value: string) {
+  const parsed = new Date(`${value}T00:00:00`)
+  return Number.isNaN(parsed.getTime()) ? null : parsed
+}
+
+function parseChildAges(value: string, count: number) {
+  const parsed = value
+    .split(',')
+    .map((entry) => Number.parseInt(entry, 10))
+    .filter((entry) => Number.isFinite(entry) && entry > 0)
+
+  const next = parsed.slice(0, count)
+  while (next.length < count) {
+    next.push(14)
+  }
+
+  return next
+}
+
+function normalizeStayDates() {
+  if (checkInDate.value && checkOutDate.value && checkOutDate.value <= checkInDate.value) {
+    checkOutDate.value = addDays(checkInDate.value, 1)
+  }
+
+  if (checkInDate.value && !checkOutDate.value) {
+    checkOutDate.value = addDays(checkInDate.value, 1)
+  }
+
+  if (!checkInDate.value && checkOutDate.value) {
+    checkInDate.value = addDays(checkOutDate.value, -1)
+  }
+}
+
+function formatDateForQuery(date: Date) {
+  return startOfDay(date).toISOString().split('T')[0]
+}
+
+function startOfDay(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate())
+}
+
+function addDays(date: Date, days: number) {
+  const next = new Date(date)
+  next.setDate(next.getDate() + days)
+  return next
+}
+
+function toggleGuestPanel() {
+  activeFilterPanel.value = activeFilterPanel.value === 'guests' ? null : 'guests'
+}
+
+function updateGuestCount(type: 'adults' | 'children' | 'rooms', delta: number) {
+  if (type === 'adults') adults.value = Math.max(1, adults.value + delta)
+  if (type === 'children') children.value = Math.max(0, children.value + delta)
+  if (type === 'rooms') roomsRequested.value = Math.max(1, roomsRequested.value + delta)
+}
+
+const guestSummary = computed(() => {
+  const adultLabel = `${adults.value} adult${adults.value > 1 ? 's' : ''}`
+  const childLabel = children.value ? ` · ${children.value} child${children.value > 1 ? 'ren' : ''}` : ''
+  const roomLabel = ` · ${roomsRequested.value} room${roomsRequested.value > 1 ? 's' : ''}`
+  return `${adultLabel}${childLabel}${roomLabel}`
+})
+
+watch(children, (count) => {
+  const next = childAges.value.slice(0, count)
+  while (next.length < count) {
+    next.push(14)
+  }
+  childAges.value = next
+}, { immediate: true })
+
+watch([checkInDate, checkOutDate], () => {
+  if (checkInDate.value || checkOutDate.value) {
+    normalizeStayDates()
+  }
+})
+
+function handleClickOutside(event: MouseEvent) {
+  if (!filtersSidebarRef.value) return
+  if (!filtersSidebarRef.value.contains(event.target as Node)) {
+    activeFilterPanel.value = null
+  }
+}
+
 onMounted(async () => {
-  applyRouteFilters()
-  await Promise.all([loadHotelsFromRoute(), fetchRooms()])
+  document.addEventListener('click', handleClickOutside)
+  await fetchDestinations()
+  await fetchRooms()
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutside)
 })
 
 watch(() => route.query, async () => {
   applyRouteFilters()
   await loadHotelsFromRoute()
-}, { deep: true })
+}, { deep: true, immediate: true })
 </script>
 
 <style scoped>
 .hotels-page {
-  background: white;
+  background:
+    radial-gradient(circle at top, color-mix(in srgb, var(--color-primary-50) 72%, white 28%) 0%, transparent 45%),
+    linear-gradient(180deg, var(--color-gray-50) 0%, white 100%);
   min-height: 100vh;
 }
 
 .page-header {
-  background: white;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   padding: 32px 0 16px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--color-gray-200);
 }
 
 .page-header__content {
@@ -256,23 +532,23 @@ watch(() => route.query, async () => {
 .page-title {
   font-size: 32px;
   font-weight: 800;
-  color: #015081;
+  color: var(--color-navy-500);
   margin: 0 0 4px 0;
 }
 
 .page-subtitle {
   font-size: 15px;
-  color: #64748b;
+  color: var(--color-gray-500);
   margin: 0;
 }
 
 .main-container {
-  max-width: 1200px;
+  max-width: 1320px;
   margin: 32px auto;
   padding: 0 24px;
   display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 40px;
+  grid-template-columns: 306px 1fr;
+  gap: 28px;
 }
 
 @media (max-width: 1024px) {
@@ -283,10 +559,11 @@ watch(() => route.query, async () => {
 
 /* Filters Sidebar matched to User Mockup */
 .filters-sidebar {
-  background: #f8fafc;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, var(--color-gray-50) 100%);
   padding: 24px;
-  border-radius: 12px;
-  border: none;
+  border-radius: 24px;
+  border: 1px solid color-mix(in srgb, var(--color-gray-200) 76%, white 24%);
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);
   height: fit-content;
   position: sticky;
   top: 24px;
@@ -297,10 +574,10 @@ watch(() => route.query, async () => {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #015081;
+  color: var(--color-navy-500);
   font-weight: 700;
   font-size: 20px;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
 }
 
 .sidebar-header .material-symbols-outlined {
@@ -308,7 +585,7 @@ watch(() => route.query, async () => {
 }
 
 .filter-section {
-  margin-bottom: 28px;
+  margin-bottom: 22px;
   position: relative;
 }
 
@@ -316,16 +593,50 @@ watch(() => route.query, async () => {
   z-index: 20;
 }
 
+.filter-section--date {
+  z-index: 18;
+}
+
+.filter-section--date:focus-within {
+  z-index: 70;
+}
+
+.date-picker-shell {
+  position: relative;
+}
+
+.date-picker-shell__chevron {
+  position: absolute;
+  top: 50%;
+  right: 18px;
+  transform: translateY(-50%);
+  color: var(--color-gray-500);
+  font-size: 20px;
+  pointer-events: none;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.date-picker-shell:focus-within .date-picker-shell__chevron {
+  transform: translateY(-50%) rotate(180deg);
+  color: var(--color-primary-600);
+}
+
+.filter-section--guests {
+  z-index: 15;
+}
+
 .filter-label {
   display: block;
   font-size: 14px;
   font-weight: 700;
-  color: #334155;
+  color: var(--color-gray-700);
   margin-bottom: 16px;
+  cursor: pointer;
 }
 
 .slider-wrapper {
   padding-top: 8px;
+  cursor: pointer;
 }
 
 .slider-values {
@@ -334,7 +645,7 @@ watch(() => route.query, async () => {
   margin-top: 12px;
   font-size: 12px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--color-gray-500);
 }
 
 .checkbox-group {
@@ -347,6 +658,7 @@ watch(() => route.query, async () => {
   display: flex;
   align-items: center;
   gap: 12px;
+  cursor: pointer;
 }
 
 .checkbox-label {
@@ -355,7 +667,7 @@ watch(() => route.query, async () => {
   gap: 6px;
   font-size: 14px;
   font-weight: 600;
-  color: #475569;
+  color: var(--color-gray-600);
   cursor: pointer;
 }
 
@@ -376,18 +688,25 @@ watch(() => route.query, async () => {
 .apply-btn {
   width: 100%;
   padding: 12px;
-  background: #008F90;
+  background: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-primary-600) 100%);
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 14px;
   font-weight: 700;
   font-size: 14px;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+  box-shadow: 0 14px 26px rgba(0, 79, 81, 0.22);
 }
 
 .apply-btn:hover {
-  opacity: 0.9;
+  transform: translateY(-1px);
+  filter: brightness(1.02);
+}
+
+.apply-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary-100) 60%, transparent 40%), 0 14px 26px rgba(0, 79, 81, 0.22);
 }
 
 .reset-btn {
@@ -395,7 +714,7 @@ watch(() => route.query, async () => {
   padding: 10px;
   background: none;
   border: 1px solid transparent;
-  color: #64748b;
+  color: var(--color-gray-500);
   font-weight: 600;
   font-size: 13px;
   cursor: pointer;
@@ -403,24 +722,25 @@ watch(() => route.query, async () => {
 }
 
 .reset-btn:hover {
-  color: #015081;
+  color: var(--color-navy-500);
 }
 
 
 /* Deep Customizations for PrimeVue Elements */
 :deep(.custom-slider.p-slider) {
   height: 6px;
-  background: #cbd5e1;
+  background: var(--color-gray-300);
   border-radius: 4px;
+  cursor: pointer;
 }
 
 :deep(.custom-slider .p-slider-range) {
-  background: #008F90;
+  background: var(--color-primary-500);
 }
 
 :deep(.custom-slider .p-slider-handle) {
   background: white !important;
-  border: 2px solid #008F90 !important;
+  border: 2px solid var(--color-primary-500) !important;
   width: 16px;
   height: 16px;
   top: 50%;
@@ -433,17 +753,18 @@ watch(() => route.query, async () => {
 }
 
 :deep(.p-checkbox-box) {
-  border: 1.5px solid #cbd5e1;
+  border: 1.5px solid var(--color-gray-300);
   border-radius: 4px;
   background: white;
   width: 18px;
   height: 18px;
   transition: all 0.2s;
+  cursor: pointer;
 }
 
 :deep(.p-checkbox-checked .p-checkbox-box) {
-  background: #008F90 !important;
-  border-color: #008F90 !important;
+  background: var(--color-primary-500) !important;
+  border-color: var(--color-primary-500) !important;
 }
 
 :deep(.p-checkbox-icon) {
@@ -462,31 +783,34 @@ watch(() => route.query, async () => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
 }
 
 :deep(.filter-rating .p-rating-icon) {
-  color: #94a3b8;
+  color: var(--color-gray-400);
   width: 16px !important;
   height: 16px !important;
   display: block;
 }
 
 :deep(.filter-rating .p-rating-on-icon) {
-  color: #B8860B;
+  color: var(--color-accent-600);
 }
 
 :deep(.full-width-select.p-select) {
   width: 100%;
   background: white;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
+  border: 1px solid var(--color-gray-200);
+  border-radius: 16px;
   padding: 2px 4px;
+  cursor: pointer;
 }
 
 :deep(.full-width-select .p-select-label) {
-  color: #334155;
+  color: var(--color-gray-700);
   font-size: 14px;
   font-weight: 500;
+  cursor: pointer;
 }
 
 :deep(.destination-dropdown.p-select) {
@@ -500,14 +824,15 @@ watch(() => route.query, async () => {
 
 :deep(.destination-dropdown .p-select-dropdown) {
   width: 36px;
-  color: #64748b;
+  color: var(--color-gray-500);
+  cursor: pointer;
 }
 
 :deep(.p-select-overlay) {
   background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  border: 1px solid color-mix(in srgb, var(--color-gray-200) 76%, white 24%);
+  border-radius: 20px;
+  box-shadow: 0 28px 54px rgba(15, 23, 42, 0.18);
   margin-top: 8px;
   overflow: hidden;
   z-index: 1000;
@@ -518,8 +843,6 @@ watch(() => route.query, async () => {
   left: 0 !important;
   min-width: 100%;
   margin-top: 0;
-  border-radius: 8px;
-  box-shadow: 0 16px 30px rgba(15, 23, 42, 0.12);
   z-index: 1100;
 }
 
@@ -532,7 +855,7 @@ watch(() => route.query, async () => {
 :deep(.p-select-option) {
   padding: 10px 16px;
   font-size: 14px;
-  color: #475569;
+  color: var(--color-gray-600);
   cursor: pointer;
   transition: background 0.2s;
   font-weight: 500;
@@ -540,25 +863,431 @@ watch(() => route.query, async () => {
 
 :deep(.p-select-option:hover),
 :deep(.p-select-option[data-p-focused="true"]) {
-  background: #f1f5f9;
-  color: #008F90;
+  background: var(--color-gray-100);
+  color: var(--color-primary-600);
 }
 
 :deep(.p-select-option[data-p-selected="true"]) {
-  background: #e0f2fe;
-  color: #015081;
+  background: var(--color-primary-50);
+  color: var(--color-navy-500);
   font-weight: 700;
+}
+
+:deep(.filter-date-picker.p-datepicker) {
+  width: 100%;
+  background: linear-gradient(180deg, white 0%, color-mix(in srgb, var(--color-gray-50) 72%, white 28%) 100%);
+  border: 1px solid color-mix(in srgb, var(--color-gray-200) 74%, white 26%);
+  border-radius: 16px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  cursor: pointer;
+}
+
+:deep(.filter-date-picker.p-datepicker:hover),
+:deep(.filter-date-picker.p-datepicker.p-focus) {
+  border-color: color-mix(in srgb, var(--color-primary-200) 68%, white 32%);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary-50) 60%, transparent 40%), inset 0 1px 0 rgba(255, 255, 255, 0.78);
+}
+
+:deep(.filter-date-picker .p-inputtext) {
+  width: 100%;
+  min-height: 3.15rem;
+  border: 0;
+  background: transparent;
+  color: var(--color-navy-500);
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 0.95rem 3.45rem 0.95rem 2.65rem;
+  cursor: pointer;
+}
+
+:deep(.filter-date-picker .p-inputtext::placeholder) {
+  color: var(--color-gray-500);
+  font-weight: 600;
+}
+
+:deep(.filter-date-picker .p-datepicker-input-icon-container),
+:deep(.filter-date-picker .p-datepicker-dropdown) {
+  color: var(--color-primary-600);
+  cursor: pointer;
+}
+
+:deep(.filter-date-picker .p-datepicker-input-icon-container) {
+  left: 0.9rem;
+  right: auto;
+}
+
+:deep(.filter-date-picker .p-datepicker-dropdown) {
+  width: 2.25rem;
+}
+
+:deep(.filter-date-picker .p-datepicker),
+:deep(.filter-date-picker .p-datepicker-panel),
+:deep(.p-select-overlay) {
+  background: white;
+  border: 1px solid color-mix(in srgb, var(--color-gray-200) 76%, white 24%);
+  border-radius: 20px;
+  box-shadow: 0 28px 54px rgba(15, 23, 42, 0.18);
+  margin-top: 8px;
+  overflow: hidden;
+  z-index: 1000;
+}
+
+:deep(.filter-date-picker .p-datepicker-panel) {
+  z-index: 1100;
+  padding: 0.9rem;
+}
+
+:deep(.filter-date-picker .p-datepicker-header) {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  border-bottom: 1px solid var(--color-gray-200);
+  padding: 0.2rem 2rem 0.7rem;
+  margin-bottom: 0.24rem;
+}
+
+:deep(.filter-date-picker .p-datepicker-title) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--color-navy-500);
+  margin: 0 auto;
+  text-align: center;
+}
+
+:deep(.filter-date-picker .p-datepicker-prev-button),
+:deep(.filter-date-picker .p-datepicker-next-button) {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.72rem;
+  height: 1.72rem;
+  padding: 0;
+  line-height: 0;
+  border-radius: 999px;
+  color: var(--color-gray-500);
+  transition: background 0.2s ease, color 0.2s ease;
+  cursor: pointer;
+}
+
+:deep(.filter-date-picker .p-datepicker-prev-button) {
+  left: 0.1rem;
+}
+
+:deep(.filter-date-picker .p-datepicker-next-button) {
+  right: 0.1rem;
+}
+
+:deep(.filter-date-picker .p-datepicker-prev-button:hover),
+:deep(.filter-date-picker .p-datepicker-next-button:hover) {
+  background: color-mix(in srgb, var(--color-primary-50) 72%, white 28%);
+  color: var(--color-primary-700);
+}
+
+:deep(.filter-date-picker .p-datepicker-day-view) {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+:deep(.filter-date-picker .p-datepicker-weekday-cell),
+:deep(.filter-date-picker .p-datepicker-day-cell) {
+  width: 14.2857%;
+}
+
+:deep(.filter-date-picker .p-datepicker-weekday) {
+  display: inline-flex;
+  width: 100%;
+  justify-content: center;
+}
+
+:deep(.filter-date-picker .p-datepicker-day-view th) {
+  padding: 0.14rem 0 0.28rem;
+  text-align: center;
+  font-size: 0.69rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--color-gray-500);
+}
+
+:deep(.filter-date-picker .p-datepicker-day-view td) {
+  padding: 0.08rem 0;
+  text-align: center;
+  vertical-align: middle;
+}
+
+:deep(.filter-date-picker .p-datepicker-day) {
+  width: 2.06rem;
+  height: 2.06rem;
+  border-radius: 0.66rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+:deep(.filter-date-picker .p-datepicker-day-cell.p-datepicker-other-month .p-datepicker-day) {
+  color: color-mix(in srgb, var(--color-gray-500) 72%, white 28%);
+}
+
+:deep(.filter-date-picker .p-datepicker-day:not(.p-disabled):hover) {
+  background: color-mix(in srgb, var(--color-primary-50) 72%, white 28%);
+  color: var(--color-primary-700);
+}
+
+:deep(.filter-date-picker .p-datepicker-day-selected-range) {
+  background: color-mix(in srgb, var(--color-primary-200) 55%, white 45%);
+  color: var(--color-primary-700);
+  border-radius: 0.68rem;
+}
+
+:deep(.filter-date-picker .p-datepicker-day-selected),
+:deep(.filter-date-picker .p-datepicker-day-selected-start),
+:deep(.filter-date-picker .p-datepicker-day-selected-end) {
+  background: linear-gradient(145deg, #0a7677 0%, var(--color-primary-600) 100%);
+  color: white;
+  box-shadow: 0 8px 18px rgba(0, 80, 81, 0.34);
+}
+
+:deep(.destination-dropdown.p-select) {
+  position: relative;
+  z-index: 20;
+}
+
+:deep(.destination-dropdown .p-select-label) {
+  padding: 8px 12px;
+}
+
+:deep(.destination-dropdown .p-select-dropdown) {
+  width: 36px;
+  color: var(--color-gray-500);
+}
+
+:deep(.destination-dropdown .p-select-overlay) {
+  top: 100% !important;
+  left: 0 !important;
+  min-width: 100%;
+  margin-top: 0;
+  z-index: 1100;
+}
+
+:deep(.p-select-list) {
+  padding: 4px 0;
+  list-style-type: none;
+  margin: 0;
+}
+
+:deep(.p-select-option) {
+  padding: 10px 16px;
+  font-size: 14px;
+  color: var(--color-gray-600);
+  cursor: pointer;
+  transition: background 0.2s;
+  font-weight: 500;
+}
+
+:deep(.p-select-option:hover),
+:deep(.p-select-option[data-p-focused="true"]) {
+  background: var(--color-gray-100);
+  color: var(--color-primary-600);
+}
+
+.guest-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.95rem 1rem;
+  background: white;
+  border: 1px solid color-mix(in srgb, var(--color-gray-200) 76%, white 24%);
+  border-radius: 16px;
+  text-align: left;
+  transition: background 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  cursor: pointer;
+}
+
+.guest-trigger:hover,
+.guest-trigger--open {
+  background: color-mix(in srgb, var(--color-primary-25) 62%, white 38%);
+  border-color: color-mix(in srgb, var(--color-primary-200) 64%, white 36%);
+  box-shadow: 0 10px 22px rgba(0, 79, 81, 0.08);
+}
+
+.guest-trigger__icon {
+  flex-shrink: 0;
+  color: var(--color-primary-600);
+  font-size: 1.2rem;
+}
+
+.guest-trigger__copy {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.guest-trigger__copy strong {
+  display: block;
+  color: var(--color-gray-700);
+  font-size: 0.95rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.guest-trigger__copy span {
+  color: var(--color-gray-500);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.guest-trigger__chevron {
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--color-gray-500);
+  transition: transform 0.24s ease;
+}
+
+.guest-trigger--open .guest-trigger__chevron {
+  transform: rotate(180deg);
+}
+
+.guest-panel {
+  margin-top: 0.9rem;
+  padding: 1rem;
+  background: white;
+  border: 1px solid color-mix(in srgb, var(--color-gray-200) 76%, white 24%);
+  border-radius: 20px;
+  box-shadow: 0 24px 42px rgba(15, 23, 42, 0.12);
+}
+
+.guest-counter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.guest-counter-row + .guest-counter-row,
+.guest-age-grid,
+.guest-pets-row,
+.guest-done-button {
+  margin-top: 1rem;
+}
+
+.guest-counter-copy {
+  flex: 1;
+}
+
+.guest-counter-copy strong,
+.guest-age-label {
+  display: block;
+  color: var(--color-gray-800);
+  font-weight: 800;
+}
+
+.guest-counter-copy span,
+.guest-age-note {
+  color: var(--color-gray-500);
+  font-size: 0.93rem;
+  line-height: 1.5;
+}
+
+.guest-counter-control {
+  display: grid;
+  grid-template-columns: 2.2rem 2.8rem 2.2rem;
+  align-items: center;
+  border: 1px solid var(--color-gray-200);
+  border-radius: 0.9rem;
+  background: var(--color-gray-50);
+  overflow: hidden;
+}
+
+.guest-counter-control span {
+  text-align: center;
+  color: var(--color-gray-800);
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.guest-counter-btn {
+  border: none;
+  min-height: 2.4rem;
+  color: var(--color-primary-600);
+  cursor: pointer;
+}
+
+.guest-counter-btn:disabled {
+  opacity: 0.35;
+}
+
+.guest-age-grid {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.guest-age-item {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.guest-age-select :deep(.p-select) {
+  width: 100%;
+  border-radius: 0.95rem;
+  cursor: pointer;
+}
+
+.guest-age-note {
+  margin: 0;
+}
+
+.guest-pets-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-gray-200);
+}
+
+.guest-done-button {
+  width: 100%;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.guest-pets-row :deep(.p-toggleswitch) {
+  flex-shrink: 0;
+  cursor: pointer;
 }
 
 /* Results Main */
 .search-sort-bar {
-  background: #f8fafc;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, var(--color-gray-50) 100%);
   padding: 12px 20px;
-  border-radius: 12px;
+  border-radius: 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
+  border: 1px solid color-mix(in srgb, var(--color-gray-200) 76%, white 24%);
 }
 
 .search-input-wrap {
@@ -567,19 +1296,19 @@ watch(() => route.query, async () => {
   gap: 12px;
   background: white;
   padding: 4px 12px;
-  border-radius: 8px;
+  border-radius: 14px;
   flex: 1;
   max-width: 400px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-gray-200);
   transition: all 0.2s;
 }
 
 .search-input-wrap:focus-within {
-  border-color: #008F90;
-  box-shadow: 0 0 0 2px rgba(0, 143, 144, 0.1);
+  border-color: var(--color-primary-400);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary-100) 62%, transparent 38%);
 }
 
-.search-input-wrap .material-symbols-outlined { color: #94a3b8; font-size: 18px; }
+.search-input-wrap .material-symbols-outlined { color: var(--color-gray-400); font-size: 18px; }
 
 .search-input-wrap input {
   background: none;
@@ -587,7 +1316,7 @@ watch(() => route.query, async () => {
   font-size: 14px;
   width: 100%;
   outline: none !important;
-  color: #334155;
+  color: var(--color-gray-700);
   font-weight: 500;
   box-shadow: none !important;
   padding: 4px 8px !important;
@@ -609,32 +1338,32 @@ watch(() => route.query, async () => {
 .sort-label { 
   font-size: 11px; 
   font-weight: 800; 
-  color: #64748b; 
+  color: var(--color-gray-500); 
   letter-spacing: 0.5px; 
 }
 
 :deep(.sort-select-small.p-select) {
   min-width: 160px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  border: 1px solid var(--color-gray-200);
+  border-radius: 14px;
   background: white;
   transition: all 0.2s;
 }
 
 :deep(.sort-select-small.p-select:hover) {
-  border-color: #cbd5e1;
+  border-color: var(--color-gray-300);
 }
 
 :deep(.sort-select-small .p-select-label) {
   font-size: 14px;
   font-weight: 600;
-  color: #015081;
+  color: var(--color-navy-500);
   padding: 10px 16px;
 }
 
 :deep(.sort-select-small .p-select-dropdown) {
   width: 32px;
-  color: #64748b;
+  color: var(--color-gray-500);
 }
 
 :deep(.sort-select-small .p-select-overlay) {
@@ -650,10 +1379,10 @@ watch(() => route.query, async () => {
 .results-info {
   margin-bottom: 20px;
   font-size: 14px;
-  color: #64748b;
+  color: var(--color-gray-500);
 }
 
-.results-info strong { color: #015081; font-weight: 800; }
+.results-info strong { color: var(--color-navy-500); font-weight: 800; }
 
 .hotels-grid {
   display: grid;
@@ -676,38 +1405,44 @@ watch(() => route.query, async () => {
 .empty-results-state {
   text-align: center;
   padding: 80px 0;
-  color: #94a3b8;
-  background: #f8fafc;
-  border-radius: 12px;
+  color: var(--color-gray-400);
+  background: var(--color-gray-50);
+  border-radius: 20px;
 }
 
 .empty-results-state .material-symbols-outlined {
   font-size: 56px;
   margin-bottom: 16px;
-  color: #cbd5e1;
+  color: var(--color-gray-300);
 }
 
 /* Cursors */
-:deep(*) { cursor: default; }
-
-:deep(input:not([type="text"])), 
-:deep(button), 
-:deep(a), 
-:deep(.p-slider-handle), 
-:deep(.p-checkbox-box), 
-:deep(.p-rating-option), 
-:deep(.p-select), 
-:deep(.p-select-item), 
-.reset-btn,
+.filters-sidebar :deep(button),
+.filters-sidebar :deep(.p-slider),
+.filters-sidebar :deep(.p-slider-handle),
+.filters-sidebar :deep(.p-checkbox),
+.filters-sidebar :deep(.p-checkbox-box),
+.filters-sidebar :deep(.p-rating-option),
+.filters-sidebar :deep(.p-select),
+.filters-sidebar :deep(.p-select-label),
+.filters-sidebar :deep(.p-select-dropdown),
+.filters-sidebar :deep(.p-select-option),
+.filters-sidebar :deep(.p-datepicker),
+.filters-sidebar :deep(.p-datepicker input),
+.filters-sidebar :deep(.p-datepicker-day),
+.filters-sidebar :deep(.p-datepicker-prev-button),
+.filters-sidebar :deep(.p-datepicker-next-button),
+.filters-sidebar :deep(.p-toggleswitch),
+.filter-label,
+.checkbox-field,
+.checkbox-label,
+.guest-trigger,
 .apply-btn,
-.hotel-card,
-.switch,
-.slider {
+.reset-btn {
   cursor: pointer !important;
 }
 
-:deep(input[type="text"]),
-.page-title, .page-subtitle, .filter-label, .sidebar-header, strong, p, span, label, .toggle-label {
+.search-input-wrap input {
   cursor: text;
 }
 </style>

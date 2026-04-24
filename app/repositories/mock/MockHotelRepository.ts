@@ -12,6 +12,16 @@ import { ReservationStatus } from '~/types/enums'
 export class MockHotelRepository implements IHotelRepository {
   private hotels: Hotel[] = [...mockHotels]
 
+  private parseDateInput(value: string) {
+    const parsed = new Date(`${value}T00:00:00`)
+
+    if (Number.isNaN(parsed.getTime())) {
+      throw new Error(`Invalid date format: ${value}`)
+    }
+
+    return parsed
+  }
+
   async getAll(): Promise<Hotel[]> {
     return this.hotels.filter(h => h.active)
   }
@@ -41,8 +51,12 @@ export class MockHotelRepository implements IHotelRepository {
     const guests = Math.max(1, filters.guests ?? 1)
     const capacityPerRoom = Math.max(1, Math.ceil(guests / roomsRequested))
     const hasDates = Boolean(filters.checkIn && filters.checkOut)
-    const start = hasDates ? new Date(`${filters.checkIn}T00:00:00`) : null
-    const end = hasDates ? new Date(`${filters.checkOut}T00:00:00`) : null
+    const start = hasDates ? this.parseDateInput(filters.checkIn as string) : null
+    const end = hasDates ? this.parseDateInput(filters.checkOut as string) : null
+
+    if (Boolean(filters.checkIn) !== Boolean(filters.checkOut)) {
+      throw new Error('Check-in and check-out dates must be provided together')
+    }
 
     return this.hotels.filter((hotel) => {
       if (!hotel.active) return false
@@ -55,8 +69,8 @@ export class MockHotelRepository implements IHotelRepository {
         const hasBlockingReservation = mockReservations.some((reservation) =>
           reservation.roomId === room.id &&
           ![ReservationStatus.CANCELLED, ReservationStatus.REFUSED].includes(reservation.status) &&
-          new Date(reservation.checkInDate) < end &&
-          new Date(reservation.checkOutDate) > start
+          new Date(reservation.checkInDate).getTime() < end.getTime() &&
+          new Date(reservation.checkOutDate).getTime() > start.getTime()
         )
 
         return !hasBlockingReservation
