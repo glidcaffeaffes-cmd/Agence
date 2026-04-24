@@ -189,7 +189,7 @@ function deleteKey(key: any) { apiKeys.value = apiKeys.value.filter(k => k.id !=
 .new-key-banner { display: flex; align-items: center; gap: 1rem; background: #fff8e1; border: 1.5px solid #CDAF5D; border-radius: 0.75rem; padding: 1rem 1.25rem; margin-bottom: 1.5rem; }
 .new-key-banner .material-symbols-outlined { font-size: 1.5rem; color: #735c10; flex-shrink: 0; }
 .key-banner-label { font-size: 0.8125rem; font-weight: 600; color: #735c10; margin: 0 0 0.25rem; }
-.key-value { font-family: monospace; font-size: 0.9375rem; color: #015081; background: transparent; border: none; font-weight: 700; }
+.key-value { font-family: var(--font-family-mono); font-size: 0.9375rem; color: #015081; background: transparent; border: none; font-weight: 700; }
 .copy-btn { margin-left: auto; background: none; border: 1px solid #bcc9c8; border-radius: 0.375rem; padding: 0.375rem; cursor: pointer; color: #3d4949; display: flex; flex-shrink: 0; }
 .copy-btn:hover { background: #edf5fc; }
 
@@ -208,7 +208,7 @@ function deleteKey(key: any) { apiKeys.value = apiKeys.value.filter(k => k.id !=
 .data-table tr:last-child td { border-bottom: none; }
 .td-name { font-weight: 600; color: #151d22; }
 .td-date { color: #6d7979; font-size: 0.8125rem; }
-.key-masked { font-family: monospace; font-size: 0.8125rem; background: #f5faff; padding: 0.2rem 0.5rem; border-radius: 0.25rem; color: #3d4949; }
+.key-masked { font-family: var(--font-family-mono); font-size: 0.8125rem; background: #f5faff; padding: 0.2rem 0.5rem; border-radius: 0.25rem; color: #3d4949; }
 
 .status-pill { display: inline-block; padding: 0.2rem 0.625rem; border-radius: 999px; font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; }
 .pill--active { background: #e0f2f1; color: #006768; }
@@ -227,7 +227,7 @@ function deleteKey(key: any) { apiKeys.value = apiKeys.value.filter(k => k.id !=
 .dot--active { background: #006768; }
 .dot--inactive { background: #bcc9c8; }
 .webhook-info { flex: 1; }
-.webhook-url { font-size: 0.875rem; font-weight: 600; color: #015081; margin: 0 0 0.375rem; font-family: monospace; }
+.webhook-url { font-size: 0.875rem; font-weight: 600; color: #015081; margin: 0 0 0.375rem; font-family: var(--font-family-mono); }
 .webhook-events { display: flex; flex-wrap: wrap; gap: 0.375rem; }
 .event-tag { background: #edf5fc; color: #236294; padding: 0.1rem 0.5rem; border-radius: 0.25rem; font-size: 0.6875rem; font-weight: 600; }
 

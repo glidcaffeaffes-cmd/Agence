@@ -50,7 +50,8 @@ export default defineNuxtConfig({
     head: {
       link: [
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
-        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' }
+        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
+        { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap' }
       ],
       script: [
         { src: 'https://cdn.tailwindcss.com?plugins=forms,container-queries' },
@@ -59,6 +60,13 @@ export default defineNuxtConfig({
             darkMode: "class",
             theme: {
               extend: {
+                fontFamily: {
+                  sans: ["var(--font-family-base)"],
+                  body: ["var(--font-family-base)"],
+                  headline: ["var(--font-family-heading)"],
+                  label: ["var(--font-family-base)"],
+                  mono: ["var(--font-family-mono)"]
+                },
                 colors: { "on-tertiary-fixed": "#241a00", "on-tertiary-fixed-variant": "#584400", "surface-container": "#e7eff6", "on-tertiary": "#ffffff", "on-primary-fixed": "#002020", "secondary-container": "#8fc6fe", "primary-fixed-dim": "#6cd7d7", "primary-container": "#008283", "on-primary-fixed-variant": "#004f50", "tertiary-container": "#c6a857", "inverse-primary": "#6cd7d7", "surface-container-low": "#edf5fc", "on-primary-container": "#f3fffe", "on-secondary-container": "#065283", "secondary-fixed-dim": "#99cbff", "on-tertiary-container": "#4f3d00", "on-secondary-fixed": "#001d34", "error-container": "#ffdad6", "on-secondary": "#ffffff", "surface-container-lowest": "#ffffff", "surface-tint": "#00696a", "tertiary": "#735c10", "surface-bright": "#f5faff", "secondary": "#236294", "on-error-container": "#93000a", "primary": "#006768", "surface-dim": "#d3dbe2", "surface-container-highest": "#dce3eb", "on-primary": "#ffffff", "surface-container-high": "#e1e9f0", "secondary-fixed": "#cfe5ff", "on-surface-variant": "#3d4949", "on-surface": "#151d22", "background": "#f5faff", "outline": "#6d7979", "inverse-surface": "#2a3137", "tertiary-fixed": "#ffe08e", "outline-variant": "#bcc9c8", "on-secondary-fixed-variant": "#004a78", "surface-variant": "#dce3eb", "primary-fixed": "#8af3f4", "surface": "#f5faff", "inverse-on-surface": "#eaf2f9", "tertiary-fixed-dim": "#e3c36f", "on-error": "#ffffff", "error": "#ba1a1a", "on-background": "#151d22" },
                 borderRadius: { DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px" }
               }

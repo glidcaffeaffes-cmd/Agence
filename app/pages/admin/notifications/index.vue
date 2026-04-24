@@ -176,14 +176,14 @@ function previewTemplate() {
 .icon--warning { background: #fff8e1; color: #735c10; }
 .icon--sms { background: #e8eaf6; color: #3949ab; }
 .template-name { font-size: 0.875rem; font-weight: 600; color: #151d22; margin: 0; }
-.template-trigger { font-size: 0.6875rem; color: #6d7979; font-family: monospace; margin: 0.125rem 0 0; }
+.template-trigger { font-size: 0.6875rem; color: #6d7979; font-family: var(--font-family-mono); margin: 0.125rem 0 0; }
 
 .editor-panel { background: #fff; border-radius: 0.875rem; padding: 1.75rem; box-shadow: 0 1px 4px rgba(1,80,129,0.06); }
 .editor-header { display: flex; align-items: center; gap: 0.875rem; margin-bottom: 1.5rem; padding-bottom: 1.25rem; border-bottom: 1px solid #e1e9f0; }
 .editor-icon { font-size: 1.25rem; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; border-radius: 0.5rem; flex-shrink: 0; }
 .editor-title { font-size: 1.0625rem; font-weight: 700; color: #015081; margin: 0; }
 .editor-trigger { font-size: 0.8125rem; color: #6d7979; margin: 0.125rem 0 0; }
-.editor-trigger strong { color: #006768; font-family: monospace; }
+.editor-trigger strong { color: #006768; font-family: var(--font-family-mono); }
 
 .field-group { display: flex; flex-direction: column; gap: 0.375rem; margin-bottom: 1.25rem; }
 .field-label { font-size: 0.8125rem; font-weight: 600; color: #151d22; }
@@ -193,7 +193,7 @@ function previewTemplate() {
 
 .tokens-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 0.375rem; margin-bottom: 0.5rem; }
 .token-label { font-size: 0.6875rem; color: #6d7979; font-weight: 600; }
-.token { background: #edf5fc; color: #006768; padding: 0.1rem 0.5rem; border-radius: 0.25rem; font-size: 0.6875rem; font-family: monospace; cursor: pointer; transition: background 0.15s; }
+.token { background: #edf5fc; color: #006768; padding: 0.1rem 0.5rem; border-radius: 0.25rem; font-size: 0.6875rem; font-family: var(--font-family-mono); cursor: pointer; transition: background 0.15s; }
 .token:hover { background: #006768; color: #fff; }
 
 .editor-footer { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #e1e9f0; }

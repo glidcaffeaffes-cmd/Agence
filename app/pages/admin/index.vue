@@ -1,5 +1,5 @@
 <template>
-  <div class="pt-8 px-8 pb-12 space-y-8 font-['Inter'] antialiased">
+  <div class="pt-8 px-8 pb-12 space-y-8 antialiased">
     <!-- ROW 1: KPI Cards -->
     <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <!-- KPI 1 -->

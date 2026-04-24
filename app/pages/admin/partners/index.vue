@@ -1,5 +1,5 @@
 <template>
-  <div class="p-8 font-['Inter'] antialiased">
+  <div class="p-8 antialiased">
     <!-- Page Header -->
     <div class="flex justify-between items-end mb-8">
       <div>

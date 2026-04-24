@@ -1,5 +1,5 @@
 <template>
-  <div class="p-8 max-w-7xl mx-auto font-['Inter'] antialiased">
+  <div class="p-8 max-w-7xl mx-auto antialiased">
     <Head>
       <title>Offres & Promotions — Admin</title>
     </Head>

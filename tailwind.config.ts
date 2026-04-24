@@ -54,9 +54,11 @@ export default <Partial<Config>>{
         "surface-bright": "#f5faff"
       },
       fontFamily: {
-        "headline": ["Inter"],
-        "body": ["Inter"],
-        "label": ["Inter"]
+        "sans": ["var(--font-family-base)"],
+        "headline": ["var(--font-family-heading)"],
+        "body": ["var(--font-family-base)"],
+        "label": ["var(--font-family-base)"],
+        "mono": ["var(--font-family-mono)"]
       }
     }
   }

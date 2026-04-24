@@ -1,5 +1,5 @@
 <template>
-  <div class="p-8 max-w-7xl mx-auto font-['Inter'] antialiased">
+  <div class="p-8 max-w-7xl mx-auto antialiased">
     <div class="flex justify-between items-end mb-8">
       <div>
         <h2 class="text-3xl font-bold text-[#015081] tracking-tight mb-1">Gestion des Hotels</h2>

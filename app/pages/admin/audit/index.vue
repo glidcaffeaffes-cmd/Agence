@@ -161,7 +161,7 @@ function loadLogs() {
 .data-table tr:hover td { background: #f5faff; }
 .empty-row { text-align: center; color: #6d7979; padding: 2rem; }
 
-.td-time { font-family: monospace; font-size: 0.75rem; color: #6d7979; white-space: nowrap; }
+.td-time { font-family: var(--font-family-mono); font-size: 0.75rem; color: #6d7979; white-space: nowrap; }
 .td-resource { font-weight: 600; color: #015081; }
 .td-details { color: #3d4949; max-width: 260px; }
 .user-chip { background: #edf5fc; color: #006768; padding: 0.2rem 0.5rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
