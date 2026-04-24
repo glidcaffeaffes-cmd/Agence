@@ -189,7 +189,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuth } from '~/composables/useAuth'
 
 definePageMeta({
@@ -197,6 +197,7 @@ definePageMeta({
 })
 
 const router = useRouter()
+const route = useRoute()
 const { register, loading, error } = useAuth()
 
 const firstName = ref('')
@@ -277,6 +278,9 @@ async function handleRegister() {
   }
   
   const ok = await register(email.value, password.value, firstName.value, lastName.value)
-  if (ok) router.push('/')
+  if (ok) {
+    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : ''
+    router.push(redirect.startsWith('/') ? redirect : '/')
+  }
 }
 </script>
