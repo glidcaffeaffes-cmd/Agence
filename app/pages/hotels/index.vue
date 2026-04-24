@@ -257,17 +257,19 @@ const checkOutMinDate = computed(() => {
   return addDays(startOfDay(checkInDate.value), 1)
 })
 
-// Options
-const cityOptions = computed(() => {
-  const cityEntries = [...destinations.value]
-  if (selectedCity.value && !cityEntries.some((destination) => destination.ville === selectedCity.value)) {
-    cityEntries.push({ ville: selectedCity.value, count: 0 })
-  }
-  return [
-    { label: 'Toutes les villes', value: null },
-    ...cityEntries.map((destination) => ({ label: destination.ville, value: destination.ville }))
-  ]
-})
+// Static 24 Tunisian governorates — always shown regardless of DB content
+const TUNISIA_CITIES = [
+  'Ariana', 'Béja', 'Ben Arous', 'Bizerte', 'Gabès', 'Gafsa',
+  'Jendouba', 'Kairouan', 'Kasserine', 'Kébili', 'La Manouba', 'Le Kef',
+  'Mahdia', 'Médenine', 'Monastir', 'Nabeul', 'Sfax', 'Sidi Bouzid',
+  'Siliana', 'Sousse', 'Tataouine', 'Tozeur', 'Tunis', 'Zaghouan',
+]
+
+const cityOptions = [
+  { label: 'Toutes les villes', value: null },
+  ...TUNISIA_CITIES.map((city) => ({ label: city, value: city })),
+]
+
 
 const sortOptions = [
   { label: 'Note', value: 'note' },
