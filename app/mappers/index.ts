@@ -342,15 +342,21 @@ export const ReservationMapper = {
 
 export const OfferMapper = {
   fromDto(dto: OfferDTO): Offer {
+    // Attempt to find a fallback image from the hotel rooms if the offer doesn't have one
+    const fallbackImage = dto.hotel?.chambres?.[0]?.photos?.[0] || 
+                          hotelFallbackImages[dto.hotelId % hotelFallbackImages.length]
+
     return {
       id: dto.id,
       hotelId: dto.hotelId,
+      hotelName: dto.hotel?.nom,
       title: dto.titre,
       description: dto.description ?? '',
       discountRate: dto.tauxRemise,
       startDate: dto.dateDebut,
       endDate: dto.dateFin,
       active: dto.active,
+      image: dto.photo || fallbackImage,
     }
   },
 
@@ -358,6 +364,7 @@ export const OfferMapper = {
     return {
       titre: model.title,
       description: model.description || undefined,
+      photo: model.image || undefined,
       tauxRemise: model.discountRate,
       dateDebut: model.startDate,
       dateFin: model.endDate,
@@ -370,6 +377,7 @@ export const OfferMapper = {
     return {
       ...(model.title !== undefined && { titre: model.title }),
       ...(model.description !== undefined && { description: model.description }),
+      ...(model.image !== undefined && { photo: model.image }),
       ...(model.discountRate !== undefined && { tauxRemise: model.discountRate }),
       ...(model.startDate !== undefined && { dateDebut: model.startDate }),
       ...(model.endDate !== undefined && { dateFin: model.endDate }),
@@ -378,6 +386,7 @@ export const OfferMapper = {
     }
   },
 }
+
 
 export const ComplaintMapper = {
   fromDto(dto: ComplaintDTO): Complaint {

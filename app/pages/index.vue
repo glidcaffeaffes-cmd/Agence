@@ -154,6 +154,9 @@
       </div>
     </section>
 
+    <!-- Top Destinations -->
+    <TopDestinations />
+
     <!-- Featured Hotels: Tonal Background -->
     <section class="section-featured">
       <div class="section-container">

@@ -58,13 +58,15 @@ export interface OfferDTO {
   id: number
   titre: string
   description: string | null
+  photo: string | null
   tauxRemise: number
   dateDebut: string
   dateFin: string
   active: boolean
   hotelId: number
-  hotel?: HotelDTO
+  hotel?: HotelDTO & { nom?: string }
 }
+
 
 export interface ComplaintDTO {
   id: number

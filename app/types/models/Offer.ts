@@ -1,10 +1,7 @@
-/**
- * Special offer / promotion for a hotel.
- * UML: Offre
- */
 export interface Offer {
   id: number
   hotelId: number
+  hotelName?: string
   title: string
   description: string
   discountRate: number
