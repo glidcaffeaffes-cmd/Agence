@@ -16,6 +16,10 @@
       </button>
     </div>
 
+    <div v-if="error" class="mb-4 rounded-lg border border-error/20 bg-error/5 px-4 py-3 text-sm text-error">
+      {{ error }}
+    </div>
+
     <!-- Table -->
     <div class="bg-white rounded-xl overflow-hidden shadow-[0_4px_20px_rgba(1,80,129,0.06)]">
       <table class="w-full text-left border-collapse">
@@ -142,6 +146,7 @@ definePageMeta({ layout: 'admin' })
 const service = new OfferService()
 const offers = ref<Offer[]>([])
 const loading = ref(false)
+const error = ref<string | null>(null)
 const isModalOpen = ref(false)
 const editingOffer = ref<Offer | null>(null)
 const form = ref({ title: '', discountRate: 10, hotelId: 1, startDate: '', endDate: '', description: '' })
@@ -153,25 +158,51 @@ function formatDate(d: string) {
 function openEdit(offer: Offer) { editingOffer.value = { ...offer } }
 
 async function handleSave() {
-  await service.create({ ...form.value, active: true, image: undefined })
-  form.value = { title: '', discountRate: 10, hotelId: 1, startDate: '', endDate: '', description: '' }
-  isModalOpen.value = false
-  offers.value = await service.getAll()
+  try {
+    error.value = null
+    const created = await service.create({ ...form.value, active: true, image: undefined })
+    offers.value = [created, ...offers.value]
+    form.value = { title: '', discountRate: 10, hotelId: 1, startDate: '', endDate: '', description: '' }
+    isModalOpen.value = false
+  } catch (cause: any) {
+    error.value = cause.message
+  }
 }
 
 async function saveEdit() {
   if (!editingOffer.value) return
-  const updated = await service.update(editingOffer.value.id, editingOffer.value)
-  const i = offers.value.findIndex(o => o.id === updated.id)
-  if (i !== -1) offers.value[i] = updated
-  editingOffer.value = null
+  try {
+    error.value = null
+    const updated = await service.update(editingOffer.value.id, editingOffer.value)
+    const i = offers.value.findIndex(o => o.id === updated.id)
+    if (i !== -1) offers.value[i] = updated
+    editingOffer.value = null
+  } catch (cause: any) {
+    error.value = cause.message
+  }
 }
 
 async function handleDelete(id: number) {
   if (!confirm('Supprimer cette offre ?')) return
-  await service.delete(id)
-  offers.value = offers.value.filter(o => o.id !== id)
+  try {
+    error.value = null
+    await service.delete(id)
+    offers.value = offers.value.filter(o => o.id !== id)
+  } catch (cause: any) {
+    error.value = cause.message
+  }
 }
 
-onMounted(async () => { loading.value = true; offers.value = await service.getAll(); loading.value = false })
+onMounted(async () => {
+  loading.value = true
+  error.value = null
+  try {
+    offers.value = await service.getAll()
+  } catch (cause: any) {
+    error.value = cause.message
+    offers.value = []
+  } finally {
+    loading.value = false
+  }
+})
 </script>

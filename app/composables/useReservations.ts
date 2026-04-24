@@ -1,61 +1,45 @@
 import { ref } from 'vue'
 import type { Reservation } from '~/types/models'
 import type { ReservationStatus } from '~/types/enums'
-import { ApiReservationRepository, ApiRoomRepository } from '~/repositories/api'
+import { ReservationService, RoomService } from '~/services'
 import { ReservationStatus as ReservationStatusEnum } from '~/types/enums'
 import { useAuth } from '~/composables/useAuth'
+import { useAsyncAction } from '~/composables/useAsyncAction'
 
-const repo = new ApiReservationRepository()
-const roomRepo = new ApiRoomRepository()
+const reservationService = new ReservationService()
+const roomService = new RoomService()
 
 export function useReservations() {
   const reservations = ref<Reservation[]>([])
   const reservation = ref<Reservation | null>(null)
-  const loading = ref(false)
-  const error = ref<string | null>(null)
+  const { loading, error, execute } = useAsyncAction()
 
   async function fetchAll() {
-    loading.value = true
-    try { reservations.value = await repo.getAll() }
-    catch (e: any) { error.value = e.message }
-    finally { loading.value = false }
+    reservations.value = await execute(() => reservationService.getAll(), [])
   }
 
   async function fetchByAccount(accountId: number) {
-    loading.value = true
-    try { reservations.value = await repo.getByAccount(accountId) }
-    catch (e: any) { error.value = e.message }
-    finally { loading.value = false }
+    reservations.value = await execute(() => reservationService.getByAccount(accountId), [])
   }
 
   async function fetchById(id: number) {
-    loading.value = true
-    try { reservation.value = await repo.getById(id) }
-    catch (e: any) { error.value = e.message }
-    finally { loading.value = false }
+    reservation.value = await execute(() => reservationService.getById(id), null)
   }
 
   async function create(data: Omit<Reservation, 'id' | 'confirmationCode'> & { numberOfGuests?: number }) {
-    loading.value = true
-    try {
-      const created = await repo.create(data)
-      reservations.value.push(created)
-      return created
-    }
-    catch (e: any) { error.value = e.message; return null }
-    finally { loading.value = false }
+    const created = await execute(() => reservationService.book(data), null)
+    if (created) reservations.value.push(created)
+    return created
   }
 
   async function updateStatus(id: number, status: ReservationStatus, reason?: string) {
-    loading.value = true
-    try {
-      const updated = await repo.updateStatus(id, status, reason)
+    const action = () => reservationService.updateStatus(id, status, reason)
+    const updated = await execute(action, null)
+    if (updated) {
       const i = reservations.value.findIndex(r => r.id === id)
       if (i !== -1) reservations.value[i] = updated
-      return updated
     }
-    catch (e: any) { error.value = e.message; return null }
-    finally { loading.value = false }
+    return updated
   }
 
   async function finalizeReservation(data: { hotelId: number; checkIn: string; checkOut: string; guests: number }) {
@@ -72,10 +56,9 @@ export function useReservations() {
       return null
     }
 
-    const availableRooms = await roomRepo.getAvailable(
-      data.hotelId,
-      checkInDate.toISOString(),
-      checkOutDate.toISOString(),
+    const availableRooms = await execute(
+      () => roomService.getAvailable(data.hotelId, checkInDate.toISOString(), checkOutDate.toISOString()),
+      [],
     )
     const room = availableRooms[0]
     if (!room) {

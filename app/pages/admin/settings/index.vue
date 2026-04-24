@@ -12,7 +12,7 @@
           <h1 class="page-title">System Configuration & Policies</h1>
           <p class="page-desc">Manage global settings, policies and feature toggles</p>
         </div>
-        <button id="settings-save-btn" class="btn-save" @click="saveAll">
+        <button id="settings-save-btn" class="btn-save" :disabled="saving || loading" @click="saveAll">
           <span class="material-symbols-outlined">save</span> Save All Changes
         </button>
       </div>
@@ -20,6 +20,11 @@
       <div v-if="saved" class="alert-success">
         <span class="material-symbols-outlined">check_circle</span>
         Configuration saved successfully.
+      </div>
+
+      <div v-if="error" class="alert-error">
+        <span class="material-symbols-outlined">error</span>
+        {{ error }}
       </div>
 
       <div class="settings-grid">
@@ -109,6 +114,9 @@ definePageMeta({ layout: 'admin' })
 const service = new SystemConfigService()
 const configs = ref<SystemConfig[]>([])
 const saved = ref(false)
+const loading = ref(false)
+const saving = ref(false)
+const error = ref<string | null>(null)
 
 const toggles = computed(() => configs.value.filter(c => c.value === 'true' || c.value === 'false'))
 const policies = computed(() => configs.value.filter(c => /booking|cancellation|max_|min_/i.test(c.key) && !toggles.value.includes(c)))
@@ -119,14 +127,31 @@ function formatKey(k: string) {
 }
 
 async function saveAll() {
-  for (const c of configs.value) {
-    await service.update(c.key, c.value)
+  saving.value = true
+  error.value = null
+  try {
+    await Promise.all(configs.value.map((config) => service.update(config.key, config.value)))
+    saved.value = true
+    setTimeout(() => (saved.value = false), 3000)
+  } catch (cause: any) {
+    error.value = cause.message
+  } finally {
+    saving.value = false
   }
-  saved.value = true
-  setTimeout(() => (saved.value = false), 3000)
 }
 
-onMounted(async () => { configs.value = await service.getAll() })
+onMounted(async () => {
+  loading.value = true
+  error.value = null
+  try {
+    configs.value = await service.getAll()
+  } catch (cause: any) {
+    error.value = cause.message
+    configs.value = []
+  } finally {
+    loading.value = false
+  }
+})
 </script>
 
 <style scoped>
@@ -139,6 +164,7 @@ onMounted(async () => { configs.value = await service.getAll() })
 .btn-save:hover { opacity: 0.9; }
 
 .alert-success { display: flex; align-items: center; gap: 0.5rem; background: #e0f2f1; border-left: 3px solid #006768; color: #006768; padding: 0.75rem 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; font-weight: 600; font-size: 0.875rem; }
+.alert-error { display: flex; align-items: center; gap: 0.5rem; background: #fdecea; border-left: 3px solid #ba1a1a; color: #ba1a1a; padding: 0.75rem 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; font-weight: 600; font-size: 0.875rem; }
 
 .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
 @media (max-width: 900px) { .settings-grid { grid-template-columns: 1fr; } }

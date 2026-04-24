@@ -7,6 +7,10 @@ export class MockStatsRepository implements IStatsRepository {
     return mockDashboardStats
   }
 
+  async getReservationChart(): Promise<number[]> {
+    return [3, 5, 4, 6, 7, 5, 8]
+  }
+
   async getHotelStats(hotelId: number, start: string, end: string): Promise<HotelStats> {
     return {
       hotelId,

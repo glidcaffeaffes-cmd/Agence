@@ -1,26 +1,24 @@
 import { ref } from 'vue'
 import type { DashboardStats } from '~/types/models'
 import { StatsService } from '~/services'
+import { useAsyncAction } from '~/composables/useAsyncAction'
 
 const service = new StatsService()
 
 export function useStats() {
   const dashboardStats = ref<DashboardStats | null>(null)
-  const loading = ref(false)
-  const error = ref<string | null>(null)
+  const reservationChart = ref<number[]>([])
+  const { loading, error, execute } = useAsyncAction()
 
   async function fetchDashboard() {
-    loading.value = true
-    error.value = null
-    try {
-      dashboardStats.value = await service.getDashboardStats()
-    } catch (e: any) {
-      error.value = e.message
-      dashboardStats.value = null
-    } finally {
-      loading.value = false
-    }
+    const [stats, chart] = await execute(
+      () => Promise.all([service.getDashboardStats(), service.getReservationChart()]),
+      [null, []] as [DashboardStats | null, number[]],
+    )
+
+    dashboardStats.value = stats
+    reservationChart.value = chart
   }
 
-  return { dashboardStats, loading, error, fetchDashboard }
+  return { dashboardStats, reservationChart, loading, error, fetchDashboard }
 }

@@ -1,82 +1,40 @@
 import { ref } from 'vue'
 import type { Hotel } from '~/types/models'
 import type { HotelAvailabilityFilters } from '~/types/interfaces'
-import { ApiHotelRepository } from '~/repositories/api'
+import { HotelService } from '~/services'
+import { useAsyncAction } from '~/composables/useAsyncAction'
 
-const apiRepo = new ApiHotelRepository()
+const service = new HotelService()
 
 export function useHotels() {
   const hotels = ref<Hotel[]>([])
   const hotel = ref<Hotel | null>(null)
   const featured = ref<Hotel[]>([])
   const selectedHotel = ref<Hotel | null>(null)
-  const loading = ref(false)
-  const error = ref<string | null>(null)
+  const { loading, error, execute } = useAsyncAction()
 
   async function fetchAll() {
-    loading.value = true
-    error.value = null
-    try {
-      hotels.value = await apiRepo.getAll()
-    } catch (e: any) {
-      error.value = e.message
-      hotels.value = []
-    } finally { loading.value = false }
+    hotels.value = await execute(() => service.getAll(), [])
   }
 
   async function fetchById(id: number) {
-    loading.value = true
-    error.value = null
-    try {
-      hotel.value = await apiRepo.getById(id)
-    } catch (e: any) {
-      error.value = e.message
-      hotel.value = null
-    } finally { loading.value = false }
+    hotel.value = await execute(() => service.getById(id), null)
   }
 
   async function fetchFeatured() {
-    loading.value = true
-    error.value = null
-    try {
-      featured.value = await apiRepo.getFeatured()
-    } catch (e: any) {
-      error.value = e.message
-      featured.value = []
-    } finally { loading.value = false }
+    featured.value = await execute(() => service.getFeatured(), [])
   }
 
   async function search(query: string) {
-    loading.value = true
-    error.value = null
-    try {
-      hotels.value = await apiRepo.search(query)
-    } catch (e: any) {
-      error.value = e.message
-      hotels.value = []
-    } finally { loading.value = false }
+    hotels.value = await execute(() => service.search(query), [])
   }
 
   async function findAvailable(filters: HotelAvailabilityFilters) {
-    loading.value = true
-    error.value = null
-    try {
-      return await apiRepo.searchAvailability(filters)
-    } catch (e: any) {
-      error.value = e.message
-      return []
-    } finally { loading.value = false }
+    return execute(() => service.searchAvailability(filters), [])
   }
 
   async function fetchAvailable(filters: HotelAvailabilityFilters) {
-    loading.value = true
-    error.value = null
-    try {
-      hotels.value = await apiRepo.searchAvailability(filters)
-    } catch (e: any) {
-      error.value = e.message
-      hotels.value = []
-    } finally { loading.value = false }
+    hotels.value = await execute(() => service.searchAvailability(filters), [])
   }
 
   async function getById(id: number) {

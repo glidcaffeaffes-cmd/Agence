@@ -1,6 +1,6 @@
 import type { ISystemConfigRepository } from '~/types/interfaces'
 import type { SystemConfig } from '~/types/models'
-import { ApiSystemConfigRepository } from '~/repositories/api'
+import { AdminRepositoryFactory } from '~/repositories/factory'
 
 /**
  * SystemConfigService — Application settings and configuration management.
@@ -8,7 +8,7 @@ import { ApiSystemConfigRepository } from '~/repositories/api'
 export class SystemConfigService {
   private repo: ISystemConfigRepository
 
-  constructor(repo: ISystemConfigRepository = new ApiSystemConfigRepository()) {
+  constructor(repo: ISystemConfigRepository = AdminRepositoryFactory.systemConfig()) {
     this.repo = repo
   }
 

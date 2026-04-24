@@ -75,7 +75,7 @@
         </div>
         <!-- Dynamic Chart -->
         <div class="h-64 flex items-end justify-between gap-4">
-          <div v-for="(count, index) in reservationChart" :key="index" class="w-full bg-slate-100 rounded-t-lg relative group transition-all duration-300 cursor-pointer" :style="{ height: `${Math.max(10, (count / Math.max(...reservationChart)) * 100)}%` }" :class="count > 0 ? 'hover:bg-primary' : ''">
+          <div v-for="(count, index) in dashboardReservationChart" :key="index" class="w-full bg-slate-100 rounded-t-lg relative group transition-all duration-300 cursor-pointer" :style="{ height: `${Math.max(10, (count / Math.max(...dashboardReservationChart)) * 100)}%` }" :class="count > 0 ? 'hover:bg-primary' : ''">
             <div class="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 text-[10px] font-bold text-primary">{{ count }}</div>
           </div>
         </div>
@@ -187,24 +187,23 @@
 
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
-import { ApiHotelRepository, ApiReservationRepository } from '~/repositories/api'
+import { HotelService, ReservationService } from '~/services'
 import { useStats } from '~/composables/useStats'
 
 definePageMeta({
   layout: 'admin'
 })
 
-const hotelRepo = new ApiHotelRepository()
-const reservationRepo = new ApiReservationRepository()
-const { dashboardStats, fetchDashboard } = useStats()
+const hotelService = new HotelService()
+const reservationService = new ReservationService()
+const { dashboardStats, reservationChart, fetchDashboard } = useStats()
 
-const { data: hotelsData } = useAsyncData('dashboard-hotels', () => hotelRepo.getAll())
-const { data: reservationsData } = useAsyncData('dashboard-reservations', () => reservationRepo.getAll())
-const { data: chartData } = useAsyncData('reservation-chart', () => $fetch('/api/stats/chart/reservations'))
+const { data: hotelsData } = useAsyncData('dashboard-hotels', () => hotelService.getAll())
+const { data: reservationsData } = useAsyncData('dashboard-reservations', () => reservationService.getAll())
 
 const hotels = computed(() => hotelsData.value || [])
 const reservations = computed(() => reservationsData.value || [])
-const reservationChart = computed(() => chartData.value || [0, 0, 0, 0, 0, 0, 0])
+const dashboardReservationChart = computed(() => reservationChart.value || [0, 0, 0, 0, 0, 0, 0])
 
 // Use stats from backend
 const totalReservations = computed(() => dashboardStats.value?.totalReservations || 0)

@@ -7,4 +7,5 @@ export interface INotificationRepository {
   markAsRead(id: number): Promise<void>
   markAllAsRead(accountId: number): Promise<void>
   create(notification: Omit<AppNotification, 'id'>): Promise<AppNotification>
+  delete(id: number): Promise<void>
 }

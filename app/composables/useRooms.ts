@@ -1,57 +1,29 @@
 import { ref } from 'vue'
 import type { Room, RoomType } from '~/types/models'
-import { ApiRoomRepository } from '~/repositories/api'
+import { RoomService } from '~/services'
+import { useAsyncAction } from '~/composables/useAsyncAction'
 
-const apiRepo = new ApiRoomRepository()
+const service = new RoomService()
 
 export function useRooms() {
   const rooms = ref<Room[]>([])
   const roomTypes = ref<RoomType[]>([])
-  const loading = ref(false)
-  const error = ref<string | null>(null)
+  const { loading, error, execute } = useAsyncAction()
 
   async function fetchAll() {
-    loading.value = true
-    error.value = null
-    try {
-      rooms.value = await apiRepo.getAll()
-    } catch (e: any) {
-      error.value = e.message
-      rooms.value = []
-    } finally { loading.value = false }
+    rooms.value = await execute(() => service.getAll(), [])
   }
 
   async function fetchByHotel(hotelId: number) {
-    loading.value = true
-    error.value = null
-    try {
-      rooms.value = await apiRepo.getByHotel(hotelId)
-    } catch (e: any) {
-      error.value = e.message
-      rooms.value = []
-    } finally { loading.value = false }
+    rooms.value = await execute(() => service.getByHotel(hotelId), [])
   }
 
   async function fetchAvailable(hotelId: number, checkIn: string, checkOut: string) {
-    loading.value = true
-    error.value = null
-    try {
-      rooms.value = await apiRepo.getAvailable(hotelId, checkIn, checkOut)
-    } catch (e: any) {
-      error.value = e.message
-      rooms.value = []
-    } finally { loading.value = false }
+    rooms.value = await execute(() => service.getAvailable(hotelId, checkIn, checkOut), [])
   }
 
   async function fetchRoomTypes() {
-    loading.value = true
-    error.value = null
-    try {
-      roomTypes.value = await apiRepo.getRoomTypes()
-    } catch (e: any) {
-      error.value = e.message
-      roomTypes.value = []
-    } finally { loading.value = false }
+    roomTypes.value = await execute(() => service.getRoomTypes(), [])
   }
 
   return { rooms, roomTypes, loading, error, fetchAll, fetchByHotel, fetchAvailable, fetchRoomTypes }

@@ -8,6 +8,10 @@
       </div>
     </div>
 
+    <div v-if="error" class="mb-4 rounded-lg border border-error/20 bg-error/5 px-4 py-3 text-sm text-error">
+      {{ error }}
+    </div>
+
     <!-- Table -->
     <div class="bg-white rounded-xl overflow-hidden shadow-[0_4px_20px_rgba(1,80,129,0.06)]">
       <table class="w-full text-left border-collapse">
@@ -87,6 +91,7 @@ definePageMeta({ layout: 'admin' })
 const service = new ComplaintService()
 const complaints = ref<Complaint[]>([])
 const loading = ref(false)
+const error = ref<string | null>(null)
 const resolving = ref<Complaint | null>(null)
 const response = ref('')
 
@@ -94,17 +99,38 @@ function openResolve(comp: Complaint) { resolving.value = comp; response.value =
 
 async function handleResolve() {
   if (!resolving.value || !response.value.trim()) return
-  const updated = await service.resolve(resolving.value.id, response.value)
-  const i = complaints.value.findIndex(c => c.id === updated.id)
-  if (i !== -1) complaints.value[i] = updated
-  resolving.value = null
+  try {
+    error.value = null
+    const updated = await service.resolve(resolving.value.id, response.value)
+    const i = complaints.value.findIndex(c => c.id === updated.id)
+    if (i !== -1) complaints.value[i] = updated
+    resolving.value = null
+  } catch (cause: any) {
+    error.value = cause.message
+  }
 }
 
 async function handleDelete(id: number) {
   if (!confirm('Supprimer cette réclamation ?')) return
-  await service.delete(id)
-  complaints.value = complaints.value.filter(c => c.id !== id)
+  try {
+    error.value = null
+    await service.delete(id)
+    complaints.value = complaints.value.filter(c => c.id !== id)
+  } catch (cause: any) {
+    error.value = cause.message
+  }
 }
 
-onMounted(async () => { loading.value = true; complaints.value = await service.getAll(); loading.value = false })
+onMounted(async () => {
+  loading.value = true
+  error.value = null
+  try {
+    complaints.value = await service.getAll()
+  } catch (cause: any) {
+    error.value = cause.message
+    complaints.value = []
+  } finally {
+    loading.value = false
+  }
+})
 </script>

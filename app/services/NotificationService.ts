@@ -1,6 +1,6 @@
 import type { INotificationRepository } from '~/types/interfaces'
 import type { AppNotification } from '~/types/models'
-import { ApiNotificationRepository } from '~/repositories/api'
+import { AdminRepositoryFactory } from '~/repositories/factory'
 
 /**
  * NotificationService — In-app notification management.
@@ -8,7 +8,7 @@ import { ApiNotificationRepository } from '~/repositories/api'
 export class NotificationService {
   private repo: INotificationRepository
 
-  constructor(repo: INotificationRepository = new ApiNotificationRepository()) {
+  constructor(repo: INotificationRepository = AdminRepositoryFactory.notification()) {
     this.repo = repo
   }
 
@@ -41,5 +41,9 @@ export class NotificationService {
   async create(data: Omit<AppNotification, 'id'>): Promise<AppNotification> {
     if (!data.message?.trim()) throw new Error('Notification message cannot be empty')
     return this.repo.create(data)
+  }
+
+  async delete(id: number): Promise<void> {
+    await this.repo.delete(id)
   }
 }

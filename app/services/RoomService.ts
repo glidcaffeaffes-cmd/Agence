@@ -1,6 +1,6 @@
 import type { IRoomRepository } from '~/types/interfaces'
 import type { Room, RoomType } from '~/types/models'
-import { ApiRoomRepository } from '~/repositories/api'
+import { AdminRepositoryFactory } from '~/repositories/factory'
 
 /**
  * RoomService — Room catalogue and availability logic.
@@ -8,7 +8,7 @@ import { ApiRoomRepository } from '~/repositories/api'
 export class RoomService {
   private repo: IRoomRepository
 
-  constructor(repo: IRoomRepository = new ApiRoomRepository()) {
+  constructor(repo: IRoomRepository = AdminRepositoryFactory.room()) {
     this.repo = repo
   }
 

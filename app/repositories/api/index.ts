@@ -34,7 +34,6 @@ import type {
   RoomTypeDTO,
   NotificationDTO,
   ReviewDTO,
-  ApiErrorDTO,
 } from '~/types/dto'
 import type { ReservationStatus } from '~/types/enums/ReservationStatus'
 import type { ComplaintStatus } from '~/types/enums/ComplaintStatus'
@@ -50,43 +49,14 @@ import {
   ReviewMapper,
   NotificationMapper,
 } from '~/mappers'
-import { ReservationStatus as ReservationStatusEnum } from '~/types/enums/ReservationStatus'
-
-function useBase() {
-  return useRuntimeConfig().public.apiBase || '/api'
-}
-
-function extractErrorMessage(error: unknown, fallback: string) {
-  const data = (error as { data?: ApiErrorDTO }).data
-  if (!data) {
-    return (error as Error)?.message || fallback
-  }
-
-  if (Array.isArray(data.message)) {
-    return data.message.join(', ')
-  }
-
-  return data.message || data.error || fallback
-}
-
-async function apiFetch<T>(path: string, options?: Parameters<typeof $fetch<T>>[1]) {
-  try {
-    return await $fetch<T>(`${useBase()}${path}`, options)
-  } catch (error: any) {
-    if (error.status === 401) {
-      const { logout } = useAuth()
-      logout()
-      navigateTo('/login')
-    }
-    throw new Error(extractErrorMessage(error, `Request failed: ${path}`))
-  }
-}
+import { apiGetCached, apiRequest, buildApiPath, invalidateApiCache } from './client'
 
 function normalizeDate(value: string) {
   const parsed = new Date(value)
   if (Number.isNaN(parsed.getTime())) {
     throw new Error(`Invalid date value: ${value}`)
   }
+
   return parsed.toISOString()
 }
 
@@ -111,22 +81,31 @@ function buildRecentMonthKeys(count: number) {
   const keys: string[] = []
   const cursor = new Date()
   cursor.setUTCDate(1)
+
   for (let i = count - 1; i >= 0; i -= 1) {
     const copy = new Date(Date.UTC(cursor.getUTCFullYear(), cursor.getUTCMonth() - i, 1))
     keys.push(copy.toISOString().slice(0, 7))
   }
+
   return keys
+}
+
+function patchHotelId(review: Review, hotelId: number) {
+  return {
+    ...review,
+    hotelId,
+  }
 }
 
 export class ApiHotelRepository implements IHotelRepository {
   async getAll(): Promise<Hotel[]> {
-    const dtos = await apiFetch<HotelDTO[]>('/hotels')
+    const dtos = await apiGetCached<HotelDTO[]>('/hotels')
     return dtos.map(HotelMapper.fromDto)
   }
 
   async getById(id: number): Promise<Hotel | null> {
     try {
-      const dto = await apiFetch<HotelDTO>(`/hotels/${id}`)
+      const dto = await apiGetCached<HotelDTO>(`/hotels/${id}`)
       return HotelMapper.fromDto(dto)
     } catch {
       return null
@@ -151,6 +130,7 @@ export class ApiHotelRepository implements IHotelRepository {
   async search(query: string): Promise<Hotel[]> {
     const needle = query.trim().toLowerCase()
     const hotels = await this.getAll()
+
     if (!needle) {
       return hotels
     }
@@ -164,49 +144,50 @@ export class ApiHotelRepository implements IHotelRepository {
   }
 
   async searchAvailability(filters: HotelAvailabilityFilters): Promise<Hotel[]> {
-    const params = new URLSearchParams()
-
-    if (filters.city) params.set('city', filters.city)
-    if (filters.checkIn) params.set('checkIn', filters.checkIn)
-    if (filters.checkOut) params.set('checkOut', filters.checkOut)
-    if (filters.guests) params.set('guests', String(filters.guests))
-    if (filters.rooms) params.set('rooms', String(filters.rooms))
-
-    const suffix = params.toString() ? `?${params.toString()}` : ''
-    const dtos = await apiFetch<HotelDTO[]>(`/hotels/search/availability${suffix}`)
+    const path = buildApiPath('/hotels/search/availability', {
+      city: filters.city,
+      checkIn: filters.checkIn,
+      checkOut: filters.checkOut,
+      guests: filters.guests,
+      rooms: filters.rooms,
+    })
+    const dtos = await apiGetCached<HotelDTO[]>(path)
     return dtos.map(HotelMapper.fromDto)
   }
 
   async create(hotel: Omit<Hotel, 'id'>): Promise<Hotel> {
-    const dto = await apiFetch<HotelDTO>('/hotels', {
+    const dto = await apiRequest<HotelDTO>('/hotels', {
       method: 'POST',
       body: HotelMapper.toCreateDto(hotel),
     })
+    invalidateApiCache('/hotels', '/chambres', '/offres', '/stats')
     return HotelMapper.fromDto(dto)
   }
 
   async update(id: number, data: Partial<Hotel>): Promise<Hotel> {
-    const dto = await apiFetch<HotelDTO>(`/hotels/${id}`, {
+    const dto = await apiRequest<HotelDTO>(`/hotels/${id}`, {
       method: 'PATCH',
       body: HotelMapper.toUpdateDto(data),
     })
+    invalidateApiCache('/hotels', '/chambres', '/offres', '/stats')
     return HotelMapper.fromDto(dto)
   }
 
   async delete(id: number): Promise<void> {
-    await apiFetch(`/hotels/${id}`, { method: 'DELETE' })
+    await apiRequest(`/hotels/${id}`, { method: 'DELETE' })
+    invalidateApiCache('/hotels', '/chambres', '/offres', '/stats')
   }
 }
 
 export class ApiAccountRepository implements IAccountRepository {
   async getAll(): Promise<Account[]> {
-    const dtos = await apiFetch<AccountDTO[]>('/accounts')
+    const dtos = await apiGetCached<AccountDTO[]>('/accounts')
     return dtos.map(AccountMapper.fromDto)
   }
 
   async getById(id: number): Promise<Account | null> {
     try {
-      const dto = await apiFetch<AccountDTO>(`/accounts/${id}`)
+      const dto = await apiGetCached<AccountDTO>(`/accounts/${id}`)
       return AccountMapper.fromDto(dto)
     } catch {
       return null
@@ -220,7 +201,7 @@ export class ApiAccountRepository implements IAccountRepository {
 
   async authenticate(email: string, password: string): Promise<Account | null> {
     try {
-      const dto = await apiFetch<AccountDTO>('/auth/login', {
+      const dto = await apiRequest<AccountDTO>('/auth/login', {
         method: 'POST',
         body: { email, password },
       })
@@ -231,32 +212,37 @@ export class ApiAccountRepository implements IAccountRepository {
   }
 
   async create(account: Omit<Account, 'id' | 'registrationDate'>): Promise<Account> {
-    const dto = await apiFetch<AccountDTO>('/auth/register', {
+    const dto = await apiRequest<AccountDTO>('/auth/register', {
       method: 'POST',
       body: AccountMapper.toCreateDto(account),
     })
+    invalidateApiCache('/accounts', '/profiles', '/notifications')
     return AccountMapper.fromDto(dto)
   }
 
   async update(id: number, data: Partial<Account>): Promise<Account> {
-    const dto = await apiFetch<AccountDTO>(`/accounts/${id}`, {
+    const dto = await apiRequest<AccountDTO>(`/accounts/${id}`, {
       method: 'PATCH',
       body: AccountMapper.toUpdateDto(data),
     })
+    invalidateApiCache('/accounts', '/profiles')
     return AccountMapper.fromDto(dto)
   }
 
   async deactivate(id: number): Promise<void> {
-    await apiFetch(`/accounts/${id}`, {
+    await apiRequest(`/accounts/${id}`, {
       method: 'PATCH',
       body: { actif: false },
     })
+    invalidateApiCache('/accounts', '/profiles')
   }
 
   async getProfile(accountId: number): Promise<Profile | null> {
     try {
-      const account = await this.getById(accountId)
-      const dto = await apiFetch<ProfileDTO>(`/accounts/${accountId}/profile`)
+      const [account, dto] = await Promise.all([
+        this.getById(accountId),
+        apiGetCached<ProfileDTO>(`/accounts/${accountId}/profile`),
+      ])
       return ProfileMapper.fromDto(dto, account ?? undefined)
     } catch {
       return null
@@ -265,29 +251,31 @@ export class ApiAccountRepository implements IAccountRepository {
 
   async createProfile(accountId: number, data: Partial<Profile>): Promise<Profile> {
     const account = await this.getById(accountId)
-    const dto = await apiFetch<ProfileDTO>('/profiles', {
+    const dto = await apiRequest<ProfileDTO>('/profiles', {
       method: 'POST',
       body: ProfileMapper.toCreateDto(accountId, data),
     })
+    invalidateApiCache(`/accounts/${accountId}/profile`, '/profiles', '/accounts')
     return ProfileMapper.fromDto(dto, account ?? undefined)
   }
 
   async updateProfile(accountId: number, data: Partial<Profile>): Promise<Profile> {
-    const current = await this.getProfile(accountId)
-    const account = await this.getById(accountId)
+    const [current, account] = await Promise.all([this.getProfile(accountId), this.getById(accountId)])
+
     if (!current) {
       return this.createProfile(accountId, data)
     }
 
-    const dto = await apiFetch<ProfileDTO>(`/accounts/${accountId}/profile`, {
+    const dto = await apiRequest<ProfileDTO>(`/accounts/${accountId}/profile`, {
       method: 'PATCH',
       body: ProfileMapper.toUpdateDto(data),
     })
+    invalidateApiCache(`/accounts/${accountId}/profile`, '/profiles', '/accounts')
     return ProfileMapper.fromDto(dto, account ?? undefined)
   }
 
   async changePassword(accountId: number, oldPassword: string, newPassword: string): Promise<void> {
-    await apiFetch(`/accounts/${accountId}/change-password`, {
+    await apiRequest(`/accounts/${accountId}/change-password`, {
       method: 'PATCH',
       body: { oldPassword, newPassword },
     })
@@ -296,13 +284,13 @@ export class ApiAccountRepository implements IAccountRepository {
 
 export class ApiReservationRepository implements IReservationRepository {
   async getAll(): Promise<Reservation[]> {
-    const dtos = await apiFetch<ReservationDTO[]>('/reservations')
+    const dtos = await apiGetCached<ReservationDTO[]>('/reservations')
     return dtos.map(ReservationMapper.fromDto)
   }
 
   async getById(id: number): Promise<Reservation | null> {
     try {
-      const dto = await apiFetch<ReservationDTO>(`/reservations/${id}`)
+      const dto = await apiGetCached<ReservationDTO>(`/reservations/${id}`)
       return ReservationMapper.fromDto(dto)
     } catch {
       return null
@@ -310,7 +298,7 @@ export class ApiReservationRepository implements IReservationRepository {
   }
 
   async getByAccount(accountId: number): Promise<Reservation[]> {
-    const dtos = await apiFetch<ReservationDTO[]>(`/reservations?accountId=${accountId}`)
+    const dtos = await apiGetCached<ReservationDTO[]>(buildApiPath('/reservations', { accountId }))
     return dtos.map(ReservationMapper.fromDto)
   }
 
@@ -325,31 +313,35 @@ export class ApiReservationRepository implements IReservationRepository {
   }
 
   async create(data: Omit<Reservation, 'id' | 'confirmationCode'>): Promise<Reservation> {
-    const dto = await apiFetch<ReservationDTO>('/reservations', {
+    const dto = await apiRequest<ReservationDTO>('/reservations', {
       method: 'POST',
       body: ReservationMapper.toCreateDto(data),
     })
+    invalidateApiCache('/reservations', '/stats', '/hotels/search/availability')
     return ReservationMapper.fromDto(dto)
   }
 
   async updateStatus(id: number, status: ReservationStatus, reason?: string): Promise<Reservation> {
-    const dto = await apiFetch<ReservationDTO>(`/reservations/${id}`, {
+    const dto = await apiRequest<ReservationDTO>(`/reservations/${id}`, {
       method: 'PATCH',
       body: ReservationMapper.toUpdateDto(status, reason),
     })
+    invalidateApiCache('/reservations', '/stats', '/hotels/search/availability')
     return ReservationMapper.fromDto(dto)
   }
 
   async delete(id: number): Promise<void> {
-    await apiFetch(`/reservations/${id}`, { method: 'DELETE' })
+    await apiRequest(`/reservations/${id}`, { method: 'DELETE' })
+    invalidateApiCache('/reservations', '/stats', '/hotels/search/availability')
   }
 }
 
 export class ApiSystemConfigRepository implements ISystemConfigRepository {
   async getAll(): Promise<SystemConfig[]> {
-    const dtos = await apiFetch<Array<{ id: number; cle: string; valeur: string; description: string | null }>>(
+    const dtos = await apiGetCached<Array<{ id: number; cle: string; valeur: string; description: string | null }>>(
       '/system-config',
     )
+
     return dtos.map((dto) => ({
       id: dto.id,
       key: dto.cle,
@@ -360,9 +352,10 @@ export class ApiSystemConfigRepository implements ISystemConfigRepository {
 
   async getByKey(key: string): Promise<SystemConfig | null> {
     try {
-      const dto = await apiFetch<{ id: number; cle: string; valeur: string; description: string | null }>(
+      const dto = await apiGetCached<{ id: number; cle: string; valeur: string; description: string | null }>(
         `/system-config/${encodeURIComponent(key)}`,
       )
+
       return {
         id: dto.id,
         key: dto.cle,
@@ -380,13 +373,15 @@ export class ApiSystemConfigRepository implements ISystemConfigRepository {
       throw new Error(`System config "${key}" not found`)
     }
 
-    const dto = await apiFetch<{ id: number; cle: string; valeur: string; description: string | null }>(
+    const dto = await apiRequest<{ id: number; cle: string; valeur: string; description: string | null }>(
       `/system-config/${current.id}`,
       {
         method: 'PATCH',
         body: { valeur: value },
       },
     )
+
+    invalidateApiCache('/system-config')
 
     return {
       id: dto.id,
@@ -399,54 +394,58 @@ export class ApiSystemConfigRepository implements ISystemConfigRepository {
 
 export class ApiReviewRepository implements IReviewRepository {
   async getAll(): Promise<Review[]> {
-    const dtos = await apiFetch<ReviewDTO[]>('/avis')
+    const dtos = await apiGetCached<ReviewDTO[]>('/avis')
     return dtos.map(ReviewMapper.fromDto)
   }
 
   async getByHotel(hotelId: number): Promise<Review[]> {
-    const dtos = await apiFetch<ReviewDTO[]>(`/avis/hotel/${hotelId}`)
-    return dtos.map(ReviewMapper.fromDto)
+    const dtos = await apiGetCached<ReviewDTO[]>(`/avis/hotel/${hotelId}`)
+    return dtos.map((dto) => patchHotelId(ReviewMapper.fromDto(dto), hotelId))
   }
 
   async getByAccount(accountId: number): Promise<Review[]> {
-    const dtos = await apiFetch<ReviewDTO[]>(`/avis/account/${accountId}`)
+    const dtos = await apiGetCached<ReviewDTO[]>(`/avis/account/${accountId}`)
     return dtos.map(ReviewMapper.fromDto)
   }
 
   async create(review: Omit<Review, 'id' | 'publicationDate'>): Promise<Review> {
-    const dto = await apiFetch<ReviewDTO>('/avis', {
+    const dto = await apiRequest<ReviewDTO>('/avis', {
       method: 'POST',
       body: ReviewMapper.toCreateDto(review),
     })
+    invalidateApiCache('/avis')
     return ReviewMapper.fromDto(dto)
   }
 
   async update(id: number, data: Partial<Review>): Promise<Review> {
-    const dto = await apiFetch<ReviewDTO>(`/avis/${id}`, {
+    const dto = await apiRequest<ReviewDTO>(`/avis/${id}`, {
       method: 'PATCH',
       body: ReviewMapper.toUpdateDto(data),
     })
+    invalidateApiCache('/avis')
     return ReviewMapper.fromDto(dto)
   }
 
   async delete(id: number): Promise<void> {
-    await apiFetch(`/avis/${id}`, { method: 'DELETE' })
+    await apiRequest(`/avis/${id}`, { method: 'DELETE' })
+    invalidateApiCache('/avis')
   }
 }
 
 export class ApiNotificationRepository implements INotificationRepository {
   async getAll(): Promise<AppNotification[]> {
-    const accounts = await apiFetch<AccountDTO[]>('/accounts')
+    const accounts = await apiGetCached<AccountDTO[]>('/accounts')
     const notifications = await Promise.all(
       accounts.map((account) =>
-        apiFetch<NotificationDTO[]>(`/notifications/account/${account.id}`).catch(() => []),
+        apiGetCached<NotificationDTO[]>(`/notifications/account/${account.id}`).catch(() => []),
       ),
     )
+
     return notifications.flat().map(NotificationMapper.fromDto)
   }
 
   async getByAccount(accountId: number): Promise<AppNotification[]> {
-    const dtos = await apiFetch<NotificationDTO[]>(`/notifications/account/${accountId}`)
+    const dtos = await apiGetCached<NotificationDTO[]>(`/notifications/account/${accountId}`)
     return dtos.map(NotificationMapper.fromDto)
   }
 
@@ -456,38 +455,43 @@ export class ApiNotificationRepository implements INotificationRepository {
   }
 
   async markAsRead(id: number): Promise<void> {
-    await apiFetch(`/notifications/${id}/read`, {
+    await apiRequest(`/notifications/${id}/read`, {
       method: 'PATCH',
     })
+    invalidateApiCache('/notifications')
   }
 
   async markAllAsRead(accountId: number): Promise<void> {
     const unread = await this.getUnread(accountId)
+
     await Promise.all(unread.map((notification) => this.markAsRead(notification.id)))
+    invalidateApiCache('/notifications')
   }
 
   async create(notification: Omit<AppNotification, 'id'>): Promise<AppNotification> {
-    const dto = await apiFetch<NotificationDTO>('/notifications', {
+    const dto = await apiRequest<NotificationDTO>('/notifications', {
       method: 'POST',
       body: NotificationMapper.toCreateDto(notification),
     })
+    invalidateApiCache('/notifications')
     return NotificationMapper.fromDto(dto)
   }
 
   async delete(id: number): Promise<void> {
-    await apiFetch(`/notifications/${id}`, { method: 'DELETE' })
+    await apiRequest(`/notifications/${id}`, { method: 'DELETE' })
+    invalidateApiCache('/notifications')
   }
 }
 
 export class ApiOfferRepository implements IOfferRepository {
   async getAll(): Promise<Offer[]> {
-    const dtos = await apiFetch<OfferDTO[]>('/offres')
+    const dtos = await apiGetCached<OfferDTO[]>('/offres')
     return dtos.map(OfferMapper.fromDto)
   }
 
   async getById(id: number): Promise<Offer | null> {
     try {
-      const dto = await apiFetch<OfferDTO>(`/offres/${id}`)
+      const dto = await apiGetCached<OfferDTO>(`/offres/${id}`)
       return OfferMapper.fromDto(dto)
     } catch {
       return null
@@ -497,9 +501,7 @@ export class ApiOfferRepository implements IOfferRepository {
   async getActive(): Promise<Offer[]> {
     const now = new Date().toISOString()
     const offers = await this.getAll()
-    return offers.filter(
-      (offer) => offer.active && offer.startDate <= now && offer.endDate >= now,
-    )
+    return offers.filter((offer) => offer.active && offer.startDate <= now && offer.endDate >= now)
   }
 
   async getByHotel(hotelId: number): Promise<Offer[]> {
@@ -508,35 +510,38 @@ export class ApiOfferRepository implements IOfferRepository {
   }
 
   async create(offer: Omit<Offer, 'id'>): Promise<Offer> {
-    const dto = await apiFetch<OfferDTO>('/offres', {
+    const dto = await apiRequest<OfferDTO>('/offres', {
       method: 'POST',
       body: OfferMapper.toCreateDto(offer),
     })
+    invalidateApiCache('/offres', '/hotels', '/stats')
     return OfferMapper.fromDto(dto)
   }
 
   async update(id: number, data: Partial<Offer>): Promise<Offer> {
-    const dto = await apiFetch<OfferDTO>(`/offres/${id}`, {
+    const dto = await apiRequest<OfferDTO>(`/offres/${id}`, {
       method: 'PATCH',
       body: OfferMapper.toUpdateDto(data),
     })
+    invalidateApiCache('/offres', '/hotels', '/stats')
     return OfferMapper.fromDto(dto)
   }
 
   async delete(id: number): Promise<void> {
-    await apiFetch(`/offres/${id}`, { method: 'DELETE' })
+    await apiRequest(`/offres/${id}`, { method: 'DELETE' })
+    invalidateApiCache('/offres', '/hotels', '/stats')
   }
 }
 
 export class ApiComplaintRepository implements IComplaintRepository {
   async getAll(): Promise<Complaint[]> {
-    const dtos = await apiFetch<ComplaintDTO[]>('/reclamations')
+    const dtos = await apiGetCached<ComplaintDTO[]>('/reclamations')
     return dtos.map(ComplaintMapper.fromDto)
   }
 
   async getById(id: number): Promise<Complaint | null> {
     try {
-      const dto = await apiFetch<ComplaintDTO>(`/reclamations/${id}`)
+      const dto = await apiGetCached<ComplaintDTO>(`/reclamations/${id}`)
       return ComplaintMapper.fromDto(dto)
     } catch {
       return null
@@ -554,86 +559,103 @@ export class ApiComplaintRepository implements IComplaintRepository {
   }
 
   async create(data: Omit<Complaint, 'id' | 'complaintDate'>): Promise<Complaint> {
-    const dto = await apiFetch<ComplaintDTO>('/reclamations', {
+    const dto = await apiRequest<ComplaintDTO>('/reclamations', {
       method: 'POST',
       body: ComplaintMapper.toCreateDto(data),
     })
+    invalidateApiCache('/reclamations', '/stats')
     return ComplaintMapper.fromDto(dto)
   }
 
   async updateStatus(id: number, status: ComplaintStatus, response?: string): Promise<Complaint> {
-    const dto = await apiFetch<ComplaintDTO>(`/reclamations/${id}`, {
+    const dto = await apiRequest<ComplaintDTO>(`/reclamations/${id}`, {
       method: 'PATCH',
       body: ComplaintMapper.toUpdateDto(status, response),
     })
+    invalidateApiCache('/reclamations', '/stats')
     return ComplaintMapper.fromDto(dto)
   }
 
   async delete(id: number): Promise<void> {
-    await apiFetch(`/reclamations/${id}`, { method: 'DELETE' })
+    await apiRequest(`/reclamations/${id}`, { method: 'DELETE' })
+    invalidateApiCache('/reclamations', '/stats')
   }
 }
 
 export class ApiRoomRepository implements IRoomRepository {
   async getAll(): Promise<Room[]> {
-    const dtos = await apiFetch<RoomDTO[]>('/chambres')
+    const dtos = await apiGetCached<RoomDTO[]>('/chambres')
     return dtos.map(RoomMapper.fromDto)
   }
 
   async getByHotel(hotelId: number): Promise<Room[]> {
-    const dtos = await apiFetch<RoomDTO[]>(`/chambres?hotelId=${hotelId}`)
+    const dtos = await apiGetCached<RoomDTO[]>(buildApiPath('/chambres', { hotelId }))
     return dtos.map(RoomMapper.fromDto)
   }
 
   async getById(id: number): Promise<Room | null> {
     try {
-      const dto = await apiFetch<RoomDTO>(`/chambres/${id}`)
+      const dto = await apiGetCached<RoomDTO>(`/chambres/${id}`)
       return RoomMapper.fromDto(dto)
     } catch {
       return null
     }
   }
 
-  async getAvailable(hotelId: number, _checkIn: string, _checkOut: string): Promise<Room[]> {
-    const rooms = await this.getByHotel(hotelId)
-    return rooms.filter((room) => room.available)
+  async getAvailable(hotelId: number, checkIn: string, checkOut: string): Promise<Room[]> {
+    if (!checkIn || !checkOut) {
+      const rooms = await this.getByHotel(hotelId)
+      return rooms.filter((room) => room.available)
+    }
+
+    const path = buildApiPath('/hotels/search/availability', {
+      checkIn,
+      checkOut,
+    })
+    const hotels = await apiGetCached<HotelDTO[]>(path)
+    const hotel = hotels.find((entry) => entry.id === hotelId)
+
+    return (hotel?.chambres ?? []).map(RoomMapper.fromDto).filter((room) => room.available)
   }
 
   async getRoomTypes(): Promise<RoomType[]> {
-    const dtos = await apiFetch<RoomTypeDTO[]>('/types-chambre')
+    const dtos = await apiGetCached<RoomTypeDTO[]>('/types-chambre')
     return dtos.map(RoomTypeMapper.fromDto)
   }
 
   async create(room: Omit<Room, 'id'>): Promise<Room> {
-    const dto = await apiFetch<RoomDTO>('/chambres', {
+    const dto = await apiRequest<RoomDTO>('/chambres', {
       method: 'POST',
       body: RoomMapper.toCreateDto(room),
     })
+    invalidateApiCache('/chambres', '/hotels', '/stats')
     return RoomMapper.fromDto(dto)
   }
 
   async update(id: number, data: Partial<Room>): Promise<Room> {
-    const dto = await apiFetch<RoomDTO>(`/chambres/${id}`, {
+    const dto = await apiRequest<RoomDTO>(`/chambres/${id}`, {
       method: 'PATCH',
       body: RoomMapper.toUpdateDto(data),
     })
+    invalidateApiCache('/chambres', '/hotels', '/stats')
     return RoomMapper.fromDto(dto)
   }
 
   async delete(id: number): Promise<void> {
-    await apiFetch(`/chambres/${id}`, { method: 'DELETE' })
+    await apiRequest(`/chambres/${id}`, { method: 'DELETE' })
+    invalidateApiCache('/chambres', '/hotels', '/stats')
   }
 }
 
 export class ApiStatsRepository implements IStatsRepository {
   async getDashboardStats(): Promise<DashboardStats> {
     const [dashboard, hotels, reservations, offers, accounts, complaints] = await Promise.all([
-      apiFetch<{ totalReservations: number; totalRevenue: number; activeHotels: number }>('/stats/dashboard'),
-      apiFetch<HotelDTO[]>('/hotels'),
-      apiFetch<ReservationDTO[]>('/reservations'),
-      apiFetch<OfferDTO[]>('/offres'),
-      apiFetch<AccountDTO[]>('/accounts'),
-      apiFetch<ComplaintDTO[]>('/reclamations').catch(() => []),
+      apiGetCached<{ totalReservations: number; totalRevenue: number; activeHotels: number }>('/stats/dashboard'),
+      apiGetCached<HotelDTO[]>('/hotels'),
+      apiGetCached<ReservationDTO[]>('/reservations'),
+      apiGetCached<OfferDTO[]>('/offres'),
+      apiGetCached<AccountDTO[]>('/accounts'),
+      apiGetCached<ComplaintDTO[]>('/reclamations').catch(() => []),
     ])
 
     const rooms = hotels.flatMap((hotel) => hotel.chambres ?? [])
@@ -678,12 +700,8 @@ export class ApiStatsRepository implements IStatsRepository {
         : 0
 
     const now = new Date().toISOString()
-    const activeOffers = offers.filter(
-      (offer) => offer.active && offer.dateDebut <= now && offer.dateFin >= now,
-    ).length
-    const pendingReservations = reservations.filter(
-      (reservation) => reservation.statut === 'EN_ATTENTE',
-    ).length
+    const activeOffers = offers.filter((offer) => offer.active && offer.dateDebut <= now && offer.dateFin >= now).length
+    const pendingReservations = reservations.filter((reservation) => reservation.statut === 'EN_ATTENTE').length
 
     return {
       totalHotels: dashboard.activeHotels || hotels.filter((hotel) => hotel.actif).length,
@@ -700,10 +718,14 @@ export class ApiStatsRepository implements IStatsRepository {
     }
   }
 
+  async getReservationChart(): Promise<number[]> {
+    return apiGetCached<number[]>('/stats/chart/reservations')
+  }
+
   async getHotelStats(hotelId: number, start: string, end: string): Promise<HotelStats> {
     const [reservations, rooms] = await Promise.all([
-      apiFetch<ReservationDTO[]>('/reservations'),
-      apiFetch<RoomDTO[]>(`/chambres?hotelId=${hotelId}`),
+      apiGetCached<ReservationDTO[]>('/reservations'),
+      apiGetCached<RoomDTO[]>(buildApiPath('/chambres', { hotelId })),
     ])
 
     const startIso = normalizeDate(start)

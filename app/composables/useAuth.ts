@@ -1,10 +1,10 @@
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import type { Account, Profile } from '~/types/models'
-import { ApiAccountRepository } from '~/repositories/api'
 import { ProfileMapper } from '~/mappers'
 import { useCookie } from '#app'
+import { AccountService } from '~/services'
 
-const repo = new ApiAccountRepository()
+const service = new AccountService()
 
 export function useAuth() {
   const currentAccount = useState<Account | null>('auth_account', () => null)
@@ -16,7 +16,7 @@ export function useAuth() {
       return
     }
 
-    const profile = await repo.getProfile(account.id)
+    const profile = await service.getProfile(account.id)
     currentProfile.value = ProfileMapper.merge(profile, account)
   }
 
@@ -31,13 +31,14 @@ export function useAuth() {
     loading.value = true
     error.value = null
     try {
-      const account = await repo.authenticate(email.trim(), password)
+      const normalizedEmail = email.trim().toLowerCase()
+      const account = await service.login(normalizedEmail, password)
       if (!account) {
         error.value = 'Invalid email or password'
         return false
       }
 
-      const profile = await repo.getProfile(account.id)
+      const profile = await service.getProfile(account.id)
       const mergedProfile = ProfileMapper.merge(profile, account)
       
       currentProfile.value = mergedProfile
@@ -62,14 +63,10 @@ export function useAuth() {
     loading.value = true
     error.value = null
     try {
-      const account = await repo.create({
-        email: email.trim().toLowerCase(),
-        password,
-        active: true,
-        role: 'client',
-      })
+      const normalizedEmail = email.trim().toLowerCase()
+      const account = await service.register(normalizedEmail, password)
 
-      const profile = await repo.createProfile(account.id, {
+      const profile = await service.createProfile(account.id, {
         firstName,
         lastName,
         notificationsReservation: true,
@@ -111,7 +108,7 @@ export function useAuth() {
     loading.value = true
     error.value = null
     try {
-      const updatedProfile = await repo.updateProfile(currentAccount.value.id, data)
+      const updatedProfile = await service.updateProfile(currentAccount.value.id, data)
       currentProfile.value = ProfileMapper.merge(updatedProfile, currentAccount.value)
       return true
     } catch (e: any) {
@@ -130,7 +127,7 @@ export function useAuth() {
     loading.value = true
     error.value = null
     try {
-      await repo.changePassword(currentAccount.value.id, oldPassword, newPassword)
+      await service.changePassword(currentAccount.value.id, oldPassword, newPassword)
       return true
     } catch (e: any) {
       error.value = e.message

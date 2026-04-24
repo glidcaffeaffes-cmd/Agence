@@ -1,45 +1,24 @@
 import { ref } from 'vue'
 import type { Offer } from '~/types/models'
-import { ApiOfferRepository } from '~/repositories/api'
+import { OfferService } from '~/services'
+import { useAsyncAction } from '~/composables/useAsyncAction'
 
-const apiRepo = new ApiOfferRepository()
+const service = new OfferService()
 
 export function useOffers() {
   const offers = ref<Offer[]>([])
-  const loading = ref(false)
-  const error = ref<string | null>(null)
+  const { loading, error, execute } = useAsyncAction()
 
   async function fetchActive() {
-    loading.value = true
-    error.value = null
-    try {
-      offers.value = await apiRepo.getActive()
-    } catch (e: any) {
-      error.value = e.message
-      offers.value = []
-    } finally { loading.value = false }
+    offers.value = await execute(() => service.getActive(), [])
   }
 
   async function fetchAll() {
-    loading.value = true
-    error.value = null
-    try {
-      offers.value = await apiRepo.getAll()
-    } catch (e: any) {
-      error.value = e.message
-      offers.value = []
-    } finally { loading.value = false }
+    offers.value = await execute(() => service.getAll(), [])
   }
 
   async function fetchByHotel(hotelId: number) {
-    loading.value = true
-    error.value = null
-    try {
-      offers.value = await apiRepo.getByHotel(hotelId)
-    } catch (e: any) {
-      error.value = e.message
-      offers.value = []
-    } finally { loading.value = false }
+    offers.value = await execute(() => service.getByHotel(hotelId), [])
   }
 
   return { offers, loading, error, fetchActive, fetchAll, fetchOffers: fetchAll, fetchByHotel }

@@ -1,6 +1,6 @@
 import type { IStatsRepository } from '~/types/interfaces'
 import type { DashboardStats, HotelStats } from '~/types/models'
-import { ApiStatsRepository } from '~/repositories/api'
+import { AdminRepositoryFactory } from '~/repositories/factory'
 
 /**
  * StatsService — KPI and analytics aggregation.
@@ -8,13 +8,17 @@ import { ApiStatsRepository } from '~/repositories/api'
 export class StatsService {
   private repo: IStatsRepository
 
-  constructor(repo: IStatsRepository = new ApiStatsRepository()) {
+  constructor(repo: IStatsRepository = AdminRepositoryFactory.stats()) {
     this.repo = repo
   }
 
   /** Aggregated dashboard KPIs for the admin home screen */
   async getDashboardStats(): Promise<DashboardStats> {
     return this.repo.getDashboardStats()
+  }
+
+  async getReservationChart(): Promise<number[]> {
+    return this.repo.getReservationChart()
   }
 
   /**

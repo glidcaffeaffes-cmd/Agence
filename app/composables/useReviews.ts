@@ -1,24 +1,21 @@
 import { ref } from 'vue'
 import type { Review } from '~/types/models'
-import { ApiReviewRepository } from '~/repositories/api'
+import { ReviewService } from '~/services'
+import { useAsyncAction } from '~/composables/useAsyncAction'
 
-const repo = new ApiReviewRepository()
+const service = new ReviewService()
 
 export function useReviews() {
   const reviews = ref<Review[]>([])
-  const loading = ref(false)
+  const { loading, error, execute } = useAsyncAction()
 
   async function fetchByHotel(hotelId: number) {
-    loading.value = true
-    try { reviews.value = await repo.getByHotel(hotelId) }
-    finally { loading.value = false }
+    reviews.value = await execute(() => service.getByHotel(hotelId), [])
   }
 
   async function fetchAll() {
-    loading.value = true
-    try { reviews.value = await repo.getAll() }
-    finally { loading.value = false }
+    reviews.value = await execute(() => service.getAll(), [])
   }
 
-  return { reviews, loading, fetchByHotel, fetchAll }
+  return { reviews, loading, error, fetchByHotel, fetchAll }
 }

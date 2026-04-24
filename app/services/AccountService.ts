@@ -64,4 +64,20 @@ export class AccountService {
   async updateProfile(accountId: number, data: Partial<Profile>): Promise<Profile> {
     return this.repo.updateProfile(accountId, data)
   }
+
+  async createProfile(accountId: number, data: Partial<Profile>): Promise<Profile> {
+    return this.repo.createProfile(accountId, data)
+  }
+
+  async changePassword(accountId: number, oldPassword: string, newPassword: string): Promise<void> {
+    if (!oldPassword.trim() || !newPassword.trim()) {
+      throw new Error('Both current and new passwords are required')
+    }
+
+    if (newPassword.length < 6) {
+      throw new Error('Password must be at least 6 characters')
+    }
+
+    return this.repo.changePassword(accountId, oldPassword, newPassword)
+  }
 }

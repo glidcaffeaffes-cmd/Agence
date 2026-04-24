@@ -29,4 +29,8 @@ export class MockNotificationRepository implements INotificationRepository {
     this.notifications.push(newNotif)
     return newNotif
   }
+
+  async delete(id: number): Promise<void> {
+    this.notifications = this.notifications.filter(n => n.id !== id)
+  }
 }

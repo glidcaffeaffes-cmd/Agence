@@ -1,61 +1,81 @@
 <template>
-  <div class="p-8 max-w-7xl mx-auto antialiased">
+  <div class="mx-auto max-w-7xl p-8 antialiased">
     <Head>
-      <title>Gestion des Utilisateurs — Admin</title>
+      <title>Gestion des Utilisateurs - Admin</title>
     </Head>
 
-    <!-- Header -->
-    <div class="flex justify-between items-end mb-8">
+    <div class="mb-8 flex items-end justify-between">
       <div>
-        <h2 class="text-3xl font-bold text-[#015081] tracking-tight mb-1">Gestion des Utilisateurs</h2>
-        <p class="text-outline text-sm">Gérez les comptes clients et administrateurs.</p>
+        <h2 class="mb-1 text-3xl font-bold tracking-tight text-[#015081]">Gestion des Utilisateurs</h2>
+        <p class="text-sm text-outline">Gerez les comptes clients et administrateurs.</p>
       </div>
     </div>
 
-    <!-- Table -->
-    <div class="bg-white rounded-xl overflow-hidden shadow-[0_4px_20px_rgba(1,80,129,0.06)]">
-      <table class="w-full text-left border-collapse">
+    <div v-if="error" class="mb-4 rounded-lg border border-error/20 bg-error/5 px-4 py-3 text-sm text-error">
+      {{ error }}
+    </div>
+
+    <div class="overflow-hidden rounded-xl bg-white shadow-[0_4px_20px_rgba(1,80,129,0.06)]">
+      <table class="w-full border-collapse text-left">
         <thead>
-          <tr class="bg-surface-container-high/50 border-b border-surface-variant/30 text-outline text-xs font-bold uppercase tracking-widest">
+          <tr class="border-b border-surface-variant/30 bg-surface-container-high/50 text-xs font-bold uppercase tracking-widest text-outline">
             <th class="px-6 py-4">ID</th>
             <th class="px-6 py-4">Email</th>
-            <th class="px-6 py-4">Rôle</th>
+            <th class="px-6 py-4">Role</th>
             <th class="px-6 py-4">Date d'inscription</th>
             <th class="px-6 py-4">Statut</th>
             <th class="px-6 py-4 text-right">Actions</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-surface-variant/20 text-sm">
-          <tr v-if="loading"><td colspan="6" class="px-6 py-8 text-center text-outline">Chargement…</td></tr>
-          <tr v-for="acc in accounts" :key="acc.id" class="hover:bg-surface-container-low/50 transition-colors group">
+          <tr v-if="loading">
+            <td colspan="6" class="px-6 py-8 text-center text-outline">Chargement...</td>
+          </tr>
+          <tr
+            v-for="acc in accounts"
+            :key="acc.id"
+            class="group transition-colors hover:bg-surface-container-low/50"
+          >
             <td class="px-6 py-4 font-mono text-outline">#{{ acc.id }}</td>
             <td class="px-6 py-4">
               <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#006768] to-[#008283] text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+                <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#006768] to-[#008283] text-xs font-bold text-white">
                   {{ acc.email.charAt(0).toUpperCase() }}
                 </div>
                 <span class="font-medium">{{ acc.email }}</span>
               </div>
             </td>
             <td class="px-6 py-4">
-              <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider"
-                :class="acc.role === 'admin' ? 'bg-secondary/10 text-secondary' : 'bg-primary/10 text-primary'">
+              <span
+                class="rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider"
+                :class="acc.role === 'admin' ? 'bg-secondary/10 text-secondary' : 'bg-primary/10 text-primary'"
+              >
                 {{ acc.role }}
               </span>
             </td>
             <td class="px-6 py-4 text-on-surface-variant">{{ formatDate(acc.registrationDate) }}</td>
             <td class="px-6 py-4">
-              <span class="inline-flex items-center gap-1.5 text-xs font-semibold" :class="acc.active ? 'text-primary' : 'text-error'">
-                <span class="w-1.5 h-1.5 rounded-full" :class="acc.active ? 'bg-primary' : 'bg-error'"></span>
+              <span
+                class="inline-flex items-center gap-1.5 text-xs font-semibold"
+                :class="acc.active ? 'text-primary' : 'text-error'"
+              >
+                <span class="h-1.5 w-1.5 rounded-full" :class="acc.active ? 'bg-primary' : 'bg-error'"></span>
                 {{ acc.active ? 'Actif' : 'Inactif' }}
               </span>
             </td>
-            <td class="px-6 py-4 text-right space-x-1">
-              <button @click="openEdit(acc)" class="p-2 hover:bg-white rounded-lg text-secondary transition-all active:scale-90 shadow-sm border border-transparent hover:border-surface-variant/30">
+            <td class="space-x-1 px-6 py-4 text-right">
+              <button
+                class="rounded-lg border border-transparent p-2 text-secondary shadow-sm transition-all hover:border-surface-variant/30 hover:bg-white active:scale-90"
+                @click="openEdit(acc)"
+              >
                 <span class="material-symbols-outlined text-lg">edit</span>
               </button>
-              <button @click="toggleActive(acc)" class="p-2 hover:bg-white rounded-lg transition-all active:scale-90 shadow-sm border border-transparent hover:border-surface-variant/30"
-                :class="acc.active ? 'text-error' : 'text-primary'" :title="acc.active ? 'Désactiver' : 'Activer'">
+              <button
+                class="rounded-lg border border-transparent p-2 shadow-sm transition-all hover:border-surface-variant/30 hover:bg-white active:scale-90"
+                :class="acc.active ? 'text-error' : 'text-primary'"
+                :title="acc.active ? 'Desactiver' : 'Activer'"
+                @click="toggleActive(acc)"
+              >
                 <span class="material-symbols-outlined text-lg">{{ acc.active ? 'person_off' : 'how_to_reg' }}</span>
               </button>
             </td>
@@ -64,30 +84,47 @@
       </table>
     </div>
 
-    <!-- Edit Modal -->
-    <div v-if="editing" class="fixed inset-0 z-[100] flex items-center justify-center bg-on-surface/40 backdrop-blur-sm px-4" @click.self="editing = null">
-      <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
-        <div class="bg-[#015081] px-6 py-4 flex items-center justify-between">
-          <h3 class="text-white font-bold">Modifier l'utilisateur #{{ editing.id }}</h3>
-          <button @click="editing = null" class="text-white/60 hover:text-white">
+    <div
+      v-if="editing"
+      class="fixed inset-0 z-[100] flex items-center justify-center bg-on-surface/40 px-4 backdrop-blur-sm"
+      @click.self="editing = null"
+    >
+      <div class="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div class="flex items-center justify-between bg-[#015081] px-6 py-4">
+          <h3 class="font-bold text-white">Modifier l'utilisateur #{{ editing.id }}</h3>
+          <button class="text-white/60 hover:text-white" @click="editing = null">
             <span class="material-symbols-outlined">close</span>
           </button>
         </div>
-        <div class="p-6 space-y-4">
+        <div class="space-y-4 p-6">
           <div class="space-y-1">
-            <label class="text-[11px] font-bold text-outline uppercase">Email</label>
-            <input v-model="editing.email" class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" type="email">
+            <label class="text-[11px] font-bold uppercase text-outline">Email</label>
+            <input
+              v-model="editing.email"
+              class="w-full rounded-lg border border-outline-variant/30 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+              type="email"
+            >
           </div>
           <div class="space-y-1">
-            <label class="text-[11px] font-bold text-outline uppercase">Rôle</label>
-            <select v-model="editing.role" class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none">
-              <option value="client">Client</option>
-              <option value="admin">Admin</option>
-            </select>
+            <label class="text-[11px] font-bold uppercase text-outline">Role</label>
+            <div class="rounded-lg border border-outline-variant/30 bg-surface-container-low px-3 py-2 text-sm text-on-surface-variant">
+              {{ editing.role }}
+            </div>
+            <p class="text-xs text-outline">Le role provient du backend et ne peut pas etre modifie ici.</p>
           </div>
-          <div class="pt-2 flex gap-3">
-            <button @click="editing = null" class="flex-1 py-2.5 rounded-lg font-bold text-outline hover:bg-surface-container-low transition-colors">Annuler</button>
-            <button @click="saveEdit" class="flex-1 py-2.5 bg-[#008F90] text-white rounded-lg font-bold hover:bg-[#007a7a] transition-colors">Enregistrer</button>
+          <div class="flex gap-3 pt-2">
+            <button
+              class="flex-1 rounded-lg py-2.5 font-bold text-outline transition-colors hover:bg-surface-container-low"
+              @click="editing = null"
+            >
+              Annuler
+            </button>
+            <button
+              class="flex-1 rounded-lg bg-[#008F90] py-2.5 font-bold text-white transition-colors hover:bg-[#007a7a]"
+              @click="saveEdit"
+            >
+              Enregistrer
+            </button>
           </div>
         </div>
       </div>
@@ -96,7 +133,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import type { Account } from '~/types/models'
 import { AccountService } from '~/services'
 
@@ -105,31 +142,75 @@ definePageMeta({ layout: 'admin' })
 const service = new AccountService()
 const accounts = ref<Account[]>([])
 const loading = ref(false)
+const error = ref<string | null>(null)
 const editing = ref<Account | null>(null)
 
-function formatDate(d: string) {
-  return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+function formatDate(value: string) {
+  return new Date(value).toLocaleDateString('fr-FR', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
 }
 
-function openEdit(acc: Account) { editing.value = { ...acc } }
+function openEdit(account: Account) {
+  editing.value = { ...account }
+}
 
-async function toggleActive(acc: Account) {
-  if (acc.active) await service.deactivate(acc.id)
-  else await service.update(acc.id, { active: true })
-  const i = accounts.value.findIndex(a => a.id === acc.id)
-  if (i !== -1) accounts.value[i] = { ...accounts.value[i], active: !acc.active }
+async function toggleActive(account: Account) {
+  try {
+    error.value = null
+
+    if (account.active) {
+      await service.deactivate(account.id)
+    } else {
+      await service.update(account.id, { active: true })
+    }
+
+    const index = accounts.value.findIndex((entry) => entry.id === account.id)
+    if (index !== -1) {
+      accounts.value[index] = { ...accounts.value[index], active: !account.active }
+    }
+  } catch (cause: any) {
+    error.value = cause.message
+  }
 }
 
 async function saveEdit() {
-  if (!editing.value) return
-  const updated = await service.update(editing.value.id, {
-    email: editing.value.email,
-    active: editing.value.active,
-  })
-  const i = accounts.value.findIndex(a => a.id === updated.id)
-  if (i !== -1) accounts.value[i] = updated
-  editing.value = null
+  if (!editing.value) {
+    return
+  }
+
+  try {
+    error.value = null
+
+    const updated = await service.update(editing.value.id, {
+      email: editing.value.email,
+      active: editing.value.active,
+    })
+
+    const index = accounts.value.findIndex((entry) => entry.id === updated.id)
+    if (index !== -1) {
+      accounts.value[index] = updated
+    }
+
+    editing.value = null
+  } catch (cause: any) {
+    error.value = cause.message
+  }
 }
 
-onMounted(async () => { loading.value = true; accounts.value = await service.getAll(); loading.value = false })
+onMounted(async () => {
+  loading.value = true
+  error.value = null
+
+  try {
+    accounts.value = await service.getAll()
+  } catch (cause: any) {
+    error.value = cause.message
+    accounts.value = []
+  } finally {
+    loading.value = false
+  }
+})
 </script>

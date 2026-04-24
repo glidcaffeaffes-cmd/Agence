@@ -71,14 +71,14 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { ApiHotelRepository } from '~/repositories/api'
+import { HotelService } from '~/services'
 
 definePageMeta({
   layout: 'admin'
 })
 
-const hotelRepo = new ApiHotelRepository()
-const { data: hotelsData } = useAsyncData('admin-partners', () => hotelRepo.getAll())
+const hotelService = new HotelService()
+const { data: hotelsData } = useAsyncData('admin-partners', () => hotelService.getAll())
 
 const hotels = computed(() => hotelsData.value || [])
 </script>
