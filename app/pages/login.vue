@@ -107,7 +107,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuth } from '~/composables/useAuth'
 
 definePageMeta({
@@ -115,6 +115,7 @@ definePageMeta({
 })
 
 const router = useRouter()
+const route = useRoute()
 const { login, demoLoginClient, demoLoginAdmin, loading, error } = useAuth()
 
 const email = ref('')
@@ -125,7 +126,9 @@ async function handleLogin() {
   const ok = await login(email.value, password.value)
   if (ok) {
     const { currentAccount } = useAuth()
-    router.push(currentAccount.value?.role === 'admin' ? '/admin' : '/')
+    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : ''
+    const fallbackPath = currentAccount.value?.role === 'admin' ? '/admin' : '/'
+    router.push(redirect.startsWith('/') ? redirect : fallbackPath)
   }
 }
 

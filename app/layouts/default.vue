@@ -5,6 +5,7 @@
       <slot />
     </main>
     <ClientFooter v-if="!hideFooter" />
+    <AuthPromptModal />
   </div>
 </template>
 

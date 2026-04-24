@@ -47,6 +47,13 @@
             active-class="client-navbar__link--active"
             >Offers</NuxtLink
           >
+          <NuxtLink
+            to="/wishlist"
+            class="client-navbar__link px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+            active-class="client-navbar__link--active"
+            @click="handleWishlistNav"
+            >Wishlist</NuxtLink
+          >
         </nav>
       </div>
 
@@ -119,7 +126,7 @@
                   <span
                     class="material-symbols-outlined text-[20px] text-outline"
                     >person</span
-                  >
+                >
                   Profile
                 </NuxtLink>
                 <NuxtLink
@@ -203,6 +210,12 @@
           @click="mobileOpen = false"
           >Offers</NuxtLink
         >
+        <NuxtLink
+          to="/wishlist"
+          class="block px-4 py-3 rounded-xl text-base font-bold text-on-surface hover:bg-surface-container-lowest transition-colors"
+          @click="handleWishlistNav"
+          >Wishlist</NuxtLink
+        >
 
         <template v-if="isAuthenticated">
           <div class="h-px bg-outline-variant/30 my-4"></div>
@@ -244,9 +257,11 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useAuth } from "~/composables/useAuth";
+import { useAuthPrompt } from "~/composables/useAuthPrompt";
 import { useNotifications } from "~/composables/useNotifications";
 
 const { isAuthenticated, isAdmin, currentProfile, logout } = useAuth();
+const { open: openAuthPrompt } = useAuthPrompt();
 const { unreadCount } = useNotifications();
 const route = useRoute();
 
@@ -271,6 +286,19 @@ function handleLogout() {
   showUserMenu.value = false;
   mobileOpen.value = false;
   navigateTo("/");
+}
+
+function handleWishlistNav(event: MouseEvent) {
+  if (isAuthenticated.value) {
+    mobileOpen.value = false;
+    return;
+  }
+
+  event.preventDefault();
+  mobileOpen.value = false;
+  openAuthPrompt({
+    redirectTo: "/wishlist",
+  });
 }
 
 function updateHeaderState() {

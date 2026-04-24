@@ -44,17 +44,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed } from 'vue'
 import type { Hotel } from '~/types/models'
+import { useWishlist } from '~/composables/useWishlist'
 
 const props = defineProps<{ hotel: Hotel; minPrice?: number }>()
 
 const fallbackImage =
   'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=1200'
-const isFavorite = ref(false)
+const { isWishlisted, toggle } = useWishlist()
+const isFavorite = computed(() => isWishlisted(props.hotel.id))
 
 const toggleFavorite = () => {
-  isFavorite.value = !isFavorite.value
+  toggle(props.hotel.id)
 }
 
 const reserveHotel = () => {
