@@ -2,22 +2,22 @@
   <div class="hotel-detail">
     <div v-if="loading" class="loading-state">
       <span class="material-symbols-outlined rotating">progress_activity</span>
-      <p>Chargement de l'établissement...</p>
+      <p>Loading hotel details...</p>
     </div>
     
     <template v-else-if="hotel">
       <!-- Top Navigation -->
       <nav class="detail-nav">
         <div class="breadcrumbs">
-          <NuxtLink to="/">Accueil</NuxtLink>
+          <NuxtLink to="/">Home</NuxtLink>
           <span class="material-symbols-outlined separator">chevron_right</span>
-          <NuxtLink to="/hotels">Hôtels</NuxtLink>
+          <NuxtLink to="/hotels">Hotels</NuxtLink>
           <span class="material-symbols-outlined separator">chevron_right</span>
           <span class="active">{{ hotel.name }}</span>
         </div>
         <div class="nav-actions">
-          <button class="action-btn"><span class="material-symbols-outlined">ios_share</span> Partager</button>
-          <button class="action-btn"><span class="material-symbols-outlined">favorite</span> Sauvegarder</button>
+          <button class="action-btn"><span class="material-symbols-outlined">ios_share</span> Share</button>
+          <button class="action-btn"><span class="material-symbols-outlined">favorite</span> Save</button>
         </div>
       </nav>
 
@@ -34,7 +34,7 @@
             <div class="location-badge">
               <span class="material-symbols-outlined">location_on</span>
               <span>{{ hotel.city }}, {{ hotel.country }}</span>
-              <a href="#map" class="map-link">Voir sur la carte</a>
+              <a href="#map" class="map-link">View on map</a>
             </div>
           </div>
         </div>
@@ -48,10 +48,10 @@
           </div>
           <div class="side-photos">
             <div class="photo-wrap">
-              <img :src="hotel.images[1]" alt="Intérieur">
+              <img :src="hotel.images[1]" alt="Interior">
             </div>
             <div class="photo-wrap relative">
-              <img :src="hotel.images[2]" alt="Extérieur">
+              <img :src="hotel.images[2]" alt="Exterior">
               <div v-if="hotel.images.length > 3" class="more-photos-overlay">
                 <span class="material-symbols-outlined">photo_library</span>
                 <span>+{{ hotel.images.length - 3 }} photos</span>
@@ -70,10 +70,10 @@
         <main class="main-content">
           <!-- Overview -->
           <section class="content-section">
-            <h2 class="section-title">À propos de cet établissement</h2>
+            <h2 class="section-title">About this property</h2>
             <p class="hotel-description">{{ hotel.description }}</p>
             
-            <h3 class="subsection-title">Équipements & Services</h3>
+            <h3 class="subsection-title">Amenities & Services</h3>
             <div class="amenities-grid">
               <div class="amenity-item" v-for="amenity in hotel?.amenities || defaultAmenities.map(a => a.label)" :key="amenity">
                 <span class="material-symbols-outlined">{{ getAmenityIcon(amenity) }}</span>
@@ -84,28 +84,28 @@
 
           <!-- Rooms -->
           <section class="content-section">
-            <h2 class="section-title" id="rooms">Chambres & Disponibilités</h2>
+            <h2 class="section-title" id="rooms">Rooms & Availability</h2>
             <div class="rooms-list">
               <div v-for="room in rooms" :key="room.id" class="premium-room-card">
                 <div class="room-image">
-                  <img :src="room.image || 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=400&q=80'" alt="Chambre">
+                  <img :src="room.image || 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=400&q=80'" alt="Room">
                 </div>
                 <div class="room-content">
                   <div class="room-header">
                     <h3>{{ room.type }}</h3>
                     <div class="room-features">
-                      <span><span class="material-symbols-outlined">person</span>Jusqu'à {{ room.capacity }} pers.</span>
-                      <span><span class="material-symbols-outlined">king_bed</span>1 Lit King Size</span>
+                      <span><span class="material-symbols-outlined">person</span>Up to {{ room.capacity }} guests</span>
+                      <span><span class="material-symbols-outlined">king_bed</span>1 King Size Bed</span>
                       <span><span class="material-symbols-outlined">aspect_ratio</span>32 m²</span>
                     </div>
                   </div>
                   <div class="room-footer">
                     <div class="price-block">
                       <span class="price-val">{{ room.pricePerNight }}€</span>
-                      <span class="price-unit">/ nuit</span>
+                      <span class="price-unit">/ night</span>
                     </div>
-                    <button v-if="room.status === 'AVAILABLE'" class="book-btn-outline">Sélectionner</button>
-                    <button v-else class="book-btn-outline disabled">Indisponible</button>
+                    <button v-if="room.status === 'AVAILABLE'" class="book-btn-outline">Select</button>
+                    <button v-else class="book-btn-outline disabled">Unavailable</button>
                   </div>
                 </div>
               </div>
@@ -116,8 +116,8 @@
           <section class="content-section no-border border-0">
             <div class="reviews-header-advanced">
               <div>
-                <h2 class="section-title m-0">Avis voyageurs</h2>
-                <p class="reviews-subtitle">Moyenne calculée sur {{ reviews.length }} avis vérifiés</p>
+                <h2 class="section-title m-0">Guest Reviews</h2>
+                <p class="reviews-subtitle">Average based on {{ reviews.length }} verified reviews</p>
               </div>
               <div class="global-rating-block">
                 <span class="rating-score">{{ (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length || 0).toFixed(1) }}</span>
@@ -128,21 +128,65 @@
               </div>
             </div>
 
-            <div class="reviews-grid">
-              <div class="review-card" v-for="review in reviews.slice(0, 2)" :key="review.id">
-                <div class="reviewer-prof">
-                  <div class="avatar-circle">{{ review.accountId }}</div>
-                  <div class="reviewer-meta">
-                    <strong>Client {{ review.accountId }}</strong>
-                    <span>{{ new Date(review.publicationDate).toLocaleDateString('fr-FR') }}</span>
+            <!-- Write a Review Form -->
+            <div class="feedback-form-container">
+              <h3 class="subsection-title">Write a Review</h3>
+              <div class="feedback-card">
+                <div class="rating-selector mb-3">
+                  <span class="rating-label">Your rating:</span>
+                  <div class="stars-interactive">
+                    <span 
+                      v-for="i in 5" 
+                      :key="'star-'+i" 
+                      class="material-symbols-outlined star-btn" 
+                      :class="{ 'active': i <= newReviewRating }"
+                      @click="newReviewRating = i"
+                    >star</span>
                   </div>
                 </div>
-                <div class="review-stars-small"><span v-for="s in 5" :key="s" class="material-symbols-outlined" :class="{ 'active': s <= review.rating }">star</span></div>
-                <p class="review-body">{{ review.comment }}</p>
+                <textarea 
+                  v-model="newReviewText" 
+                  class="feedback-textarea" 
+                  placeholder="Share your experience at this property..."
+                  rows="4"
+                ></textarea>
+                <div class="feedback-actions">
+                  <p v-if="submitSuccess" class="submit-success-msg"><span class="material-symbols-outlined">check_circle</span> Your review was submitted!</p>
+                  <button 
+                    class="submit-review-btn" 
+                    @click="handleSubmitReview" 
+                    :disabled="!newReviewText.trim() || submitting"
+                  >{{ submitting ? 'Submitting...' : 'Submit Review' }}</button>
+                </div>
               </div>
             </div>
-            
-            <button class="show-all-reviews">Lire les {{ reviews.length }} avis</button>
+
+            <!-- All Reviews List -->
+            <div class="all-reviews-section" v-if="reviews.length > 0">
+              <h3 class="subsection-title">All Reviews ({{ reviews.length }})</h3>
+              <div class="reviews-list">
+                <div class="review-card" v-for="review in reviews" :key="review.id">
+                  <div class="reviewer-prof">
+                    <div class="avatar-circle">
+                      {{ (review.authorName || String(review.accountId)).charAt(0).toUpperCase() }}
+                    </div>
+                    <div class="reviewer-meta">
+                      <strong>{{ review.authorName || `Guest #${review.accountId}` }}</strong>
+                      <span>{{ new Date(review.publicationDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) }}</span>
+                    </div>
+                  </div>
+                  <div class="review-stars-small">
+                    <span v-for="s in 5" :key="s" class="material-symbols-outlined" :class="{ 'active': s <= review.rating }">star</span>
+                    <span class="review-rating-text">{{ review.rating }}/5</span>
+                  </div>
+                  <p class="review-body">{{ review.comment }}</p>
+                </div>
+              </div>
+            </div>
+            <div v-else class="no-reviews-msg">
+              <span class="material-symbols-outlined">rate_review</span>
+              <p>No reviews yet. Be the first to share your experience!</p>
+            </div>
           </section>
         </main>
 
@@ -150,7 +194,7 @@
         <aside class="sidebar-wrapper">
           <div class="sticky-booking-widget">
             <div class="widget-header">
-              <span class="price-display">À partir de <strong>120€</strong> <span>/ nuit</span></span>
+              <span class="price-display">From <strong>120€</strong> <span>/ night</span></span>
               <div class="rating-small">
                 <span class="material-symbols-outlined">star</span> 4.8
               </div>
@@ -159,31 +203,31 @@
             <div class="booking-inputs">
               <div class="date-picker-mock">
                 <div class="date-field border-right">
-                  <label>ARRIVÉE</label>
-                  <span>17 Avr. 2026</span>
+                  <label>CHECK-IN</label>
+                  <span>Apr 17, 2026</span>
                 </div>
                 <div class="date-field">
-                  <label>DÉPART</label>
-                  <span>20 Avr. 2026</span>
+                  <label>CHECK-OUT</label>
+                  <span>Apr 20, 2026</span>
                 </div>
               </div>
               <div class="guest-picker-mock">
-                <label>VOYAGEURS</label>
-                <span>2 adultes, 0 enfant</span>
+                <label>GUESTS</label>
+                <span>2 adults, 0 children</span>
                 <span class="material-symbols-outlined expand-icon">expand_more</span>
               </div>
             </div>
 
-            <button class="primary-checkout-btn">Vérifier les disponibilités</button>
-            <p class="no-charge-text">Aucun montant ne vous sera débité pour le moment</p>
+            <button class="primary-checkout-btn">Check Availability</button>
+            <p class="no-charge-text">You won't be charged at this point</p>
 
             <div class="price-breakdown">
               <div class="breakdown-row">
-                <span>120€ x 3 nuits</span>
+                <span>120€ x 3 nights</span>
                 <span>360€</span>
               </div>
               <div class="breakdown-row">
-                <span>Taxes de séjour</span>
+                <span>City tax</span>
                 <span>15€</span>
               </div>
               <div class="breakdown-row total">
@@ -203,34 +247,72 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useHotels } from '~/composables/useHotels'
 import { useRooms } from '~/composables/useRooms'
-import { useReviews } from '~/composables/useReviews'
+import { useAuth } from '~/composables/useAuth'
+import { useAuthPrompt } from '~/composables/useAuthPrompt'
 import type { Hotel } from '~/types/models'
 
 const route = useRoute()
+const { isAuthenticated, currentProfile } = useAuth()
+const authPrompt = useAuthPrompt()
 const { getById } = useHotels()
 const { rooms, fetchByHotel } = useRooms()
-const { reviews, fetchByHotel: fetchReviews } = useReviews()
+const { reviews, fetchByHotel: fetchReviews, submitReview } = useReviews()
 
 const hotel = ref<Hotel | null>(null)
 const loading = ref(true)
 
+const newReviewText = ref('')
+const newReviewRating = ref(5)
+const submitting = ref(false)
+const submitSuccess = ref(false)
+
+async function handleSubmitReview() {
+  if (!isAuthenticated.value) {
+    authPrompt.open({
+      title: 'Share your experience',
+      message: 'Please sign in or create an account to leave a review for this hotel.',
+      icon: 'rate_review',
+      eyebrow: 'Review access',
+      redirectTo: route.fullPath
+    })
+    return
+  }
+
+  if (!newReviewText.value.trim() || !hotel.value) return
+  submitting.value = true
+  submitSuccess.value = false
+  await submitReview({
+    hotelId: hotel.value.id,
+    accountId: currentProfile.value?.accountId,
+    authorName: currentProfile.value ? `${currentProfile.value.prenom} ${currentProfile.value.nom}` : 'Anonymous Guest',
+    rating: newReviewRating.value,
+    comment: newReviewText.value,
+    visible: true
+  })
+  newReviewText.value = ''
+  newReviewRating.value = 5
+  submitting.value = false
+  submitSuccess.value = true
+  setTimeout(() => { submitSuccess.value = false }, 4000)
+}
+
 const defaultAmenities = [
-  { icon: 'wifi', label: 'Wi-Fi gratuit très haut débit' },
-  { icon: 'pool', label: 'Piscine extérieure chauffée' },
-  { icon: 'fitness_center', label: 'Centre de remise en forme 24/7' },
+  { icon: 'wifi', label: 'Free high-speed Wi-Fi' },
+  { icon: 'pool', label: 'Heated outdoor pool' },
+  { icon: 'fitness_center', label: '24/7 Fitness center' },
   { icon: 'local_bar', label: 'Lounge bar & Cocktails' },
-  { icon: 'restaurant', label: 'Restaurant Gastronomique' },
-  { icon: 'spa', label: 'Spa et centre de bien-être' }
+  { icon: 'restaurant', label: 'Gourmet restaurant' },
+  { icon: 'spa', label: 'Spa & wellness center' }
 ]
 
 function getAmenityIcon(amenity: string) {
   const amenityMap: Record<string, string> = {
-    'Wi-Fi gratuit très haut débit': 'wifi',
-    'Piscine extérieure chauffée': 'pool',
-    'Centre de remise en forme 24/7': 'fitness_center',
+    'Free high-speed Wi-Fi': 'wifi',
+    'Heated outdoor pool': 'pool',
+    '24/7 Fitness center': 'fitness_center',
     'Lounge bar & Cocktails': 'local_bar',
-    'Restaurant Gastronomique': 'restaurant',
-    'Spa et centre de bien-être': 'spa'
+    'Gourmet restaurant': 'restaurant',
+    'Spa & wellness center': 'spa'
   }
   return amenityMap[amenity] || 'check_circle'
 }
@@ -533,28 +615,44 @@ onMounted(async () => {
 .rating-context span { font-weight: 700; font-size: 13px; color: #334155; }
 
 .reviews-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-.review-card { padding: 16px; background: #f8fafc; border-radius: 10px; border: 1px solid #f1f5f9; transition: box-shadow 0.2s ease; }
-.review-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+.review-card { padding: 20px; background: #f8fafc; border-radius: 12px; border: 1px solid #f1f5f9; transition: box-shadow 0.2s ease; margin-bottom: 12px; }
+.review-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.05); border-color: #e2e8f0; }
 .reviewer-prof { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-.avatar-circle { width: 36px; height: 36px; background: #015081; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;}
-.reviewer-meta strong { display: block; font-size: 14px; color: #001d34; }
+.avatar-circle { width: 40px; height: 40px; background: #015081; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; flex-shrink: 0; }
+.reviewer-meta strong { display: block; font-size: 14px; color: #001d34; font-weight: 600; }
 .reviewer-meta span { font-size: 12px; color: #64748b; }
-.review-stars-small { margin-bottom: 8px; }
-.review-stars-small .material-symbols-outlined { font-size: 14px; color: #CDAF5D; font-variation-settings: 'FILL' 1; }
-.review-body { font-size: 13px; line-height: 1.5; color: #334155; margin: 0; }
+.review-stars-small { display: flex; align-items: center; gap: 4px; margin-bottom: 10px; }
+.review-stars-small .material-symbols-outlined { font-size: 15px; color: #e2e8f0; font-variation-settings: 'FILL' 1; }
+.review-stars-small .material-symbols-outlined.active { color: #CDAF5D; }
+.review-rating-text { font-size: 12px; font-weight: 700; color: #64748b; margin-left: 4px; }
+.review-body { font-size: 14px; line-height: 1.6; color: #334155; margin: 0; }
 
-.show-all-reviews {
-  padding: 12px 24px;
-  background: white;
-  border: 1px solid #001d34;
-  color: #001d34;
-  border-radius: 8px;
-  font-weight: 700;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s;
-}
-.show-all-reviews:hover { background: #f1f5f9; }
+.all-reviews-section { margin-top: 32px; }
+.reviews-list { display: flex; flex-direction: column; gap: 0; }
+
+.no-reviews-msg { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 40px 20px; color: #94a3b8; text-align: center; }
+.no-reviews-msg .material-symbols-outlined { font-size: 40px; }
+.no-reviews-msg p { font-size: 14px; margin: 0; }
+
+/* Feedback Form */
+.mb-3 { margin-bottom: 12px; }
+.rating-label { font-size: 14px; font-weight: 600; color: #001d34; margin-right: 10px; }
+
+.feedback-form-container { margin-top: 28px; border-top: 1px solid #e2e8f0; padding-top: 24px; }
+.feedback-card { background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 12px; padding: 20px; }
+.rating-selector { display: flex; align-items: center; margin-bottom: 12px; }
+.stars-interactive { display: flex; gap: 4px; }
+.star-btn { font-size: 26px; color: #e2e8f0; font-variation-settings: 'FILL' 1; cursor: pointer; transition: color 0.15s, transform 0.15s; }
+.star-btn.active { color: #CDAF5D; }
+.star-btn:hover { transform: scale(1.15); color: #CDAF5D; }
+.feedback-textarea { width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; font-size: 14px; color: #334155; font-family: inherit; resize: vertical; margin-bottom: 12px; transition: border-color 0.2s, box-shadow 0.2s; outline: none; box-sizing: border-box; }
+.feedback-textarea:focus { border-color: #008F90; box-shadow: 0 0 0 3px rgba(0, 143, 144, 0.1); }
+.feedback-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.submit-review-btn { background: #008F90; color: white; border: none; padding: 10px 22px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s; margin-left: auto; }
+.submit-review-btn:hover:not(:disabled) { background: #007677; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,143,144,0.25); }
+.submit-review-btn:disabled { background: #cbd5e1; cursor: not-allowed; opacity: 0.7; transform: none; }
+.submit-success-msg { display: flex; align-items: center; gap: 6px; color: #008F90; font-size: 13px; font-weight: 600; }
+.submit-success-msg .material-symbols-outlined { font-size: 18px; }
 
 /* Sticky Sidebar Widget */
 .sidebar-wrapper { position: relative; }

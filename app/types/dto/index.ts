@@ -114,7 +114,10 @@ export interface NotificationDTO {
 
 export interface ReviewDTO {
   id: number
-  reservationId: number
+  reservationId?: number | null
+  hotelId?: number | null
+  accountId?: number | null
+  authorName?: string | null
   note: number
   commentaire: string | null
   datePublication: string

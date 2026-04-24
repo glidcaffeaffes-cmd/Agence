@@ -17,5 +17,13 @@ export function useReviews() {
     reviews.value = await execute(() => service.getAll(), [])
   }
 
-  return { reviews, loading, error, fetchByHotel, fetchAll }
+  async function submitReview(data: Omit<Review, 'id' | 'publicationDate'>) {
+    const newReview = await execute(() => service.submit(data), null)
+    if (newReview) {
+      reviews.value.push(newReview)
+    }
+    return newReview
+  }
+
+  return { reviews, loading, error, fetchByHotel, fetchAll, submitReview }
 }

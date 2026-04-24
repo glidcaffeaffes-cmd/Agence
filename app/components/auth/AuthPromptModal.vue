@@ -20,10 +20,10 @@
           </button>
 
           <div class="auth-prompt__icon">
-            <span class="material-symbols-outlined">favorite</span>
+            <span class="material-symbols-outlined">{{ icon }}</span>
           </div>
 
-          <p class="auth-prompt__eyebrow">Wishlist access</p>
+          <p class="auth-prompt__eyebrow">{{ eyebrow }}</p>
           <h2 id="auth-prompt-title">{{ title }}</h2>
           <p class="auth-prompt__message">{{ message }}</p>
 
@@ -53,7 +53,7 @@
 import { computed } from "vue";
 import { useAuthPrompt } from "~/composables/useAuthPrompt";
 
-const { isOpen, redirectTo, title, message, close } = useAuthPrompt();
+const { isOpen, redirectTo, title, message, icon, eyebrow, close } = useAuthPrompt();
 
 const signInTarget = computed(() => ({
   path: "/login",

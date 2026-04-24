@@ -508,11 +508,15 @@ export const NotificationMapper = {
 
 export const ReviewMapper = {
   fromDto(dto: ReviewDTO): Review {
+    const reservationProfile = dto.reservation?.account?.profile
+    const reservationName = reservationProfile ? `${reservationProfile.prenom} ${reservationProfile.nom}` : undefined
+
     return {
       id: dto.id,
-      reservationId: dto.reservationId,
-      accountId: dto.reservation?.accountId ?? 0,
-      hotelId: dto.reservation?.chambre?.hotelId ?? 0,
+      reservationId: dto.reservationId ?? undefined,
+      accountId: dto.accountId ?? dto.reservation?.accountId ?? 0,
+      hotelId: dto.reservation?.chambre?.hotelId ?? dto.hotelId ?? 0,
+      authorName: dto.authorName || reservationName,
       rating: dto.note,
       comment: dto.commentaire ?? '',
       publicationDate: dto.datePublication,
@@ -522,7 +526,10 @@ export const ReviewMapper = {
 
   toCreateDto(model: Omit<Review, 'id' | 'publicationDate'>) {
     return {
-      reservationId: model.reservationId,
+      ...(model.reservationId ? { reservationId: model.reservationId } : {}),
+      ...(model.hotelId ? { hotelId: model.hotelId } : {}),
+      ...(model.accountId ? { accountId: model.accountId } : {}),
+      ...(model.authorName ? { authorName: model.authorName } : {}),
       note: model.rating,
       commentaire: model.comment,
       valide: model.visible,
