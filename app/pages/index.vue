@@ -257,11 +257,15 @@ const childAgeOptions = Array.from({ length: 17 }, (_, index) => ({
   value: index + 1,
 }))
 
-const cityOptions = computed(() => {
-  return [...new Set(hotels.value.filter((hotel) => hotel.active).map((hotel) => hotel.city))]
-    .sort((a, b) => a.localeCompare(b))
-    .map((city) => ({ label: city, value: city }))
-})
+// Static 24 Tunisian governorates — always available regardless of DB content
+const TUNISIA_CITIES = [
+  'Ariana', 'Béja', 'Ben Arous', 'Bizerte', 'Gabès', 'Gafsa',
+  'Jendouba', 'Kairouan', 'Kasserine', 'Kébili', 'La Manouba', 'Le Kef',
+  'Mahdia', 'Médenine', 'Monastir', 'Nabeul', 'Sfax', 'Sidi Bouzid',
+  'Siliana', 'Sousse', 'Tataouine', 'Tozeur', 'Tunis', 'Zaghouan',
+]
+
+const cityOptions = TUNISIA_CITIES.map((city) => ({ label: city, value: city }))
 
 const selectedDateRange = computed(() => {
   if (!Array.isArray(stayDates.value) || stayDates.value.length === 0) return [null, null] as const
@@ -1480,5 +1484,72 @@ function formatDateForQuery(date: Date) {
   }
 
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+
+<!-- Global: PrimeVue Select overlay must be styled without scoping since it teleports to <body> -->
+<style>
+/* ── Hero city-select overlay ────────────────────────────── */
+.p-select-overlay {
+  border-radius: 1.5rem !important;
+  border: 1px solid var(--color-border) !important;
+  box-shadow: 0 16px 48px rgba(15, 23, 42, 0.14) !important;
+  overflow: hidden;
+  min-width: 260px !important;
+  background: var(--color-surface-primary) !important;
+}
+
+/* Search input inside the overlay header */
+.p-select-overlay .p-select-header {
+  padding: 0.9rem 1rem 0.75rem !important;
+  background: var(--color-surface-primary) !important;
+  border-bottom: 1px solid var(--color-divider) !important;
+}
+
+.p-select-overlay .p-select-filter {
+  width: 100%;
+  border: 1.5px solid var(--color-border) !important;
+  border-radius: 0.85rem !important;
+  padding: 0.55rem 2.4rem 0.55rem 0.9rem !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  color: var(--color-heading) !important;
+  background: var(--color-surface-secondary) !important;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.p-select-overlay .p-select-filter:focus {
+  border-color: var(--color-primary-400) !important;
+}
+
+/* List items */
+.p-select-overlay .p-select-list-container {
+  max-height: 280px !important;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+.p-select-overlay .p-select-option {
+  padding: 0.68rem 1.1rem !important;
+  font-size: 0.93rem !important;
+  font-weight: 600 !important;
+  color: var(--color-heading) !important;
+  border-radius: 0 !important;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.p-select-overlay .p-select-option:hover,
+.p-select-overlay .p-select-option.p-focus {
+  background: var(--color-primary-50, #e6f4f4) !important;
+  color: var(--color-primary-700) !important;
+}
+
+.p-select-overlay .p-select-option.p-selected {
+  background: var(--color-primary-100) !important;
+  color: var(--color-primary-700) !important;
+  font-weight: 700 !important;
 }
 </style>
