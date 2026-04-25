@@ -1,5 +1,5 @@
 import type { IAccountRepository } from '~/types/interfaces'
-import type { Account, Profile } from '~/types/models'
+import type { Account, PaymentMethod, Profile } from '~/types/models'
 import { AdminRepositoryFactory } from '~/repositories/factory'
 
 /**
@@ -74,6 +74,43 @@ export class AccountService {
 
   async createProfile(accountId: number, data: Partial<Profile>): Promise<Profile> {
     return this.repo.createProfile(accountId, data)
+  }
+
+  async listPaymentMethods(accountId: number): Promise<PaymentMethod[]> {
+    return this.repo.listPaymentMethods(accountId)
+  }
+
+  async createPaymentMethod(
+    accountId: number,
+    data: {
+      cardholderName: string
+      brand: PaymentMethod['brand']
+      cardNumber: string
+      expiryMonth: number
+      expiryYear: number
+      isDefault?: boolean
+    },
+  ): Promise<PaymentMethod> {
+    return this.repo.createPaymentMethod(accountId, data)
+  }
+
+  async updatePaymentMethod(
+    accountId: number,
+    paymentMethodId: number,
+    data: Partial<{
+      cardholderName: string
+      brand: PaymentMethod['brand']
+      cardNumber: string
+      expiryMonth: number
+      expiryYear: number
+      isDefault: boolean
+    }>,
+  ): Promise<PaymentMethod> {
+    return this.repo.updatePaymentMethod(accountId, paymentMethodId, data)
+  }
+
+  async removePaymentMethod(accountId: number, paymentMethodId: number): Promise<void> {
+    return this.repo.removePaymentMethod(accountId, paymentMethodId)
   }
 
   async changePassword(accountId: number, oldPassword: string, newPassword: string): Promise<void> {

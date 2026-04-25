@@ -17,6 +17,9 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   buildDir: '.nuxt-build',
   devtools: { enabled: true },
+  devServer: {
+    port: 3000
+  },
   vite: {
     optimizeDeps: {
       include: [

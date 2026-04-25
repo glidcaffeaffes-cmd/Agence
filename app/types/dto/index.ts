@@ -33,8 +33,28 @@ export interface ProfileDTO {
   adresse?: string | null
   nationalite?: string | null
   photo?: string | null
+  dateNaissance?: string | null
+  numeroPasseport?: string | null
+  bio?: string | null
+  destinationsPreferees?: string[] | null
+  preferencesVoyage?: string[] | null
   notificationsReservation?: boolean | null
   notificationsPromotion?: boolean | null
+  account?: {
+    paymentMethods?: PaymentMethodDTO[] | null
+  } | null
+}
+
+export interface PaymentMethodDTO {
+  id: number
+  accountId: number
+  cardholderName: string
+  brand: 'visa' | 'mastercard' | 'amex' | 'discover' | 'other'
+  last4: string
+  expiryMonth: number
+  expiryYear: number
+  isDefault: boolean
+  createdAt: string
 }
 
 export interface ReservationDTO {

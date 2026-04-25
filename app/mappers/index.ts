@@ -1,6 +1,7 @@
 import type {
   HotelDTO,
   AccountDTO,
+  PaymentMethodDTO,
   ProfileDTO,
   ReservationDTO,
   OfferDTO,
@@ -13,6 +14,7 @@ import type {
 import type {
   Hotel,
   Account,
+  PaymentMethod,
   Profile,
   Reservation,
   Offer,
@@ -35,6 +37,16 @@ const hotelFallbackImages = [
 
 function inferRole(email: string): 'client' | 'admin' {
   return email.toLowerCase().includes('admin') ? 'admin' : 'client'
+}
+
+function normalizeDateInput(date?: string | null) {
+  if (!date) return ''
+  return date.slice(0, 10)
+}
+
+function summarizePaymentMethod(methods?: PaymentMethod[]) {
+  const primary = methods?.find(method => method.isDefault) ?? methods?.[0]
+  return primary ? `${primary.brand.toUpperCase()} ending in ${primary.last4}` : ''
 }
 
 function fallbackHotelImages(id: number) {
@@ -234,6 +246,8 @@ export const AccountMapper = {
 
 export const ProfileMapper = {
   fromDto(dto: ProfileDTO, account?: Pick<Account, 'email' | 'role'>): Profile {
+    const paymentMethods = dto.account?.paymentMethods?.map(PaymentMethodMapper.fromDto) ?? []
+
     return {
       id: dto.id,
       accountId: dto.accountId,
@@ -242,6 +256,13 @@ export const ProfileMapper = {
       address: dto.adresse ?? '',
       phone: dto.telephone ?? '',
       photo: dto.photo ?? '',
+      dateOfBirth: normalizeDateInput(dto.dateNaissance),
+      passportNumber: dto.numeroPasseport ?? '',
+      preferredDestinations: dto.destinationsPreferees ?? [],
+      travelPreferences: dto.preferencesVoyage ?? [],
+      bio: dto.bio ?? '',
+      paymentMethod: summarizePaymentMethod(paymentMethods),
+      paymentMethods,
       notificationsReservation: dto.notificationsReservation ?? true,
       notificationsPromotion: dto.notificationsPromotion ?? false,
       email: account?.email,
@@ -257,6 +278,21 @@ export const ProfileMapper = {
       ...(model.phone !== undefined && { telephone: model.phone }),
       ...(model.address !== undefined && { adresse: model.address }),
       ...(model.photo !== undefined && { photo: model.photo }),
+      ...(model.dateOfBirth !== undefined && { dateNaissance: model.dateOfBirth || null }),
+      ...(model.passportNumber !== undefined && { numeroPasseport: model.passportNumber }),
+      ...(model.bio !== undefined && { bio: model.bio }),
+      ...(model.preferredDestinations !== undefined && {
+        destinationsPreferees: model.preferredDestinations,
+      }),
+      ...(model.travelPreferences !== undefined && {
+        preferencesVoyage: model.travelPreferences,
+      }),
+      ...(model.notificationsReservation !== undefined && {
+        notificationsReservation: model.notificationsReservation,
+      }),
+      ...(model.notificationsPromotion !== undefined && {
+        notificationsPromotion: model.notificationsPromotion,
+      }),
     }
   },
 
@@ -267,6 +303,15 @@ export const ProfileMapper = {
       ...(model.phone !== undefined && { telephone: model.phone }),
       ...(model.address !== undefined && { adresse: model.address }),
       ...(model.photo !== undefined && { photo: model.photo }),
+      ...(model.dateOfBirth !== undefined && { dateNaissance: model.dateOfBirth || null }),
+      ...(model.passportNumber !== undefined && { numeroPasseport: model.passportNumber }),
+      ...(model.bio !== undefined && { bio: model.bio }),
+      ...(model.preferredDestinations !== undefined && {
+        destinationsPreferees: model.preferredDestinations,
+      }),
+      ...(model.travelPreferences !== undefined && {
+        preferencesVoyage: model.travelPreferences,
+      }),
       ...(model.notificationsReservation !== undefined && {
         notificationsReservation: model.notificationsReservation,
       }),
@@ -289,10 +334,33 @@ export const ProfileMapper = {
       address: profile?.address ?? '',
       phone: profile?.phone ?? '',
       photo: profile?.photo ?? '',
+      dateOfBirth: profile?.dateOfBirth ?? '',
+      passportNumber: profile?.passportNumber ?? '',
+      preferredDestinations: profile?.preferredDestinations ?? [],
+      travelPreferences: profile?.travelPreferences ?? [],
+      bio: profile?.bio ?? '',
+      paymentMethod: profile?.paymentMethod ?? summarizePaymentMethod(profile?.paymentMethods),
+      paymentMethods: profile?.paymentMethods ?? [],
       notificationsReservation: profile?.notificationsReservation ?? true,
       notificationsPromotion: profile?.notificationsPromotion ?? false,
       email: account?.email ?? profile?.email,
       role: account?.role ?? profile?.role,
+    }
+  },
+}
+
+export const PaymentMethodMapper = {
+  fromDto(dto: PaymentMethodDTO): PaymentMethod {
+    return {
+      id: dto.id,
+      accountId: dto.accountId,
+      cardholderName: dto.cardholderName,
+      brand: dto.brand,
+      last4: dto.last4,
+      expiryMonth: dto.expiryMonth,
+      expiryYear: dto.expiryYear,
+      isDefault: dto.isDefault,
+      createdAt: dto.createdAt,
     }
   },
 }

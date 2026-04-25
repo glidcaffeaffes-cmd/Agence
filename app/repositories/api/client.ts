@@ -3,7 +3,9 @@ import type { ApiErrorDTO } from '~/types/dto'
 type QueryValue = string | number | boolean | null | undefined
 type QueryParams = Record<string, QueryValue>
 
-const responseCache = new Map<string, Promise<unknown>>()
+function useResponseCache() {
+  return useState<Record<string, any>>('api_response_cache', () => ({}))
+}
 
 function resolveBaseUrl() {
   return useRuntimeConfig().public.apiBase || '/api'
@@ -56,29 +58,30 @@ export async function apiRequest<T>(path: string, options?: Parameters<typeof $f
 }
 
 export function apiGetCached<T>(path: string) {
-  const cached = responseCache.get(path) as Promise<T> | undefined
+  const cache = useResponseCache()
+  const cached = cache.value[path] as T | undefined
   if (cached) {
-    return cached
+    return Promise.resolve(cached)
   }
 
-  const request = apiRequest<T>(path).catch((error) => {
-    responseCache.delete(path)
-    throw error
+  const request = apiRequest<T>(path).then((data) => {
+    cache.value[path] = data
+    return data
   })
 
-  responseCache.set(path, request)
   return request
 }
 
 export function invalidateApiCache(...prefixes: string[]) {
+  const cache = useResponseCache()
   if (prefixes.length === 0) {
-    responseCache.clear()
+    cache.value = {}
     return
   }
 
-  for (const key of responseCache.keys()) {
+  for (const key of Object.keys(cache.value)) {
     if (prefixes.some((prefix) => key.startsWith(prefix))) {
-      responseCache.delete(key)
+      delete cache.value[key]
     }
   }
 }

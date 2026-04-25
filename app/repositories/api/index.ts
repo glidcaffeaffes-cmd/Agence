@@ -11,6 +11,7 @@ import type { IStatsRepository } from '~/types/interfaces/IStatsRepository'
 import type {
   Hotel,
   Account,
+  PaymentMethod,
   Profile,
   Reservation,
   Offer,
@@ -26,6 +27,7 @@ import type {
 import type {
   HotelDTO,
   AccountDTO,
+  PaymentMethodDTO,
   ProfileDTO,
   ReservationDTO,
   OfferDTO,
@@ -40,6 +42,7 @@ import type { ComplaintStatus } from '~/types/enums/ComplaintStatus'
 import {
   HotelMapper,
   AccountMapper,
+  PaymentMethodMapper,
   ProfileMapper,
   ReservationMapper,
   OfferMapper,
@@ -189,8 +192,11 @@ export class ApiAccountRepository implements IAccountRepository {
     try {
       const dto = await apiGetCached<AccountDTO>(`/accounts/${id}`)
       return AccountMapper.fromDto(dto)
-    } catch {
-      return null
+    } catch (error: any) {
+      if (error?.message?.includes('404')) {
+        return null
+      }
+      throw error
     }
   }
 
@@ -256,8 +262,11 @@ export class ApiAccountRepository implements IAccountRepository {
         apiGetCached<ProfileDTO>(`/accounts/${accountId}/profile`),
       ])
       return ProfileMapper.fromDto(dto, account ?? undefined)
-    } catch {
-      return null
+    } catch (error: any) {
+      if (error?.message?.includes('404')) {
+        return null
+      }
+      throw error
     }
   }
 
@@ -284,6 +293,60 @@ export class ApiAccountRepository implements IAccountRepository {
     })
     invalidateApiCache(`/accounts/${accountId}/profile`, '/profiles', '/accounts')
     return ProfileMapper.fromDto(dto, account ?? undefined)
+  }
+
+  async listPaymentMethods(accountId: number): Promise<PaymentMethod[]> {
+    const dtos = await apiGetCached<PaymentMethodDTO[]>(`/accounts/${accountId}/payment-methods`)
+    return dtos.map(PaymentMethodMapper.fromDto)
+  }
+
+  async createPaymentMethod(
+    accountId: number,
+    data: {
+      cardholderName: string
+      brand: PaymentMethod['brand']
+      cardNumber: string
+      expiryMonth: number
+      expiryYear: number
+      isDefault?: boolean
+    },
+  ): Promise<PaymentMethod> {
+    const dto = await apiRequest<PaymentMethodDTO>(`/accounts/${accountId}/payment-methods`, {
+      method: 'POST',
+      body: data,
+    })
+    invalidateApiCache(`/accounts/${accountId}/profile`, `/accounts/${accountId}/payment-methods`, '/accounts')
+    return PaymentMethodMapper.fromDto(dto)
+  }
+
+  async updatePaymentMethod(
+    accountId: number,
+    paymentMethodId: number,
+    data: Partial<{
+      cardholderName: string
+      brand: PaymentMethod['brand']
+      cardNumber: string
+      expiryMonth: number
+      expiryYear: number
+      isDefault: boolean
+    }>,
+  ): Promise<PaymentMethod> {
+    const dto = await apiRequest<PaymentMethodDTO>(
+      `/accounts/${accountId}/payment-methods/${paymentMethodId}`,
+      {
+        method: 'PATCH',
+        body: data,
+      },
+    )
+    invalidateApiCache(`/accounts/${accountId}/profile`, `/accounts/${accountId}/payment-methods`, '/accounts')
+    return PaymentMethodMapper.fromDto(dto)
+  }
+
+  async removePaymentMethod(accountId: number, paymentMethodId: number): Promise<void> {
+    await apiRequest(`/accounts/${accountId}/payment-methods/${paymentMethodId}`, {
+      method: 'DELETE',
+    })
+    invalidateApiCache(`/accounts/${accountId}/profile`, `/accounts/${accountId}/payment-methods`, '/accounts')
   }
 
   async changePassword(accountId: number, oldPassword: string, newPassword: string): Promise<void> {

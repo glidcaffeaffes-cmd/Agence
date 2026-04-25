@@ -1,3 +1,5 @@
+import type { PaymentMethod } from './PaymentMethod'
+
 /**
  * User profile details linked to an Account.
  * UML: Profile
@@ -21,4 +23,5 @@ export interface Profile {
   travelPreferences?: string[]
   bio?: string
   paymentMethod?: string
+  paymentMethods?: PaymentMethod[]
 }

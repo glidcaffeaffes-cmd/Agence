@@ -1,11 +1,12 @@
 import type { IAccountRepository } from '~/types/interfaces'
-import type { Account, Profile } from '~/types/models'
+import type { Account, PaymentMethod, Profile } from '~/types/models'
 import { mockAccounts } from './data/accounts'
 import { mockProfiles } from './data/profiles'
 
 export class MockAccountRepository implements IAccountRepository {
   private accounts: Account[] = [...mockAccounts]
   private profiles: Profile[] = [...mockProfiles]
+  private paymentMethods: PaymentMethod[] = []
 
   async getAll(): Promise<Account[]> {
     return this.accounts
@@ -69,6 +70,13 @@ export class MockAccountRepository implements IAccountRepository {
       photo: data.photo ?? '',
       notificationsReservation: data.notificationsReservation ?? true,
       notificationsPromotion: data.notificationsPromotion ?? false,
+      dateOfBirth: data.dateOfBirth,
+      passportNumber: data.passportNumber,
+      preferredDestinations: data.preferredDestinations ?? [],
+      travelPreferences: data.travelPreferences ?? [],
+      bio: data.bio ?? '',
+      paymentMethod: data.paymentMethod,
+      paymentMethods: data.paymentMethods ?? [],
       email: data.email,
       role: data.role,
     }
@@ -83,7 +91,118 @@ export class MockAccountRepository implements IAccountRepository {
     return this.profiles[index]
   }
 
+  async listPaymentMethods(accountId: number): Promise<PaymentMethod[]> {
+    return this.paymentMethods
+      .filter(method => method.accountId === accountId)
+      .sort((a, b) => Number(b.isDefault) - Number(a.isDefault))
+  }
+
+  async createPaymentMethod(
+    accountId: number,
+    data: {
+      cardholderName: string
+      brand: PaymentMethod['brand']
+      cardNumber: string
+      expiryMonth: number
+      expiryYear: number
+      isDefault?: boolean
+    },
+  ): Promise<PaymentMethod> {
+    const isDefault = data.isDefault ?? !this.paymentMethods.some(method => method.accountId === accountId)
+    if (isDefault) {
+      this.paymentMethods = this.paymentMethods.map(method =>
+        method.accountId === accountId ? { ...method, isDefault: false } : method,
+      )
+    }
+
+    const method: PaymentMethod = {
+      id: Date.now(),
+      accountId,
+      cardholderName: data.cardholderName,
+      brand: data.brand,
+      last4: data.cardNumber.slice(-4),
+      expiryMonth: data.expiryMonth,
+      expiryYear: data.expiryYear,
+      isDefault,
+      createdAt: new Date().toISOString(),
+    }
+
+    this.paymentMethods.push(method)
+    this.syncProfilePaymentState(accountId)
+    return method
+  }
+
+  async updatePaymentMethod(
+    accountId: number,
+    paymentMethodId: number,
+    data: Partial<{
+      cardholderName: string
+      brand: PaymentMethod['brand']
+      cardNumber: string
+      expiryMonth: number
+      expiryYear: number
+      isDefault: boolean
+    }>,
+  ): Promise<PaymentMethod> {
+    const index = this.paymentMethods.findIndex(
+      method => method.id === paymentMethodId && method.accountId === accountId,
+    )
+    if (index === -1) throw new Error(`Payment method ${paymentMethodId} not found`)
+
+    if (data.isDefault) {
+      this.paymentMethods = this.paymentMethods.map(method =>
+        method.accountId === accountId ? { ...method, isDefault: false } : method,
+      )
+    }
+
+    const current = this.paymentMethods[index]
+    this.paymentMethods[index] = {
+      ...current,
+      ...(data.cardholderName !== undefined && { cardholderName: data.cardholderName }),
+      ...(data.brand !== undefined && { brand: data.brand }),
+      ...(data.cardNumber !== undefined && { last4: data.cardNumber.slice(-4) }),
+      ...(data.expiryMonth !== undefined && { expiryMonth: data.expiryMonth }),
+      ...(data.expiryYear !== undefined && { expiryYear: data.expiryYear }),
+      ...(data.isDefault !== undefined && { isDefault: data.isDefault }),
+    }
+
+    this.syncProfilePaymentState(accountId)
+    return this.paymentMethods[index]
+  }
+
+  async removePaymentMethod(accountId: number, paymentMethodId: number): Promise<void> {
+    const existing = this.paymentMethods.find(
+      method => method.id === paymentMethodId && method.accountId === accountId,
+    )
+    this.paymentMethods = this.paymentMethods.filter(
+      method => !(method.id === paymentMethodId && method.accountId === accountId),
+    )
+
+    if (existing?.isDefault) {
+      const nextDefault = this.paymentMethods.find(method => method.accountId === accountId)
+      if (nextDefault) nextDefault.isDefault = true
+    }
+
+    this.syncProfilePaymentState(accountId)
+  }
+
   async changePassword(_accountId: number, _oldPassword: string, _newPassword: string): Promise<void> {
     return
+  }
+
+  private syncProfilePaymentState(accountId: number) {
+    const profileIndex = this.profiles.findIndex(profile => profile.accountId === accountId)
+    if (profileIndex === -1) return
+
+    const methods = this.paymentMethods
+      .filter(method => method.accountId === accountId)
+      .sort((a, b) => Number(b.isDefault) - Number(a.isDefault))
+    const primary = methods[0]
+
+    this.profiles[profileIndex] = {
+      ...this.profiles[profileIndex],
+      paymentMethods: methods,
+      paymentMethod: primary ? `${primary.brand.toUpperCase()} ending in ${primary.last4}` : '',
+    }
   }
 }

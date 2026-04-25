@@ -148,8 +148,29 @@
                             >
                           </div>
                         </div>
-                        <!-- Empty slot for grid alignment if needed, or leave for 2-column flow -->
-                        <div class="form-group"></div>
+                        <div
+                          class="form-group"
+                          :class="getFieldState('photo', formData.photo)"
+                        >
+                          <div class="form-label-row">
+                            <label class="form-label">Profile Photo URL</label>
+                            <span class="field-status-text">{{
+                              getFieldStatusText("photo", formData.photo)
+                            }}</span>
+                          </div>
+                          <div class="input-icon-wrap">
+                            <input
+                              type="url"
+                              v-model="formData.photo"
+                              class="form-input"
+                              placeholder="https://example.com/profile-photo.jpg"
+                            />
+                            <span
+                              class="material-symbols-outlined state-icon"
+                              >{{ getFieldIcon("photo", formData.photo) }}</span
+                            >
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </section>
@@ -404,7 +425,89 @@
                     <h2 class="settings-section__title">Payment Methods</h2>
                   </div>
                   <div class="settings-section__body">
-                    <div class="payment-methods-empty">
+                    <div class="billing-toolbar">
+                      <div>
+                        <h3 class="billing-title">Saved cards</h3>
+                        <p class="billing-subtitle">
+                          Add at least one payment method to complete your
+                          account and speed up checkout.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        class="btn-update"
+                        @click="showPaymentForm = !showPaymentForm"
+                      >
+                        <span class="material-symbols-outlined">{{
+                          showPaymentForm ? "close" : "add"
+                        }}</span>
+                        {{
+                          showPaymentForm
+                            ? "Cancel"
+                            : paymentMethods.length
+                              ? "Add Payment Method"
+                              : "Add Your First Card"
+                        }}
+                      </button>
+                    </div>
+
+                    <div v-if="paymentMethods.length" class="payment-methods-list">
+                      <article
+                        v-for="method in paymentMethods"
+                        :key="method.id"
+                        class="payment-card"
+                        :class="{ 'payment-card--default': method.isDefault }"
+                      >
+                        <div class="payment-card__header">
+                          <div>
+                            <div class="payment-card__brand">
+                              {{ formatCardBrand(method.brand) }}
+                            </div>
+                            <div class="payment-card__number">
+                              •••• {{ method.last4 }}
+                            </div>
+                          </div>
+                          <span
+                            v-if="method.isDefault"
+                            class="payment-card__badge"
+                          >
+                            Default
+                          </span>
+                        </div>
+
+                        <div class="payment-card__meta">
+                          <span>{{ method.cardholderName }}</span>
+                          <span>
+                            Expires
+                            {{ String(method.expiryMonth).padStart(2, "0") }}/{{
+                              method.expiryYear
+                            }}
+                          </span>
+                        </div>
+
+                        <div class="payment-card__actions">
+                          <button
+                            v-if="!method.isDefault"
+                            type="button"
+                            class="payment-card__action"
+                            :disabled="loading"
+                            @click="setDefaultPaymentMethod(method.id)"
+                          >
+                            Set default
+                          </button>
+                          <button
+                            type="button"
+                            class="payment-card__action payment-card__action--danger"
+                            :disabled="loading"
+                            @click="deletePaymentMethod(method.id)"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </article>
+                    </div>
+
+                    <div v-else class="payment-methods-empty">
                       <div class="empty-vault">
                         <div class="empty-vault__icon">
                           <span class="material-symbols-outlined"
@@ -418,12 +521,110 @@
                           Securely manage your payment options for faster
                           bookings.
                         </p>
-                        <button class="btn-update">
+                        <button
+                          type="button"
+                          class="btn-update"
+                          @click="showPaymentForm = true"
+                        >
                           <span class="material-symbols-outlined">add</span>
                           Add Payment Method
                         </button>
                       </div>
                     </div>
+
+                    <form
+                      v-if="showPaymentForm"
+                      class="payment-form"
+                      @submit.prevent="savePaymentMethod"
+                    >
+                      <div class="form-row">
+                        <div class="form-group">
+                          <label class="form-label">Cardholder Name</label>
+                          <input
+                            v-model="paymentForm.cardholderName"
+                            type="text"
+                            class="form-input"
+                            placeholder="Mohamed Amin"
+                          />
+                        </div>
+                        <div class="form-group">
+                          <label class="form-label">Card Brand</label>
+                          <select
+                            v-model="paymentForm.brand"
+                            class="form-input"
+                          >
+                            <option
+                              v-for="brand in paymentBrands"
+                              :key="brand.value"
+                              :value="brand.value"
+                            >
+                              {{ brand.label }}
+                            </option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div class="form-row">
+                        <div class="form-group">
+                          <label class="form-label">Card Number</label>
+                          <input
+                            v-model="paymentForm.cardNumber"
+                            type="text"
+                            inputmode="numeric"
+                            class="form-input"
+                            placeholder="4242424242424242"
+                          />
+                        </div>
+                        <div class="form-row form-row--compact">
+                          <div class="form-group">
+                            <label class="form-label">Expiry Month</label>
+                            <input
+                              v-model="paymentForm.expiryMonth"
+                              type="number"
+                              min="1"
+                              max="12"
+                              class="form-input"
+                              placeholder="08"
+                            />
+                          </div>
+                          <div class="form-group">
+                            <label class="form-label">Expiry Year</label>
+                            <input
+                              v-model="paymentForm.expiryYear"
+                              type="number"
+                              :min="currentYear"
+                              :max="currentYear + 25"
+                              class="form-input"
+                              placeholder="2030"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <label class="checkbox-row">
+                        <input
+                          v-model="paymentForm.isDefault"
+                          type="checkbox"
+                        />
+                        <span>Set as default payment method</span>
+                      </label>
+
+                      <p v-if="paymentFormError" class="form-error">
+                        {{ paymentFormError }}
+                      </p>
+
+                      <div class="form-actions">
+                        <button
+                          type="submit"
+                          class="btn-update"
+                          :disabled="loading"
+                        >
+                          {{
+                            loading ? "Saving..." : "Save Payment Method"
+                          }}
+                        </button>
+                      </div>
+                    </form>
                   </div>
                 </section>
               </div>
@@ -515,14 +716,22 @@
 
 <script setup lang="ts">
 definePageMeta({ middleware: "auth" });
-import { useAuth } from "~/composables/useAuth";
 import { ref, watch, computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
-import { useProfileCompletion } from "~/composables/useProfileCompletion";
+import type { PaymentMethod } from "~/types/models";
+import { useAuth } from "~/composables/useAuth";
 
 const route = useRoute();
-const { currentProfile, updateProfile, loading } = useAuth();
+const {
+  currentProfile,
+  updateProfile,
+  createPaymentMethod,
+  updatePaymentMethod,
+  removePaymentMethod,
+  loading,
+} = useAuth();
 const activeTab = ref("Account Settings");
+const currentYear = new Date().getFullYear();
 
 // Handle query param for tabs
 onMounted(() => {
@@ -556,16 +765,36 @@ const travelPrefOptions = [
   "Ski",
 ];
 
+const paymentBrands: { value: PaymentMethod["brand"]; label: string }[] = [
+  { value: "visa", label: "Visa" },
+  { value: "mastercard", label: "Mastercard" },
+  { value: "amex", label: "American Express" },
+  { value: "discover", label: "Discover" },
+  { value: "other", label: "Other" },
+];
+
 const formData = ref({
   firstName: "",
   lastName: "",
   phone: "",
+  photo: "",
   dateOfBirth: "",
   passportNumber: "",
   bio: "",
   preferredDestinations: [] as string[],
   travelPreferences: [] as string[],
 });
+const paymentForm = ref({
+  cardholderName: "",
+  brand: "visa" as PaymentMethod["brand"],
+  cardNumber: "",
+  expiryMonth: "",
+  expiryYear: "",
+  isDefault: true,
+});
+const paymentFormError = ref("");
+const showPaymentForm = ref(false);
+const paymentMethods = computed(() => currentProfile.value?.paymentMethods ?? []);
 
 watch(
   currentProfile,
@@ -574,7 +803,8 @@ watch(
       formData.value = {
         firstName: profile.firstName || "",
         lastName: profile.lastName || "",
-        phone: profile.phone || "",
+        phone: normalizePhoneInput(profile.phone || ""),
+        photo: profile.photo || "",
         dateOfBirth: profile.dateOfBirth || "",
         passportNumber: profile.passportNumber || "",
         bio: profile.bio || "",
@@ -591,7 +821,18 @@ watch(
 );
 
 async function saveProfile() {
-  const success = await updateProfile(formData.value);
+  const success = await updateProfile({
+    ...formData.value,
+    phone: normalizePhoneForSave(formData.value.phone),
+    firstName: formData.value.firstName.trim(),
+    lastName: formData.value.lastName.trim(),
+    photo: formData.value.photo.trim(),
+    passportNumber: formData.value.passportNumber.trim(),
+    bio: formData.value.bio.trim(),
+    preferredDestinations: formData.value.preferredDestinations
+      .map((city) => city.trim())
+      .filter(Boolean),
+  });
   if (success) {
     alert("Profile updated successfully!");
   } else {
@@ -612,7 +853,73 @@ async function updateNotifications() {
 }
 
 // ─── Field State Logic ───
-const requiredFields = ["firstName"];
+
+async function savePaymentMethod() {
+  paymentFormError.value = "";
+
+  const digitsOnly = paymentForm.value.cardNumber.replace(/\D/g, "");
+  const expiryMonth = Number(paymentForm.value.expiryMonth);
+  const expiryYear = Number(paymentForm.value.expiryYear);
+
+  if (!paymentForm.value.cardholderName.trim()) {
+    paymentFormError.value = "Cardholder name is required.";
+    return;
+  }
+
+  if (digitsOnly.length < 12) {
+    paymentFormError.value = "Enter a valid card number.";
+    return;
+  }
+
+  if (!Number.isInteger(expiryMonth) || expiryMonth < 1 || expiryMonth > 12) {
+    paymentFormError.value = "Expiry month must be between 1 and 12.";
+    return;
+  }
+
+  if (!Number.isInteger(expiryYear) || expiryYear < currentYear) {
+    paymentFormError.value = "Enter a valid expiry year.";
+    return;
+  }
+
+  const success = await createPaymentMethod({
+    cardholderName: paymentForm.value.cardholderName.trim(),
+    brand: paymentForm.value.brand,
+    cardNumber: digitsOnly,
+    expiryMonth,
+    expiryYear,
+    isDefault:
+      paymentMethods.value.length === 0 ? true : paymentForm.value.isDefault,
+  });
+
+  if (success) {
+    paymentForm.value = {
+      cardholderName: "",
+      brand: "visa",
+      cardNumber: "",
+      expiryMonth: "",
+      expiryYear: "",
+      isDefault: paymentMethods.value.length === 0,
+    };
+    showPaymentForm.value = false;
+    alert("Payment method saved successfully!");
+  } else {
+    paymentFormError.value = "Failed to save payment method. Please try again.";
+  }
+}
+
+async function setDefaultPaymentMethod(paymentMethodId: number) {
+  const success = await updatePaymentMethod(paymentMethodId, { isDefault: true });
+  if (!success) {
+    alert("Failed to update payment method.");
+  }
+}
+
+async function deletePaymentMethod(paymentMethodId: number) {
+  const success = await removePaymentMethod(paymentMethodId);
+  if (!success) {
+    alert("Failed to remove payment method.");
+  }
+}
 
 function hasValue(val: any) {
   if (val === null || val === undefined) return false;
@@ -634,6 +941,28 @@ function getFieldStatusText(key: string, value: any) {
 function getFieldIcon(key: string, value: any) {
   if (hasValue(value)) return "check_circle";
   return "error";
+}
+
+function normalizePhoneInput(phone: string) {
+  const digits = phone.replace(/\D/g, "");
+  if (digits.startsWith("216") && digits.length > 8) {
+    return digits.slice(3);
+  }
+  return digits;
+}
+
+function normalizePhoneForSave(phone: string) {
+  const digits = phone.replace(/\D/g, "");
+  if (!digits) return "";
+  if (digits.startsWith("216") && digits.length > 8) {
+    return `+${digits}`;
+  }
+  return digits.length === 8 ? `+216${digits}` : `+${digits}`;
+}
+
+function formatCardBrand(brand: PaymentMethod["brand"]) {
+  const item = paymentBrands.find((entry) => entry.value === brand);
+  return item?.label ?? brand.toUpperCase();
 }
 </script>
 
@@ -968,6 +1297,129 @@ input[type="date"] ~ .state-icon {
 /* ──────────────────────────────────────────
    Billing Styles (Empty Vault)
 ────────────────────────────────────────── */
+.form-row--compact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.billing-toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.billing-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-heading);
+}
+
+.billing-subtitle {
+  margin: 6px 0 0;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.payment-methods-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.payment-card {
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-xl);
+  background: linear-gradient(180deg, #ffffff 0%, var(--color-bg-soft) 100%);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.payment-card--default {
+  border-color: color-mix(in srgb, var(--color-primary-500) 40%, white 60%);
+  box-shadow: 0 10px 24px rgba(0, 103, 104, 0.08);
+}
+
+.payment-card__header,
+.payment-card__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.payment-card__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.payment-card__brand {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-primary-700);
+}
+
+.payment-card__number {
+  margin-top: 6px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-heading);
+}
+
+.payment-card__badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-full);
+  padding: 6px 10px;
+  background: var(--color-primary-25);
+  color: var(--color-primary-700);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.payment-card__action {
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-primary-700);
+  cursor: pointer;
+}
+
+.payment-card__action--danger {
+  color: var(--color-danger-600);
+}
+
+.payment-form {
+  border-top: 1px solid var(--color-border-soft);
+  padding-top: 8px;
+}
+
+.checkbox-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-text);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.form-error {
+  margin: 0;
+  color: var(--color-danger-600);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
 .empty-vault {
   display: flex;
   flex-direction: column;

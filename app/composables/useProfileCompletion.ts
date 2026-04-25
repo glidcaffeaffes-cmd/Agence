@@ -119,7 +119,7 @@ export function useProfileCompletion(profile: Readonly<ReturnType<typeof compute
         label: 'Payment Method',
         icon: 'credit_card',
         description: 'Save a payment method',
-        completed: hasValue(p?.paymentMethod),
+        completed: hasValue(p?.paymentMethods) || hasValue(p?.paymentMethod),
         required: false,
       },
       {

@@ -712,24 +712,25 @@ function formatDateForQuery(date: Date) {
 }
 
 .hero-filter-panel {
-  position: absolute;
-  top: calc(100% + 1rem);
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   z-index: 27;
   background: var(--color-surface-primary);
   border: 1px solid color-mix(in srgb, var(--color-border) 88%, white 12%);
   border-radius: 1.5rem;
   box-shadow: 0 34px 62px rgba(5, 17, 32, 0.28);
   padding: 1.45rem;
+  max-height: calc(100vh - 72px);
+  overflow: auto;
 }
 
 .hero-filter-panel--dates {
-  left: 50%;
-  transform: translateX(-50%);
   width: min(760px, calc(100vw - 72px));
 }
 
 .hero-filter-panel--guests {
-  right: 0;
   width: min(420px, calc(100vw - 72px));
 }
 
@@ -1003,22 +1004,29 @@ function formatDateForQuery(date: Date) {
 }
 
 .hero-filter-field--destination :deep(.p-select-overlay) {
-  min-width: max(100%, 21rem);
-  margin-top: 0.95rem;
-  border-radius: 1.35rem;
-  border: 1px solid color-mix(in srgb, var(--color-border) 88%, white 12%);
-  background: var(--color-surface-primary);
-  box-shadow: 0 34px 62px rgba(5, 17, 32, 0.28);
-  padding: 0.5rem;
-  overflow: hidden;
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: min(560px, calc(100vw - 72px)) !important;
+  min-width: min(560px, calc(100vw - 72px)) !important;
+  max-width: calc(100vw - 72px) !important;
+  margin-top: 0 !important;
+  border-radius: 1.5rem !important;
+  border: 1px solid color-mix(in srgb, var(--color-border) 88%, white 12%) !important;
+  background: var(--color-surface-primary) !important;
+  box-shadow: 0 34px 62px rgba(5, 17, 32, 0.28) !important;
+  padding: 1.45rem !important;
+  max-height: calc(100vh - 72px) !important;
+  overflow: hidden !important;
   z-index: 40;
 }
 
 .hero-filter-field--destination :deep(.p-select-header) {
-  padding: 0.45rem;
-  margin-bottom: 0.2rem;
-  border: none;
-  background: transparent;
+  padding: 0 0 1rem !important;
+  margin: 0 !important;
+  border: none !important;
+  background: transparent !important;
 }
 
 .hero-filter-field--destination :deep(.p-select-filter-container) {
@@ -1053,8 +1061,8 @@ function formatDateForQuery(date: Date) {
 }
 
 .hero-filter-field--destination :deep(.p-select-list-container) {
-  max-height: 16.8rem;
-  padding: 0.2rem;
+  max-height: min(18rem, calc(100vh - 220px)) !important;
+  padding: 0 !important;
   border-radius: 1rem;
 }
 
@@ -1062,11 +1070,11 @@ function formatDateForQuery(date: Date) {
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 0.12rem;
+  gap: 0.2rem;
 }
 
 .hero-filter-field--destination :deep(.p-select-option) {
-  padding: 0.7rem 0.9rem;
+  padding: 0.85rem 0.95rem;
   border-radius: 0.8rem;
   font-size: 0.95rem;
   font-weight: 600;
@@ -1339,12 +1347,12 @@ function formatDateForQuery(date: Date) {
     margin-left: 0;
   }
 
-  .hero-filter-panel--dates,
+  .hero-filter-panel--dates {
+    width: min(760px, calc(100vw - 48px));
+  }
+
   .hero-filter-panel--guests {
-    left: 0;
-    right: 0;
-    transform: none;
-    width: auto;
+    width: min(420px, calc(100vw - 48px));
   }
 
   .benefits-grid {
@@ -1394,10 +1402,6 @@ function formatDateForQuery(date: Date) {
     max-width: none;
   }
 
-  .hero-filter-shell--panel-open::after {
-    display: none;
-  }
-
   .hero-filter-bar {
     grid-template-columns: 1fr;
     gap: 0.46rem;
@@ -1440,11 +1444,24 @@ function formatDateForQuery(date: Date) {
   }
 
   .hero-filter-panel {
-    position: static;
-    width: 100%;
-    margin-top: 0.85rem;
+    width: calc(100vw - 32px);
+    max-height: calc(100vh - 32px);
     border-radius: 1.15rem;
     padding: 1rem;
+  }
+
+  .hero-filter-panel--dates,
+  .hero-filter-panel--guests {
+    width: calc(100vw - 32px);
+  }
+
+  .hero-filter-field--destination :deep(.p-select-overlay) {
+    width: calc(100vw - 32px) !important;
+    min-width: calc(100vw - 32px) !important;
+    max-width: calc(100vw - 32px) !important;
+    max-height: calc(100vh - 32px) !important;
+    border-radius: 1.15rem !important;
+    padding: 1rem !important;
   }
 
   .hero-datepicker :deep(.p-datepicker) {

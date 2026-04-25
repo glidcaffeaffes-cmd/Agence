@@ -1,4 +1,4 @@
-import type { Account, Profile } from '../models'
+import type { Account, PaymentMethod, Profile } from '../models'
 
 export interface IAccountRepository {
   getAll(): Promise<Account[]>
@@ -12,5 +12,30 @@ export interface IAccountRepository {
   getProfile(accountId: number): Promise<Profile | null>
   createProfile(accountId: number, data: Partial<Profile>): Promise<Profile>
   updateProfile(accountId: number, data: Partial<Profile>): Promise<Profile>
+  listPaymentMethods(accountId: number): Promise<PaymentMethod[]>
+  createPaymentMethod(
+    accountId: number,
+    data: {
+      cardholderName: string
+      brand: PaymentMethod['brand']
+      cardNumber: string
+      expiryMonth: number
+      expiryYear: number
+      isDefault?: boolean
+    },
+  ): Promise<PaymentMethod>
+  updatePaymentMethod(
+    accountId: number,
+    paymentMethodId: number,
+    data: Partial<{
+      cardholderName: string
+      brand: PaymentMethod['brand']
+      cardNumber: string
+      expiryMonth: number
+      expiryYear: number
+      isDefault: boolean
+    }>,
+  ): Promise<PaymentMethod>
+  removePaymentMethod(accountId: number, paymentMethodId: number): Promise<void>
   changePassword(accountId: number, oldPassword: string, newPassword: string): Promise<void>
 }

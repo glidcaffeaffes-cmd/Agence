@@ -27,7 +27,13 @@
               transform="rotate(150 50 50)"
             />
           </svg>
-          <div class="avatar-letter">
+          <img
+            v-if="currentProfile?.photo"
+            :src="currentProfile.photo"
+            alt="Profile photo"
+            class="avatar-image"
+          />
+          <div v-else class="avatar-letter">
             {{ avatarLetter }}
           </div>
           <button class="avatar-edit-btn" title="Update Profile Picture">
@@ -155,9 +161,23 @@ const avatarLetter = computed(() => {
   justify-content: center;
 }
 
+.avatar-image,
 .avatar-letter {
   width: 90px;
   height: 90px;
+  border-radius: var(--radius-pill);
+  border: 4px solid #ffffff;
+  position: relative;
+  z-index: 2;
+}
+
+.avatar-image {
+  object-fit: cover;
+  box-shadow: 0 8px 24px rgba(0, 103, 104, 0.2);
+}
+
+.avatar-letter {
+  z-index: 2;
   background: linear-gradient(
     135deg,
     var(--color-primary-500),

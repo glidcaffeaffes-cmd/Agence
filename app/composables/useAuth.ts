@@ -1,5 +1,5 @@
 import { ref, computed } from 'vue'
-import type { Account, Profile } from '~/types/models'
+import type { Account, PaymentMethod, Profile } from '~/types/models'
 import { ProfileMapper } from '~/mappers'
 import { useCookie } from '#app'
 import { AccountService } from '~/services'
@@ -9,15 +9,54 @@ const service = new AccountService()
 export function useAuth() {
   const currentAccount = useState<Account | null>('auth_account', () => null)
   const currentProfile = useState<Profile | null>('auth_profile', () => null)
+  const authCookie = useCookie<{ account: Account, profile: Profile | null } | null>('voyagehub_auth', {
+    maxAge: 60 * 60 * 24 * 7,
+    path: '/',
+  })
+
+  function persistAuthState(account: Account | null, profile: Profile | null) {
+    authCookie.value = account ? { account, profile } : null
+  }
 
   async function hydrateProfile(account: Account | null) {
     if (!account) {
       currentProfile.value = null
+      persistAuthState(null, null)
       return
     }
 
-    const profile = await service.getProfile(account.id)
-    currentProfile.value = ProfileMapper.merge(profile, account)
+    try {
+      const profile = await service.getProfile(account.id)
+      if (profile) {
+        currentProfile.value = ProfileMapper.merge(profile, account)
+        persistAuthState(account, currentProfile.value)
+      }
+    } catch (e) {
+      // Background refresh failed, keep existing state
+      console.warn('Profile hydration failed:', e)
+    }
+  }
+
+  async function refreshProfile() {
+    if (!currentAccount.value) {
+      currentProfile.value = null
+      persistAuthState(null, null)
+      return null
+    }
+
+    try {
+      const profile = await service.getProfile(currentAccount.value.id)
+      if (profile) {
+        const mergedProfile = ProfileMapper.merge(profile, currentAccount.value)
+        currentProfile.value = mergedProfile
+        persistAuthState(currentAccount.value, mergedProfile)
+        return mergedProfile
+      }
+    } catch (e) {
+      console.warn('Profile refresh failed:', e)
+    }
+    
+    return currentProfile.value
   }
 
   const loading = ref(false)
@@ -43,12 +82,7 @@ export function useAuth() {
       
       currentProfile.value = mergedProfile
       currentAccount.value = account
-      
-      const authCookie = useCookie<{ account: Account, profile: Profile | null } | null>('voyagehub_auth', {
-        maxAge: 60 * 60 * 24 * 7,
-        path: '/',
-      })
-      authCookie.value = { account, profile: mergedProfile }
+      persistAuthState(account, mergedProfile)
 
       return true
     } catch (e: any) {
@@ -74,12 +108,7 @@ export function useAuth() {
       
       currentProfile.value = mergedProfile
       currentAccount.value = account
-      
-      const authCookie = useCookie<{ account: Account, profile: Profile | null } | null>('voyagehub_auth', {
-        maxAge: 60 * 60 * 24 * 7,
-        path: '/',
-      })
-      authCookie.value = { account, profile: mergedProfile }
+      persistAuthState(account, mergedProfile)
 
       return true
     } catch (e: any) {
@@ -108,12 +137,7 @@ export function useAuth() {
       const mergedProfile = ProfileMapper.merge(profile, account)
       currentProfile.value = mergedProfile
       currentAccount.value = account
-      
-      const authCookie = useCookie<{ account: Account, profile: Profile | null } | null>('voyagehub_auth', {
-        maxAge: 60 * 60 * 24 * 7,
-        path: '/',
-      })
-      authCookie.value = { account, profile: mergedProfile }
+      persistAuthState(account, mergedProfile)
 
       return true
     } catch (e: any) {
@@ -127,8 +151,7 @@ export function useAuth() {
   function logout() {
     currentAccount.value = null
     currentProfile.value = null
-    const authCookie = useCookie('voyagehub_auth')
-    authCookie.value = null
+    persistAuthState(null, null)
   }
 
   async function updateProfile(data: Partial<Profile>) {
@@ -141,6 +164,81 @@ export function useAuth() {
     try {
       const updatedProfile = await service.updateProfile(currentAccount.value.id, data)
       currentProfile.value = ProfileMapper.merge(updatedProfile, currentAccount.value)
+      persistAuthState(currentAccount.value, currentProfile.value)
+      return true
+    } catch (e: any) {
+      error.value = e.message
+      return false
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function createPaymentMethod(data: {
+    cardholderName: string
+    brand: PaymentMethod['brand']
+    cardNumber: string
+    expiryMonth: number
+    expiryYear: number
+    isDefault?: boolean
+  }) {
+    if (!currentAccount.value) {
+      return false
+    }
+
+    loading.value = true
+    error.value = null
+    try {
+      await service.createPaymentMethod(currentAccount.value.id, data)
+      await refreshProfile()
+      return true
+    } catch (e: any) {
+      error.value = e.message
+      return false
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function updatePaymentMethod(
+    paymentMethodId: number,
+    data: Partial<{
+      cardholderName: string
+      brand: PaymentMethod['brand']
+      cardNumber: string
+      expiryMonth: number
+      expiryYear: number
+      isDefault: boolean
+    }>,
+  ) {
+    if (!currentAccount.value) {
+      return false
+    }
+
+    loading.value = true
+    error.value = null
+    try {
+      await service.updatePaymentMethod(currentAccount.value.id, paymentMethodId, data)
+      await refreshProfile()
+      return true
+    } catch (e: any) {
+      error.value = e.message
+      return false
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function removePaymentMethod(paymentMethodId: number) {
+    if (!currentAccount.value) {
+      return false
+    }
+
+    loading.value = true
+    error.value = null
+    try {
+      await service.removePaymentMethod(currentAccount.value.id, paymentMethodId)
+      await refreshProfile()
       return true
     } catch (e: any) {
       error.value = e.message
@@ -179,11 +277,6 @@ export function useAuth() {
   }
 
   async function initAuth() {
-    const authCookie = useCookie<{ account: Account, profile: Profile | null } | null>('voyagehub_auth', {
-      maxAge: 60 * 60 * 24 * 7,
-      path: '/',
-    })
-
     if (authCookie.value && !currentAccount.value) {
       const data = authCookie.value as any
       const account = data.account || data
@@ -210,6 +303,9 @@ export function useAuth() {
     register,
     logout,
     updateProfile,
+    createPaymentMethod,
+    updatePaymentMethod,
+    removePaymentMethod,
     changePassword,
     demoLoginClient,
     demoLoginAdmin,
