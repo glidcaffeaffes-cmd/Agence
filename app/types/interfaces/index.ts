@@ -9,6 +9,8 @@ export type {
   IReservationRepository,
   BookingCreatePayload,
   BookingConfirmation,
+  BookingCancellationPreview,
+  BookingCancellationConfirmation,
 } from './IReservationRepository'
 export type { IAccountRepository } from './IAccountRepository'
 export type { IOfferRepository } from './IOfferRepository'

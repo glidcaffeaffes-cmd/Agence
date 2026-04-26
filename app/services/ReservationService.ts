@@ -1,5 +1,10 @@
 import type { IReservationRepository } from '~/types/interfaces'
-import type { BookingConfirmation, BookingCreatePayload } from '~/types/interfaces'
+import type {
+  BookingCancellationConfirmation,
+  BookingCancellationPreview,
+  BookingConfirmation,
+  BookingCreatePayload,
+} from '~/types/interfaces'
 import type { Reservation } from '~/types/models'
 import { ReservationStatus } from '~/types/enums'
 import { AdminRepositoryFactory } from '~/repositories/factory'
@@ -57,6 +62,14 @@ export class ReservationService {
 
   async createBooking(payload: BookingCreatePayload): Promise<BookingConfirmation> {
     return this.repo.createBooking(payload)
+  }
+
+  async getCancellationPreview(bookingId: number): Promise<BookingCancellationPreview> {
+    return this.repo.getCancellationPreview(bookingId)
+  }
+
+  async cancelBooking(bookingId: number): Promise<BookingCancellationConfirmation> {
+    return this.repo.cancelBooking(bookingId)
   }
 
   /** Confirm a pending reservation (admin) */

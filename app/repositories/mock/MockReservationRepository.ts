@@ -1,5 +1,7 @@
 import type {
   IReservationRepository,
+  BookingCancellationConfirmation,
+  BookingCancellationPreview,
   BookingCreatePayload,
   BookingConfirmation,
 } from '~/types/interfaces'
@@ -103,6 +105,77 @@ export class MockReservationRepository implements IReservationRepository {
         phone: payload.phone,
         specialRequests: payload.specialRequests ?? null,
       },
+    }
+  }
+
+  async getCancellationPreview(bookingId: number): Promise<BookingCancellationPreview> {
+    const reservation = this.reservations.find((entry) => entry.id === bookingId)
+    if (!reservation) {
+      throw new Error('Booking not found')
+    }
+
+    const now = new Date()
+    const checkIn = new Date(reservation.checkInDate)
+    const deadline = new Date(checkIn.getTime() - 48 * 60 * 60 * 1000)
+    const cancellationAllowed =
+      ![ReservationStatusEnum.CANCELLED, ReservationStatusEnum.COMPLETED].includes(reservation.status) &&
+      now.getTime() < checkIn.getTime()
+    const fullRefund = now.getTime() <= deadline.getTime()
+    const firstNightCharge = Math.min(reservation.totalAmount, reservation.totalAmount / Math.max(1, reservation.numberOfNights))
+    const refundAmount = !cancellationAllowed ? 0 : fullRefund ? reservation.totalAmount : Math.max(0, reservation.totalAmount - firstNightCharge)
+
+    return {
+      bookingId: reservation.id,
+      bookingReference: reservation.confirmationCode,
+      hotelName: `Hotel #${reservation.hotelId}`,
+      roomName: `Room #${reservation.roomId}`,
+      stay: {
+        checkIn: reservation.checkInDate,
+        checkOut: reservation.checkOutDate,
+        nights: reservation.numberOfNights,
+      },
+      cancellationAllowed,
+      cancellationDeadline: deadline.toISOString(),
+      policy: {
+        label: `Free cancellation before ${deadline.toISOString()}`,
+        description: 'After this date, the first night is charged.',
+      },
+      refund: {
+        type: !cancellationAllowed ? 'NONE' : fullRefund ? 'FULL' : refundAmount > 0 ? 'PARTIAL' : 'NONE',
+        amount: refundAmount,
+        chargeAmount: reservation.totalAmount - refundAmount,
+        totalPaid: reservation.totalAmount,
+      },
+      reason: cancellationAllowed ? null : 'Cancellation is no longer available for this booking.',
+    }
+  }
+
+  async cancelBooking(bookingId: number): Promise<BookingCancellationConfirmation> {
+    const preview = await this.getCancellationPreview(bookingId)
+    if (!preview.cancellationAllowed) {
+      throw new Error(preview.reason || 'This reservation cannot be cancelled')
+    }
+
+    const index = this.reservations.findIndex((entry) => entry.id === bookingId)
+    if (index === -1) {
+      throw new Error('Booking not found')
+    }
+
+    this.reservations[index] = {
+      ...this.reservations[index],
+      status: ReservationStatusEnum.CANCELLED,
+      blockReason: `Cancelled on ${new Date().toISOString()}`,
+    }
+
+    return {
+      cancelled: true,
+      bookingId: preview.bookingId,
+      bookingReference: preview.bookingReference,
+      cancellationDate: new Date().toISOString(),
+      hotelName: preview.hotelName,
+      roomName: preview.roomName,
+      stay: preview.stay,
+      refund: preview.refund,
     }
   }
 
