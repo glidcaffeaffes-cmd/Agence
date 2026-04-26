@@ -372,6 +372,44 @@
             </div>
           </section>
 
+          <!-- Location / Map -->
+          <section class="content-section">
+            <h2 class="section-title">Location</h2>
+            <div class="map-container-wrapper">
+              <div class="map-info-card">
+                <div class="map-icon-box">
+                  <span class="material-symbols-outlined">location_on</span>
+                </div>
+                <div class="map-address-details">
+                  <h3>Property Address</h3>
+                  <p>{{ hotel.address }}, {{ hotel.city }}, {{ hotel.country }}</p>
+                </div>
+              </div>
+              <div class="map-iframe-holder">
+                <iframe
+                  v-if="hotel.latitude && hotel.longitude"
+                  width="100%"
+                  height="450"
+                  style="border:0; border-radius: 20px;"
+                  loading="lazy"
+                  allowfullscreen
+                  referrerpolicy="no-referrer-when-downgrade"
+                  :src="`https://maps.google.com/maps?q=${hotel.latitude},${hotel.longitude}&t=&z=15&ie=UTF8&iwloc=&output=embed`"
+                ></iframe>
+                <iframe
+                  v-else
+                  width="100%"
+                  height="450"
+                  style="border:0; border-radius: 20px;"
+                  loading="lazy"
+                  allowfullscreen
+                  referrerpolicy="no-referrer-when-downgrade"
+                  :src="`https://maps.google.com/maps?q=${encodeURIComponent(hotel.address + ', ' + hotel.city)}&t=&z=15&ie=UTF8&iwloc=&output=embed`"
+                ></iframe>
+              </div>
+            </div>
+          </section>
+
           <!-- Reviews -->
           <section class="content-section no-border border-0">
             <div class="reviews-header-advanced">
@@ -2460,6 +2498,38 @@ onBeforeUnmount(() => {
 }
 .book-btn-outline:hover:not(.disabled) { background: var(--color-primary-500); color: #ffffff; }
 .book-btn-outline.disabled { border-color: var(--color-disabled); color: var(--color-disabled-text); cursor: not-allowed; }
+
+/* ── Map ────────────────────────────────────────────────────────────── */
+.map-container-wrapper {
+  background: var(--color-surface);
+  border-radius: var(--radius-3xl);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 20px;
+}
+.map-info-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  background: #f8fafc;
+  border-bottom: 1px solid var(--color-border-soft);
+}
+.map-icon-box {
+  width: 48px;
+  height: 48px;
+  background: rgba(0, 103, 104, 0.1);
+  color: var(--color-primary);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.map-icon-box .material-symbols-outlined { font-size: 28px; }
+.map-address-details h3 { font-size: 16px; font-weight: 800; color: var(--color-navy); margin: 0 0 4px; }
+.map-address-details p { font-size: 14px; color: var(--color-text-soft); margin: 0; }
+.map-iframe-holder { padding: 12px; }
 
 /* ── Reviews ─────────────────────────────────────────────────────────── */
 .reviews-header-advanced {
