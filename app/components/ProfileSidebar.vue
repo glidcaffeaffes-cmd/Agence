@@ -31,6 +31,7 @@
             v-if="currentProfile?.photo"
             :src="currentProfile.photo"
             alt="Profile photo"
+            referrerpolicy="no-referrer"
             class="avatar-image"
           />
           <div v-else class="avatar-letter">

@@ -93,17 +93,27 @@ export function useAuth() {
     }
   }
 
-  async function loginGoogle(data: { email: string; firstName: string; lastName: string; uid: string }) {
+  async function loginGoogle(data: { email: string; firstName: string; lastName: string; uid: string; photo?: string }) {
     loading.value = true
     error.value = null
     try {
-      const account = await service.loginGoogle(data)
+      const account = await service.loginGoogle({
+        email: data.email,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        uid: data.uid
+      })
       if (!account) {
         error.value = 'Failed to sign in with Google'
         return false
       }
 
-      const profile = await service.getProfile(account.id)
+      let profile = await service.getProfile(account.id)
+      
+      if (data.photo && (!profile || profile.photo !== data.photo)) {
+        profile = await service.updateProfile(account.id, { photo: data.photo })
+      }
+
       const mergedProfile = ProfileMapper.merge(profile, account)
       
       currentProfile.value = mergedProfile

@@ -157,7 +157,8 @@ async function handleGoogleSignIn() {
       email: user.email || '',
       firstName: firstName || 'Google User',
       lastName: lastName || '',
-      uid: user.uid
+      uid: user.uid,
+      photo: user.photoURL || undefined
     })
     
     if (ok) {

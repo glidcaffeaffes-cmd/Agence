@@ -87,6 +87,7 @@
                 <img
                   :src="currentProfile.photo"
                   alt="Avatar"
+                  referrerpolicy="no-referrer"
                   class="w-full h-full object-cover"
                 />
               </div>

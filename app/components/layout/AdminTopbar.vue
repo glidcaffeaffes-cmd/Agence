@@ -39,7 +39,7 @@
       <!-- User pill (same pattern as ClientNavbar's nav-avatar-btn) -->
       <button class="user-pill" @click="showMenu = !showMenu">
         <div v-if="currentProfile?.photo" class="user-avatar-wrap">
-          <img :src="currentProfile.photo" alt="Avatar" class="user-avatar" />
+          <img :src="currentProfile.photo" alt="Avatar" referrerpolicy="no-referrer" class="user-avatar" />
         </div>
         <div v-else class="user-avatar-placeholder brand-text">
           {{ avatarLetter }}
