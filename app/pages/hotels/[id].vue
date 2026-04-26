@@ -26,38 +26,51 @@
 
         <!-- LEFT: Gallery -->
           <div class="hero-gallery">
-            <div class="gallery-stage" v-if="hotel.images && hotel.images.length > 0">
-              <div class="gallery-main" @touchstart="onTouchStart" @touchend="onTouchEnd">
-                <transition :name="galleryTransition">
-                  <img
-                    :key="activeGalleryIndex"
-                    :src="hotel.images[activeGalleryIndex]"
-                    :alt="hotel.name + ' photo ' + (activeGalleryIndex + 1)"
-                    class="gallery-main-img"
-                    @click="openLightbox(activeGalleryIndex)"
-                  />
-                </transition>
-                <button class="gallery-arrow gallery-arrow--prev" v-if="hotel.images.length > 1" @click="prevImage" aria-label="Previous photo">
-                  <span class="material-symbols-outlined">chevron_left</span>
-                </button>
-                <button class="gallery-arrow gallery-arrow--next" v-if="hotel.images.length > 1" @click="nextImage" aria-label="Next photo">
-                  <span class="material-symbols-outlined">chevron_right</span>
-                </button>
-                <div class="gallery-counter">{{ activeGalleryIndex + 1 }} / {{ hotel.images.length }}</div>
-                <button class="gallery-show-all" @click="openLightbox(activeGalleryIndex)">
-                  <span class="material-symbols-outlined">photo_library</span>
-                  All {{ hotel.images.length }} photos
-                </button>
+              <div class="gallery-stage-wrapper" v-if="hotel.images && hotel.images.length > 0">
+                <div class="gallery-main-container">
+                  <UCarousel
+                    ref="carouselRef"
+                    v-model="activeGalleryIndex"
+                    :items="hotel.images"
+                    :ui="{ item: 'basis-full' }"
+                    class="gallery-carousel"
+                    loop
+                    @update:model-value="(val) => activeGalleryIndex = val"
+                  >
+                    <template #default="{ item, index }">
+                      <img
+                        :src="item"
+                        :alt="hotel.name + ' photo ' + (index + 1)"
+                        class="gallery-main-img"
+                        draggable="false"
+                        @click="openLightbox(index)"
+                      />
+                    </template>
+                  </UCarousel>
+
+                  <!-- Custom Navigation UI on top of Carousel -->
+                  <button class="gallery-arrow gallery-arrow--prev" v-if="hotel.images.length > 1" @click="prevImage" aria-label="Previous photo">
+                    <span class="material-symbols-outlined">chevron_left</span>
+                  </button>
+                  <button class="gallery-arrow gallery-arrow--next" v-if="hotel.images.length > 1" @click="nextImage" aria-label="Next photo">
+                    <span class="material-symbols-outlined">chevron_right</span>
+                  </button>
+                  <div class="gallery-counter">{{ activeGalleryIndex + 1 }} / {{ hotel.images.length }}</div>
+                  <button class="gallery-show-all" @click="openLightbox(activeGalleryIndex)">
+                    <span class="material-symbols-outlined">photo_library</span>
+                    All {{ hotel.images.length }} photos
+                  </button>
+                </div>
+
+                <div class="gallery-thumbs" ref="thumbsRef" v-if="hotel.images.length > 1">
+                  <button
+                    v-for="(img, idx) in hotel.images" :key="idx"
+                    class="gallery-thumb"
+                    :class="{ 'gallery-thumb--active': idx === activeGalleryIndex }"
+                    @click="setGalleryImage(idx)"
+                  ><img :src="img" :alt="'Thumb ' + (idx+1)" /></button>
+                </div>
               </div>
-              <div class="gallery-thumbs" ref="thumbsRef" v-if="hotel.images.length > 1">
-                <button
-                  v-for="(img, idx) in hotel.images" :key="idx"
-                  class="gallery-thumb"
-                  :class="{ 'gallery-thumb--active': idx === activeGalleryIndex }"
-                  @click="setGalleryImage(idx)"
-                ><img :src="img" :alt="'Thumb ' + (idx+1)" /></button>
-              </div>
-            </div>
 
         </div>
 
@@ -67,9 +80,6 @@
           <div class="hi-header">
             <div class="hi-title-row">
               <h1 class="hi-name">{{ hotel.name }}</h1>
-              <div class="hi-stars">
-                <span v-for="i in hotel.stars" :key="i" class="material-symbols-outlined hi-star">star</span>
-              </div>
             </div>
             <div class="hi-location">
               <span class="material-symbols-outlined">location_on</span>
@@ -81,10 +91,12 @@
           <div class="hi-rating-block">
             <div class="hi-score">{{ averageRatingDisplay }}</div>
             <div class="hi-rating-detail">
-              <div class="hi-stars-row">
-                <span v-for="i in 5" :key="i" class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;color:#cdaf5d;font-size:16px">star</span>
+              <div class="flex items-center gap-2">
+                <div class="hi-stars-row flex items-center">
+                  <span v-for="i in 5" :key="i" class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;color:#cdaf5d;font-size:16px">star</span>
+                </div>
+                <span class="hi-rating-label">Excellent</span>
               </div>
-              <span class="hi-rating-label">Excellent</span>
               <span class="hi-review-count">{{ reviews.length }} reviews</span>
             </div>
           </div>
@@ -130,7 +142,7 @@
             </div>
             
             <div class="hi-controls-col">
-              <div class="hi-date-grid">
+              <div class="hi-controls-bar">
                 <div class="hi-date-field">
                   <label>CHECK-IN</label>
                   <DatePicker v-model="checkInDate" :manualInput="false" :minDate="today" appendTo="self" placeholder="Select" dateFormat="M d, yy" class="booking-date-picker" />
@@ -139,37 +151,33 @@
                   <label>CHECK-OUT</label>
                   <DatePicker v-model="checkOutDate" :manualInput="false" :minDate="checkOutMinDate" appendTo="self" placeholder="Select" dateFormat="M d, yy" class="booking-date-picker" />
                 </div>
-              </div>
-              
-              <div class="hi-guest-wrapper">
-                <button
-                  type="button"
-                  class="hi-guest-trigger"
-                  :class="{ 'hi-guest-trigger--open': isGuestPanelOpen }"
-                  @click="isGuestPanelOpen = !isGuestPanelOpen"
-                >
-                  <span class="material-symbols-outlined">person</span>
-                  <span>{{ guestSummary }}</span>
-                  <span class="material-symbols-outlined" style="margin-left:auto">expand_more</span>
-                </button>
-                <div v-if="isGuestPanelOpen" class="guest-panel">
-                  <div class="guest-counter-row">
-                    <div class="guest-counter-copy"><strong>Adults</strong><span>Ages 18+</span></div>
-                    <div class="guest-counter-control">
-                      <button type="button" class="guest-counter-btn" :disabled="adults <= 1" @click="updateGuestCount('adults', -1)">−</button>
-                      <span>{{ adults }}</span>
-                      <button type="button" class="guest-counter-btn" @click="updateGuestCount('adults', 1)">+</button>
-                    </div>
+                
+                <div class="hi-guest-field" @click="isGuestPanelOpen = !isGuestPanelOpen">
+                  <label>GUESTS</label>
+                  <div class="hi-guest-value">
+                    <span class="material-symbols-outlined icon">person</span>
+                    <span class="text">{{ guestSummary }}</span>
+                    <span class="material-symbols-outlined icon-arrow">expand_more</span>
                   </div>
-                  <div class="guest-counter-row">
-                    <div class="guest-counter-copy"><strong>Children</strong><span>Ages 0-17</span></div>
-                    <div class="guest-counter-control">
-                      <button type="button" class="guest-counter-btn" :disabled="children <= 0" @click="updateGuestCount('children', -1)">−</button>
-                      <span>{{ children }}</span>
-                      <button type="button" class="guest-counter-btn" @click="updateGuestCount('children', 1)">+</button>
+                  <div v-if="isGuestPanelOpen" class="guest-panel" @click.stop>
+                    <div class="guest-counter-row">
+                      <div class="guest-counter-copy"><strong>Adults</strong><span>Ages 18+</span></div>
+                      <div class="guest-counter-control">
+                        <button type="button" class="guest-counter-btn" :disabled="adults <= 1" @click="updateGuestCount('adults', -1)">−</button>
+                        <span>{{ adults }}</span>
+                        <button type="button" class="guest-counter-btn" @click="updateGuestCount('adults', 1)">+</button>
+                      </div>
                     </div>
+                    <div class="guest-counter-row">
+                      <div class="guest-counter-copy"><strong>Children</strong><span>Ages 0-17</span></div>
+                      <div class="guest-counter-control">
+                        <button type="button" class="guest-counter-btn" :disabled="children <= 0" @click="updateGuestCount('children', -1)">−</button>
+                        <span>{{ children }}</span>
+                        <button type="button" class="guest-counter-btn" @click="updateGuestCount('children', 1)">+</button>
+                      </div>
+                    </div>
+                    <button type="button" class="guest-done-button" @click="isGuestPanelOpen = false">Done</button>
                   </div>
-                  <button type="button" class="guest-done-button" @click="isGuestPanelOpen = false">Done</button>
                 </div>
               </div>
               
@@ -194,11 +202,22 @@
             <div class="lightbox-content">
               <button class="lightbox-close" @click="closeLightbox"><span class="material-symbols-outlined">close</span></button>
               <div class="lightbox-counter">{{ lightboxIndex + 1 }} / {{ hotel.images.length }}</div>
-              <div class="lightbox-stage" @touchstart="onLightboxTouchStart" @touchend="onLightboxTouchEnd">
+              <div class="lightbox-stage">
+                <UCarousel
+                  ref="lightboxCarouselRef"
+                  v-model="lightboxIndex"
+                  :items="hotel.images"
+                  :ui="{ item: 'basis-full' }"
+                  class="lightbox-carousel"
+                  loop
+                  @update:model-value="(val) => lightboxIndex = val"
+                >
+                  <template #default="{ item }">
+                    <img :src="item" :alt="hotel.name" class="lightbox-img" draggable="false" />
+                  </template>
+                </UCarousel>
+
                 <button class="lightbox-arrow lightbox-arrow--prev" v-if="hotel.images.length > 1" @click="prevLightbox"><span class="material-symbols-outlined">chevron_left</span></button>
-                <transition :name="lightboxTransition">
-                  <img :key="lightboxIndex" :src="hotel.images[lightboxIndex]" :alt="hotel.name" class="lightbox-img" />
-                </transition>
                 <button class="lightbox-arrow lightbox-arrow--next" v-if="hotel.images.length > 1" @click="nextLightbox"><span class="material-symbols-outlined">chevron_right</span></button>
               </div>
               <div class="lightbox-thumbs" ref="lightboxThumbsRef">
@@ -720,46 +739,58 @@ const hotel = ref<Hotel | null>(null);
 
 // ── Gallery ────────────────────────────────────────────────────────────────
 const activeGalleryIndex = ref(0);
-const galleryTransition = ref('slide-left');
+const carouselRef = ref(null);
 const thumbsRef = ref<HTMLElement | null>(null);
-let touchStartX = 0;
 
 function setGalleryImage(idx: number) {
-  galleryTransition.value = idx > activeGalleryIndex.value ? 'slide-left' : 'slide-right';
   activeGalleryIndex.value = idx;
   nextTick(() => scrollThumbIntoView(thumbsRef.value, idx));
 }
 
 function prevImage() {
-  galleryTransition.value = 'slide-right';
-  activeGalleryIndex.value =
-    activeGalleryIndex.value === 0
-      ? (hotel.value?.images.length ?? 1) - 1
-      : activeGalleryIndex.value - 1;
-  nextTick(() => scrollThumbIntoView(thumbsRef.value, activeGalleryIndex.value));
+  if (!hotel.value?.images) return;
+  const len = hotel.value.images.length;
+  activeGalleryIndex.value = (activeGalleryIndex.value - 1 + len) % len;
 }
 
 function nextImage() {
-  galleryTransition.value = 'slide-left';
-  activeGalleryIndex.value =
-    activeGalleryIndex.value === (hotel.value?.images.length ?? 1) - 1
-      ? 0
-      : activeGalleryIndex.value + 1;
-  nextTick(() => scrollThumbIntoView(thumbsRef.value, activeGalleryIndex.value));
+  if (!hotel.value?.images) return;
+  const len = hotel.value.images.length;
+  activeGalleryIndex.value = (activeGalleryIndex.value + 1) % len;
 }
 
-function onTouchStart(e: TouchEvent) { touchStartX = e.touches[0].clientX; }
-function onTouchEnd(e: TouchEvent) {
-  const diff = touchStartX - e.changedTouches[0].clientX;
-  if (Math.abs(diff) > 40) diff > 0 ? nextImage() : prevImage();
-}
+watch(activeGalleryIndex, (newIdx) => {
+  nextTick(() => {
+    scrollThumbIntoView(thumbsRef.value, newIdx);
+    
+    const carousel = carouselRef.value;
+    if (!carousel) return;
+
+    // Try multiple possible API methods to ensure movement
+    if (typeof carousel.select === 'function') {
+      carousel.select(newIdx);
+    } else if (carousel.emblaApi && typeof carousel.emblaApi.scrollTo === 'function') {
+      carousel.emblaApi.scrollTo(newIdx);
+    }
+  });
+}, { immediate: true });
+
+// Listen for native carousel changes (swipes) to keep external state in sync
+watch(carouselRef, (ref) => {
+  if (ref?.emblaApi) {
+    ref.emblaApi.on('select', () => {
+      const index = ref.emblaApi.selectedScrollSnap();
+      if (activeGalleryIndex.value !== index) {
+        activeGalleryIndex.value = index;
+      }
+    });
+  }
+}, { immediate: true });
 
 // ── Lightbox ───────────────────────────────────────────────────────────────
 const lightboxOpen = ref(false);
 const lightboxIndex = ref(0);
-const lightboxTransition = ref('slide-left');
 const lightboxThumbsRef = ref<HTMLElement | null>(null);
-let lbTouchStartX = 0;
 
 function openLightbox(idx: number) {
   lightboxIndex.value = idx;
@@ -774,28 +805,47 @@ function closeLightbox() {
 }
 
 function prevLightbox() {
-  lightboxTransition.value = 'slide-right';
-  lightboxIndex.value =
-    lightboxIndex.value === 0
-      ? (hotel.value?.images.length ?? 1) - 1
-      : lightboxIndex.value - 1;
-  nextTick(() => scrollThumbIntoView(lightboxThumbsRef.value, lightboxIndex.value));
+  if (!hotel.value?.images) return;
+  const len = hotel.value.images.length;
+  lightboxIndex.value = (lightboxIndex.value - 1 + len) % len;
 }
 
 function nextLightbox() {
-  lightboxTransition.value = 'slide-left';
-  lightboxIndex.value =
-    lightboxIndex.value === (hotel.value?.images.length ?? 1) - 1
-      ? 0
-      : lightboxIndex.value + 1;
-  nextTick(() => scrollThumbIntoView(lightboxThumbsRef.value, lightboxIndex.value));
+  if (!hotel.value?.images) return;
+  const len = hotel.value.images.length;
+  lightboxIndex.value = (lightboxIndex.value + 1) % len;
 }
 
-function onLightboxTouchStart(e: TouchEvent) { lbTouchStartX = e.touches[0].clientX; }
-function onLightboxTouchEnd(e: TouchEvent) {
-  const diff = lbTouchStartX - e.changedTouches[0].clientX;
-  if (Math.abs(diff) > 40) diff > 0 ? nextLightbox() : prevLightbox();
-}
+const lightboxCarouselRef = ref(null);
+
+watch(lightboxIndex, (newIdx) => {
+  nextTick(() => {
+    scrollThumbIntoView(lightboxThumbsRef.value, newIdx);
+    
+    const carousel = lightboxCarouselRef.value;
+    if (!carousel) return;
+
+    if (typeof carousel.select === 'function') {
+      carousel.select(newIdx);
+    } else if (carousel.emblaApi && typeof carousel.emblaApi.scrollTo === 'function') {
+      carousel.emblaApi.scrollTo(newIdx);
+    }
+  });
+});
+
+watch(lightboxCarouselRef, (ref) => {
+  if (ref?.emblaApi) {
+    ref.emblaApi.on('select', () => {
+      const index = ref.emblaApi.selectedScrollSnap();
+      if (lightboxIndex.value !== index) {
+        lightboxIndex.value = index;
+      }
+    });
+  }
+}, { immediate: true });
+
+function onLightboxPointerDown() { /* Handled by UCarousel */ }
+function onLightboxPointerUp() { /* Handled by UCarousel */ }
 
 function scrollThumbIntoView(container: HTMLElement | null, idx: number) {
   if (!container) return;
@@ -1353,32 +1403,46 @@ onBeforeUnmount(() => {
   width: 100%;
   position: sticky;
   top: 24px;
+  min-width: 0;
 }
 
 .gallery-stage {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  min-width: 0;
 }
 
-.gallery-main {
+.gallery-main-container {
   position: relative;
   width: 100%;
-  height: 520px;
+  height: 440px;
   border-radius: 24px;
   overflow: hidden;
-  background: #0a1c2e;
-  cursor: pointer;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
 }
 
+.gallery-main-container {
+  position: relative;
+  width: 100%;
+  height: 440px;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+  background: #0f172a;
+}
+
+.gallery-carousel {
+  width: 100%;
+  height: 100%;
+}
+
 .gallery-main-img {
-  position: absolute;
-  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: opacity 0.3s ease;
+  cursor: pointer;
+  display: block;
 }
 
 /* Slide transitions */
@@ -1421,9 +1485,8 @@ onBeforeUnmount(() => {
 
 .gallery-counter {
   position: absolute;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 24px;
+  left: 24px;
   background: rgba(0, 0, 0, 0.6);
   color: #fff;
   font-size: 13px;
@@ -1462,7 +1525,7 @@ onBeforeUnmount(() => {
   display: flex;
   gap: 12px;
   overflow-x: auto;
-  padding-bottom: 8px;
+  padding: 8px 0;
   scrollbar-width: none;
 }
 .gallery-thumbs::-webkit-scrollbar { display: none; }
@@ -1511,7 +1574,6 @@ onBeforeUnmount(() => {
   margin: 0;
   line-height: 1.2;
 }
-.hi-stars { display: flex; gap: 2px; }
 .hi-star { color: #cdaf5d; font-size: 18px; font-variation-settings: 'FILL' 1; }
 .hi-location {
   display: flex;
@@ -1610,30 +1672,78 @@ onBeforeUnmount(() => {
   gap: 16px;
 }
 
-.hi-booking--horizontal .hi-date-grid {
-  margin-bottom: 0;
-  flex: 1;
-  min-width: 250px;
-}
-
-.hi-booking--horizontal .hi-guest-wrapper {
-  position: relative;
-  flex: 1;
-  min-width: 200px;
+.hi-controls-bar {
   display: flex;
+  align-items: stretch;
+  flex: 1;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background: #fff;
 }
 
-.hi-booking--horizontal .hi-guest-trigger {
-  margin-bottom: 0;
-  height: auto;
+.hi-date-field, .hi-guest-field {
   flex: 1;
+  padding: 10px 14px;
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.hi-date-field:not(:last-child), .hi-guest-field:not(:last-child) {
+  border-right: 1px solid #cbd5e1;
+}
+
+.hi-date-field label, .hi-guest-field label { 
+  display: block; 
+  font-size: 10px; 
+  font-weight: 800; 
+  color: #015081; 
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.hi-guest-value {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #334155;
+  font-weight: 600;
+}
+
+.hi-guest-value .icon {
+  font-size: 18px;
+  color: #64748b;
+}
+
+.hi-guest-value .icon-arrow {
+  margin-left: auto;
+  font-size: 18px;
+  color: #94a3b8;
+}
+
+/* Strip DatePicker inner input styles */
+.hi-controls-bar .booking-date-picker {
+  width: 100%;
+}
+.hi-controls-bar .p-inputtext {
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+  width: 100%;
 }
 
 .hi-booking--horizontal .guest-panel {
   top: calc(100% + 8px);
   left: 0;
   right: auto;
-  width: 300px;
+  width: 320px;
 }
 
 .hi-booking--horizontal .hi-book-btn {
@@ -1651,30 +1761,7 @@ onBeforeUnmount(() => {
 .hi-per { font-size: 14px; color: #94a3b8; }
 .hi-no-charge { text-align: left; font-size: 12px; color: #94a3b8; margin: 0; }
 
-.hi-date-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  border: 1px solid #cbd5e1;
-  border-radius: 12px;
-}
-.hi-date-field { padding: 10px 14px; }
-.hi-date-field:first-child { border-right: 1px solid #cbd5e1; }
-.hi-date-field label { display: block; font-size: 10px; font-weight: 800; color: #015081; margin-bottom: 4px; }
 
-.hi-guest-trigger {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  border: 1px solid #cbd5e1;
-  border-radius: 12px;
-  background: #fff;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  color: #334155;
-}
 
 .hi-book-btn {
   width: 100%;
@@ -1724,9 +1811,7 @@ onBeforeUnmount(() => {
   align-items: center;
   width: 100%;
   height: 100%;
-  padding: 20px;
-  gap: 12px;
-  position: relative;
+  padding: 60px 20px 40px; /* Space for counter at top and thumbnails at bottom */
 }
 
 .lightbox-close {
@@ -1762,22 +1847,36 @@ onBeforeUnmount(() => {
 
 .lightbox-stage {
   position: relative;
-  flex: 1;
   width: 100%;
+  flex: 1; /* Expand to take all available middle space */
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  border-radius: 16px;
+}
+
+.lightbox-carousel {
+  width: 80%;
+  height: 100%;
+}
+
+/* Force the Carousel engine to fill the vertical space */
+.lightbox-carousel :deep(div:first-child),
+.lightbox-carousel :deep(.embla),
+.lightbox-carousel :deep(.embla__container),
+.lightbox-carousel :deep(.embla__slide) {
+  height: 100%;
 }
 
 .lightbox-img {
-  max-width: 100%;
-  max-height: 100%;
+  max-width: 80%;
+  max-height: 75vh;
   object-fit: contain;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
   border-radius: 12px;
-  position: absolute;
   user-select: none;
+  display: block;
+  margin: 0 auto;
 }
 
 .lightbox-arrow {
@@ -1813,8 +1912,9 @@ onBeforeUnmount(() => {
   overflow-x: auto;
   scroll-behavior: smooth;
   max-width: 100%;
-  padding: 4px 0;
+  padding-top: 32px;
   scrollbar-width: none;
+  margin-top: auto; /* Push to bottom of screen */
 }
 .lightbox-thumbs::-webkit-scrollbar { display: none; }
 

@@ -51,7 +51,7 @@ export default defineNuxtConfig({
       }
     }
   },
-  modules: ['@primevue/nuxt-module'],
+  modules: ['@primevue/nuxt-module', '@nuxt/ui'],
   components: [
     { path: '~/components', pathPrefix: false },
   ],
