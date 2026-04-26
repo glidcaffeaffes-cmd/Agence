@@ -30,6 +30,9 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     apiServerBase: process.env.NUXT_SERVER_API_BASE || 'http://127.0.0.1:3001/api',
+    cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME || '',
+    cloudinaryApiKey: process.env.CLOUDINARY_API_KEY || '',
+    cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET || '',
     public: {
       apiBase: '/api'
     }
@@ -38,6 +41,7 @@ export default defineNuxtConfig({
     // Local Nitro handlers for review filters (avoid backend 404 on /avis/hotel/:id)
     '/api/avis/hotel/**': {},
     '/api/avis/account/**': {},
+    '/api/cloudinary/**': {},
     '/api/**': {
       proxy: {
         // Point API calls to local Nest backend by default to avoid ngrok loop/403.

@@ -148,29 +148,7 @@
                             >
                           </div>
                         </div>
-                        <div
-                          class="form-group"
-                          :class="getFieldState('photo', formData.photo)"
-                        >
-                          <div class="form-label-row">
-                            <label class="form-label">Profile Photo URL</label>
-                            <span class="field-status-text">{{
-                              getFieldStatusText("photo", formData.photo)
-                            }}</span>
-                          </div>
-                          <div class="input-icon-wrap">
-                            <input
-                              type="url"
-                              v-model="formData.photo"
-                              class="form-input"
-                              placeholder="https://example.com/profile-photo.jpg"
-                            />
-                            <span
-                              class="material-symbols-outlined state-icon"
-                              >{{ getFieldIcon("photo", formData.photo) }}</span
-                            >
-                          </div>
-                        </div>
+                        <div class="form-group"></div>
                       </div>
                     </div>
                   </section>
@@ -804,7 +782,6 @@ watch(
         firstName: profile.firstName || "",
         lastName: profile.lastName || "",
         phone: normalizePhoneInput(profile.phone || ""),
-        photo: profile.photo || "",
         dateOfBirth: profile.dateOfBirth || "",
         passportNumber: profile.passportNumber || "",
         bio: profile.bio || "",
@@ -826,7 +803,6 @@ async function saveProfile() {
     phone: normalizePhoneForSave(formData.value.phone),
     firstName: formData.value.firstName.trim(),
     lastName: formData.value.lastName.trim(),
-    photo: formData.value.photo.trim(),
     passportNumber: formData.value.passportNumber.trim(),
     bio: formData.value.bio.trim(),
     preferredDestinations: formData.value.preferredDestinations
@@ -1211,6 +1187,7 @@ function formatCardBrand(brand: PaymentMethod["brand"]) {
   color: var(--color-text-muted);
   cursor: not-allowed;
   opacity: 0.7;
+  padding-right: 44px;
 }
 
 .form-input--prefix {
@@ -1228,6 +1205,17 @@ function formatCardBrand(brand: PaymentMethod["brand"]) {
   font-weight: 700;
   color: var(--color-text-muted);
   z-index: 1;
+}
+
+.input-icon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 20px;
+  color: var(--color-text-muted);
+  pointer-events: none;
+  z-index: 2;
 }
 
 .field-status-text {

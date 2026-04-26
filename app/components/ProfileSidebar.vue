@@ -36,8 +36,22 @@
           <div v-else class="avatar-letter">
             {{ avatarLetter }}
           </div>
-          <button class="avatar-edit-btn" title="Update Profile Picture">
-            <span class="material-symbols-outlined">photo_camera</span>
+          <input
+            ref="avatarInputRef"
+            type="file"
+            accept="image/*"
+            class="avatar-file-input"
+            @change="handleAvatarSelect"
+          />
+          <button
+            class="avatar-edit-btn"
+            :disabled="isUploadingAvatar"
+            :title="isUploadingAvatar ? 'Uploading...' : 'Update Profile Picture'"
+            @click="openAvatarPicker"
+          >
+            <span class="material-symbols-outlined">{{
+              isUploadingAvatar ? "hourglass_top" : "photo_camera"
+            }}</span>
           </button>
         </div>
         <h2 class="sidebar-name">
@@ -99,8 +113,10 @@ import { useAuth } from "~/composables/useAuth";
 import { computed } from "vue";
 import { useProfileCompletion } from "~/composables/useProfileCompletion";
 
-const { currentProfile } = useAuth();
+const { currentProfile, updateProfile } = useAuth();
 const { percentage } = useProfileCompletion(currentProfile);
+const avatarInputRef = ref<HTMLInputElement | null>(null);
+const isUploadingAvatar = ref(false);
 
 const isMounted = ref(false);
 onMounted(() => {
@@ -119,6 +135,46 @@ const avatarLetter = computed(() => {
   const last = currentProfile.value?.lastName?.trim().charAt(0).toUpperCase() || "";
   return (first + last) || "?";
 });
+
+function openAvatarPicker(event: MouseEvent) {
+  event.preventDefault();
+  if (isUploadingAvatar.value) return;
+  avatarInputRef.value?.click();
+}
+
+async function handleAvatarSelect(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+
+  if (!file) {
+    return;
+  }
+
+  try {
+    isUploadingAvatar.value = true;
+
+    const data = new FormData();
+    data.append("file", file);
+
+    const result = await $fetch<{ url: string }>("/cloudinary/upload", {
+      method: "POST",
+      body: data,
+    });
+
+    const success = await updateProfile({ photo: result.url });
+    if (!success) {
+      throw new Error("Unable to save profile photo");
+    }
+  } catch (error) {
+    console.error("Avatar upload failed:", error);
+    const message =
+      error instanceof Error ? error.message : "Image upload failed. Please try again.";
+    alert(message);
+  } finally {
+    isUploadingAvatar.value = false;
+    input.value = "";
+  }
+}
 </script>
 
 <style scoped>
@@ -237,9 +293,19 @@ const avatarLetter = computed(() => {
   z-index: 3;
 }
 
+.avatar-file-input {
+  display: none;
+}
+
 .avatar-edit-btn:hover {
   transform: scale(1.1);
   background: var(--color-primary-700);
+}
+
+.avatar-edit-btn:disabled {
+  cursor: wait;
+  opacity: 0.75;
+  transform: none;
 }
 
 .avatar-edit-btn .material-symbols-outlined {
