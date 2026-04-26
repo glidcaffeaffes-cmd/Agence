@@ -17,27 +17,16 @@
           </div>
         </div>
 
-        <div ref="heroFilterRef" class="hero-filter-shell" :class="{ 'hero-filter-shell--panel-open': activeFilterPanel !== null || destinationOverlayOpen }">
+        <div ref="heroFilterRef" class="hero-filter-shell" :class="{ 'hero-filter-shell--panel-open': activeFilterPanel !== null }">
           <div class="hero-filter-bar">
-            <div class="hero-filter-field hero-filter-field--destination" :class="{ 'hero-filter-field--open': destinationOverlayOpen }" @click="activeFilterPanel = null">
-              <span class="material-symbols-outlined hero-filter-field__icon">bed</span>
-              <div class="hero-filter-field__copy">
-                <span class="hero-filter-field__label">Destination</span>
-                <Select
-                  v-model="selectedCity"
-                  :options="cityOptions"
-                  optionLabel="label"
-                  optionValue="value"
-                  placeholder="Choose a city"
-                  filter
-                  appendTo="self"
-                  @show="handleDestinationShow"
-                  @hide="handleDestinationHide"
-                  class="hero-filter-select"
-                />
-              </div>
-              <span class="material-symbols-outlined hero-filter-field__chevron">expand_more</span>
-            </div>
+            <button type="button" class="hero-filter-trigger" :class="{ 'hero-filter-trigger--open': activeFilterPanel === 'destination' }" @click="toggleFilterPanel('destination')">
+              <span class="material-symbols-outlined hero-filter-trigger__icon">bed</span>
+              <span class="hero-filter-trigger__copy">
+                <span class="hero-filter-trigger__label">Destination</span>
+                <span class="hero-filter-trigger__value">{{ selectedCity || 'Choose a city' }}</span>
+              </span>
+              <span class="material-symbols-outlined hero-filter-trigger__chevron">expand_more</span>
+            </button>
 
             <button type="button" class="hero-filter-trigger" :class="{ 'hero-filter-trigger--open': activeFilterPanel === 'dates' }" @click="toggleFilterPanel('dates')">
               <span class="material-symbols-outlined hero-filter-trigger__icon">calendar_month</span>
@@ -61,6 +50,33 @@
               <span class="material-symbols-outlined">search</span>
               <span>Search</span>
             </Button>
+          </div>
+
+          <div v-if="activeFilterPanel === 'destination'" class="hero-filter-panel hero-filter-panel--destination">
+            <div class="destination-search-wrap">
+              <span class="material-symbols-outlined">search</span>
+              <input 
+                type="text" 
+                v-model="citySearchQuery" 
+                placeholder="Choose a city" 
+                class="destination-search-input"
+                autofocus
+              />
+            </div>
+            <div class="destination-list">
+              <button
+                v-for="city in filteredCities"
+                :key="city.value"
+                class="destination-list-item"
+                :class="{ 'destination-list-item--selected': selectedCity === city.value }"
+                @click="selectCity(city.value)"
+              >
+                {{ city.label }}
+              </button>
+              <div v-if="filteredCities.length === 0" class="destination-list-empty">
+                No cities found
+              </div>
+            </div>
           </div>
 
           <div v-if="activeFilterPanel === 'dates'" class="hero-filter-panel hero-filter-panel--dates">
@@ -240,8 +256,7 @@ const benefits = [
 ]
 
 const heroFilterRef = ref<HTMLElement | null>(null)
-const activeFilterPanel = ref<'dates' | 'guests' | null>(null)
-const destinationOverlayOpen = ref(false)
+const activeFilterPanel = ref<'dates' | 'guests' | 'destination' | null>(null)
 const today = startOfDay(new Date())
 const selectedCity = ref<string | null>(null)
 const stayDates = ref<(Date | null)[] | null>([today, addDays(today, 7)])
@@ -266,6 +281,17 @@ const TUNISIA_CITIES = [
 ]
 
 const cityOptions = TUNISIA_CITIES.map((city) => ({ label: city, value: city }))
+
+const citySearchQuery = ref('')
+const filteredCities = computed(() => {
+  const q = citySearchQuery.value.toLowerCase()
+  return cityOptions.filter(c => c.label.toLowerCase().includes(q))
+})
+
+function selectCity(city: string) {
+  selectedCity.value = city
+  activeFilterPanel.value = null
+}
 
 const selectedDateRange = computed(() => {
   if (!Array.isArray(stayDates.value) || stayDates.value.length === 0) return [null, null] as const
@@ -318,18 +344,8 @@ watch(children, (count) => {
   childAges.value = next
 }, { immediate: true })
 
-function toggleFilterPanel(panel: 'dates' | 'guests') {
-  destinationOverlayOpen.value = false
+function toggleFilterPanel(panel: 'dates' | 'guests' | 'destination') {
   activeFilterPanel.value = activeFilterPanel.value === panel ? null : panel
-}
-
-function handleDestinationShow() {
-  activeFilterPanel.value = null
-  destinationOverlayOpen.value = true
-}
-
-function handleDestinationHide() {
-  destinationOverlayOpen.value = false
 }
 
 function updateGuestCount(type: 'adults' | 'children' | 'rooms', delta: number) {
@@ -347,7 +363,6 @@ function applyQuickStay(days: number) {
 function submitHeroSearch() {
   const [checkIn, checkOut] = selectedDateRange.value
   activeFilterPanel.value = null
-  destinationOverlayOpen.value = false
 
   router.push({
     path: '/hotels',
@@ -368,7 +383,6 @@ function handleClickOutside(event: MouseEvent) {
   if (!heroFilterRef.value) return
   if (!heroFilterRef.value.contains(event.target as Node)) {
     activeFilterPanel.value = null
-    destinationOverlayOpen.value = false
   }
 }
 
@@ -514,9 +528,14 @@ function formatDateForQuery(date: Date) {
     inset 0 1px 0 rgba(255, 255, 255, 0.55);
   padding: 0.6rem;
   overflow: visible;
+  transition: all 0.3s ease;
 }
 
-.hero-filter-field,
+.hero-filter-shell--panel-open .hero-filter-bar {
+  filter: blur(2px);
+  pointer-events: none;
+}
+
 .hero-filter-trigger {
   display: flex;
   align-items: center;
@@ -528,16 +547,16 @@ function formatDateForQuery(date: Date) {
   border-right: 1px solid var(--color-divider);
   border-radius: 1.2rem;
   transition: background 0.25s ease, box-shadow 0.25s ease;
+  width: 100%;
+  cursor: pointer;
+  text-align: left;
 }
 
-.hero-filter-field:hover,
 .hero-filter-trigger:hover,
-.hero-filter-trigger--open,
-.hero-filter-field--open {
+.hero-filter-trigger--open {
   background: color-mix(in srgb, var(--color-primary-25) 70%, white 30%);
 }
 
-.hero-filter-field__icon,
 .hero-filter-trigger__icon {
   flex-shrink: 0;
   display: inline-flex;
@@ -549,7 +568,6 @@ function formatDateForQuery(date: Date) {
   font-size: 1.28rem;
 }
 
-.hero-filter-field__copy,
 .hero-filter-trigger__copy {
   min-width: 0;
   flex: 1;
@@ -559,81 +577,12 @@ function formatDateForQuery(date: Date) {
   gap: 0.16rem;
 }
 
-.hero-filter-field__label,
 .hero-filter-trigger__label {
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-text-secondary);
-}
-
-.hero-filter-select {
-  width: 100%;
-}
-
-.hero-filter-field :deep(.p-select) {
-  width: 100%;
-  min-width: 0;
-  border: none !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0 !important;
-}
-
-.hero-filter-field :deep(.p-select-label-container) {
-  min-width: 0;
-  flex: 1;
-}
-
-.hero-filter-field :deep(.p-select-label) {
-  display: block;
-  padding: 0 !important;
-  min-height: 0;
-  font-size: 0.98rem;
-  font-weight: 700;
-  line-height: 1.3;
-  color: var(--color-heading);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.hero-filter-field :deep(.p-placeholder) {
-  color: var(--color-text-secondary);
-  font-weight: 600;
-}
-
-.hero-filter-field :deep(.p-select-dropdown),
-.hero-filter-field :deep(.p-select-clear-icon) {
-  display: none !important;
-}
-
-.hero-filter-field__chevron {
-  flex-shrink: 0;
-  margin-left: auto;
-  color: var(--color-text-secondary);
-  font-size: 1.16rem;
-  transition: transform 0.24s ease;
-}
-
-.hero-filter-field--open .hero-filter-field__chevron {
-  transform: rotate(180deg);
-}
-
-.hero-filter-field :deep(.p-select-header) {
-  padding: 0.8rem;
-  background: var(--color-surface-secondary);
-}
-
-.hero-filter-trigger {
-  width: 100%;
-  cursor: pointer;
-  text-align: left;
 }
 
 .hero-filter-trigger__value {
@@ -732,6 +681,95 @@ function formatDateForQuery(date: Date) {
 
 .hero-filter-panel--guests {
   width: min(420px, calc(100vw - 72px));
+}
+
+.hero-filter-panel--destination {
+  width: min(420px, calc(100vw - 72px));
+}
+
+.destination-search-wrap {
+  position: relative;
+  margin-bottom: 0.75rem;
+}
+
+.destination-search-input {
+  width: 100%;
+  padding: 0.85rem 1rem 0.85rem 2.8rem;
+  border: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
+  border-radius: 0.8rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-heading);
+  background: var(--color-surface-secondary);
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.destination-search-input:focus {
+  background: white;
+  border-color: var(--color-primary-400);
+}
+
+.destination-search-wrap .material-symbols-outlined {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-secondary);
+  font-size: 1.2rem;
+  pointer-events: none;
+}
+
+.destination-list {
+  max-height: 320px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding-right: 0.5rem;
+  margin-right: -0.5rem;
+}
+
+.destination-list::-webkit-scrollbar {
+  width: 4px;
+}
+.destination-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.destination-list::-webkit-scrollbar-thumb {
+  background: var(--color-divider);
+  border-radius: 4px;
+}
+
+.destination-list-item {
+  width: 100%;
+  text-align: left;
+  padding: 0.8rem 1rem;
+  border: none;
+  background: transparent;
+  border-radius: 0.6rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-heading);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.destination-list-item:hover {
+  background: var(--color-surface-secondary);
+}
+
+.destination-list-item--selected {
+  background: color-mix(in srgb, var(--color-primary-100) 40%, white 60%);
+  color: var(--color-primary-700);
+}
+
+.destination-list-empty {
+  padding: 1rem;
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
 }
 
 .hero-filter-panel__header {

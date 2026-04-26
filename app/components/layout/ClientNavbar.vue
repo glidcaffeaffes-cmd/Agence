@@ -29,7 +29,7 @@
           </div>
           <span
             class="client-navbar__brand-text text-xl font-bold tracking-tight"
-            >Voyage<span class="text-primary">Hub</span></span
+            >Voyage<span class="client-navbar__brand-accent">Hub</span></span
           >
         </NuxtLink>
 
@@ -77,7 +77,7 @@
 
           <div class="relative">
             <button
-              class="flex items-center gap-2 pl-1 pr-3 py-1 border border-outline-variant/50 rounded-full hover:border-primary/50 hover:bg-surface-container-lowest transition-all focus:outline-none"
+              class="client-navbar__profile-btn flex items-center gap-2 pl-1 pr-3 py-1 rounded-full transition-all focus:outline-none"
               @click="showUserMenu = !showUserMenu"
             >
               <div
@@ -92,15 +92,15 @@
               </div>
               <div
                 v-else
-                class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-bold text-[10px] brand-text"
+                class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-bold text-[14px] brand-text"
               >
                 {{ avatarLetter }}
               </div>
-              <span class="text-sm font-bold text-on-surface">{{
+              <span class="client-navbar__profile-name text-sm font-bold">{{
                 currentProfile?.firstName || ""
               }}</span>
               <span
-                class="material-symbols-outlined text-[18px] text-on-surface-variant"
+                class="client-navbar__profile-chevron material-symbols-outlined text-[18px]"
                 >expand_more</span
               >
             </button>
@@ -277,8 +277,7 @@ const isTransparentHeader = computed(
 
 const avatarLetter = computed(() => {
   const first = currentProfile.value?.firstName?.trim().charAt(0).toUpperCase() || "";
-  const last = currentProfile.value?.lastName?.trim().charAt(0).toUpperCase() || "";
-  return (first + last) || "?";
+  return first || "?";
 });
 
 function handleLogout() {
@@ -376,9 +375,18 @@ defineEmits(["toggle-notifications"]);
     border-color 0.25s ease;
 }
 
+.client-navbar__brand-accent {
+  color: var(--color-primary-500);
+  transition: color 0.25s ease;
+}
+
 .client-navbar--solid .client-navbar__brand-text,
 .client-navbar--solid .client-navbar__profile-name {
   color: var(--color-text-primary);
+}
+
+.client-navbar--solid .client-navbar__profile-chevron {
+  color: var(--color-text-secondary);
 }
 
 .client-navbar--transparent .client-navbar__brand-text,
@@ -387,6 +395,10 @@ defineEmits(["toggle-notifications"]);
 .client-navbar--transparent .client-navbar__profile-chevron,
 .client-navbar--transparent .client-navbar__mobile-toggle {
   color: white;
+}
+
+.client-navbar--transparent .client-navbar__brand-accent {
+  color: var(--color-primary-400);
 }
 
 .client-navbar__link {

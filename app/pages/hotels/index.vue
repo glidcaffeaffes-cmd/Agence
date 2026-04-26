@@ -51,7 +51,7 @@
           />
         </div>
 
-        <div class="filter-section filter-section--date">
+        <div class="filter-section filter-section--date filter-section--checkin">
           <label class="filter-label">Check-in</label>
           <div class="date-picker-shell">
             <DatePicker
@@ -62,14 +62,14 @@
               :minDate="today"
               appendTo="self"
               placeholder="Choose check-in"
-              dateFormat="D, MMM d"
+              dateFormat="D, M d"
               class="filter-date-picker"
             />
             <span class="material-symbols-outlined date-picker-shell__chevron">expand_more</span>
           </div>
         </div>
 
-        <div class="filter-section filter-section--date">
+        <div class="filter-section filter-section--date filter-section--checkout">
           <label class="filter-label">Check-out</label>
           <div class="date-picker-shell">
             <DatePicker
@@ -80,7 +80,7 @@
               :minDate="checkOutMinDate"
               appendTo="self"
               placeholder="Choose check-out"
-              dateFormat="D, MMM d"
+              dateFormat="D, M d"
               class="filter-date-picker"
             />
             <span class="material-symbols-outlined date-picker-shell__chevron">expand_more</span>
@@ -107,7 +107,6 @@
             <div class="guest-counter-row">
               <div class="guest-counter-copy">
                 <strong>Adults</strong>
-                <span>Ages 18 or above</span>
               </div>
               <div class="guest-counter-control">
                 <Button type="button" text class="guest-counter-btn" @click="updateGuestCount('adults', -1)" :disabled="adults <= 1">−</Button>
@@ -119,7 +118,6 @@
             <div class="guest-counter-row">
               <div class="guest-counter-copy">
                 <strong>Children</strong>
-                <span>Age 0 to 17 years</span>
               </div>
               <div class="guest-counter-control">
                 <Button type="button" text class="guest-counter-btn" @click="updateGuestCount('children', -1)" :disabled="children <= 0">−</Button>
@@ -129,8 +127,8 @@
             </div>
 
             <div v-if="children > 0" class="guest-age-grid">
-              <div v-for="(_, index) in childAges" :key="`child-age-${index}`" class="guest-age-item">
-                <label class="guest-age-label">Child {{ index + 1 }} age</label>
+              <div v-for="(_, index) in childAges" :key="`child-age-${index}`" class="guest-counter-row">
+                <label class="guest-age-label guest-counter-copy"><strong>Age of child {{ index + 1 }}</strong></label>
                 <Select
                   v-model="childAges[index]"
                   :options="childAgeOptions"
@@ -141,14 +139,9 @@
               </div>
             </div>
 
-            <p v-if="children > 0" class="guest-age-note">
-              We use each child age to estimate the correct room options and rates for your stay.
-            </p>
-
             <div class="guest-counter-row">
               <div class="guest-counter-copy">
                 <strong>Rooms</strong>
-                <span>Choose what you need</span>
               </div>
               <div class="guest-counter-control">
                 <Button type="button" text class="guest-counter-btn" @click="updateGuestCount('rooms', -1)" :disabled="roomsRequested <= 1">−</Button>
@@ -157,15 +150,14 @@
               </div>
             </div>
 
-            <div class="guest-pets-row">
+            <div class="guest-counter-row guest-pets-row">
               <div class="guest-counter-copy">
                 <strong>Traveling with pets?</strong>
-                <span>We will keep that in your search details.</span>
               </div>
               <ToggleSwitch v-model="travelWithPets" />
             </div>
 
-            <Button type="button" label="Done" outlined class="guest-done-button" @click="activeFilterPanel = null" />
+            <Button type="button" label="Apply" class="apply-btn guest-done-button" @click="activeFilterPanel = null" />
           </div>
         </div>
 
@@ -589,8 +581,8 @@ watch(() => route.query, async () => {
 /* Filters Sidebar matched to User Mockup */
 .filters-sidebar {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, var(--color-gray-50) 100%);
-  padding: 24px;
-  border-radius: 24px;
+  padding: 20px;
+  border-radius: 16px;
   border: 1px solid color-mix(in srgb, var(--color-gray-200) 76%, white 24%);
   box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);
   height: fit-content;
@@ -623,6 +615,14 @@ watch(() => route.query, async () => {
 }
 
 .filter-section--date {
+  z-index: 18;
+}
+
+.filter-section--checkin {
+  z-index: 19;
+}
+
+.filter-section--checkout {
   z-index: 18;
 }
 
@@ -660,10 +660,10 @@ watch(() => route.query, async () => {
 
 .filter-label {
   display: block;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--color-gray-700);
-  margin-bottom: 16px;
+  margin-bottom: 8px;
   cursor: pointer;
 }
 
@@ -720,13 +720,13 @@ watch(() => route.query, async () => {
 
 .apply-btn {
   width: 100%;
-  padding: 12px;
+  padding: 10px;
   background: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-primary-600) 100%);
   color: white;
   border: none;
-  border-radius: 14px;
+  border-radius: 8px;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
   box-shadow: 0 14px 26px rgba(0, 79, 81, 0.22);
@@ -744,12 +744,12 @@ watch(() => route.query, async () => {
 
 .reset-btn {
   width: 100%;
-  padding: 10px;
+  padding: 8px;
   background: none;
   border: 1px solid transparent;
   color: var(--color-gray-500);
   font-weight: 600;
-  font-size: 13px;
+  font-size: 12px;
   cursor: pointer;
   text-decoration: underline;
 }
@@ -834,9 +834,9 @@ watch(() => route.query, async () => {
   width: 100%;
   background: linear-gradient(180deg, white 0%, color-mix(in srgb, var(--color-gray-50) 72%, white 28%) 100%);
   border: 1px solid color-mix(in srgb, var(--color-gray-200) 74%, white 26%);
-  border-radius: 16px;
+  border-radius: 8px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
-  min-height: 2.85rem;
+  min-height: 2.3rem;
   display: flex;
   align-items: center;
   padding: 0 4px;
@@ -853,7 +853,7 @@ watch(() => route.query, async () => {
 
 :deep(.full-width-select .p-select-label) {
   color: var(--color-heading);
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 700;
   cursor: pointer;
   display: flex;
@@ -937,7 +937,7 @@ watch(() => route.query, async () => {
   width: 100%;
   background: linear-gradient(180deg, white 0%, color-mix(in srgb, var(--color-gray-50) 72%, white 28%) 100%);
   border: 1px solid color-mix(in srgb, var(--color-gray-200) 74%, white 26%);
-  border-radius: 16px;
+  border-radius: 8px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
   cursor: pointer;
@@ -951,13 +951,14 @@ watch(() => route.query, async () => {
 
 :deep(.filter-date-picker .p-inputtext) {
   width: 100%;
-  min-height: 2.85rem;
+  height: 2.3rem;
+  line-height: 2.3rem;
   border: 0;
   background: transparent;
   color: var(--color-heading);
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 700;
-  padding: 0.75rem 3.45rem 0.75rem 2.65rem;
+  padding: 0 2.8rem 0 2.2rem;
   cursor: pointer;
 }
 
@@ -975,6 +976,11 @@ watch(() => route.query, async () => {
 :deep(.filter-date-picker .p-datepicker-input-icon-container) {
   left: 0.9rem;
   right: auto;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 :deep(.filter-date-picker .p-datepicker-dropdown) {
@@ -1002,10 +1008,10 @@ watch(() => route.query, async () => {
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   min-height: 2rem;
   border-bottom: 1px solid var(--color-gray-200);
-  padding: 0.2rem 2rem 0.7rem;
+  padding: 0.5rem 1rem;
   margin-bottom: 0.24rem;
 }
 
@@ -1013,20 +1019,17 @@ watch(() => route.query, async () => {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: 1;
   gap: 0.3rem;
   font-size: 0.95rem;
   font-weight: 800;
   line-height: 1;
   color: var(--color-navy-500);
-  margin: 0 auto;
   text-align: center;
 }
 
 :deep(.filter-date-picker .p-datepicker-prev-button),
 :deep(.filter-date-picker .p-datepicker-next-button) {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1038,14 +1041,6 @@ watch(() => route.query, async () => {
   color: var(--color-gray-500);
   transition: background 0.2s ease, color 0.2s ease;
   cursor: pointer;
-}
-
-:deep(.filter-date-picker .p-datepicker-prev-button) {
-  left: 0.1rem;
-}
-
-:deep(.filter-date-picker .p-datepicker-next-button) {
-  right: 0.1rem;
 }
 
 :deep(.filter-date-picker .p-datepicker-prev-button:hover),
@@ -1152,10 +1147,11 @@ watch(() => route.query, async () => {
   display: flex;
   align-items: center;
   gap: 0.8rem;
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 0.85rem;
+  min-height: 2.3rem;
   background: white;
   border: 1px solid color-mix(in srgb, var(--color-gray-200) 76%, white 24%);
-  border-radius: 16px;
+  border-radius: 8px;
   text-align: left;
   transition: background 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
   cursor: pointer;
@@ -1184,7 +1180,7 @@ watch(() => route.query, async () => {
 .guest-trigger__copy strong {
   display: block;
   color: var(--color-heading);
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 700;
   white-space: nowrap;
   overflow: hidden;
@@ -1212,8 +1208,8 @@ watch(() => route.query, async () => {
   position: absolute;
   bottom: calc(100% + 0.5rem);
   top: auto;
-  left: -1rem;
-  width: calc(100% + 2rem);
+  left: 0;
+  width: 100%;
   padding: 1rem;
   background: white;
   border: 1px solid color-mix(in srgb, var(--color-gray-200) 76%, white 24%);
@@ -1231,6 +1227,7 @@ watch(() => route.query, async () => {
 
 .guest-counter-row + .guest-counter-row,
 .guest-age-grid,
+.guest-age-grid + .guest-counter-row,
 .guest-pets-row,
 .guest-done-button {
   margin-top: 0.85rem;
@@ -1244,7 +1241,8 @@ watch(() => route.query, async () => {
 .guest-age-label {
   display: block;
   color: var(--color-gray-800);
-  font-weight: 800;
+  font-weight: 600;
+  font-size: 0.9rem;
 }
 
 .guest-counter-copy span,
@@ -1267,8 +1265,8 @@ watch(() => route.query, async () => {
 .guest-counter-control span {
   text-align: center;
   color: var(--color-gray-800);
-  font-size: 0.95rem;
-  font-weight: 800;
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .guest-counter-btn {
@@ -1292,10 +1290,25 @@ watch(() => route.query, async () => {
   gap: 0.45rem;
 }
 
+.guest-age-select {
+  width: 6.2rem;
+}
+
 .guest-age-select :deep(.p-select) {
   width: 100%;
-  border-radius: 0.95rem;
+  border-radius: 0.8rem;
+  border: 1px solid var(--color-gray-200);
+  background: var(--color-gray-50);
+  min-height: 2.1rem;
   cursor: pointer;
+}
+
+.guest-age-select :deep(.p-select-label) {
+  padding: 0 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
 }
 
 .guest-age-note {

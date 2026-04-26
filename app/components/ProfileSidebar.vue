@@ -132,8 +132,7 @@ const avatarDashOffset = computed(() => {
 const avatarLetter = computed(() => {
   if (!isMounted.value) return "?";
   const first = currentProfile.value?.firstName?.trim().charAt(0).toUpperCase() || "";
-  const last = currentProfile.value?.lastName?.trim().charAt(0).toUpperCase() || "";
-  return (first + last) || "?";
+  return first || "?";
 });
 
 function openAvatarPicker(event: MouseEvent) {
@@ -240,7 +239,7 @@ async function handleAvatarSelect(event: Event) {
     var(--color-primary-700)
   );
   color: #ffffff;
-  font-size: 1.8rem;
+  font-size: 2.4rem;
   font-weight: 800;
   display: flex;
   align-items: center;
