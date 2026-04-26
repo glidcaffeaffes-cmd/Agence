@@ -13,6 +13,8 @@ export type {
   BookingConfirmation,
   BookingCancellationPreview,
   BookingCancellationConfirmation,
+  CreateCheckoutSessionPayload,
+  CheckoutSessionResponse,
 } from './IReservationRepository'
 export type { IAccountRepository } from './IAccountRepository'
 export type { IOfferRepository } from './IOfferRepository'

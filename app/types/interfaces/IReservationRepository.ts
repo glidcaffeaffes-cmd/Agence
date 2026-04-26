@@ -88,6 +88,18 @@ export interface BookingCancellationConfirmation {
   }
 }
 
+export interface CreateCheckoutSessionPayload {
+  tripId: number
+  userId: number
+  totalPrice: number
+  bookingId: number
+}
+
+export interface CheckoutSessionResponse {
+  sessionId: string
+  url: string
+}
+
 export interface ReservationFetchOptions {
   page: number
   limit: number
@@ -114,6 +126,9 @@ export interface IReservationRepository {
     bookingId: number,
   ): Promise<BookingCancellationPreview>
   cancelBooking(bookingId: number): Promise<BookingCancellationConfirmation>
+  createCheckoutSession(
+    payload: CreateCheckoutSessionPayload,
+  ): Promise<CheckoutSessionResponse>
   updateStatus(
     id: number,
     status: ReservationStatus,

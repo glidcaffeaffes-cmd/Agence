@@ -6,6 +6,8 @@ import type {
   BookingCancellationPreview,
   BookingConfirmation,
   BookingCreatePayload,
+  CheckoutSessionResponse,
+  CreateCheckoutSessionPayload,
 } from '~/types/interfaces'
 import { ReservationService, RoomService } from '~/services'
 import { ReservationStatus as ReservationStatusEnum } from '~/types/enums'
@@ -48,6 +50,12 @@ export function useReservations() {
 
   async function cancelBooking(bookingId: number): Promise<BookingCancellationConfirmation | null> {
     return execute(() => reservationService.cancelBooking(bookingId), null)
+  }
+
+  async function createCheckoutSession(
+    payload: CreateCheckoutSessionPayload,
+  ): Promise<CheckoutSessionResponse | null> {
+    return execute(() => reservationService.createCheckoutSession(payload), null)
   }
 
   async function updateStatus(id: number, status: ReservationStatus, reason?: string) {
@@ -115,6 +123,7 @@ export function useReservations() {
     createBooking,
     getCancellationPreview,
     cancelBooking,
+    createCheckoutSession,
     updateStatus,
     fetchPaginated: async (
       options: import('~/types/interfaces/IReservationRepository').ReservationFetchOptions,

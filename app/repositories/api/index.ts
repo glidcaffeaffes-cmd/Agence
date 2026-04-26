@@ -11,6 +11,8 @@ import type {
   BookingCancellationConfirmation,
   BookingCancellationPreview,
   BookingCreatePayload,
+  CreateCheckoutSessionPayload,
+  CheckoutSessionResponse,
 } from '~/types/interfaces/IReservationRepository'
 import type { IOfferRepository } from '~/types/interfaces/IOfferRepository'
 import type { IComplaintRepository } from '~/types/interfaces/IComplaintRepository'
@@ -501,6 +503,15 @@ export class ApiReservationRepository implements IReservationRepository {
     })
     invalidateApiCache('/reservations', '/hotels/search/availability')
     return confirmation
+  }
+
+  async createCheckoutSession(
+    payload: CreateCheckoutSessionPayload,
+  ): Promise<CheckoutSessionResponse> {
+    return apiRequest<CheckoutSessionResponse>('/payments/create-checkout-session', {
+      method: 'POST',
+      body: payload,
+    })
   }
 
   async updateStatus(id: number, status: ReservationStatus, reason?: string): Promise<Reservation> {

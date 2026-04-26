@@ -508,7 +508,7 @@
                         </div>
                         <button
                           type="button"
-                          class="book-btn-outline"
+                          class="availability-book-btn"
                           @click="handleReserveNow(room)"
                         >
                           Reserve Now
@@ -2264,10 +2264,38 @@ onBeforeUnmount(() => {
 .availability-drawer-header { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; }
 .availability-drawer-header h3 { font-size: 24px; font-weight: 800; color: #001d34; margin: 0; }
 .availability-room-list { padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
-.availability-room-card { display: flex; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; }
-.availability-room-image { width: 280px; }
+.availability-room-card { display: flex; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; background: #fff; }
+.availability-room-image { width: 280px; min-width: 280px; }
 .availability-room-image img { width: 100%; height: 100%; object-fit: cover; }
 .availability-room-content { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+.availability-room-content h4 { margin: 0; font-size: 1.25rem; color: #0f172a; }
+.availability-room-meta { display: flex; flex-wrap: wrap; gap: 10px 14px; color: #334155; }
+.availability-room-meta span { display: inline-flex; align-items: center; gap: 4px; }
+.availability-room-meta .material-symbols-outlined { font-size: 20px; color: #1e293b; }
+.availability-room-footer {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.availability-book-btn {
+  border: 1px solid #0f172a;
+  background: #0f172a;
+  color: #fff;
+  padding: 9px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.availability-book-btn:hover {
+  background: #1e293b;
+  border-color: #1e293b;
+}
 
 /* Confirm Drawer */
 .booking-confirm-drawer { width: min(800px, 100%); }
@@ -2288,6 +2316,7 @@ onBeforeUnmount(() => {
   .gallery-main { height: 300px; }
   .availability-room-card { flex-direction: column; }
   .availability-room-image { width: 100%; height: 180px; }
+  .availability-book-btn { width: 100%; }
   .booking-form-grid { grid-template-columns: 1fr; }
   .availability-overlay { padding: 0; align-items: flex-end; }
   .availability-drawer { border-radius: 24px 24px 0 0; max-height: 95vh; }

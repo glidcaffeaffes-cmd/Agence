@@ -4,9 +4,13 @@ import type {
   BookingCancellationPreview,
   BookingCreatePayload,
   BookingConfirmation,
+  CheckoutSessionResponse,
+  CreateCheckoutSessionPayload,
 } from '~/types/interfaces'
 import type { Reservation } from '~/types/models'
 import type { ReservationStatus } from '~/types/enums'
+import type { ReservationFetchOptions } from '~/types/interfaces/IReservationRepository'
+import type { PaginatedResult } from '~/types/interfaces/IHotelRepository'
 import { mockReservations } from './data/reservations'
 import { ReservationStatus as ReservationStatusEnum } from '~/types/enums'
 
@@ -31,6 +35,45 @@ export class MockReservationRepository implements IReservationRepository {
 
   async getByStatus(status: ReservationStatus): Promise<Reservation[]> {
     return this.reservations.filter(r => r.status === status)
+  }
+
+  async fetchPaginated(
+    options: ReservationFetchOptions,
+  ): Promise<PaginatedResult<Reservation>> {
+    let items = [...this.reservations]
+
+    if (options.accountId) {
+      items = items.filter((reservation) => reservation.accountId === options.accountId)
+    }
+
+    if (options.hotelId) {
+      items = items.filter((reservation) => reservation.hotelId === options.hotelId)
+    }
+
+    if (options.status) {
+      items = items.filter((reservation) => reservation.status === options.status)
+    }
+
+    if (options.search?.trim()) {
+      const needle = options.search.trim().toLowerCase()
+      items = items.filter((reservation) =>
+        reservation.confirmationCode.toLowerCase().includes(needle),
+      )
+    }
+
+    const total = items.length
+    const page = Math.max(1, options.page)
+    const limit = Math.max(1, options.limit)
+    const start = (page - 1) * limit
+    const paged = items.slice(start, start + limit)
+
+    return {
+      items: paged,
+      total,
+      page,
+      limit,
+      totalPages: Math.max(1, Math.ceil(total / limit)),
+    }
   }
 
   async create(reservation: Omit<Reservation, 'id' | 'confirmationCode'>): Promise<Reservation> {
@@ -176,6 +219,24 @@ export class MockReservationRepository implements IReservationRepository {
       roomName: preview.roomName,
       stay: preview.stay,
       refund: preview.refund,
+    }
+  }
+
+  async createCheckoutSession(
+    payload: CreateCheckoutSessionPayload,
+  ): Promise<CheckoutSessionResponse> {
+    const reservation = this.reservations.find((entry) => entry.id === payload.bookingId)
+    if (!reservation) {
+      throw new Error('Booking not found')
+    }
+
+    if (reservation.accountId !== payload.userId) {
+      throw new Error('Booking does not belong to this user')
+    }
+
+    return {
+      sessionId: `cs_test_${payload.bookingId}`,
+      url: '/payment/success',
     }
   }
 

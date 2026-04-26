@@ -4,6 +4,8 @@ import type {
   BookingCancellationPreview,
   BookingConfirmation,
   BookingCreatePayload,
+  CheckoutSessionResponse,
+  CreateCheckoutSessionPayload,
 } from '~/types/interfaces'
 import type { Reservation } from '~/types/models'
 import { ReservationStatus } from '~/types/enums'
@@ -78,6 +80,12 @@ export class ReservationService {
 
   async cancelBooking(bookingId: number): Promise<BookingCancellationConfirmation> {
     return this.repo.cancelBooking(bookingId)
+  }
+
+  async createCheckoutSession(
+    payload: CreateCheckoutSessionPayload,
+  ): Promise<CheckoutSessionResponse> {
+    return this.repo.createCheckoutSession(payload)
   }
 
   /** Confirm a pending reservation (admin) */
