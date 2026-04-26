@@ -46,7 +46,9 @@
               <div v-if="activeTab === 'Account Settings'" class="tab-pane">
                 <form @submit.prevent="saveProfile" class="profile-form">
                   <!-- Personal Details Section -->
-                  <section class="settings-section">
+                  <section
+                    class="settings-section settings-section--allow-overflow"
+                  >
                     <div class="settings-section__header">
                       <span class="material-symbols-outlined section-icon"
                         >account_circle</span
@@ -176,19 +178,83 @@
                               getFieldStatusText("phone", formData.phone)
                             }}</span>
                           </div>
-                          <div class="input-icon-wrap">
-                            <span class="input-prefix">+216</span>
-                            <input
-                              type="tel"
-                              v-model="formData.phone"
-                              placeholder="01 234 567"
-                              class="form-input form-input--prefix"
-                            />
-                            <span
-                              class="material-symbols-outlined state-icon"
-                              >{{ getFieldIcon("phone", formData.phone) }}</span
+                          <div class="phone-input-group">
+                            <div
+                              ref="phoneCountryPickerRef"
+                              class="phone-country-picker"
                             >
+                              <button
+                                type="button"
+                                class="phone-country-trigger"
+                                @click="togglePhoneCountryMenu"
+                              >
+                                <img
+                                  v-if="selectedPhoneCountryData"
+                                  :src="selectedPhoneCountryData.flagUrl"
+                                  :alt="selectedPhoneCountryData.name"
+                                  class="phone-country-flag"
+                                  loading="lazy"
+                                />
+                                <span class="phone-country-trigger__text">
+                                  {{ selectedPhoneCountryLabel }}
+                                </span>
+                                <span class="material-symbols-outlined">
+                                  {{
+                                    isPhoneCountryMenuOpen
+                                      ? "expand_less"
+                                      : "expand_more"
+                                  }}
+                                </span>
+                              </button>
+                            </div>
+                            <Teleport to="body">
+                              <div
+                                v-if="isPhoneCountryMenuOpen"
+                                ref="phoneCountryMenuRef"
+                                class="phone-country-menu"
+                                :style="phoneCountryMenuStyle"
+                              >
+                                <button
+                                  v-for="country in phoneCountries"
+                                  :key="country.code"
+                                  type="button"
+                                  class="phone-country-option"
+                                  @click="selectPhoneCountry(country.code)"
+                                >
+                                  <img
+                                    :src="country.flagUrl"
+                                    :alt="country.name"
+                                    class="phone-country-flag"
+                                    loading="lazy"
+                                  />
+                                  <span>
+                                    {{ country.code }} (+{{ country.dialCode }})
+                                  </span>
+                                </button>
+                              </div>
+                            </Teleport>
+                            <div class="input-icon-wrap">
+                              <span class="phone-dial-prefix">
+                                {{ selectedPhoneDialPrefix }}
+                              </span>
+                              <input
+                                type="tel"
+                                v-model="formData.phone"
+                                :placeholder="phonePlaceholder"
+                                class="form-input form-input--phone"
+                                @input="onPhoneInput"
+                              />
+                              <span
+                                class="material-symbols-outlined state-icon"
+                                >{{
+                                  getFieldIcon("phone", formData.phone)
+                                }}</span
+                              >
+                            </div>
                           </div>
+                          <p v-if="phoneValidationMessage" class="form-error">
+                            {{ phoneValidationMessage }}
+                          </p>
                         </div>
                         <!-- Email (Locked) -->
                         <div class="form-group">
@@ -429,7 +495,10 @@
                       </button>
                     </div>
 
-                    <div v-if="paymentMethods.length" class="payment-methods-list">
+                    <div
+                      v-if="paymentMethods.length"
+                      class="payment-methods-list"
+                    >
                       <article
                         v-for="method in paymentMethods"
                         :key="method.id"
@@ -597,9 +666,7 @@
                           class="btn-update"
                           :disabled="loading"
                         >
-                          {{
-                            loading ? "Saving..." : "Save Payment Method"
-                          }}
+                          {{ loading ? "Saving..." : "Save Payment Method" }}
                         </button>
                       </div>
                     </form>
@@ -694,10 +761,26 @@
 
 <script setup lang="ts">
 definePageMeta({ middleware: "auth" });
-import { ref, watch, computed, onMounted } from "vue";
+import {
+  ref,
+  watch,
+  computed,
+  onMounted,
+  onBeforeUnmount,
+  nextTick,
+} from "vue";
 import { useRoute } from "vue-router";
 import type { PaymentMethod } from "~/types/models";
 import { useAuth } from "~/composables/useAuth";
+import {
+  getCountries,
+  getCountryCallingCode,
+  isValidPhoneNumber,
+  parsePhoneNumberFromString,
+  validatePhoneNumberLength,
+  type CountryCode,
+} from "libphonenumber-js";
+import phoneExamplesData from "libphonenumber-js/examples.mobile";
 
 const route = useRoute();
 const {
@@ -710,6 +793,87 @@ const {
 } = useAuth();
 const activeTab = ref("Account Settings");
 const currentYear = new Date().getFullYear();
+const defaultPhoneCountry: CountryCode = "TN";
+const phoneExamples = phoneExamplesData as Record<string, string>;
+
+type PhoneCountry = {
+  code: CountryCode;
+  dialCode: string;
+  name: string;
+  flagUrl: string;
+};
+
+const DisplayNamesCtor = (Intl as any).DisplayNames as
+  | (new (
+      locales?: string | string[],
+      options?: { type: "region" },
+    ) => { of: (code: string) => string | undefined })
+  | undefined;
+const regionNameFormatter = DisplayNamesCtor
+  ? new DisplayNamesCtor(["en"], { type: "region" })
+  : null;
+
+const phoneCountries: PhoneCountry[] = getCountries()
+  .map((code) => {
+    const countryCode = code as CountryCode;
+    return {
+      code: countryCode,
+      dialCode: getCountryCallingCode(countryCode),
+      name: regionNameFormatter?.of(countryCode) || countryCode,
+      flagUrl: `https://flagcdn.com/24x18/${countryCode.toLowerCase()}.png`,
+    };
+  })
+  .sort((a, b) => a.name.localeCompare(b.name));
+
+const selectedPhoneCountry = ref<CountryCode>(defaultPhoneCountry);
+const phoneCountryPickerRef = ref<HTMLElement | null>(null);
+const phoneCountryMenuRef = ref<HTMLElement | null>(null);
+const isPhoneCountryMenuOpen = ref(false);
+const phoneCountryMenuStyle = ref<Record<string, string>>({});
+const selectedPhoneCountryData = computed(
+  () =>
+    phoneCountries.find(
+      (country) => country.code === selectedPhoneCountry.value,
+    ) ||
+    phoneCountries.find((country) => country.code === defaultPhoneCountry) ||
+    null,
+);
+const selectedPhoneCountryLabel = computed(() => {
+  const country = selectedPhoneCountryData.value;
+  if (!country) return "";
+  return country.code;
+});
+const selectedPhoneDialPrefix = computed(() => {
+  const country = selectedPhoneCountryData.value;
+  return country ? `+${country.dialCode}` : "";
+});
+const selectedPhoneLengthInfo = computed(() => {
+  const country = selectedPhoneCountry.value;
+  const validLengths: number[] = [];
+
+  for (let length = 2; length <= 15; length += 1) {
+    const probe = "9".repeat(length);
+    const status = validatePhoneNumberLength(probe, country);
+    if (status === undefined) {
+      validLengths.push(length);
+    }
+  }
+
+  if (validLengths.length === 0) {
+    return { label: "digits required", example: "" };
+  }
+
+  const min = Math.min(...validLengths);
+  const max = Math.max(...validLengths);
+  const label = min === max ? `${min} digits` : `${min}-${max} digits`;
+  const example = "0".repeat(min);
+
+  return { label, example };
+});
+const phonePlaceholder = computed(() => {
+  if (!selectedPhoneCountry.value) return "";
+  return phoneExamples[selectedPhoneCountry.value] || "";
+});
 
 // Handle query param for tabs
 onMounted(() => {
@@ -717,6 +881,14 @@ onMounted(() => {
   if (tabParam) {
     activeTab.value = tabParam;
   }
+
+  document.addEventListener("mousedown", handlePhoneCountryOutsideClick);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener("mousedown", handlePhoneCountryOutsideClick);
+  window.removeEventListener("resize", updatePhoneCountryMenuPosition);
+  window.removeEventListener("scroll", updatePhoneCountryMenuPosition, true);
 });
 
 watch(
@@ -727,6 +899,31 @@ watch(
     }
   },
 );
+
+watch(selectedPhoneCountry, () => {
+  let digits = formData.value.phone.replace(/\D/g, "");
+  while (
+    digits &&
+    validatePhoneNumberLength(digits, selectedPhoneCountry.value) === "TOO_LONG"
+  ) {
+    digits = digits.slice(0, -1);
+  }
+  formData.value.phone = digits;
+  isPhoneCountryMenuOpen.value = false;
+});
+
+watch(isPhoneCountryMenuOpen, async (isOpen) => {
+  if (isOpen) {
+    await nextTick();
+    updatePhoneCountryMenuPosition();
+    window.addEventListener("resize", updatePhoneCountryMenuPosition);
+    window.addEventListener("scroll", updatePhoneCountryMenuPosition, true);
+    return;
+  }
+
+  window.removeEventListener("resize", updatePhoneCountryMenuPosition);
+  window.removeEventListener("scroll", updatePhoneCountryMenuPosition, true);
+});
 
 const notificationSettings = ref({ reservation: true, promotion: false });
 
@@ -762,6 +959,36 @@ const formData = ref({
   preferredDestinations: [] as string[],
   travelPreferences: [] as string[],
 });
+const phoneValidationMessage = computed(() => {
+  const digits = formData.value.phone.replace(/\D/g, "");
+  if (!digits) {
+    return "";
+  }
+
+  const currentCountry = selectedPhoneCountry.value;
+  const lengthStatus = validatePhoneNumberLength(digits, currentCountry);
+  const countryName =
+    selectedPhoneCountryData.value?.name || "selected country";
+
+  if (lengthStatus === "TOO_SHORT") {
+    return `Number is too short for ${countryName}.`;
+  }
+
+  if (lengthStatus === "TOO_LONG") {
+    return `Number is too long for ${countryName}.`;
+  }
+
+  if (lengthStatus === "INVALID_LENGTH") {
+    return `Invalid number length for ${countryName}.`;
+  }
+
+  const fullNumber = `+${getCountryCallingCode(currentCountry)}${digits}`;
+  if (!isValidPhoneNumber(fullNumber)) {
+    return `Invalid phone number for ${countryName}.`;
+  }
+
+  return "";
+});
 const paymentForm = ref({
   cardholderName: "",
   brand: "visa" as PaymentMethod["brand"],
@@ -772,22 +999,26 @@ const paymentForm = ref({
 });
 const paymentFormError = ref("");
 const showPaymentForm = ref(false);
-const paymentMethods = computed(() => currentProfile.value?.paymentMethods ?? []);
+const paymentMethods = computed(
+  () => currentProfile.value?.paymentMethods ?? [],
+);
 
 watch(
   currentProfile,
   (profile) => {
     if (profile) {
+      const phoneData = normalizePhoneInput(profile.phone || "");
       formData.value = {
         firstName: profile.firstName || "",
         lastName: profile.lastName || "",
-        phone: normalizePhoneInput(profile.phone || ""),
+        phone: phoneData.national,
         dateOfBirth: profile.dateOfBirth || "",
         passportNumber: profile.passportNumber || "",
         bio: profile.bio || "",
         preferredDestinations: profile.preferredDestinations || [],
         travelPreferences: profile.travelPreferences || [],
       };
+      selectedPhoneCountry.value = phoneData.country;
       notificationSettings.value = {
         reservation: profile.notificationsReservation,
         promotion: profile.notificationsPromotion,
@@ -798,6 +1029,11 @@ watch(
 );
 
 async function saveProfile() {
+  if (formData.value.phone && phoneValidationMessage.value) {
+    alert(phoneValidationMessage.value);
+    return;
+  }
+
   const success = await updateProfile({
     ...formData.value,
     phone: normalizePhoneForSave(formData.value.phone),
@@ -884,7 +1120,9 @@ async function savePaymentMethod() {
 }
 
 async function setDefaultPaymentMethod(paymentMethodId: number) {
-  const success = await updatePaymentMethod(paymentMethodId, { isDefault: true });
+  const success = await updatePaymentMethod(paymentMethodId, {
+    isDefault: true,
+  });
   if (!success) {
     alert("Failed to update payment method.");
   }
@@ -905,35 +1143,111 @@ function hasValue(val: any) {
 }
 
 function getFieldState(key: string, value: any) {
+  if (key === "phone") {
+    if (!hasValue(value)) return "form-group--incomplete";
+    return phoneValidationMessage.value
+      ? "form-group--incomplete"
+      : "form-group--completed";
+  }
   if (hasValue(value)) return "form-group--completed";
   return "form-group--incomplete";
 }
 
 function getFieldStatusText(key: string, value: any) {
+  if (key === "phone") {
+    if (!hasValue(value)) return "Missing information";
+    return phoneValidationMessage.value ? "Invalid number" : "Completed";
+  }
   if (hasValue(value)) return "Completed";
   return "Missing information";
 }
 
 function getFieldIcon(key: string, value: any) {
+  if (key === "phone") {
+    if (hasValue(value) && !phoneValidationMessage.value) return "check_circle";
+    return "error";
+  }
   if (hasValue(value)) return "check_circle";
   return "error";
 }
 
-function normalizePhoneInput(phone: string) {
-  const digits = phone.replace(/\D/g, "");
-  if (digits.startsWith("216") && digits.length > 8) {
-    return digits.slice(3);
+function onPhoneInput(event: Event) {
+  const input = event.target as HTMLInputElement;
+  let digits = input.value.replace(/\D/g, "");
+  while (
+    digits &&
+    validatePhoneNumberLength(digits, selectedPhoneCountry.value) === "TOO_LONG"
+  ) {
+    digits = digits.slice(0, -1);
   }
-  return digits;
+  formData.value.phone = digits;
+}
+
+function togglePhoneCountryMenu() {
+  isPhoneCountryMenuOpen.value = !isPhoneCountryMenuOpen.value;
+}
+
+function selectPhoneCountry(countryCode: CountryCode) {
+  selectedPhoneCountry.value = countryCode;
+  isPhoneCountryMenuOpen.value = false;
+}
+
+function handlePhoneCountryOutsideClick(event: MouseEvent) {
+  if (!isPhoneCountryMenuOpen.value || !phoneCountryPickerRef.value) {
+    return;
+  }
+
+  const target = event.target as Node | null;
+  const clickedInsidePicker =
+    !!target && phoneCountryPickerRef.value.contains(target);
+  const clickedInsideMenu =
+    !!target && !!phoneCountryMenuRef.value?.contains(target);
+  if (!clickedInsidePicker && !clickedInsideMenu) {
+    isPhoneCountryMenuOpen.value = false;
+  }
+}
+
+function updatePhoneCountryMenuPosition() {
+  const anchor = phoneCountryPickerRef.value;
+  if (!anchor) {
+    return;
+  }
+
+  const rect = anchor.getBoundingClientRect();
+  phoneCountryMenuStyle.value = {
+    left: `${rect.left}px`,
+    top: `${rect.bottom + 6}px`,
+    width: `${rect.width}px`,
+  };
+}
+
+function normalizePhoneInput(phone: string): {
+  country: CountryCode;
+  national: string;
+} {
+  const trimmed = phone.trim();
+  if (!trimmed) {
+    return { country: defaultPhoneCountry, national: "" };
+  }
+
+  const parsed = parsePhoneNumberFromString(trimmed);
+  if (parsed?.country) {
+    return {
+      country: parsed.country as CountryCode,
+      national: parsed.nationalNumber,
+    };
+  }
+
+  return {
+    country: selectedPhoneCountry.value || defaultPhoneCountry,
+    national: trimmed.replace(/\D/g, ""),
+  };
 }
 
 function normalizePhoneForSave(phone: string) {
   const digits = phone.replace(/\D/g, "");
   if (!digits) return "";
-  if (digits.startsWith("216") && digits.length > 8) {
-    return `+${digits}`;
-  }
-  return digits.length === 8 ? `+216${digits}` : `+${digits}`;
+  return `+${getCountryCallingCode(selectedPhoneCountry.value)}${digits}`;
 }
 
 function formatCardBrand(brand: PaymentMethod["brand"]) {
@@ -995,7 +1309,7 @@ function formatCardBrand(brand: PaymentMethod["brand"]) {
   display: flex;
   flex-direction: column;
   padding: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .tabs-header {
@@ -1100,6 +1414,10 @@ function formatCardBrand(brand: PaymentMethod["brand"]) {
     box-shadow 0.2s ease;
 }
 
+.settings-section--allow-overflow {
+  overflow: visible;
+}
+
 .settings-section:hover {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
@@ -1193,8 +1511,149 @@ function formatCardBrand(brand: PaymentMethod["brand"]) {
 .form-input--prefix {
   padding-left: 52px;
 }
+.phone-input-group {
+  display: flex;
+  align-items: stretch;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-bg-soft);
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.phone-input-group:focus-within {
+  background: #ffffff;
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px rgba(0, 103, 104, 0.12);
+}
+
+.phone-country-picker {
+  position: relative;
+  flex: 0 0 76px;
+  z-index: 30;
+  border-right: 1.5px solid var(--color-border);
+}
+
+.phone-country-trigger {
+  width: 100%;
+  min-height: 52px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  font-size: 11px;
+  color: var(--color-text);
+  outline: none;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+  .material-symbols-outlined {
+    font-size: 20px !important;
+  }
+}
+
+.phone-country-trigger:hover {
+  background: #ffffff;
+}
+
+.phone-country-trigger:focus {
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.phone-country-trigger__text {
+  flex: 0 0 auto;
+  min-width: 0;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.phone-country-menu {
+  position: fixed;
+  min-width: 220px;
+  max-height: 280px;
+  overflow: auto;
+  z-index: 4000;
+  background: #ffffff;
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+  padding: 6px;
+}
+
+.phone-country-option {
+  width: 100%;
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.phone-country-option:hover {
+  background: var(--color-bg-soft);
+}
+
+.phone-country-flag {
+  width: 20px;
+  height: 15px;
+  border-radius: 2px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
 .input-icon-wrap {
   position: relative;
+}
+
+.phone-input-group .input-icon-wrap {
+  flex: 1;
+}
+
+.form-input--phone {
+  min-height: 52px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  padding-left: 72px;
+  padding-right: 46px;
+  font-size: 18px;
+}
+
+.form-input--phone:focus {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.form-input--phone::placeholder {
+  font-size: 13px;
+}
+
+.form-group--completed .form-input--phone,
+.form-group--incomplete .form-input--phone {
+  border: none;
+  background: transparent;
+}
+
+.phone-dial-prefix {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--color-text-muted);
+  pointer-events: none;
+  z-index: 2;
 }
 .input-prefix {
   position: absolute;
@@ -1610,6 +2069,12 @@ input[type="date"] ~ .state-icon {
 @media (max-width: 600px) {
   .form-row {
     grid-template-columns: 1fr;
+  }
+  .phone-input-group {
+    flex-direction: row;
+  }
+  .phone-country-picker {
+    flex-basis: 86px;
   }
   .tabs-header {
     overflow-x: auto;
