@@ -24,9 +24,7 @@
       <!-- ═══ HERO 2-COLUMN LAYOUT ═══ -->
       <section class="hero-layout">
 
-        <!-- LEFT COLUMN: Gallery & Booking -->
-        <div class="hero-left-column">
-          <!-- LEFT: Gallery -->
+        <!-- LEFT: Gallery -->
           <div class="hero-gallery">
             <div class="gallery-stage" v-if="hotel.images && hotel.images.length > 0">
               <div class="gallery-main" @touchstart="onTouchStart" @touchend="onTouchEnd">
@@ -61,60 +59,6 @@
               </div>
             </div>
 
-            <!-- Booking Widget Below Gallery -->
-            <div class="hi-booking" ref="bookingPanelRef">
-              <div class="hi-price-row">
-                <span class="hi-price">From <strong>{{ formatEuro(fromPricePerNight) }}</strong></span>
-                <span class="hi-per">/night</span>
-              </div>
-              <div class="hi-date-grid">
-                <div class="hi-date-field">
-                  <label>CHECK-IN</label>
-                  <DatePicker v-model="checkInDate" :manualInput="false" :minDate="today" appendTo="self" placeholder="Select" dateFormat="M d, yy" class="booking-date-picker" />
-                </div>
-                <div class="hi-date-field">
-                  <label>CHECK-OUT</label>
-                  <DatePicker v-model="checkOutDate" :manualInput="false" :minDate="checkOutMinDate" appendTo="self" placeholder="Select" dateFormat="M d, yy" class="booking-date-picker" />
-                </div>
-              </div>
-              <button
-                type="button"
-                class="hi-guest-trigger"
-                :class="{ 'hi-guest-trigger--open': isGuestPanelOpen }"
-                @click="isGuestPanelOpen = !isGuestPanelOpen"
-              >
-                <span class="material-symbols-outlined">person</span>
-                <span>{{ guestSummary }}</span>
-                <span class="material-symbols-outlined" style="margin-left:auto">expand_more</span>
-              </button>
-              <div v-if="isGuestPanelOpen" class="guest-panel">
-                <div class="guest-counter-row">
-                  <div class="guest-counter-copy"><strong>Adults</strong><span>Ages 18+</span></div>
-                  <div class="guest-counter-control">
-                    <button type="button" class="guest-counter-btn" :disabled="adults <= 1" @click="updateGuestCount('adults', -1)">−</button>
-                    <span>{{ adults }}</span>
-                    <button type="button" class="guest-counter-btn" @click="updateGuestCount('adults', 1)">+</button>
-                  </div>
-                </div>
-                <div class="guest-counter-row">
-                  <div class="guest-counter-copy"><strong>Children</strong><span>Ages 0-17</span></div>
-                  <div class="guest-counter-control">
-                    <button type="button" class="guest-counter-btn" :disabled="children <= 0" @click="updateGuestCount('children', -1)">−</button>
-                    <span>{{ children }}</span>
-                    <button type="button" class="guest-counter-btn" @click="updateGuestCount('children', 1)">+</button>
-                  </div>
-                </div>
-              </div>
-              <button class="hi-book-btn" @click="bookNow">Check Availability</button>
-              <p class="hi-no-charge">You won't be charged yet</p>
-
-              <div class="hi-breakdown" v-if="checkInDate && checkOutDate">
-                <div class="hi-bd-row"><span>{{ formatEuro(fromPricePerNight) }} × {{ nightsCount }} nights</span><span>{{ formatEuro(totalNightsPrice) }}</span></div>
-                <div class="hi-bd-row"><span>City tax</span><span>15€</span></div>
-                <div class="hi-bd-row hi-bd-total"><span>Total</span><span>{{ formatEuro(totalNightsPrice + 15) }}</span></div>
-              </div>
-            </div>
-          </div>
         </div>
 
         <!-- RIGHT: Hotel Info -->
@@ -169,6 +113,77 @@
             </div>
           </div>
 
+        </div>
+      </section>
+
+      <!-- Booking Section -->
+      <section class="booking-section-bottom">
+        <!-- Booking Widget -->
+        <div class="hi-booking hi-booking--horizontal" ref="bookingPanelRef">
+          <div class="hi-booking-main-row">
+            <div class="hi-price-col">
+              <div class="hi-price-row">
+                <span class="hi-price">From <strong>{{ formatEuro(fromPricePerNight) }}</strong></span>
+                <span class="hi-per">/night</span>
+              </div>
+              <p class="hi-no-charge">You won't be charged yet</p>
+            </div>
+            
+            <div class="hi-controls-col">
+              <div class="hi-date-grid">
+                <div class="hi-date-field">
+                  <label>CHECK-IN</label>
+                  <DatePicker v-model="checkInDate" :manualInput="false" :minDate="today" appendTo="self" placeholder="Select" dateFormat="M d, yy" class="booking-date-picker" />
+                </div>
+                <div class="hi-date-field">
+                  <label>CHECK-OUT</label>
+                  <DatePicker v-model="checkOutDate" :manualInput="false" :minDate="checkOutMinDate" appendTo="self" placeholder="Select" dateFormat="M d, yy" class="booking-date-picker" />
+                </div>
+              </div>
+              
+              <div class="hi-guest-wrapper">
+                <button
+                  type="button"
+                  class="hi-guest-trigger"
+                  :class="{ 'hi-guest-trigger--open': isGuestPanelOpen }"
+                  @click="isGuestPanelOpen = !isGuestPanelOpen"
+                >
+                  <span class="material-symbols-outlined">person</span>
+                  <span>{{ guestSummary }}</span>
+                  <span class="material-symbols-outlined" style="margin-left:auto">expand_more</span>
+                </button>
+                <div v-if="isGuestPanelOpen" class="guest-panel">
+                  <div class="guest-counter-row">
+                    <div class="guest-counter-copy"><strong>Adults</strong><span>Ages 18+</span></div>
+                    <div class="guest-counter-control">
+                      <button type="button" class="guest-counter-btn" :disabled="adults <= 1" @click="updateGuestCount('adults', -1)">−</button>
+                      <span>{{ adults }}</span>
+                      <button type="button" class="guest-counter-btn" @click="updateGuestCount('adults', 1)">+</button>
+                    </div>
+                  </div>
+                  <div class="guest-counter-row">
+                    <div class="guest-counter-copy"><strong>Children</strong><span>Ages 0-17</span></div>
+                    <div class="guest-counter-control">
+                      <button type="button" class="guest-counter-btn" :disabled="children <= 0" @click="updateGuestCount('children', -1)">−</button>
+                      <span>{{ children }}</span>
+                      <button type="button" class="guest-counter-btn" @click="updateGuestCount('children', 1)">+</button>
+                    </div>
+                  </div>
+                  <button type="button" class="guest-done-button" @click="isGuestPanelOpen = false">Done</button>
+                </div>
+              </div>
+              
+              <button class="hi-book-btn" :disabled="!canCheckAvailability || availabilityLoading" @click="handleCheckAvailability">
+                {{ availabilityLoading ? 'Checking...' : 'Check Availability' }}
+              </button>
+            </div>
+          </div>
+
+          <div class="hi-breakdown hi-breakdown--horizontal" v-if="priceSummary.nights > 0">
+            <div class="hi-bd-row"><span>{{ formatEuro(priceSummary.pricePerNight) }} × {{ priceSummary.nights }} nights</span><span>{{ formatEuro(priceSummary.basePrice) }}</span></div>
+            <div class="hi-bd-row"><span>City tax</span><span>{{ formatEuro(priceSummary.cityTax) }}</span></div>
+            <div class="hi-bd-row hi-bd-total"><span>Total</span><span>{{ formatEuro(priceSummary.total) }}</span></div>
+          </div>
         </div>
       </section>
 
@@ -1326,6 +1341,13 @@ onBeforeUnmount(() => {
   }
 }
 
+/* ═══ BOTTOM BOOKING SECTION ═══ */
+.booking-section-bottom {
+  max-width: 1200px;
+  margin: 0 auto 60px;
+  padding: 0 24px;
+}
+
 /* LEFT: Gallery */
 .hero-gallery {
   width: 100%;
@@ -1566,20 +1588,74 @@ onBeforeUnmount(() => {
   border-radius: 20px;
   padding: 24px;
   box-shadow: 0 15px 35px rgba(0,0,0,0.06);
-  max-width: 450px;
+  width: 100%;
 }
-.hi-price-row { display: flex; align-items: baseline; gap: 4px; margin-bottom: 20px; }
+
+.hi-booking--horizontal .hi-booking-main-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.hi-booking--horizontal .hi-price-col {
+  flex: 0 0 auto;
+  min-width: 150px;
+}
+
+.hi-booking--horizontal .hi-controls-col {
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+  gap: 16px;
+}
+
+.hi-booking--horizontal .hi-date-grid {
+  margin-bottom: 0;
+  flex: 1;
+  min-width: 250px;
+}
+
+.hi-booking--horizontal .hi-guest-wrapper {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+}
+
+.hi-booking--horizontal .hi-guest-trigger {
+  margin-bottom: 0;
+  height: auto;
+  flex: 1;
+}
+
+.hi-booking--horizontal .guest-panel {
+  top: calc(100% + 8px);
+  left: 0;
+  right: auto;
+  width: 300px;
+}
+
+.hi-booking--horizontal .hi-book-btn {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 180px;
+  padding: 14px 24px;
+  height: auto;
+  align-self: stretch;
+}
+
+.hi-price-row { display: flex; align-items: baseline; gap: 4px; margin-bottom: 8px; }
 .hi-price { font-size: 16px; color: #64748b; }
 .hi-price strong { font-size: 28px; font-weight: 800; color: #001d34; }
 .hi-per { font-size: 14px; color: #94a3b8; }
+.hi-no-charge { text-align: left; font-size: 12px; color: #94a3b8; margin: 0; }
 
 .hi-date-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   border: 1px solid #cbd5e1;
   border-radius: 12px;
-  overflow: hidden;
-  margin-bottom: 12px;
 }
 .hi-date-field { padding: 10px 14px; }
 .hi-date-field:first-child { border-right: 1px solid #cbd5e1; }
@@ -1598,7 +1674,6 @@ onBeforeUnmount(() => {
   font-size: 14px;
   font-weight: 600;
   color: #334155;
-  margin-bottom: 16px;
 }
 
 .hi-book-btn {
@@ -1613,10 +1688,11 @@ onBeforeUnmount(() => {
   cursor: pointer;
   transition: all 0.2s;
 }
-.hi-book-btn:hover { background: #007677; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 143, 144, 0.3); }
-.hi-no-charge { text-align: center; font-size: 12px; color: #94a3b8; margin: 12px 0 0; }
+.hi-book-btn:hover:not(:disabled) { background: #007677; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 143, 144, 0.3); }
+.hi-book-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .hi-breakdown { margin-top: 20px; padding-top: 16px; border-top: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 10px; }
+.hi-breakdown--horizontal { max-width: 400px; margin-left: auto; }
 .hi-bd-row { display: flex; justify-content: space-between; font-size: 14px; color: #64748b; }
 .hi-bd-total { margin-top: 6px; padding-top: 10px; border-top: 1px dashed #e2e8f0; font-weight: 800; color: #001d34; font-size: 16px; }
 
