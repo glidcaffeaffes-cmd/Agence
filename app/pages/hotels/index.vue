@@ -150,12 +150,7 @@
               </div>
             </div>
 
-            <div class="guest-counter-row guest-pets-row">
-              <div class="guest-counter-copy">
-                <strong>Traveling with pets?</strong>
-              </div>
-              <ToggleSwitch v-model="travelWithPets" />
-            </div>
+
 
             <Button type="button" label="Apply" class="apply-btn guest-done-button" @click="activeFilterPanel = null" />
           </div>
@@ -263,7 +258,7 @@ const adults = ref(2)
 const children = ref(1)
 const roomsRequested = ref(2)
 const childAges = ref<number[]>([14])
-const travelWithPets = ref(false)
+
 const childAgeOptions = Array.from({ length: 17 }, (_, index) => ({
   label: `${index + 1} years old`,
   value: index + 1,
@@ -367,7 +362,6 @@ function applyRouteFilters() {
   children.value = Math.max(0, Number.isNaN(childrenQuery) ? 1 : childrenQuery)
   roomsRequested.value = Math.max(1, Number.isNaN(roomCount) ? 2 : roomCount)
   childAges.value = parseChildAges(childAgesQuery, children.value)
-  travelWithPets.value = typeof route.query.pets === 'string' && route.query.pets === '1'
   normalizeStayDates()
 }
 
@@ -389,7 +383,7 @@ function buildRouteQuery() {
   if (children.value > 0 && childAges.value.length > 0) {
     query.childAges = childAges.value.join(',')
   }
-  if (travelWithPets.value) query.pets = '1'
+
   return query
 }
 
