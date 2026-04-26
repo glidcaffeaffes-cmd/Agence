@@ -627,7 +627,7 @@ export class ApiNotificationRepository implements INotificationRepository {
   }
 
   async getByAccount(accountId: number): Promise<AppNotification[]> {
-    const dtos = await apiGetCached<NotificationDTO[]>(`/notifications/account/${accountId}`)
+    const dtos = await apiRequest<NotificationDTO[]>(`/notifications/account/${accountId}`)
     return dtos.map(NotificationMapper.fromDto)
   }
 
@@ -644,9 +644,9 @@ export class ApiNotificationRepository implements INotificationRepository {
   }
 
   async markAllAsRead(accountId: number): Promise<void> {
-    const unread = await this.getUnread(accountId)
-
-    await Promise.all(unread.map((notification) => this.markAsRead(notification.id)))
+    await apiRequest(`/notifications/account/${accountId}/read-all`, {
+      method: 'PATCH',
+    })
     invalidateApiCache('/notifications')
   }
 

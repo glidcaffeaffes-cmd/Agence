@@ -183,7 +183,7 @@
             <label class="flex items-start gap-3 cursor-pointer pt-1">
               <input v-model="agreed" type="checkbox" class="mt-1 w-4 h-4 transition-colors rounded focus:ring-primary focus:ring-2 accent-primary" :class="submitted && !agreed ? 'border-error ring-1 ring-error' : 'border-outline-variant'" />
               <span class="text-sm text-on-surface-variant leading-snug">
-                I agree to the <a href="#" class="font-semibold text-primary hover:underline">Terms of Service</a> and <a href="#" class="font-semibold text-primary hover:underline">Privacy Policy</a> <span class="text-error">*</span>
+                I agree to the <NuxtLink to="/terms" class="font-semibold text-primary hover:underline">Terms of Service</NuxtLink> and <NuxtLink to="/privacy" class="font-semibold text-primary hover:underline">Privacy Policy</NuxtLink> <span class="text-error">*</span>
               </span>
             </label>
             <p v-if="submitted && !agreed" class="text-xs text-error font-medium mt-1 flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">error</span> You must agree to the terms to continue</p>

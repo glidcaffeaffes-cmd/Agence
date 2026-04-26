@@ -2,63 +2,128 @@
   <div class="landing-page">
     <Head>
       <title>VoyageHub — Premium Hotel Booking</title>
-      <meta name="description" content="Discover exceptional hotel stays across France. Book your perfect luxury getaway with VoyageHub." />
+      <meta
+        name="description"
+        content="Discover exceptional hotel stays across France. Book your perfect luxury getaway with VoyageHub."
+      />
     </Head>
 
     <!-- Hero Section -->
     <section class="hero-premium">
       <div class="hero-shell">
-        <img src="/images/hero.png" alt="VoyageHub luxury resort" class="hero-backdrop" />
+        <img
+          src="/images/hero.png"
+          alt="VoyageHub luxury resort"
+          class="hero-backdrop"
+        />
         <div class="hero-overlay"></div>
 
         <div class="hero-content">
           <div class="hero-copy">
-            <h1 class="hero-title">Finding your next exceptional stay is simple.</h1>
+            <h1 class="hero-title">
+              Finding your next exceptional stay is simple.
+            </h1>
           </div>
         </div>
 
-        <div ref="heroFilterRef" class="hero-filter-shell" :class="{ 'hero-filter-shell--panel-open': activeFilterPanel !== null }">
+        <div
+          ref="heroFilterRef"
+          class="hero-filter-shell"
+          :class="{
+            'hero-filter-shell--panel-open': activeFilterPanel !== null,
+          }"
+        >
           <div class="hero-filter-bar">
-            <button type="button" class="hero-filter-trigger" :class="{ 'hero-filter-trigger--open': activeFilterPanel === 'destination' }" @click="toggleFilterPanel('destination')">
-              <span class="material-symbols-outlined hero-filter-trigger__icon">bed</span>
+            <button
+              type="button"
+              class="hero-filter-trigger"
+              :class="{
+                'hero-filter-trigger--open':
+                  activeFilterPanel === 'destination',
+              }"
+              @click="toggleFilterPanel('destination')"
+            >
+              <span class="material-symbols-outlined hero-filter-trigger__icon"
+                >bed</span
+              >
               <span class="hero-filter-trigger__copy">
                 <span class="hero-filter-trigger__label">Destination</span>
-                <span class="hero-filter-trigger__value">{{ selectedCity || 'Choose a city' }}</span>
+                <span class="hero-filter-trigger__value">{{
+                  selectedCity || "Choose a city"
+                }}</span>
               </span>
-              <span class="material-symbols-outlined hero-filter-trigger__chevron">expand_more</span>
+              <span
+                class="material-symbols-outlined hero-filter-trigger__chevron"
+                >expand_more</span
+              >
             </button>
 
-            <button type="button" class="hero-filter-trigger" :class="{ 'hero-filter-trigger--open': activeFilterPanel === 'dates' }" @click="toggleFilterPanel('dates')">
-              <span class="material-symbols-outlined hero-filter-trigger__icon">calendar_month</span>
+            <button
+              type="button"
+              class="hero-filter-trigger"
+              :class="{
+                'hero-filter-trigger--open': activeFilterPanel === 'dates',
+              }"
+              @click="toggleFilterPanel('dates')"
+            >
+              <span class="material-symbols-outlined hero-filter-trigger__icon"
+                >calendar_month</span
+              >
               <span class="hero-filter-trigger__copy">
                 <span class="hero-filter-trigger__label">Dates</span>
-                <span class="hero-filter-trigger__value">{{ dateRangeLabel }}</span>
+                <span class="hero-filter-trigger__value">{{
+                  dateRangeLabel
+                }}</span>
               </span>
-              <span class="material-symbols-outlined hero-filter-trigger__chevron">expand_more</span>
+              <span
+                class="material-symbols-outlined hero-filter-trigger__chevron"
+                >expand_more</span
+              >
             </button>
 
-            <button type="button" class="hero-filter-trigger" :class="{ 'hero-filter-trigger--open': activeFilterPanel === 'guests' }" @click="toggleFilterPanel('guests')">
-              <span class="material-symbols-outlined hero-filter-trigger__icon">person</span>
+            <button
+              type="button"
+              class="hero-filter-trigger"
+              :class="{
+                'hero-filter-trigger--open': activeFilterPanel === 'guests',
+              }"
+              @click="toggleFilterPanel('guests')"
+            >
+              <span class="material-symbols-outlined hero-filter-trigger__icon"
+                >person</span
+              >
               <span class="hero-filter-trigger__copy">
                 <span class="hero-filter-trigger__label">Guests & rooms</span>
-                <span class="hero-filter-trigger__value">{{ guestSummary }}</span>
+                <span class="hero-filter-trigger__value">{{
+                  guestSummary
+                }}</span>
               </span>
-              <span class="material-symbols-outlined hero-filter-trigger__chevron">expand_more</span>
+              <span
+                class="material-symbols-outlined hero-filter-trigger__chevron"
+                >expand_more</span
+              >
             </button>
 
-            <Button type="button" class="hero-filter-search" @click="submitHeroSearch">
+            <Button
+              type="button"
+              class="hero-filter-search"
+              @click="submitHeroSearch"
+            >
               <span class="material-symbols-outlined">search</span>
               <span>Search</span>
             </Button>
           </div>
 
-          <div v-if="activeFilterPanel === 'destination'" class="hero-filter-panel hero-filter-panel--destination">
+          <div
+            v-if="activeFilterPanel === 'destination'"
+            class="hero-filter-panel hero-filter-panel--destination"
+          >
             <div class="destination-search-wrap">
               <span class="material-symbols-outlined">search</span>
-              <input 
-                type="text" 
-                v-model="citySearchQuery" 
-                placeholder="Choose a city" 
+              <input
+                type="text"
+                v-model="citySearchQuery"
+                placeholder="Choose a city"
                 class="destination-search-input"
                 autofocus
               />
@@ -68,24 +133,35 @@
                 v-for="city in filteredCities"
                 :key="city.value"
                 class="destination-list-item"
-                :class="{ 'destination-list-item--selected': selectedCity === city.value }"
+                :class="{
+                  'destination-list-item--selected':
+                    selectedCity === city.value,
+                }"
                 @click="selectCity(city.value)"
               >
                 {{ city.label }}
               </button>
-              <div v-if="filteredCities.length === 0" class="destination-list-empty">
+              <div
+                v-if="filteredCities.length === 0"
+                class="destination-list-empty"
+              >
                 No cities found
               </div>
             </div>
           </div>
 
-          <div v-if="activeFilterPanel === 'dates'" class="hero-filter-panel hero-filter-panel--dates">
+          <div
+            v-if="activeFilterPanel === 'dates'"
+            class="hero-filter-panel hero-filter-panel--dates"
+          >
             <div class="hero-filter-panel__header">
               <div>
                 <strong>Stay dates</strong>
                 <span>Choose exact dates for your trip.</span>
               </div>
-              <span class="hero-filter-panel__nights">{{ stayLengthLabel }}</span>
+              <span class="hero-filter-panel__nights">{{
+                stayLengthLabel
+              }}</span>
             </div>
 
             <DatePicker
@@ -95,7 +171,10 @@
               :minDate="today"
               :numberOfMonths="calendarMonths"
               :manualInput="false"
-              :class="['hero-datepicker', { 'hero-datepicker--two-months': calendarMonths === 2 }]"
+              :class="[
+                'hero-datepicker',
+                { 'hero-datepicker--two-months': calendarMonths === 2 },
+              ]"
             />
 
             <div class="hero-filter-chip-row">
@@ -109,21 +188,37 @@
                 class="hero-filter-chip"
                 @click="applyQuickStay(days)"
               >
-                {{ days === 1 ? '1 day' : `${days} days` }}
+                {{ days === 1 ? "1 day" : `${days} days` }}
               </Button>
             </div>
           </div>
 
-          <div v-if="activeFilterPanel === 'guests'" class="hero-filter-panel hero-filter-panel--guests">
+          <div
+            v-if="activeFilterPanel === 'guests'"
+            class="hero-filter-panel hero-filter-panel--guests"
+          >
             <div class="guest-counter-row">
               <div class="guest-counter-copy">
                 <strong>Adults</strong>
                 <span>Ages 18 or above</span>
               </div>
               <div class="guest-counter-control">
-                <Button type="button" text class="guest-counter-btn" @click="updateGuestCount('adults', -1)" :disabled="adults <= 1">−</Button>
+                <Button
+                  type="button"
+                  text
+                  class="guest-counter-btn"
+                  @click="updateGuestCount('adults', -1)"
+                  :disabled="adults <= 1"
+                  >−</Button
+                >
                 <span>{{ adults }}</span>
-                <Button type="button" text class="guest-counter-btn" @click="updateGuestCount('adults', 1)">+</Button>
+                <Button
+                  type="button"
+                  text
+                  class="guest-counter-btn"
+                  @click="updateGuestCount('adults', 1)"
+                  >+</Button
+                >
               </div>
             </div>
 
@@ -133,14 +228,31 @@
                 <span>Age 0 to 17 years</span>
               </div>
               <div class="guest-counter-control">
-                <Button type="button" text class="guest-counter-btn" @click="updateGuestCount('children', -1)" :disabled="children <= 0">−</Button>
+                <Button
+                  type="button"
+                  text
+                  class="guest-counter-btn"
+                  @click="updateGuestCount('children', -1)"
+                  :disabled="children <= 0"
+                  >−</Button
+                >
                 <span>{{ children }}</span>
-                <Button type="button" text class="guest-counter-btn" @click="updateGuestCount('children', 1)">+</Button>
+                <Button
+                  type="button"
+                  text
+                  class="guest-counter-btn"
+                  @click="updateGuestCount('children', 1)"
+                  >+</Button
+                >
               </div>
             </div>
 
             <div v-if="children > 0" class="guest-age-grid">
-              <div v-for="(_, index) in childAges" :key="`child-age-${index}`" class="guest-age-item">
+              <div
+                v-for="(_, index) in childAges"
+                :key="`child-age-${index}`"
+                class="guest-age-item"
+              >
                 <label class="guest-age-label">Child {{ index + 1 }} age</label>
                 <Select
                   v-model="childAges[index]"
@@ -153,7 +265,8 @@
             </div>
 
             <p v-if="children > 0" class="guest-age-note">
-              We use each child age to estimate the correct room options and rates for your stay.
+              We use each child age to estimate the correct room options and
+              rates for your stay.
             </p>
 
             <div class="guest-counter-row">
@@ -162,9 +275,22 @@
                 <span>Choose what you need</span>
               </div>
               <div class="guest-counter-control">
-                <Button type="button" text class="guest-counter-btn" @click="updateGuestCount('rooms', -1)" :disabled="roomsRequested <= 1">−</Button>
+                <Button
+                  type="button"
+                  text
+                  class="guest-counter-btn"
+                  @click="updateGuestCount('rooms', -1)"
+                  :disabled="roomsRequested <= 1"
+                  >−</Button
+                >
                 <span>{{ roomsRequested }}</span>
-                <Button type="button" text class="guest-counter-btn" @click="updateGuestCount('rooms', 1)">+</Button>
+                <Button
+                  type="button"
+                  text
+                  class="guest-counter-btn"
+                  @click="updateGuestCount('rooms', 1)"
+                  >+</Button
+                >
               </div>
             </div>
 
@@ -176,7 +302,13 @@
               <ToggleSwitch v-model="travelWithPets" />
             </div>
 
-            <Button type="button" label="Done" outlined class="guest-done-button" @click="activeFilterPanel = null" />
+            <Button
+              type="button"
+              label="Done"
+              outlined
+              class="guest-done-button"
+              @click="activeFilterPanel = null"
+            />
           </div>
         </div>
       </div>
@@ -190,7 +322,9 @@
       <div class="section-container">
         <div class="section-header">
           <h2 class="section-title">Featured Collections</h2>
-          <p class="section-subtitle">Handpicked 5-star destinations for an exceptional experience</p>
+          <p class="section-subtitle">
+            Handpicked 5-star destinations for an exceptional experience
+          </p>
         </div>
         <div class="hotels-grid">
           <HotelCard
@@ -202,7 +336,8 @@
         </div>
         <div class="section-action">
           <NuxtLink to="/hotels" class="view-all-link">
-            Explore All Hotels <span class="material-symbols-outlined">arrow_forward</span>
+            Explore All Hotels
+            <span class="material-symbols-outlined">arrow_forward</span>
           </NuxtLink>
         </div>
       </div>
@@ -212,11 +347,19 @@
     <section class="benefits-section">
       <div class="section-container">
         <div class="benefits-grid">
-          <div v-for="benefit in benefits" :key="benefit.title" class="benefit-item">
-            <div class="benefit-icon-wrap">
-              <span class="material-symbols-outlined">{{ benefit.icon }}</span>
+          <div
+            v-for="benefit in benefits"
+            :key="benefit.title"
+            class="benefit-item"
+          >
+            <div class="flex items-center gap-4">
+              <div class="benefit-icon-wrap">
+                <span class="material-symbols-outlined">{{
+                  benefit.icon
+                }}</span>
+              </div>
+              <h4 class="benefit-title">{{ benefit.title }}</h4>
             </div>
-            <h4 class="benefit-title">{{ benefit.title }}</h4>
             <p class="benefit-text">{{ benefit.text }}</p>
           </div>
         </div>
@@ -228,10 +371,16 @@
       <div class="section-container">
         <div class="section-header">
           <h2 class="section-title">Special Offers</h2>
-          <p class="section-subtitle">Exclusive deals and seasonal packages for unforgettable journeys</p>
+          <p class="section-subtitle">
+            Exclusive deals and seasonal packages for unforgettable journeys
+          </p>
         </div>
         <div class="offers-grid">
-          <OfferCard v-for="offer in activeOffers" :key="offer.id" :offer="offer" />
+          <OfferCard
+            v-for="offer in activeOffers"
+            :key="offer.id"
+            :offer="offer"
+          />
         </div>
       </div>
     </section>
@@ -239,178 +388,238 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { useHotels } from '~/composables/useHotels'
-import { useOffers } from '~/composables/useOffers'
-import { useRooms } from '~/composables/useRooms'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { useHotels } from "~/composables/useHotels";
+import { useOffers } from "~/composables/useOffers";
+import { useRooms } from "~/composables/useRooms";
 
-const { hotels, featured, fetchAll: fetchHotels, fetchFeatured } = useHotels()
-const { offers: activeOffers, fetchActive } = useOffers()
-const { rooms, fetchAll: fetchAllRooms } = useRooms()
-const router = useRouter()
+const { hotels, featured, fetchAll: fetchHotels, fetchFeatured } = useHotels();
+const { offers: activeOffers, fetchActive } = useOffers();
+const { rooms, fetchAll: fetchAllRooms } = useRooms();
+const router = useRouter();
 
 const benefits = [
-  { icon: 'hotel', title: 'Handpicked Hotels', text: 'Every property in our collection is personally vetted for architectural merit and service excellence.' },
-  { icon: 'support_agent', title: 'Concierge Service', text: 'Our travel experts are available 24/7 to handle your requests, from dinner reservations to private transfers.' },
-  { icon: 'verified', title: 'Best Rate Guarantee', text: 'Book with confidence knowing you are receiving the most competitive rates available online.' }
-]
+  {
+    icon: "hotel",
+    title: "Handpicked Hotels",
+    text: "Every property in our collection is personally vetted for architectural merit and service excellence.",
+  },
+  {
+    icon: "support_agent",
+    title: "Concierge Service",
+    text: "Our travel experts are available 24/7 to handle your requests, from dinner reservations to private transfers.",
+  },
+  {
+    icon: "verified",
+    title: "Best Rate Guarantee",
+    text: "Book with confidence knowing you are receiving the most competitive rates available online.",
+  },
+];
 
-const heroFilterRef = ref<HTMLElement | null>(null)
-const activeFilterPanel = ref<'dates' | 'guests' | 'destination' | null>(null)
-const today = startOfDay(new Date())
-const selectedCity = ref<string | null>(null)
-const stayDates = ref<(Date | null)[] | null>([today, addDays(today, 7)])
-const calendarMonths = ref(2)
-const adults = ref(2)
-const children = ref(1)
-const roomsRequested = ref(2)
-const childAges = ref<number[]>([14])
-const travelWithPets = ref(false)
-const quickStayOptions = [1, 2, 3, 7]
+const heroFilterRef = ref<HTMLElement | null>(null);
+const activeFilterPanel = ref<"dates" | "guests" | "destination" | null>(null);
+const today = startOfDay(new Date());
+const selectedCity = ref<string | null>(null);
+const stayDates = ref<(Date | null)[] | null>([today, addDays(today, 7)]);
+const calendarMonths = ref(2);
+const adults = ref(2);
+const children = ref(1);
+const roomsRequested = ref(2);
+const childAges = ref<number[]>([14]);
+const travelWithPets = ref(false);
+const quickStayOptions = [1, 2, 3, 7];
 const childAgeOptions = Array.from({ length: 17 }, (_, index) => ({
   label: `${index + 1} years old`,
   value: index + 1,
-}))
+}));
 
 // Static 24 Tunisian governorates — always available regardless of DB content
 const TUNISIA_CITIES = [
-  'Ariana', 'Béja', 'Ben Arous', 'Bizerte', 'Gabès', 'Gafsa',
-  'Jendouba', 'Kairouan', 'Kasserine', 'Kébili', 'La Manouba', 'Le Kef',
-  'Mahdia', 'Médenine', 'Monastir', 'Nabeul', 'Sfax', 'Sidi Bouzid',
-  'Siliana', 'Sousse', 'Tataouine', 'Tozeur', 'Tunis', 'Zaghouan',
-]
+  "Ariana",
+  "Béja",
+  "Ben Arous",
+  "Bizerte",
+  "Gabès",
+  "Gafsa",
+  "Jendouba",
+  "Kairouan",
+  "Kasserine",
+  "Kébili",
+  "La Manouba",
+  "Le Kef",
+  "Mahdia",
+  "Médenine",
+  "Monastir",
+  "Nabeul",
+  "Sfax",
+  "Sidi Bouzid",
+  "Siliana",
+  "Sousse",
+  "Tataouine",
+  "Tozeur",
+  "Tunis",
+  "Zaghouan",
+];
 
-const cityOptions = TUNISIA_CITIES.map((city) => ({ label: city, value: city }))
+const cityOptions = TUNISIA_CITIES.map((city) => ({
+  label: city,
+  value: city,
+}));
 
-const citySearchQuery = ref('')
+const citySearchQuery = ref("");
 const filteredCities = computed(() => {
-  const q = citySearchQuery.value.toLowerCase()
-  return cityOptions.filter(c => c.label.toLowerCase().includes(q))
-})
+  const q = citySearchQuery.value.toLowerCase();
+  return cityOptions.filter((c) => c.label.toLowerCase().includes(q));
+});
 
 function selectCity(city: string) {
-  selectedCity.value = city
-  activeFilterPanel.value = null
+  selectedCity.value = city;
+  activeFilterPanel.value = null;
 }
 
 const selectedDateRange = computed(() => {
-  if (!Array.isArray(stayDates.value) || stayDates.value.length === 0) return [null, null] as const
-  return [stayDates.value[0] ?? null, stayDates.value[1] ?? null] as const
-})
+  if (!Array.isArray(stayDates.value) || stayDates.value.length === 0)
+    return [null, null] as const;
+  return [stayDates.value[0] ?? null, stayDates.value[1] ?? null] as const;
+});
 
 const dateRangeLabel = computed(() => {
-  const [start, end] = selectedDateRange.value
-  if (!start && !end) return 'Choose your stay dates'
-  if (start && !end) return `${formatDisplayDate(start)} — Add checkout`
-  if (start && end) return `${formatDisplayDate(start)} — ${formatDisplayDate(end)}`
-  return 'Choose your stay dates'
-})
+  const [start, end] = selectedDateRange.value;
+  if (!start && !end) return "Choose your stay dates";
+  if (start && !end) return `${formatDisplayDate(start)} — Add checkout`;
+  if (start && end)
+    return `${formatDisplayDate(start)} — ${formatDisplayDate(end)}`;
+  return "Choose your stay dates";
+});
 
 const stayLengthLabel = computed(() => {
-  const [start, end] = selectedDateRange.value
-  if (!start || !end) return 'Exact dates'
-  const diff = Math.max(1, Math.round((startOfDay(end).getTime() - startOfDay(start).getTime()) / (1000 * 60 * 60 * 24)))
-  return diff === 1 ? '1 night' : `${diff} nights`
-})
+  const [start, end] = selectedDateRange.value;
+  if (!start || !end) return "Exact dates";
+  const diff = Math.max(
+    1,
+    Math.round(
+      (startOfDay(end).getTime() - startOfDay(start).getTime()) /
+        (1000 * 60 * 60 * 24),
+    ),
+  );
+  return diff === 1 ? "1 night" : `${diff} nights`;
+});
 
 const guestSummary = computed(() => {
-  const adultLabel = `${adults.value} adult${adults.value > 1 ? 's' : ''}`
-  const childLabel = children.value ? ` · ${children.value} child${children.value > 1 ? 'ren' : ''}` : ''
-  const roomLabel = ` · ${roomsRequested.value} room${roomsRequested.value > 1 ? 's' : ''}`
-  return `${adultLabel}${childLabel}${roomLabel}`
-})
+  const adultLabel = `${adults.value} adult${adults.value > 1 ? "s" : ""}`;
+  const childLabel = children.value
+    ? ` · ${children.value} child${children.value > 1 ? "ren" : ""}`
+    : "";
+  const roomLabel = ` · ${roomsRequested.value} room${roomsRequested.value > 1 ? "s" : ""}`;
+  return `${adultLabel}${childLabel}${roomLabel}`;
+});
 
 onMounted(async () => {
-  await Promise.all([fetchHotels(), fetchFeatured(), fetchActive(), fetchAllRooms()])
-  updateCalendarMonths()
-  document.addEventListener('click', handleClickOutside)
-  window.addEventListener('resize', updateCalendarMonths)
-})
+  await Promise.all([
+    fetchHotels(),
+    fetchFeatured(),
+    fetchActive(),
+    fetchAllRooms(),
+  ]);
+  updateCalendarMonths();
+  document.addEventListener("click", handleClickOutside);
+  window.addEventListener("resize", updateCalendarMonths);
+});
 
 onBeforeUnmount(() => {
-  document.removeEventListener('click', handleClickOutside)
-  window.removeEventListener('resize', updateCalendarMonths)
-})
+  document.removeEventListener("click", handleClickOutside);
+  window.removeEventListener("resize", updateCalendarMonths);
+});
 
 function getMinPrice(hotelId: number): number {
-  const hotelRooms = rooms.value.filter(r => r.hotelId === hotelId)
-  if (hotelRooms.length === 0) return 120
-  return Math.min(...hotelRooms.map(r => r.pricePerNight))
+  const hotelRooms = rooms.value.filter((r) => r.hotelId === hotelId);
+  if (hotelRooms.length === 0) return 120;
+  return Math.min(...hotelRooms.map((r) => r.pricePerNight));
 }
 
-watch(children, (count) => {
-  const next = childAges.value.slice(0, count)
-  while (next.length < count) next.push(14)
-  childAges.value = next
-}, { immediate: true })
+watch(
+  children,
+  (count) => {
+    const next = childAges.value.slice(0, count);
+    while (next.length < count) next.push(14);
+    childAges.value = next;
+  },
+  { immediate: true },
+);
 
-function toggleFilterPanel(panel: 'dates' | 'guests' | 'destination') {
-  activeFilterPanel.value = activeFilterPanel.value === panel ? null : panel
+function toggleFilterPanel(panel: "dates" | "guests" | "destination") {
+  activeFilterPanel.value = activeFilterPanel.value === panel ? null : panel;
 }
 
-function updateGuestCount(type: 'adults' | 'children' | 'rooms', delta: number) {
-  if (type === 'adults') adults.value = Math.max(1, adults.value + delta)
-  if (type === 'children') children.value = Math.max(0, children.value + delta)
-  if (type === 'rooms') roomsRequested.value = Math.max(1, roomsRequested.value + delta)
+function updateGuestCount(
+  type: "adults" | "children" | "rooms",
+  delta: number,
+) {
+  if (type === "adults") adults.value = Math.max(1, adults.value + delta);
+  if (type === "children") children.value = Math.max(0, children.value + delta);
+  if (type === "rooms")
+    roomsRequested.value = Math.max(1, roomsRequested.value + delta);
 }
 
 function applyQuickStay(days: number) {
-  const [start] = selectedDateRange.value
-  const checkIn = start || today
-  stayDates.value = [checkIn, addDays(checkIn, days)]
+  const [start] = selectedDateRange.value;
+  const checkIn = start || today;
+  stayDates.value = [checkIn, addDays(checkIn, days)];
 }
 
 function submitHeroSearch() {
-  const [checkIn, checkOut] = selectedDateRange.value
-  activeFilterPanel.value = null
+  const [checkIn, checkOut] = selectedDateRange.value;
+  activeFilterPanel.value = null;
 
   router.push({
-    path: '/hotels',
+    path: "/hotels",
     query: {
-      ...(selectedCity.value ? { city: selectedCity.value, q: selectedCity.value } : {}),
+      ...(selectedCity.value
+        ? { city: selectedCity.value, q: selectedCity.value }
+        : {}),
       ...(checkIn ? { checkIn: formatDateForQuery(checkIn) } : {}),
       ...(checkOut ? { checkOut: formatDateForQuery(checkOut) } : {}),
       adults: String(adults.value),
       children: String(children.value),
       rooms: String(roomsRequested.value),
-      ...(children.value > 0 ? { childAges: childAges.value.join(',') } : {}),
-      ...(travelWithPets.value ? { pets: '1' } : {}),
+      ...(children.value > 0 ? { childAges: childAges.value.join(",") } : {}),
+      ...(travelWithPets.value ? { pets: "1" } : {}),
     },
-  })
+  });
 }
 
 function handleClickOutside(event: MouseEvent) {
-  if (!heroFilterRef.value) return
+  if (!heroFilterRef.value) return;
   if (!heroFilterRef.value.contains(event.target as Node)) {
-    activeFilterPanel.value = null
+    activeFilterPanel.value = null;
   }
 }
 
 function updateCalendarMonths() {
-  if (typeof window === 'undefined') return
-  calendarMonths.value = window.innerWidth <= 900 ? 1 : 2
+  if (typeof window === "undefined") return;
+  calendarMonths.value = window.innerWidth <= 900 ? 1 : 2;
 }
 
 function startOfDay(date: Date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate())
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
 function addDays(date: Date, days: number) {
-  const next = new Date(date)
-  next.setDate(next.getDate() + days)
-  return next
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
 }
 
 function formatDisplayDate(date: Date) {
-  return new Intl.DateTimeFormat('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-  }).format(date)
+  return new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  }).format(date);
 }
 
 function formatDateForQuery(date: Date) {
-  return startOfDay(date).toISOString().split('T')[0]
+  return startOfDay(date).toISOString().split("T")[0];
 }
 </script>
 
@@ -423,8 +632,16 @@ function formatDateForQuery(date: Date) {
 .hero-premium {
   padding: 0 0 52px;
   background:
-    radial-gradient(circle at top, color-mix(in srgb, var(--color-primary-100) 60%, white 40%) 0%, transparent 56%),
-    linear-gradient(180deg, var(--color-surface-secondary) 0%, var(--color-surface-primary) 100%);
+    radial-gradient(
+      circle at top,
+      color-mix(in srgb, var(--color-primary-100) 60%, white 40%) 0%,
+      transparent 56%
+    ),
+    linear-gradient(
+      180deg,
+      var(--color-surface-secondary) 0%,
+      var(--color-surface-primary) 100%
+    );
 }
 
 .hero-shell {
@@ -456,8 +673,18 @@ function formatDateForQuery(date: Date) {
   inset: 0;
   border-radius: inherit;
   background:
-    linear-gradient(90deg, rgba(10, 27, 44, 0.78) 0%, rgba(10, 27, 44, 0.54) 34%, rgba(10, 27, 44, 0.18) 66%, rgba(10, 27, 44, 0.24) 100%),
-    linear-gradient(180deg, rgba(12, 24, 38, 0.08) 0%, rgba(12, 24, 38, 0.18) 100%);
+    linear-gradient(
+      90deg,
+      rgba(10, 27, 44, 0.78) 0%,
+      rgba(10, 27, 44, 0.54) 34%,
+      rgba(10, 27, 44, 0.18) 66%,
+      rgba(10, 27, 44, 0.24) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(12, 24, 38, 0.08) 0%,
+      rgba(12, 24, 38, 0.18) 100%
+    );
 }
 
 .hero-content {
@@ -500,7 +727,7 @@ function formatDateForQuery(date: Date) {
 }
 
 .hero-filter-shell--panel-open::after {
-  content: '';
+  content: "";
   position: fixed;
   inset: 0;
   background: rgba(11, 22, 34, 0.18);
@@ -517,8 +744,11 @@ function formatDateForQuery(date: Date) {
   grid-template-columns: minmax(0, 1.1fr) repeat(2, minmax(0, 1fr)) auto;
   gap: 0;
   align-items: center;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(250, 253, 255, 0.98) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(250, 253, 255, 0.98) 100%
+  );
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid color-mix(in srgb, var(--color-border) 88%, white 12%);
@@ -546,7 +776,9 @@ function formatDateForQuery(date: Date) {
   border: 0;
   border-right: 1px solid var(--color-divider);
   border-radius: 1.2rem;
-  transition: background 0.25s ease, box-shadow 0.25s ease;
+  transition:
+    background 0.25s ease,
+    box-shadow 0.25s ease;
   width: 100%;
   cursor: pointer;
   text-align: left;
@@ -621,13 +853,21 @@ function formatDateForQuery(date: Date) {
   border: none;
   border-radius: 1.2rem;
   margin-left: 0.3rem;
-  background: linear-gradient(135deg, #0a7677 0%, var(--color-primary-600) 45%, var(--color-primary-700) 100%);
+  background: linear-gradient(
+    135deg,
+    #0a7677 0%,
+    var(--color-primary-600) 45%,
+    var(--color-primary-700) 100%
+  );
   color: white;
   font-size: 0.98rem;
   font-weight: 700;
   letter-spacing: 0.01em;
   box-shadow: 0 14px 28px rgba(0, 80, 81, 0.32);
-  transition: transform 0.24s ease, box-shadow 0.24s ease, filter 0.24s ease;
+  transition:
+    transform 0.24s ease,
+    box-shadow 0.24s ease,
+    filter 0.24s ease;
 }
 
 .hero-filter-search:hover {
@@ -703,7 +943,9 @@ function formatDateForQuery(date: Date) {
   color: var(--color-heading);
   background: var(--color-surface-secondary);
   outline: none;
-  transition: border-color 0.2s, background 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
 }
 
 .destination-search-input:focus {
@@ -838,18 +1080,38 @@ function formatDateForQuery(date: Date) {
   align-items: stretch;
 }
 
-.hero-datepicker--two-months :deep(.p-datepicker-group-container > .p-datepicker-calendar-container:first-of-type),
-.hero-datepicker--two-months :deep(.p-datepicker-group-container > .p-datepicker-group:first-of-type) {
+.hero-datepicker--two-months
+  :deep(
+    .p-datepicker-group-container
+      > .p-datepicker-calendar-container:first-of-type
+  ),
+.hero-datepicker--two-months
+  :deep(.p-datepicker-group-container > .p-datepicker-group:first-of-type) {
   padding-right: 22px !important;
 }
 
-.hero-datepicker--two-months :deep(.p-datepicker-group-container > .p-datepicker-calendar-container:last-of-type),
-.hero-datepicker--two-months :deep(.p-datepicker-group-container > .p-datepicker-group:last-of-type) {
+.hero-datepicker--two-months
+  :deep(
+    .p-datepicker-group-container
+      > .p-datepicker-calendar-container:last-of-type
+  ),
+.hero-datepicker--two-months
+  :deep(.p-datepicker-group-container > .p-datepicker-group:last-of-type) {
   padding-left: 22px !important;
 }
 
-.hero-datepicker--two-months :deep(.p-datepicker-group-container > .p-datepicker-calendar-container:first-of-type .p-datepicker-day-view),
-.hero-datepicker--two-months :deep(.p-datepicker-group-container > .p-datepicker-group:first-of-type .p-datepicker-day-view) {
+.hero-datepicker--two-months
+  :deep(
+    .p-datepicker-group-container
+      > .p-datepicker-calendar-container:first-of-type
+      .p-datepicker-day-view
+  ),
+.hero-datepicker--two-months
+  :deep(
+    .p-datepicker-group-container
+      > .p-datepicker-group:first-of-type
+      .p-datepicker-day-view
+  ) {
   border-right: 2px solid #374151 !important;
 }
 
@@ -901,7 +1163,9 @@ function formatDateForQuery(date: Date) {
   height: 1.72rem;
   border-radius: 999px;
   color: var(--color-text-secondary);
-  transition: background 0.2s ease, color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
 }
 
 .hero-datepicker :deep(.p-datepicker-prev-button .p-icon),
@@ -971,10 +1235,14 @@ function formatDateForQuery(date: Date) {
   font-size: 0.88rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
-.hero-datepicker :deep(.p-datepicker-day-cell.p-datepicker-other-month .p-datepicker-day) {
+.hero-datepicker
+  :deep(.p-datepicker-day-cell.p-datepicker-other-month .p-datepicker-day) {
   color: color-mix(in srgb, var(--color-text-secondary) 72%, white 28%);
 }
 
@@ -992,7 +1260,11 @@ function formatDateForQuery(date: Date) {
 .hero-datepicker :deep(.p-datepicker-day-selected),
 .hero-datepicker :deep(.p-datepicker-day-selected-start),
 .hero-datepicker :deep(.p-datepicker-day-selected-end) {
-  background: linear-gradient(145deg, #0a7677 0%, var(--color-primary-600) 100%);
+  background: linear-gradient(
+    145deg,
+    #0a7677 0%,
+    var(--color-primary-600) 100%
+  );
   color: white;
   box-shadow: 0 8px 18px rgba(0, 80, 81, 0.34);
 }
@@ -1018,19 +1290,28 @@ function formatDateForQuery(date: Date) {
   font-weight: 700;
   line-height: 1;
   box-shadow: 0 3px 10px rgba(0, 80, 81, 0.08);
-  transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .hero-filter-chip:hover {
   transform: translateY(-1px);
-  background: color-mix(in srgb, var(--color-primary-50) 66%, white 34%) !important;
+  background: color-mix(
+    in srgb,
+    var(--color-primary-50) 66%,
+    white 34%
+  ) !important;
   color: var(--color-primary-800) !important;
   box-shadow: 0 6px 14px rgba(0, 80, 81, 0.14);
 }
 
 .hero-filter-chip:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary-100) 62%, transparent 38%);
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--color-primary-100) 62%, transparent 38%);
 }
 
 .hero-filter-chip :deep(.p-button-label) {
@@ -1087,7 +1368,8 @@ function formatDateForQuery(date: Date) {
 
 .hero-filter-field--destination :deep(.p-select-filter:focus) {
   border-color: var(--color-primary-400);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary-100) 60%, transparent 40%);
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--color-primary-100) 60%, transparent 40%);
 }
 
 .hero-filter-field--destination :deep(.p-select-filter-icon) {
@@ -1117,7 +1399,9 @@ function formatDateForQuery(date: Date) {
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--color-heading);
-  transition: background 0.2s ease, color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
 }
 
 .hero-filter-field--destination :deep(.p-select-option.p-focus) {
@@ -1125,7 +1409,8 @@ function formatDateForQuery(date: Date) {
   color: var(--color-primary-700);
 }
 
-.hero-filter-field--destination :deep(.p-select-option.p-select-option-selected) {
+.hero-filter-field--destination
+  :deep(.p-select-option.p-select-option-selected) {
   background: color-mix(in srgb, var(--color-primary-100) 58%, white 42%);
   color: var(--color-primary-800);
 }
@@ -1246,14 +1531,18 @@ function formatDateForQuery(date: Date) {
   color: var(--color-text-secondary);
 }
 
-.hotels-grid, .offers-grid {
+.hotels-grid,
+.offers-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
   align-items: stretch;
 }
 
-.section-action { text-align: center; margin-top: 16px; }
+.section-action {
+  text-align: center;
+  margin-top: 16px;
+}
 .view-all-link {
   display: inline-flex;
   align-items: center;
@@ -1264,7 +1553,9 @@ function formatDateForQuery(date: Date) {
   text-decoration: none;
   transition: gap var(--motion-duration-fast) var(--motion-ease-default);
 }
-.view-all-link:hover { gap: 12px; }
+.view-all-link:hover {
+  gap: 12px;
+}
 
 .benefits-grid {
   display: grid;
@@ -1273,7 +1564,7 @@ function formatDateForQuery(date: Date) {
 }
 
 .benefit-item {
-  padding: 18px 16px;
+  padding: 32px 24px;
   border-radius: 18px;
   background: linear-gradient(180deg, #ffffff 0%, #f8fbfe 100%);
   border: 1px solid rgba(225, 232, 240, 0.92);
@@ -1323,13 +1614,20 @@ function formatDateForQuery(date: Date) {
   gap: var(--spacing-6);
   text-align: center;
 }
-.stat-item { display: flex; flex-direction: column; gap: var(--spacing-1); }
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
 .stat-number {
   font-size: var(--font-size-3xl);
   font-weight: 700;
   color: white;
 }
-.stat-label { font-size: var(--font-size-sm); color: rgba(255,255,255,0.75); }
+.stat-label {
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.75);
+}
 
 @media (max-width: 1280px) {
   .hotels-grid,
@@ -1375,7 +1673,8 @@ function formatDateForQuery(date: Date) {
   .hero-filter-trigger {
     min-height: 3.92rem;
     border: 1px solid color-mix(in srgb, var(--color-border) 82%, white 18%);
-    border-right: 1px solid color-mix(in srgb, var(--color-border) 82%, white 18%);
+    border-right: 1px solid
+      color-mix(in srgb, var(--color-border) 82%, white 18%);
   }
 
   .hero-filter-search {
@@ -1452,7 +1751,8 @@ function formatDateForQuery(date: Date) {
     min-height: 3.55rem;
     padding: 0 0.95rem;
     border: 1px solid color-mix(in srgb, var(--color-border) 80%, white 20%);
-    border-right: 1px solid color-mix(in srgb, var(--color-border) 80%, white 20%);
+    border-right: 1px solid
+      color-mix(in srgb, var(--color-border) 80%, white 20%);
     border-radius: 0.95rem;
   }
 
@@ -1538,7 +1838,9 @@ function formatDateForQuery(date: Date) {
     padding: 18px 0 24px;
   }
 
-  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 </style>
 
@@ -1595,7 +1897,9 @@ function formatDateForQuery(date: Date) {
   color: var(--color-heading) !important;
   border-radius: 0 !important;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 
 .p-select-overlay .p-select-option:hover,

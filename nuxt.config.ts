@@ -42,6 +42,8 @@ export default defineNuxtConfig({
     '/api/avis/hotel/**': {},
     '/api/avis/account/**': {},
     '/api/cloudinary/**': {},
+    '/api/help-center/**': {},
+    '/api/support/**': {},
     '/api/**': {
       proxy: {
         // Point API calls to local Nest backend by default to avoid ngrok loop/403.

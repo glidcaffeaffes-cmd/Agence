@@ -62,6 +62,10 @@
           </button>
         </div>
         <div class="p-8 space-y-4">
+          <p v-if="modalError" class="text-sm font-semibold text-error bg-error-container/30 border border-error/20 rounded-lg px-3 py-2">
+            {{ modalError }}
+          </p>
+
           <div class="grid grid-cols-2 gap-4">
             <div class="space-y-1">
               <label class="text-[11px] font-bold text-outline uppercase">Nom</label>
@@ -88,8 +92,15 @@
               <input v-model="form.country" class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" type="text">
             </div>
             <div class="space-y-1">
-              <label class="text-[11px] font-bold text-outline uppercase">Agence ID</label>
-              <input v-model.number="form.agencyVoyageId" class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" type="number" min="1">
+              <label class="text-[11px] font-bold text-outline uppercase">Agence</label>
+              <select
+                v-model.number="form.agencyVoyageId"
+                class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none bg-white"
+              >
+                <option v-for="agency in agencies" :key="agency.id" :value="agency.id">
+                  #{{ agency.id }} - {{ agency.nomAgence }}
+                </option>
+              </select>
             </div>
           </div>
           <div class="grid grid-cols-2 gap-4">
@@ -154,18 +165,30 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import type { Hotel } from '~/types/models'
 import { HotelService } from '~/services'
 
 definePageMeta({ layout: 'admin' })
 
+type AgencyOption = {
+  id: number
+  nomAgence: string
+  actif: boolean
+}
+
 const service = new HotelService()
 const { data: hotelsData, refresh } = useAsyncData('admin-hotels', () => service.getAll())
 const hotels = computed(() => hotelsData.value || [])
+const { data: agenciesData } = useAsyncData('admin-agencies', async () => {
+  const agencies = await $fetch<AgencyOption[]>('/api/agences-voyage')
+  return (agencies || []).filter((agency) => agency.actif)
+})
+const agencies = computed(() => agenciesData.value || [])
 
 const isModalOpen = ref(false)
 const editingHotel = ref<Hotel | null>(null)
+const modalError = ref('')
 const form = ref<Omit<Hotel, 'id'>>({
   name: '',
   address: '',
@@ -183,6 +206,7 @@ const form = ref<Omit<Hotel, 'id'>>({
 })
 
 function resetForm() {
+  const defaultAgencyId = agencies.value[0]?.id ?? 1
   form.value = {
     name: '',
     address: '',
@@ -194,7 +218,7 @@ function resetForm() {
     phone: '',
     active: true,
     partner: false,
-    agencyVoyageId: 1,
+    agencyVoyageId: defaultAgencyId,
     images: [],
     amenities: [],
   }
@@ -205,22 +229,51 @@ function openEdit(hotel: Hotel) {
 }
 
 async function handleSave() {
-  await service.create(form.value)
-  resetForm()
-  isModalOpen.value = false
-  await refresh()
+  modalError.value = ''
+  if (!agencies.value.length) {
+    modalError.value = "Aucune agence active n'est disponible. Creez une agence avant d'ajouter un hotel."
+    return
+  }
+
+  try {
+    await service.create(form.value)
+    resetForm()
+    isModalOpen.value = false
+    await refresh()
+  } catch (error: any) {
+    modalError.value = error?.message || "Impossible d'ajouter cet hotel."
+  }
 }
 
 async function saveEdit() {
   if (!editingHotel.value) return
-  await service.update(editingHotel.value.id, editingHotel.value)
-  editingHotel.value = null
-  await refresh()
+  try {
+    await service.update(editingHotel.value.id, editingHotel.value)
+    editingHotel.value = null
+    await refresh()
+  } catch (error: any) {
+    modalError.value = error?.message || "Impossible de modifier cet hotel."
+  }
 }
 
 async function handleDelete(id: number) {
   if (!confirm('Supprimer cet hotel ?')) return
-  await service.delete(id)
-  await refresh()
+  try {
+    await service.delete(id)
+    await refresh()
+  } catch (error: any) {
+    modalError.value = error?.message || "Impossible de supprimer cet hotel."
+  }
 }
+
+watch(
+  agencies,
+  (items) => {
+    if (!items.length) return
+    if (!items.some((agency) => agency.id === form.value.agencyVoyageId)) {
+      form.value.agencyVoyageId = items[0].id
+    }
+  },
+  { immediate: true },
+)
 </script>

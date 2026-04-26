@@ -21,6 +21,7 @@ export interface AccountDTO {
   motDePasse?: string
   dateInscription: string
   actif: boolean
+  role?: 'client' | 'admin'
   profile?: ProfileDTO | null
 }
 

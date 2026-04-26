@@ -16,84 +16,85 @@
               >Voyage<span class="brand-accent">Hub</span></span
             >
           </NuxtLink>
-          <p class="footer-manifesto">
-            We curate extraordinary stays for the discerning traveler. Our
-            mission is to bridge the gap between architectural authority and
-            personalized hospitality across France's most iconic destinations.
-          </p>
           <div class="footer-social">
-            <a
-              href="#"
-              class="social-link"
-              title="Instagram"
-              aria-label="Instagram"
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true" class="social-icon">
-                <path
-                  fill="currentColor"
-                  d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2zm0 1.8A3.95 3.95 0 0 0 3.8 7.75v8.5a3.95 3.95 0 0 0 3.95 3.95h8.5a3.95 3.95 0 0 0 3.95-3.95v-8.5a3.95 3.95 0 0 0-3.95-3.95h-8.5zm8.95 1.35a1.15 1.15 0 1 1 0 2.3 1.15 1.15 0 0 1 0-2.3zM12 6.85A5.15 5.15 0 1 1 6.85 12 5.16 5.16 0 0 1 12 6.85zm0 1.8A3.35 3.35 0 1 0 15.35 12 3.35 3.35 0 0 0 12 8.65z"
-                />
-              </svg>
-            </a>
-            <a
-              href="#"
-              class="social-link"
-              title="X (Twitter)"
-              aria-label="X (Twitter)"
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true" class="social-icon">
-                <path
-                  fill="currentColor"
-                  d="M18.9 3H21l-6.56 7.5L22 21h-6.06l-4.74-6.2L5.77 21H3.66l7.02-8.02L2 3h6.21l4.29 5.67L18.9 3zm-1.06 16.2h1.16L7.58 4.74H6.34L17.84 19.2z"
-                />
-              </svg>
-            </a>
-            <a
-              href="#"
-              class="social-link"
-              title="LinkedIn"
-              aria-label="LinkedIn"
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true" class="social-icon">
-                <path
-                  fill="currentColor"
-                  d="M6.94 8.5H3.56V20h3.38V8.5zM5.25 3A2.02 2.02 0 1 0 5.3 7.04 2.02 2.02 0 0 0 5.25 3zM20.44 13.02c0-3.46-1.85-5.07-4.32-5.07A3.74 3.74 0 0 0 12.75 9.8V8.5H9.5c.04.86 0 11.5 0 11.5h3.25v-6.42c0-.34.03-.68.12-.92a2.13 2.13 0 0 1 2-1.42c1.42 0 1.99 1.08 1.99 2.67V20h3.25v-6.98z"
-                />
-              </svg>
-            </a>
+            <div>
+              <a
+                href="https://www.facebook.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+                class="footer-social-link"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M13.5 21v-8h2.7l.4-3h-3.1V8.1c0-.9.3-1.6 1.7-1.6h1.6V3.8c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4V10H8v3h2.6v8h2.9z"
+                  />
+                </svg>
+              </a>
+              <a
+                href="https://www.instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                class="footer-social-link"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M12 7.2A4.8 4.8 0 1 0 12 16.8 4.8 4.8 0 1 0 12 7.2zm0 8A3.2 3.2 0 1 1 12 8.8a3.2 3.2 0 0 1 0 6.4z"
+                  />
+                  <path
+                    d="M16.9 3H7.1A4.1 4.1 0 0 0 3 7.1v9.8A4.1 4.1 0 0 0 7.1 21h9.8a4.1 4.1 0 0 0 4.1-4.1V7.1A4.1 4.1 0 0 0 16.9 3zm2.5 13.9a2.5 2.5 0 0 1-2.5 2.5H7.1a2.5 2.5 0 0 1-2.5-2.5V7.1a2.5 2.5 0 0 1 2.5-2.5h9.8a2.5 2.5 0 0 1 2.5 2.5v9.8z"
+                  />
+                  <circle cx="17.4" cy="6.6" r="1.1" />
+                </svg>
+              </a>
+              <a
+                href="https://x.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="X"
+                class="footer-social-link"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M18.9 3h2.9l-6.3 7.2L23 21h-5.9l-4.6-6-5.3 6H4.3l6.7-7.6L1 3h6l4.2 5.5L18.9 3zm-1 16.3h1.6L6.1 4.6H4.4l13.5 14.7z"
+                  />
+                </svg>
+              </a>
+            </div>
+            <span class="footer-social-label">FOLLOW US</span>
           </div>
         </div>
 
         <!-- Navigation Groups -->
         <div class="footer-nav-grid">
           <div class="footer-col">
-            <h4 class="footer-heading">Collections</h4>
-            <NuxtLink to="/hotels" class="footer-link"
-              >Boutique Hotels</NuxtLink
+            <h4 class="footer-heading">Company</h4>
+            <NuxtLink to="/about" class="footer-link">About Us</NuxtLink>
+            <NuxtLink to="/terms" class="footer-link"
+              >Terms of Service</NuxtLink
             >
-            <NuxtLink to="/hotels" class="footer-link">Luxury Resorts</NuxtLink>
-            <NuxtLink to="/hotels" class="footer-link">Business Stays</NuxtLink>
-            <NuxtLink to="/offers" class="footer-link"
-              >Seasonal Offers</NuxtLink
+            <NuxtLink to="/privacy" class="footer-link"
+              >Privacy Policy</NuxtLink
             >
           </div>
 
           <div class="footer-col">
-            <h4 class="footer-heading">The Agency</h4>
-            <NuxtLink to="/about" class="footer-link">Our Story</NuxtLink>
-            <NuxtLink to="/reservations/history" class="footer-link"
-              >Guest Portal</NuxtLink
+            <h4 class="footer-heading">Booking</h4>
+            <NuxtLink to="/my-bookings" class="footer-link"
+              >My Bookings</NuxtLink
             >
-            <a href="#" class="footer-link">Partner Program</a>
-            <a href="#" class="footer-link">Contact</a>
+            <NuxtLink to="/cancellation-policy" class="footer-link"
+              >Cancellation Policy</NuxtLink
+            >
+            <NuxtLink to="/help-center" class="footer-link"
+              >Help Center</NuxtLink
+            >
           </div>
 
           <div class="footer-col">
             <h4 class="footer-heading">Support</h4>
-            <a href="#" class="footer-link">Help Center</a>
-            <a href="#" class="footer-link">Terms of Service</a>
-            <a href="#" class="footer-link">Privacy Policy</a>
-            <a href="#" class="footer-link">Cancellation</a>
+            <NuxtLink to="/contact" class="footer-link">Contact</NuxtLink>
           </div>
         </div>
       </div>
@@ -106,7 +107,7 @@
             rights reserved.
           </p>
           <div class="footer-meta">
-            <span>Paris &bull; Nice &bull; Lyon &bull; Bordeaux</span>
+            <span>Sfax &bull; Tunis &bull; Mahdia &bull; Gafsa</span>
           </div>
         </div>
       </div>
@@ -133,6 +134,7 @@
   grid-template-columns: minmax(280px, 1.2fr) minmax(0, 2fr);
   gap: 24px;
   margin-bottom: 16px;
+  padding: 16px 8px;
 }
 
 .footer-brand {
@@ -140,7 +142,7 @@
   align-items: center;
   gap: 12px;
   text-decoration: none;
-  margin-bottom: 10px;
+  margin-bottom: 24px;
 }
 
 .footer-brand-mark {
@@ -178,46 +180,47 @@
   color: var(--color-primary-500);
 }
 
-.footer-manifesto {
-  font-size: 13px;
-  line-height: 1.55;
-  color: var(--color-gray-600);
-  margin-bottom: 12px;
-  max-width: 360px;
-}
-
 .footer-social {
   display: flex;
-  gap: 6px;
+  flex-direction: column;
+  gap: 12px;
+  padding-left: 12px;
 }
 
-.social-link {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.82);
-  display: flex;
+.footer-social-label {
+  font-size: 14px;
+  color: var(--color-gray-700);
+  font-weight: 800;
+}
+
+.footer-social-link {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   color: var(--color-gray-700);
-  text-decoration: none;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(188, 201, 200, 0.65);
-  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05);
+  background: white;
+  border: 1px solid rgba(188, 201, 200, 0.7);
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    background-color 0.2s ease;
 }
 
-.social-icon {
-  width: 15px;
-  height: 15px;
-  display: block;
+.footer-social-link:hover {
+  color: var(--color-primary-600);
+  border-color: var(--color-primary-300);
+  background: color-mix(in srgb, var(--color-primary-50) 70%, white 30%);
+  transform: translateY(-1px);
 }
 
-.social-link:hover {
-  background: rgba(77, 182, 172, 0.12);
-  border-color: rgba(0, 103, 104, 0.28);
-  color: var(--color-primary-700);
-  box-shadow: 0 12px 20px rgba(0, 103, 104, 0.1);
-  transform: translateY(-2px);
+.footer-social-link svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
 }
 
 /* Nav Grid */
@@ -314,10 +317,6 @@
   }
   .footer-brand .brand-text {
     font-size: 20px;
-  }
-  .footer-manifesto {
-    font-size: 12px;
-    margin-bottom: 12px;
   }
   .footer-nav-grid {
     grid-template-columns: 1fr;

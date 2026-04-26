@@ -67,20 +67,72 @@
       <!-- Desktop Actions -->
       <div class="hidden md:flex items-center gap-4">
         <template v-if="isAuthenticated">
-          <button
-            class="client-navbar__icon-btn relative p-2 rounded-full transition-all"
-            @click="$emit('toggle-notifications')"
-            title="Notifications"
-          >
-            <span class="material-symbols-outlined text-[24px]"
-              >notifications</span
+          <div ref="notificationsRef" class="relative">
+            <button
+              class="client-navbar__icon-btn relative p-2 rounded-full transition-all"
+              @click="toggleNotificationsMenu"
+              title="Notifications"
             >
-            <span
-              v-if="unreadCount > 0"
-              class="absolute top-1 right-1 w-4 h-4 bg-error text-white text-[10px] font-bold flex items-center justify-center rounded-full"
-              >{{ unreadCount }}</span
+              <span class="material-symbols-outlined text-[24px]"
+                >notifications</span
+              >
+              <span
+                v-if="unreadCount > 0"
+                class="absolute top-1 right-1 min-w-4 h-4 px-1 bg-error text-white text-[10px] font-bold flex items-center justify-center rounded-full"
+                >{{ unreadCount > 99 ? "99+" : unreadCount }}</span
+              >
+            </button>
+
+            <transition
+              enter-active-class="transition duration-200 ease-out"
+              enter-from-class="opacity-0 translate-y-2"
+              enter-to-class="opacity-100 translate-y-0"
+              leave-active-class="transition duration-150 ease-in"
+              leave-from-class="opacity-100 translate-y-0"
+              leave-to-class="opacity-0 translate-y-2"
             >
-          </button>
+              <div
+                v-if="showNotificationsMenu"
+                class="notifications-dropdown absolute right-0 mt-3 w-[360px] bg-white border border-outline-variant/40 rounded-xl shadow-lg z-50 overflow-hidden"
+              >
+                <div class="notifications-head">
+                  <h4>Notifications</h4>
+                  <button
+                    v-if="unreadCount > 0"
+                    class="notifications-mark-all"
+                    @click="handleMarkAllAsRead"
+                  >
+                    Mark all as read
+                  </button>
+                </div>
+
+                <div v-if="latestNotifications.length === 0" class="notifications-empty">
+                  <span class="material-symbols-outlined">notifications_none</span>
+                  <p>No notifications yet.</p>
+                </div>
+
+                <div v-else class="notifications-list">
+                  <button
+                    v-for="notification in latestNotifications"
+                    :key="notification.id"
+                    class="notification-item"
+                    @click="openNotification(notification.id, notification.type, notification.read)"
+                  >
+                    <span class="material-symbols-outlined notification-item__icon">
+                      {{ getNotificationIcon(notification.type) }}
+                    </span>
+                    <span class="notification-item__content">
+                      <span class="notification-item__message">{{ notification.message }}</span>
+                      <span class="notification-item__meta">
+                        {{ formatNotificationDate(notification.sentDate) }}
+                      </span>
+                    </span>
+                    <span v-if="!notification.read" class="notification-item__dot"></span>
+                  </button>
+                </div>
+              </div>
+            </transition>
+          </div>
 
           <div class="relative">
             <button
@@ -284,15 +336,18 @@ import { useRoute } from "vue-router";
 import { useAuth } from "~/composables/useAuth";
 import { useAuthPrompt } from "~/composables/useAuthPrompt";
 import { useNotifications } from "~/composables/useNotifications";
+import { NotificationType } from "~/types/enums";
 
-const { isAuthenticated, isAdmin, currentProfile, logout } = useAuth();
+const { isAuthenticated, isAdmin, currentProfile, logout, accountId } = useAuth();
 const { open: openAuthPrompt } = useAuthPrompt();
-const { unreadCount } = useNotifications();
+const { latestNotifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
 const route = useRoute();
 
 const showUserMenu = ref(false);
+const showNotificationsMenu = ref(false);
 const mobileOpen = ref(false);
 const headerRef = ref<HTMLElement | null>(null);
+const notificationsRef = ref<HTMLElement | null>(null);
 const hasSolidHeader = ref(true);
 
 const isHomePage = computed(() => route.path === "/");
@@ -308,8 +363,95 @@ const avatarLetter = computed(() => {
 function handleLogout() {
   logout();
   showUserMenu.value = false;
+  showNotificationsMenu.value = false;
   mobileOpen.value = false;
   navigateTo("/");
+}
+
+function toggleNotificationsMenu() {
+  showUserMenu.value = false;
+  showNotificationsMenu.value = !showNotificationsMenu.value;
+}
+
+function getNotificationIcon(type: NotificationType) {
+  switch (type) {
+    case NotificationType.PROMOTION:
+      return "sell";
+    case NotificationType.REMINDER:
+      return "schedule";
+    case NotificationType.RESERVATION_CANCELLATION:
+      return "event_busy";
+    case NotificationType.MODIFICATION_CONFIRMATION:
+      return "info";
+    case NotificationType.COMPLAINT:
+      return "support_agent";
+    case NotificationType.RESERVATION_CONFIRMATION:
+    default:
+      return "event_available";
+  }
+}
+
+function resolveNotificationRoute(type: NotificationType) {
+  switch (type) {
+    case NotificationType.PROMOTION:
+      return "/offers";
+    case NotificationType.COMPLAINT:
+      return "/contact";
+    case NotificationType.REMINDER:
+    case NotificationType.RESERVATION_CANCELLATION:
+    case NotificationType.MODIFICATION_CONFIRMATION:
+    case NotificationType.RESERVATION_CONFIRMATION:
+    default:
+      return "/reservations/history";
+  }
+}
+
+function formatNotificationDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+
+  const now = new Date().getTime();
+  const diffMs = Math.max(0, now - date.getTime());
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+
+  if (diffMinutes < 1) return "Just now";
+  if (diffMinutes < 60) return `${diffMinutes}m ago`;
+
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 7) return `${diffDays}d ago`;
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(date);
+}
+
+async function openNotification(id: number, type: NotificationType, isRead: boolean) {
+  if (!isRead) {
+    await markAsRead(id);
+  }
+  showNotificationsMenu.value = false;
+  await navigateTo(resolveNotificationRoute(type));
+}
+
+async function handleMarkAllAsRead() {
+  if (!unreadCount.value) return;
+  if (!accountId.value) return;
+
+  await markAllAsRead(accountId.value);
+}
+
+function handleDocumentClick(event: MouseEvent) {
+  const target = event.target as Node | null;
+  if (!target) return;
+
+  if (notificationsRef.value && !notificationsRef.value.contains(target)) {
+    showNotificationsMenu.value = false;
+  }
 }
 
 function handleWishlistNav(event: MouseEvent) {
@@ -353,25 +495,26 @@ onMounted(() => {
   updateHeaderState();
   window.addEventListener("scroll", updateHeaderState, { passive: true });
   window.addEventListener("resize", updateHeaderState);
+  document.addEventListener("click", handleDocumentClick);
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener("scroll", updateHeaderState);
   window.removeEventListener("resize", updateHeaderState);
+  document.removeEventListener("click", handleDocumentClick);
 });
 
 watch(
   () => route.path,
   () => {
     showUserMenu.value = false;
+    showNotificationsMenu.value = false;
     mobileOpen.value = false;
     if (typeof window !== "undefined") {
       window.requestAnimationFrame(() => updateHeaderState());
     }
   },
 );
-
-defineEmits(["toggle-notifications"]);
 </script>
 
 <style scoped>
@@ -522,6 +665,116 @@ defineEmits(["toggle-notifications"]);
 
 .client-navbar--transparent .client-navbar__register {
   box-shadow: 0 12px 24px rgba(15, 23, 42, 0.16);
+}
+
+.notifications-dropdown {
+  max-height: min(70vh, 520px);
+}
+
+.notifications-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgb(209 219 229 / 0.4);
+}
+
+.notifications-head h4 {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+
+.notifications-mark-all {
+  border: 0;
+  background: transparent;
+  color: var(--color-primary-600);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.notifications-list {
+  display: flex;
+  flex-direction: column;
+  max-height: min(60vh, 420px);
+  overflow-y: auto;
+}
+
+.notification-item {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid rgb(209 219 229 / 0.35);
+  background: white;
+  cursor: pointer;
+  text-align: left;
+  display: grid;
+  grid-template-columns: 24px 1fr auto;
+  align-items: start;
+  gap: 10px;
+  padding: 12px 14px;
+}
+
+.notification-item:hover {
+  background: color-mix(in srgb, var(--color-primary-50) 60%, white 40%);
+}
+
+.notification-item:last-child {
+  border-bottom: 0;
+}
+
+.notification-item__icon {
+  color: var(--color-primary-600);
+  font-size: 1.2rem;
+  margin-top: 1px;
+}
+
+.notification-item__content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.notification-item__message {
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.notification-item__meta {
+  font-size: 0.74rem;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+.notification-item__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-primary-500);
+  margin-top: 6px;
+}
+
+.notifications-empty {
+  min-height: 140px;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  gap: 8px;
+  color: var(--color-text-secondary);
+}
+
+.notifications-empty .material-symbols-outlined {
+  font-size: 1.45rem;
+}
+
+.notifications-empty p {
+  margin: 0;
+  font-size: 0.84rem;
+  font-weight: 600;
 }
 
 @media (max-width: 768px) {

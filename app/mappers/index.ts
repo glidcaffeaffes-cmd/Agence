@@ -240,7 +240,7 @@ export const AccountMapper = {
       password: '',
       registrationDate: dto.dateInscription,
       active: dto.actif,
-      role: inferRole(dto.email),
+      role: dto.role ?? inferRole(dto.email),
     }
   },
 
