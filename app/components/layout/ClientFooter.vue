@@ -17,7 +17,7 @@
             >
           </NuxtLink>
           <div class="footer-social">
-            <div>
+            <div class="flex gap-1">
               <a
                 href="https://www.facebook.com"
                 target="_blank"
