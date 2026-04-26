@@ -16,97 +16,190 @@
           <span class="active">{{ hotel.name }}</span>
         </div>
         <div class="nav-actions">
-          <button class="action-btn">
-            <span class="material-symbols-outlined">ios_share</span> Share
-          </button>
-          <button class="action-btn">
-            <span class="material-symbols-outlined">favorite</span> Save
-          </button>
+          <button class="action-btn"><span class="material-symbols-outlined">ios_share</span> Share</button>
+          <button class="action-btn"><span class="material-symbols-outlined">favorite</span> Save</button>
         </div>
       </nav>
 
-      <!-- Header Section -->
-      <header class="detail-header">
-        <div class="header-main">
-          <div class="title-wrap">
-            <h1 class="hotel-title">{{ hotel.name }}</h1>
-            <div class="stars">
-              <span
-                v-for="i in 5"
-                :key="i"
-                class="material-symbols-outlined"
-                :class="{ active: i <= hotel.stars }"
-                >star</span
-              >
-            </div>
-          </div>
-          <div class="header-meta">
-            <div class="location-badge">
-              <span class="material-symbols-outlined">location_on</span>
-              <span>{{ hotel.city }}, {{ hotel.country }}</span>
-              <a href="#map" class="map-link">View on map</a>
-            </div>
-          </div>
-        </div>
-      </header>
+      <!-- ═══ HERO 2-COLUMN LAYOUT ═══ -->
+      <section class="hero-layout">
 
-      <!-- Custom Simple Grid Gallery -->
-      <section class="advanced-gallery">
-        <div
-          class="gallery-grid"
-          v-if="hotel.images && hotel.images.length >= 3"
-        >
-          <div class="main-photo">
-            <img :src="hotel.images[0]" :alt="hotel.name" />
-          </div>
-          <div class="side-photos">
-            <div class="photo-wrap">
-              <img :src="hotel.images[1]" alt="Interior" />
+        <!-- LEFT COLUMN: Gallery & Booking -->
+        <div class="hero-left-column">
+          <!-- LEFT: Gallery -->
+          <div class="hero-gallery">
+            <div class="gallery-stage" v-if="hotel.images && hotel.images.length > 0">
+              <div class="gallery-main" @touchstart="onTouchStart" @touchend="onTouchEnd">
+                <transition :name="galleryTransition">
+                  <img
+                    :key="activeGalleryIndex"
+                    :src="hotel.images[activeGalleryIndex]"
+                    :alt="hotel.name + ' photo ' + (activeGalleryIndex + 1)"
+                    class="gallery-main-img"
+                    @click="openLightbox(activeGalleryIndex)"
+                  />
+                </transition>
+                <button class="gallery-arrow gallery-arrow--prev" v-if="hotel.images.length > 1" @click="prevImage" aria-label="Previous photo">
+                  <span class="material-symbols-outlined">chevron_left</span>
+                </button>
+                <button class="gallery-arrow gallery-arrow--next" v-if="hotel.images.length > 1" @click="nextImage" aria-label="Next photo">
+                  <span class="material-symbols-outlined">chevron_right</span>
+                </button>
+                <div class="gallery-counter">{{ activeGalleryIndex + 1 }} / {{ hotel.images.length }}</div>
+                <button class="gallery-show-all" @click="openLightbox(activeGalleryIndex)">
+                  <span class="material-symbols-outlined">photo_library</span>
+                  All {{ hotel.images.length }} photos
+                </button>
+              </div>
+              <div class="gallery-thumbs" ref="thumbsRef" v-if="hotel.images.length > 1">
+                <button
+                  v-for="(img, idx) in hotel.images" :key="idx"
+                  class="gallery-thumb"
+                  :class="{ 'gallery-thumb--active': idx === activeGalleryIndex }"
+                  @click="setGalleryImage(idx)"
+                ><img :src="img" :alt="'Thumb ' + (idx+1)" /></button>
+              </div>
             </div>
-            <div class="photo-wrap relative">
-              <img :src="hotel.images[2]" alt="Exterior" />
-              <div v-if="hotel.images.length > 3" class="more-photos-overlay">
-                <span class="material-symbols-outlined">photo_library</span>
-                <span>+{{ hotel.images.length - 3 }} photos</span>
+
+            <!-- Booking Widget Below Gallery -->
+            <div class="hi-booking" ref="bookingPanelRef">
+              <div class="hi-price-row">
+                <span class="hi-price">From <strong>{{ formatEuro(fromPricePerNight) }}</strong></span>
+                <span class="hi-per">/night</span>
+              </div>
+              <div class="hi-date-grid">
+                <div class="hi-date-field">
+                  <label>CHECK-IN</label>
+                  <DatePicker v-model="checkInDate" :manualInput="false" :minDate="today" appendTo="self" placeholder="Select" dateFormat="M d, yy" class="booking-date-picker" />
+                </div>
+                <div class="hi-date-field">
+                  <label>CHECK-OUT</label>
+                  <DatePicker v-model="checkOutDate" :manualInput="false" :minDate="checkOutMinDate" appendTo="self" placeholder="Select" dateFormat="M d, yy" class="booking-date-picker" />
+                </div>
+              </div>
+              <button
+                type="button"
+                class="hi-guest-trigger"
+                :class="{ 'hi-guest-trigger--open': isGuestPanelOpen }"
+                @click="isGuestPanelOpen = !isGuestPanelOpen"
+              >
+                <span class="material-symbols-outlined">person</span>
+                <span>{{ guestSummary }}</span>
+                <span class="material-symbols-outlined" style="margin-left:auto">expand_more</span>
+              </button>
+              <div v-if="isGuestPanelOpen" class="guest-panel">
+                <div class="guest-counter-row">
+                  <div class="guest-counter-copy"><strong>Adults</strong><span>Ages 18+</span></div>
+                  <div class="guest-counter-control">
+                    <button type="button" class="guest-counter-btn" :disabled="adults <= 1" @click="updateGuestCount('adults', -1)">−</button>
+                    <span>{{ adults }}</span>
+                    <button type="button" class="guest-counter-btn" @click="updateGuestCount('adults', 1)">+</button>
+                  </div>
+                </div>
+                <div class="guest-counter-row">
+                  <div class="guest-counter-copy"><strong>Children</strong><span>Ages 0-17</span></div>
+                  <div class="guest-counter-control">
+                    <button type="button" class="guest-counter-btn" :disabled="children <= 0" @click="updateGuestCount('children', -1)">−</button>
+                    <span>{{ children }}</span>
+                    <button type="button" class="guest-counter-btn" @click="updateGuestCount('children', 1)">+</button>
+                  </div>
+                </div>
+              </div>
+              <button class="hi-book-btn" @click="bookNow">Check Availability</button>
+              <p class="hi-no-charge">You won't be charged yet</p>
+
+              <div class="hi-breakdown" v-if="checkInDate && checkOutDate">
+                <div class="hi-bd-row"><span>{{ formatEuro(fromPricePerNight) }} × {{ nightsCount }} nights</span><span>{{ formatEuro(totalNightsPrice) }}</span></div>
+                <div class="hi-bd-row"><span>City tax</span><span>15€</span></div>
+                <div class="hi-bd-row hi-bd-total"><span>Total</span><span>{{ formatEuro(totalNightsPrice + 15) }}</span></div>
               </div>
             </div>
           </div>
         </div>
-        <div v-else class="fallback-gallery">
-          <img
-            v-if="hotel.images && hotel.images.length > 0"
-            :src="hotel.images[0]"
-            :alt="hotel.name"
-          />
-          <span v-else class="material-symbols-outlined"
-            >image_not_supported</span
-          >
+
+        <!-- RIGHT: Hotel Info -->
+        <div class="hero-info">
+          <!-- Hotel Title & Stars -->
+          <div class="hi-header">
+            <div class="hi-title-row">
+              <h1 class="hi-name">{{ hotel.name }}</h1>
+              <div class="hi-stars">
+                <span v-for="i in hotel.stars" :key="i" class="material-symbols-outlined hi-star">star</span>
+              </div>
+            </div>
+            <div class="hi-location">
+              <span class="material-symbols-outlined">location_on</span>
+              <span>{{ hotel.city }}, {{ hotel.country }}</span>
+            </div>
+          </div>
+
+          <!-- Rating Block -->
+          <div class="hi-rating-block">
+            <div class="hi-score">{{ averageRatingDisplay }}</div>
+            <div class="hi-rating-detail">
+              <div class="hi-stars-row">
+                <span v-for="i in 5" :key="i" class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;color:#cdaf5d;font-size:16px">star</span>
+              </div>
+              <span class="hi-rating-label">Excellent</span>
+              <span class="hi-review-count">{{ reviews.length }} reviews</span>
+            </div>
+          </div>
+
+          <!-- Category bars -->
+          <div class="hi-rating-bars">
+            <div class="hi-bar-row"><span>Location</span><div class="hi-bar"><div class="hi-bar-fill" style="width:90%"></div></div></div>
+            <div class="hi-bar-row"><span>Service</span><div class="hi-bar"><div class="hi-bar-fill" style="width:85%"></div></div></div>
+            <div class="hi-bar-row"><span>Value</span><div class="hi-bar"><div class="hi-bar-fill" style="width:80%"></div></div></div>
+          </div>
+
+          <!-- About -->
+          <div class="hi-about">
+            <h3 class="hi-section-label">About</h3>
+            <p class="hi-desc" style="white-space: pre-line;">{{ hotel.description }}</p>
+          </div>
+
+          <!-- All Amenities -->
+          <div class="hi-amenities">
+            <h3 class="hi-section-label">Amenities & Services</h3>
+            <div class="hi-chips">
+              <span v-for="amenity in (hotel.amenities || defaultAmenities.map(a => a.label))" :key="amenity" class="hi-chip">
+                <span class="material-symbols-outlined">{{ getAmenityIcon(amenity) }}</span>
+                {{ amenity }}
+              </span>
+            </div>
+          </div>
+
         </div>
       </section>
 
-      <!-- Main Layout -->
+      <!-- Lightbox -->
+      <Teleport to="body">
+        <transition name="lightbox-fade">
+          <div v-if="lightboxOpen" class="lightbox-overlay" @click.self="closeLightbox" tabindex="-1">
+            <div class="lightbox-content">
+              <button class="lightbox-close" @click="closeLightbox"><span class="material-symbols-outlined">close</span></button>
+              <div class="lightbox-counter">{{ lightboxIndex + 1 }} / {{ hotel.images.length }}</div>
+              <div class="lightbox-stage" @touchstart="onLightboxTouchStart" @touchend="onLightboxTouchEnd">
+                <button class="lightbox-arrow lightbox-arrow--prev" v-if="hotel.images.length > 1" @click="prevLightbox"><span class="material-symbols-outlined">chevron_left</span></button>
+                <transition :name="lightboxTransition">
+                  <img :key="lightboxIndex" :src="hotel.images[lightboxIndex]" :alt="hotel.name" class="lightbox-img" />
+                </transition>
+                <button class="lightbox-arrow lightbox-arrow--next" v-if="hotel.images.length > 1" @click="nextLightbox"><span class="material-symbols-outlined">chevron_right</span></button>
+              </div>
+              <div class="lightbox-thumbs" ref="lightboxThumbsRef">
+                <button v-for="(img, idx) in hotel.images" :key="idx" class="lightbox-thumb" :class="{ 'lightbox-thumb--active': idx === lightboxIndex }" @click="lightboxIndex = idx">
+                  <img :src="img" :alt="'Thumb ' + (idx+1)" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </transition>
+      </Teleport>
+
+      <!-- ═══ MAIN CONTENT (full width) ═══ -->
       <div class="content-layout">
         <main class="main-content">
           <!-- Overview -->
-          <section class="content-section">
-            <h2 class="section-title">About this property</h2>
-            <p class="hotel-description">{{ hotel.description }}</p>
-
-            <h3 class="subsection-title">Amenities & Services</h3>
-            <div class="amenities-grid">
-              <div
-                class="amenity-item"
-                v-for="amenity in hotel?.amenities ||
-                defaultAmenities.map((a) => a.label)"
-                :key="amenity"
-              >
-                <span class="material-symbols-outlined">{{
-                  getAmenityIcon(amenity)
-                }}</span>
-                <span>{{ amenity }}</span>
-              </div>
-            </div>
-          </section>
 
           <!-- Rooms -->
           <section class="content-section">
@@ -284,161 +377,6 @@
             </div>
           </section>
         </main>
-
-        <!-- Sticky Sidebar -->
-        <aside class="sidebar-wrapper">
-          <div class="sticky-booking-widget">
-            <div class="widget-header">
-              <span class="price-display"
-                >From <strong>{{ formatEuro(fromPricePerNight) }}</strong>
-                <span>/ night</span></span
-              >
-              <div class="rating-small">
-                <span class="material-symbols-outlined">star</span>
-                {{ averageRatingDisplay }}
-              </div>
-            </div>
-
-            <div
-              ref="bookingPanelRef"
-              class="booking-inputs sidebar-booking-inputs"
-            >
-              <div class="date-picker-mock booking-date-grid">
-                <div class="date-field border-right booking-date-field">
-                  <label>CHECK-IN</label>
-                  <DatePicker
-                    v-model="checkInDate"
-                    :manualInput="false"
-                    :minDate="today"
-                    appendTo="self"
-                    placeholder="Select check-in"
-                    dateFormat="M d, yy"
-                    class="booking-date-picker"
-                  />
-                </div>
-                <div class="date-field booking-date-field">
-                  <label>CHECK-OUT</label>
-                  <DatePicker
-                    v-model="checkOutDate"
-                    :manualInput="false"
-                    :minDate="checkOutMinDate"
-                    appendTo="self"
-                    placeholder="Select check-out"
-                    dateFormat="M d, yy"
-                    class="booking-date-picker"
-                  />
-                </div>
-              </div>
-              <div class="guest-picker-mock booking-guest-block">
-                <label>GUESTS</label>
-                <button
-                  type="button"
-                  class="guest-trigger"
-                  :class="{ 'guest-trigger--open': isGuestPanelOpen }"
-                  @click="isGuestPanelOpen = !isGuestPanelOpen"
-                >
-                  <span class="material-symbols-outlined guest-trigger__icon"
-                    >person</span
-                  >
-                  <span class="guest-trigger__copy">
-                    <strong>{{ guestSummary }}</strong>
-                    <span>Adults, children</span>
-                  </span>
-                  <span class="material-symbols-outlined guest-trigger__chevron"
-                    >expand_more</span
-                  >
-                </button>
-
-                <div v-if="isGuestPanelOpen" class="guest-panel">
-                  <div class="guest-counter-row">
-                    <div class="guest-counter-copy">
-                      <strong>Adults</strong>
-                      <span>Ages 18 or above</span>
-                    </div>
-                    <div class="guest-counter-control">
-                      <button
-                        type="button"
-                        class="guest-counter-btn"
-                        :disabled="adults <= 1"
-                        @click="updateGuestCount('adults', -1)"
-                      >
-                        −
-                      </button>
-                      <span>{{ adults }}</span>
-                      <button
-                        type="button"
-                        class="guest-counter-btn"
-                        @click="updateGuestCount('adults', 1)"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-
-                  <div class="guest-counter-row">
-                    <div class="guest-counter-copy">
-                      <strong>Children</strong>
-                      <span>Age 0 to 17 years</span>
-                    </div>
-                    <div class="guest-counter-control">
-                      <button
-                        type="button"
-                        class="guest-counter-btn"
-                        :disabled="children <= 0"
-                        @click="updateGuestCount('children', -1)"
-                      >
-                        −
-                      </button>
-                      <span>{{ children }}</span>
-                      <button
-                        type="button"
-                        class="guest-counter-btn"
-                        @click="updateGuestCount('children', 1)"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    class="guest-done-button"
-                    @click="isGuestPanelOpen = false"
-                  >
-                    Done
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <button
-              class="primary-checkout-btn"
-              :disabled="!canCheckAvailability || availabilityLoading"
-              @click="handleCheckAvailability"
-            >
-              {{ availabilityLoading ? "Checking..." : "Check Availability" }}
-            </button>
-            <p class="no-charge-text">You won't be charged at this point</p>
-
-            <div class="price-breakdown">
-              <div class="breakdown-row">
-                <span
-                  >{{ formatEuro(priceSummary.pricePerNight) }} x
-                  {{ priceSummary.nights }} nights</span
-                >
-                <span>{{ formatEuro(priceSummary.basePrice) }}</span>
-              </div>
-              <div class="breakdown-row">
-                <span>City tax</span>
-                <span>{{ formatEuro(priceSummary.cityTax) }}</span>
-              </div>
-              <div class="breakdown-row total">
-                <span>Total</span>
-                <span>{{ formatEuro(priceSummary.total) }}</span>
-              </div>
-            </div>
-          </div>
-        </aside>
       </div>
 
       <Teleport to="body">
@@ -737,7 +675,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useHotels } from "~/composables/useHotels";
 import { useRooms } from "~/composables/useRooms";
@@ -764,6 +702,98 @@ const {
 } = useReservations();
 
 const hotel = ref<Hotel | null>(null);
+
+// ── Gallery ────────────────────────────────────────────────────────────────
+const activeGalleryIndex = ref(0);
+const galleryTransition = ref('slide-left');
+const thumbsRef = ref<HTMLElement | null>(null);
+let touchStartX = 0;
+
+function setGalleryImage(idx: number) {
+  galleryTransition.value = idx > activeGalleryIndex.value ? 'slide-left' : 'slide-right';
+  activeGalleryIndex.value = idx;
+  nextTick(() => scrollThumbIntoView(thumbsRef.value, idx));
+}
+
+function prevImage() {
+  galleryTransition.value = 'slide-right';
+  activeGalleryIndex.value =
+    activeGalleryIndex.value === 0
+      ? (hotel.value?.images.length ?? 1) - 1
+      : activeGalleryIndex.value - 1;
+  nextTick(() => scrollThumbIntoView(thumbsRef.value, activeGalleryIndex.value));
+}
+
+function nextImage() {
+  galleryTransition.value = 'slide-left';
+  activeGalleryIndex.value =
+    activeGalleryIndex.value === (hotel.value?.images.length ?? 1) - 1
+      ? 0
+      : activeGalleryIndex.value + 1;
+  nextTick(() => scrollThumbIntoView(thumbsRef.value, activeGalleryIndex.value));
+}
+
+function onTouchStart(e: TouchEvent) { touchStartX = e.touches[0].clientX; }
+function onTouchEnd(e: TouchEvent) {
+  const diff = touchStartX - e.changedTouches[0].clientX;
+  if (Math.abs(diff) > 40) diff > 0 ? nextImage() : prevImage();
+}
+
+// ── Lightbox ───────────────────────────────────────────────────────────────
+const lightboxOpen = ref(false);
+const lightboxIndex = ref(0);
+const lightboxTransition = ref('slide-left');
+const lightboxThumbsRef = ref<HTMLElement | null>(null);
+let lbTouchStartX = 0;
+
+function openLightbox(idx: number) {
+  lightboxIndex.value = idx;
+  lightboxOpen.value = true;
+  document.body.style.overflow = 'hidden';
+  nextTick(() => scrollThumbIntoView(lightboxThumbsRef.value, idx));
+}
+
+function closeLightbox() {
+  lightboxOpen.value = false;
+  document.body.style.overflow = '';
+}
+
+function prevLightbox() {
+  lightboxTransition.value = 'slide-right';
+  lightboxIndex.value =
+    lightboxIndex.value === 0
+      ? (hotel.value?.images.length ?? 1) - 1
+      : lightboxIndex.value - 1;
+  nextTick(() => scrollThumbIntoView(lightboxThumbsRef.value, lightboxIndex.value));
+}
+
+function nextLightbox() {
+  lightboxTransition.value = 'slide-left';
+  lightboxIndex.value =
+    lightboxIndex.value === (hotel.value?.images.length ?? 1) - 1
+      ? 0
+      : lightboxIndex.value + 1;
+  nextTick(() => scrollThumbIntoView(lightboxThumbsRef.value, lightboxIndex.value));
+}
+
+function onLightboxTouchStart(e: TouchEvent) { lbTouchStartX = e.touches[0].clientX; }
+function onLightboxTouchEnd(e: TouchEvent) {
+  const diff = lbTouchStartX - e.changedTouches[0].clientX;
+  if (Math.abs(diff) > 40) diff > 0 ? nextLightbox() : prevLightbox();
+}
+
+function scrollThumbIntoView(container: HTMLElement | null, idx: number) {
+  if (!container) return;
+  const thumb = container.children[idx] as HTMLElement;
+  if (thumb) thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+}
+
+function handleLightboxKeydown(e: KeyboardEvent) {
+  if (!lightboxOpen.value) return;
+  if (e.key === 'ArrowRight') nextLightbox();
+  if (e.key === 'ArrowLeft') prevLightbox();
+  if (e.key === 'Escape') closeLightbox();
+}
 const loading = ref(true);
 
 const newReviewText = ref("");
@@ -1167,6 +1197,7 @@ function getAmenityIcon(amenity: string) {
 onMounted(async () => {
   document.addEventListener("click", closeGuestPanelOnOutside);
   document.addEventListener("keydown", handleGlobalKeydown);
+  document.addEventListener("keydown", handleLightboxKeydown);
   checkInDate.value = addDays(today, 1);
   checkOutDate.value = addDays(today, 4);
 
@@ -1184,6 +1215,8 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   document.removeEventListener("click", closeGuestPanelOnOutside);
   document.removeEventListener("keydown", handleGlobalKeydown);
+  document.removeEventListener("keydown", handleLightboxKeydown);
+  document.body.style.overflow = '';
 });
 </script>
 
@@ -1276,1272 +1309,658 @@ onBeforeUnmount(() => {
   font-size: 18px;
 }
 
-/* Header */
-.detail-header {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-.title-wrap {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 8px;
-}
-
-.hotel-title {
-  font-size: 36px;
-  font-weight: 700;
-  color: #001d34;
-  margin: 0;
-}
-
-.stars {
-  display: flex;
-  gap: 2px;
-}
-.stars .material-symbols-outlined {
-  font-size: 20px;
-  color: #e2e8f0;
-  font-variation-settings: "FILL" 1;
-}
-.stars .active {
-  color: #cdaf5d;
-}
-
-.location-badge {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  color: #475569;
-}
-.location-badge .material-symbols-outlined {
-  font-size: 18px;
-  color: #015081;
-}
-.map-link {
-  font-weight: 600;
-  color: #008f90;
-  text-decoration: underline;
-  margin-left: 8px;
-  cursor: pointer;
-}
-
-/* Gallery */
-.advanced-gallery {
+/* ═══ HERO 2-COLUMN LAYOUT ═══ */
+.hero-layout {
   max-width: 1200px;
   margin: 0 auto 40px;
   padding: 0 24px;
-}
-
-.gallery-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 12px;
-  border-radius: 16px;
-  overflow: hidden;
-  height: 480px;
-}
-
-.main-photo {
-  height: 100%;
-}
-.main-photo img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s;
-  cursor: pointer;
-}
-.main-photo:hover img {
-  transform: scale(1.02);
-}
-
-.side-photos {
-  display: grid;
-  grid-template-rows: 1fr 1fr;
-  gap: 12px;
-}
-
-.photo-wrap {
-  overflow: hidden;
-  position: relative;
-  cursor: pointer;
-  height: 100%;
-  border-radius: 8px;
-}
-.photo-wrap img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.photo-wrap:hover img {
-  transform: scale(1.02);
-}
-
-.relative {
-  position: relative;
-}
-
-.more-photos-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  color: white;
-  font-weight: 700;
-  font-size: 16px;
-  gap: 8px;
-  transition: background 0.3s;
-}
-.more-photos-overlay:hover {
-  background: rgba(0, 0, 0, 0.5);
-}
-.more-photos-overlay .material-symbols-outlined {
-  font-size: 32px;
-}
-
-.fallback-gallery {
-  height: 480px;
-  background: #f8fafc;
-  border-radius: 16px;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #cbd5e1;
-}
-.fallback-gallery img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.fallback-gallery .material-symbols-outlined {
-  font-size: 64px;
-}
-
-/* Content Layout */
-.content-layout {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
-  display: grid;
-  grid-template-columns: 1fr 360px;
-  gap: 48px;
+  grid-template-columns: 1fr 400px;
+  gap: 32px;
+  align-items: start;
 }
 
 @media (max-width: 1024px) {
-  .content-layout {
+  .hero-layout {
     grid-template-columns: 1fr;
   }
 }
 
-.content-section {
-  padding-bottom: 24px;
-  margin-bottom: 24px;
-  border-bottom: 1px solid #e2e8f0;
+/* LEFT: Gallery */
+.hero-gallery {
+  width: 100%;
+  position: sticky;
+  top: 24px;
 }
 
+.gallery-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.gallery-main {
+  position: relative;
+  width: 100%;
+  height: 520px;
+  border-radius: 24px;
+  overflow: hidden;
+  background: #0a1c2e;
+  cursor: pointer;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+}
+
+.gallery-main-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.3s ease;
+}
+
+/* Slide transitions */
+.slide-left-enter-active, .slide-left-leave-active,
+.slide-right-enter-active, .slide-right-leave-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: absolute;
+  inset: 0;
+}
+.slide-left-enter-from { transform: translateX(100%); opacity: 0; }
+.slide-left-leave-to   { transform: translateX(-100%); opacity: 0; }
+.slide-right-enter-from { transform: translateX(-100%); opacity: 0; }
+.slide-right-leave-to  { transform: translateX(100%); opacity: 0; }
+
+.gallery-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  color: #015081;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: all 0.2s;
+  backdrop-filter: blur(4px);
+}
+.gallery-arrow:hover {
+  background: #fff;
+  transform: translateY(-50%) scale(1.1);
+}
+.gallery-arrow--prev { left: 20px; }
+.gallery-arrow--next { right: 20px; }
+
+.gallery-counter {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 16px;
+  border-radius: 30px;
+  backdrop-filter: blur(8px);
+  z-index: 10;
+}
+
+.gallery-show-all {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #015081;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: all 0.2s;
+}
+.gallery-show-all:hover {
+  background: #fff;
+  transform: translateY(-2px);
+}
+
+.gallery-thumbs {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: none;
+}
+.gallery-thumbs::-webkit-scrollbar { display: none; }
+
+.gallery-thumb {
+  flex-shrink: 0;
+  width: 100px;
+  height: 68px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+  opacity: 0.6;
+}
+.gallery-thumb--active {
+  border-color: #008f90;
+  opacity: 1;
+  transform: translateY(-4px);
+}
+.gallery-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+/* RIGHT: Hero Info */
+.hero-info {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.hi-header {
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 20px;
+}
+.hi-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.hi-name {
+  font-size: 28px;
+  font-weight: 800;
+  color: #001d34;
+  margin: 0;
+  line-height: 1.2;
+}
+.hi-stars { display: flex; gap: 2px; }
+.hi-star { color: #cdaf5d; font-size: 18px; font-variation-settings: 'FILL' 1; }
+.hi-location {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #64748b;
+}
+.hi-location .material-symbols-outlined { font-size: 18px; color: #015081; }
+
+.hi-rating-block {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.hi-score {
+  background: #015081;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 800;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+}
+.hi-rating-detail {
+  display: flex;
+  flex-direction: column;
+}
+.hi-rating-label { font-weight: 700; color: #001d34; font-size: 15px; }
+.hi-review-count { font-size: 13px; color: #64748b; }
+
+.hi-rating-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.hi-bar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.hi-bar-row span { font-size: 13px; font-weight: 600; color: #475569; width: 60px; }
+.hi-bar { flex: 1; height: 6px; background: #f1f5f9; border-radius: 10px; overflow: hidden; }
+.hi-bar-fill { height: 100%; background: #015081; border-radius: 10px; }
+
+.hi-about { display: flex; flex-direction: column; gap: 8px; }
+.hi-section-label { font-size: 16px; font-weight: 800; color: #001d34; margin: 0; }
+.hi-desc { font-size: 14px; line-height: 1.6; color: #475569; margin: 0; }
+
+.hi-amenities { display: flex; flex-direction: column; gap: 12px; }
+.hi-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.hi-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f8fafc;
+  padding: 6px 12px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #015081;
+  border: 1px solid #e2e8f0;
+}
+.hi-chip .material-symbols-outlined { font-size: 16px; }
+
+/* Booking Widget in Hero */
+.hi-booking {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.06);
+  max-width: 450px;
+}
+.hi-price-row { display: flex; align-items: baseline; gap: 4px; margin-bottom: 20px; }
+.hi-price { font-size: 16px; color: #64748b; }
+.hi-price strong { font-size: 28px; font-weight: 800; color: #001d34; }
+.hi-per { font-size: 14px; color: #94a3b8; }
+
+.hi-date-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.hi-date-field { padding: 10px 14px; }
+.hi-date-field:first-child { border-right: 1px solid #cbd5e1; }
+.hi-date-field label { display: block; font-size: 10px; font-weight: 800; color: #015081; margin-bottom: 4px; }
+
+.hi-guest-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 16px;
+}
+
+.hi-book-btn {
+  width: 100%;
+  padding: 16px;
+  background: #008f90;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.hi-book-btn:hover { background: #007677; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 143, 144, 0.3); }
+.hi-no-charge { text-align: center; font-size: 12px; color: #94a3b8; margin: 12px 0 0; }
+
+.hi-breakdown { margin-top: 20px; padding-top: 16px; border-top: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 10px; }
+.hi-bd-row { display: flex; justify-content: space-between; font-size: 14px; color: #64748b; }
+.hi-bd-total { margin-top: 6px; padding-top: 10px; border-top: 1px dashed #e2e8f0; font-weight: 800; color: #001d34; font-size: 16px; }
+
+/* ── Lightbox ─────────────────────────────────────────────────────────── */
+.lightbox-fade-enter-active,
+.lightbox-fade-leave-active {
+  transition: opacity 0.25s ease;
+}
+.lightbox-fade-enter-from,
+.lightbox-fade-leave-to {
+  opacity: 0;
+}
+
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 10, 20, 0.96);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+}
+
+.lightbox-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  gap: 12px;
+  position: relative;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 20;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.lightbox-close:hover { background: rgba(255, 255, 255, 0.2); }
+.lightbox-close .material-symbols-outlined { font-size: 22px; }
+
+.lightbox-counter {
+  position: absolute;
+  top: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.lightbox-stage {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 16px;
+}
+
+.lightbox-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 12px;
+  position: absolute;
+  user-select: none;
+}
+
+.lightbox-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+  backdrop-filter: blur(4px);
+}
+.lightbox-arrow:hover {
+  background: rgba(255, 255, 255, 0.22);
+  transform: translateY(-50%) scale(1.08);
+}
+.lightbox-arrow--prev { left: 12px; }
+.lightbox-arrow--next { right: 12px; }
+.lightbox-arrow .material-symbols-outlined { font-size: 26px; }
+
+/* Lightbox thumbnails */
+.lightbox-thumbs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  max-width: 100%;
+  padding: 4px 0;
+  scrollbar-width: none;
+}
+.lightbox-thumbs::-webkit-scrollbar { display: none; }
+
+.lightbox-thumb {
+  flex-shrink: 0;
+  width: 72px;
+  height: 50px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  background: none;
+  opacity: 0.5;
+  transition: opacity 0.2s, border-color 0.2s, transform 0.2s;
+}
+.lightbox-thumb:hover { opacity: 0.85; }
+.lightbox-thumb--active {
+  border-color: #008f90;
+  opacity: 1;
+  transform: translateY(-2px);
+}
+.lightbox-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── Property Content ────────────────────────────────────────────────── */
+.content-section {
+  padding: 48px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
 .section-title {
-  font-size: 22px;
+  font-size: 26px;
+  font-weight: 800;
+  color: #001d34;
+  margin-bottom: 24px;
+}
+.hotel-description {
+  font-size: 16px;
+  line-height: 1.8;
+  color: #475569;
+  white-space: pre-line;
+}
+.subsection-title {
+  font-size: 18px;
+  font-weight: 700;
   color: #001d34;
   margin-bottom: 16px;
-  font-weight: 700;
 }
-
-.hotel-description {
-  font-size: 15px;
-  line-height: 1.6;
-  color: #334155;
-  margin-bottom: 24px;
-}
-
-.subsection-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: #015081;
-  margin-bottom: 20px;
-}
-
 .amenities-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
 }
-
 .amenity-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 15px;
-  color: #334155;
-}
-.amenity-item .material-symbols-outlined {
-  color: #008f90;
-  font-size: 24px;
-}
-
-/* Rooms List */
-.premium-room-card {
-  display: flex;
-  border: 1px solid #e2e8f0;
+  padding: 12px 16px;
+  background: #f8fafc;
   border-radius: 12px;
+  border: 1px solid #f1f5f9;
+  font-size: 14px;
+  font-weight: 600;
+  color: #015081;
+}
+.amenity-item .material-symbols-outlined { color: #008f90; font-size: 24px; }
+
+/* ── Rooms Grid ──────────────────────────────────────────────────────── */
+.rooms-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 24px;
+  margin-bottom: 40px;
+}
+.premium-room-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
   overflow: hidden;
-  margin-bottom: 16px;
-  transition:
-    box-shadow 0.2s ease,
-    border-color 0.2s ease;
-  background: white;
-}
-.premium-room-card:hover {
-  box-shadow: 0 4px 12px rgba(1, 80, 129, 0.08); /* Reduced hover intensity */
-  border-color: #cbd5e1;
-}
-
-.room-image {
-  width: 220px;
-  flex-shrink: 0;
-}
-.room-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.room-content {
-  padding: 16px 20px;
-  flex: 1;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
 }
-
-.room-header h3 {
-  font-size: 18px;
-  color: #015081;
-  margin: 0 0 12px 0;
-  font-weight: 700;
+.premium-room-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.08);
 }
-.room-features {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-.room-features span {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: #475569;
-}
-.room-features .material-symbols-outlined {
-  font-size: 18px;
-  color: #94a3b8;
-}
-
-.room-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-top: 24px;
-}
-.price-val {
-  font-size: 24px;
-  font-weight: 800;
-  color: #008f90;
-}
-.price-unit {
-  font-size: 13px;
-  color: #64748b;
-  margin-left: 4px;
-}
-
+.room-image { height: 220px; overflow: hidden; }
+.room-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
+.premium-room-card:hover .room-image img { transform: scale(1.1); }
+.room-content { padding: 24px; flex: 1; display: flex; flex-direction: column; }
+.room-header h3 { font-size: 20px; font-weight: 800; color: #001d34; margin: 0 0 12px; }
+.room-features { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+.room-features span { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #64748b; }
+.room-features .material-symbols-outlined { font-size: 20px; color: #008f90; }
+.room-footer { margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid #f1f5f9; }
+.price-block { display: flex; align-items: baseline; gap: 4px; }
+.price-val { font-size: 24px; font-weight: 800; color: #008f90; }
+.price-unit { font-size: 12px; color: #94a3b8; font-weight: 600; }
 .book-btn-outline {
-  padding: 10px 24px;
-  border: 2px solid #008f90;
-  background: white;
-  color: #008f90;
-  border-radius: 8px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s;
+  border: 2px solid #008f90; background: transparent; color: #008f90;
+  padding: 10px 24px; border-radius: 12px; font-weight: 800; font-size: 14px;
+  cursor: pointer; transition: all 0.2s;
 }
-.book-btn-outline:hover {
-  background: #008f90;
-  color: white;
-}
-.book-btn-outline.disabled {
-  border-color: #cbd5e1;
-  color: #94a3b8;
-  cursor: not-allowed;
-}
-.book-btn-outline.disabled:hover {
-  background: white;
-  color: #94a3b8;
-}
+.book-btn-outline:hover:not(.disabled) { background: #008f90; color: #fff; }
+.book-btn-outline.disabled { border-color: #cbd5e1; color: #cbd5e1; cursor: not-allowed; }
 
-/* Reviews & Ratings (Notes) */
+/* ── Reviews ─────────────────────────────────────────────────────────── */
 .reviews-header-advanced {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 32px;
+  gap: 24px;
 }
-.reviews-subtitle {
-  color: #64748b;
-  font-size: 13px;
-  margin-top: 4px;
-}
-.m-0 {
-  margin: 0;
-}
+.reviews-subtitle { color: #64748b; font-size: 14px; margin-top: 4px; }
 
 .global-rating-block {
   display: flex;
   align-items: center;
-  gap: 12px;
-  background: #fdfbf7;
-  padding: 12px 16px;
-  border-radius: 12px;
-  border: 1px solid #f6ecd6;
-}
-.rating-score {
-  font-size: 36px;
-  font-weight: 800;
-  color: #001d34;
-  line-height: 1;
-}
-.stars-gold {
-  display: flex;
-  margin-bottom: 2px;
-}
-.stars-gold .material-symbols-outlined {
-  color: #cdaf5d;
-  font-variation-settings: "FILL" 1;
-  font-size: 16px;
-}
-.rating-context {
-  display: flex;
-  flex-direction: column;
-}
-.rating-context span {
-  font-weight: 700;
-  font-size: 13px;
-  color: #334155;
-}
-
-.reviews-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
   gap: 16px;
-  margin-bottom: 24px;
-}
-.review-card {
-  padding: 20px;
   background: #f8fafc;
-  border-radius: 12px;
+  padding: 16px 24px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+}
+.rating-score { font-size: 38px; font-weight: 800; color: #015081; line-height: 1; }
+.rating-context { display: flex; flex-direction: column; }
+.stars-gold { display: flex; gap: 2px; margin-bottom: 4px; }
+.stars-gold .material-symbols-outlined { color: #cdaf5d; font-variation-settings: 'FILL' 1; font-size: 18px; }
+.rating-context span { font-weight: 700; font-size: 14px; color: #001d34; }
+
+.reviews-list { display: flex; flex-direction: column; gap: 20px; }
+.review-card {
+  padding: 24px;
+  background: #fff;
   border: 1px solid #f1f5f9;
-  transition: box-shadow 0.2s ease;
-  margin-bottom: 12px;
+  border-radius: 16px;
+  transition: all 0.2s;
 }
-.review-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
-  border-color: #e2e8f0;
-}
-.reviewer-prof {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
+.review-card:hover { border-color: #e2e8f0; box-shadow: 0 8px 20px rgba(0,0,0,0.04); }
+.reviewer-prof { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
 .avatar-circle {
-  width: 40px;
-  height: 40px;
-  background: #015081;
-  color: white;
+  width: 44px; height: 44px;
+  background: #015081; color: #fff;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 16px;
-  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 18px;
 }
-.reviewer-meta strong {
-  display: block;
-  font-size: 14px;
-  color: #001d34;
-  font-weight: 600;
-}
-.reviewer-meta span {
-  font-size: 12px;
-  color: #64748b;
-}
-.review-stars-small {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-bottom: 10px;
-}
-.review-stars-small .material-symbols-outlined {
-  font-size: 15px;
-  color: #e2e8f0;
-  font-variation-settings: "FILL" 1;
-}
-.review-stars-small .material-symbols-outlined.active {
-  color: #cdaf5d;
-}
-.review-rating-text {
-  font-size: 12px;
-  font-weight: 700;
-  color: #64748b;
-  margin-left: 4px;
-}
-.review-body {
-  font-size: 14px;
-  line-height: 1.6;
-  color: #334155;
-  margin: 0;
-}
-
-.all-reviews-section {
-  margin-top: 32px;
-}
-.reviews-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.no-reviews-msg {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding: 40px 20px;
-  color: #94a3b8;
-  text-align: center;
-}
-.no-reviews-msg .material-symbols-outlined {
-  font-size: 40px;
-}
-.no-reviews-msg p {
-  font-size: 14px;
-  margin: 0;
-}
+.reviewer-meta strong { display: block; font-size: 15px; color: #001d34; }
+.reviewer-meta span { font-size: 13px; color: #94a3b8; }
+.review-stars-small { display: flex; gap: 4px; margin-bottom: 12px; }
+.review-stars-small .material-symbols-outlined { font-size: 16px; color: #e2e8f0; font-variation-settings: 'FILL' 1; }
+.review-stars-small .active { color: #cdaf5d; }
+.review-body { font-size: 15px; line-height: 1.7; color: #475569; }
 
 /* Feedback Form */
-.mb-3 {
-  margin-bottom: 12px;
-}
-.rating-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: #001d34;
-  margin-right: 10px;
-}
-
-.feedback-form-container {
-  margin-top: 28px;
-  border-top: 1px solid #e2e8f0;
-  padding-top: 24px;
-}
-.feedback-card {
-  background: #f8fafc;
-  border: 1px solid #f1f5f9;
-  border-radius: 12px;
-  padding: 20px;
-}
-.rating-selector {
-  display: flex;
-  align-items: center;
-  margin-bottom: 12px;
-}
-.stars-interactive {
-  display: flex;
-  gap: 4px;
-}
-.star-btn {
-  font-size: 26px;
-  color: #e2e8f0;
-  font-variation-settings: "FILL" 1;
-  cursor: pointer;
-  transition:
-    color 0.15s,
-    transform 0.15s;
-}
-.star-btn.active {
-  color: #cdaf5d;
-}
-.star-btn:hover {
-  transform: scale(1.15);
-  color: #cdaf5d;
-}
+.feedback-form-container { margin-top: 40px; padding-top: 32px; border-top: 1px solid #f1f5f9; }
+.feedback-card { background: #f8fafc; padding: 24px; border-radius: 20px; border: 1px solid #e2e8f0; }
+.rating-selector { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.rating-label { font-size: 15px; font-weight: 700; color: #001d34; }
+.stars-interactive { display: flex; gap: 6px; }
+.star-btn { font-size: 30px; color: #cbd5e1; cursor: pointer; transition: all 0.2s; font-variation-settings: 'FILL' 1; }
+.star-btn:hover, .star-btn.active { color: #cdaf5d; transform: scale(1.1); }
 .feedback-textarea {
-  width: 100%;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  padding: 12px;
-  font-size: 14px;
-  color: #334155;
-  font-family: inherit;
-  resize: vertical;
-  margin-bottom: 12px;
-  transition:
-    border-color 0.2s,
-    box-shadow 0.2s;
-  outline: none;
-  box-sizing: border-box;
+  width: 100%; border: 1px solid #cbd5e1; border-radius: 12px;
+  padding: 16px; font-size: 15px; font-family: inherit;
+  resize: vertical; margin-bottom: 16px; outline: none;
 }
-.feedback-textarea:focus {
-  border-color: #008f90;
-  box-shadow: 0 0 0 3px rgba(0, 143, 144, 0.1);
-}
-.feedback-actions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
+.feedback-textarea:focus { border-color: #008f90; box-shadow: 0 0 0 4px rgba(0, 143, 144, 0.1); }
 .submit-review-btn {
-  background: #008f90;
-  color: white;
-  border: none;
-  padding: 10px 22px;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s;
-  margin-left: auto;
+  background: #008f90; color: #fff; border: none; padding: 12px 28px;
+  border-radius: 12px; font-weight: 800; cursor: pointer; transition: all 0.2s;
 }
-.submit-review-btn:hover:not(:disabled) {
-  background: #007677;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 143, 144, 0.25);
-}
-.submit-review-btn:disabled {
-  background: #cbd5e1;
-  cursor: not-allowed;
-  opacity: 0.7;
-  transform: none;
-}
-.submit-success-msg {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: #008f90;
-  font-size: 13px;
-  font-weight: 600;
-}
-.submit-success-msg .material-symbols-outlined {
-  font-size: 18px;
-}
+.submit-review-btn:hover:not(:disabled) { background: #007677; transform: translateY(-2px); }
 
-/* Sticky Sidebar Widget */
-.sidebar-wrapper {
-  position: relative;
-}
-.sticky-booking-widget {
-  position: sticky;
-  top: 32px;
-  background: white;
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 20px 40px rgba(1, 80, 129, 0.08);
-  border: 1px solid #e2e8f0;
-}
-
-.widget-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-}
-.price-display {
-  font-size: 14px;
-  color: #334155;
-}
-.price-display strong {
-  font-size: 24px;
-  font-weight: 800;
-  color: #001d34;
-  margin: 0 2px;
-}
-.rating-small {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-weight: 700;
-  font-size: 14px;
-}
-.rating-small .material-symbols-outlined {
-  font-size: 16px;
-  color: #cdaf5d;
-  font-variation-settings: "FILL" 1;
-}
-
-.booking-inputs {
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  margin-bottom: 16px;
-  overflow: visible;
-  background: #fff;
-}
-.sidebar-booking-inputs {
-  position: relative;
-  z-index: 30;
-}
-.booking-date-grid {
-  display: flex;
-  border-bottom: 1px solid #cbd5e1;
-}
-.booking-date-field {
-  padding: 12px;
-}
-.date-field {
-  flex: 1;
-  transition: background 0.2s;
-}
-.date-field:hover {
-  background: #f8fafc;
-}
-.border-right {
-  border-right: 1px solid #cbd5e1;
-}
-.date-field label {
-  display: block;
-  font-size: 10px;
-  font-weight: 800;
-  color: #015081;
-  margin-bottom: 4px;
-  cursor: pointer;
-  letter-spacing: 0.04em;
-}
-
-:deep(.booking-date-picker .p-inputtext) {
-  width: 100%;
-  border: none;
-  background: transparent;
-  padding: 0;
-  font-size: 14px;
-  color: #334155;
-  font-weight: 500;
-  box-shadow: none;
-}
-
-:deep(.booking-date-picker .p-datepicker-input-icon-container),
-:deep(.booking-date-picker .p-datepicker-trigger) {
-  display: none;
-}
-
-:deep(.booking-date-picker .p-datepicker) {
-  width: 100%;
-}
-
-:deep(.booking-date-picker .p-datepicker-panel) {
-  z-index: 80 !important;
-  margin-top: 6px;
-  background: #ffffff !important;
-  border: 1px solid #cbd5e1 !important;
-  border-radius: 14px !important;
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.22) !important;
-  padding: 0.7rem !important;
-  min-width: 18rem;
-}
-
-:deep(.booking-date-picker .p-datepicker-header) {
-  border-bottom: 1px solid #e2e8f0;
-  padding: 0.2rem 0.35rem 0.55rem;
-  margin-bottom: 0.25rem;
-}
-
-:deep(.booking-date-picker .p-datepicker-title) {
-  font-size: 0.95rem;
-  font-weight: 800;
-  color: #001d34;
-}
-
-:deep(.booking-date-picker .p-datepicker-weekday) {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: #64748b;
-}
-
-:deep(.booking-date-picker .p-datepicker-day) {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 8px;
-  font-size: 0.88rem;
-  font-weight: 600;
-}
-
-:deep(.booking-date-picker .p-datepicker-day:hover) {
-  background: #f1f5f9;
-}
-
-:deep(.booking-date-picker .p-datepicker-day-selected),
-:deep(.booking-date-picker .p-datepicker-day-selected-start),
-:deep(.booking-date-picker .p-datepicker-day-selected-end) {
-  background: #008f90 !important;
-  color: #ffffff !important;
-}
-
-.booking-guest-block {
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-}
-.booking-guest-block label {
-  font-size: 10px;
-  font-weight: 800;
-  color: #015081;
-  margin-bottom: 4px;
-  letter-spacing: 0.04em;
-}
-
-.guest-trigger {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  color: #334155;
-  cursor: pointer;
-  text-align: left;
-  padding: 0;
-}
-
-.guest-trigger__icon {
-  font-size: 18px;
-  color: #64748b;
-}
-.guest-trigger__copy {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-.guest-trigger__copy strong {
-  font-size: 14px;
-  font-weight: 600;
-  color: #334155;
-  line-height: 1.2;
-}
-.guest-trigger__copy span {
-  font-size: 12px;
-  color: #94a3b8;
-  line-height: 1.2;
-}
-.guest-trigger__chevron {
-  font-size: 18px;
-  color: #64748b;
-  transition: transform 0.2s;
-}
-.guest-trigger--open .guest-trigger__chevron {
-  transform: rotate(180deg);
-}
-
-.guest-panel {
-  margin-top: 12px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  box-shadow: 0 12px 24px rgba(1, 80, 129, 0.08);
-}
-
-.guest-counter-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.guest-counter-copy {
-  display: flex;
-  flex-direction: column;
-}
-.guest-counter-copy strong {
-  font-size: 14px;
-  color: #001d34;
-  line-height: 1.2;
-}
-.guest-counter-copy span {
-  font-size: 12px;
-  color: #64748b;
-  line-height: 1.2;
-}
-
-.guest-counter-control {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 14px;
-  font-weight: 700;
-  color: #001d34;
-}
-
-.guest-counter-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 1px solid #cbd5e1;
-  background: #fff;
-  color: #001d34;
-  font-size: 18px;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.guest-counter-btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.guest-done-button {
-  align-self: flex-end;
-  border: 1px solid #008f90;
-  background: #fff;
-  color: #008f90;
-  border-radius: 8px;
-  padding: 6px 14px;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.primary-checkout-btn {
-  width: 100%;
-  padding: 14px;
-  background: #008f90;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-.primary-checkout-btn:hover {
-  opacity: 0.9;
-}
-.primary-checkout-btn:disabled {
-  background: #94a3b8;
-  cursor: not-allowed;
-  opacity: 0.8;
-}
-
-.no-charge-text {
-  text-align: center;
-  font-size: 12px;
-  color: #64748b;
-  margin: 16px 0;
-}
-
-.price-breakdown {
-  padding-top: 16px;
-  border-top: 1px solid #e2e8f0;
-}
-.breakdown-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 14px;
-  color: #475569;
-  margin-bottom: 12px;
-}
-.breakdown-row.total {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px dashed #cbd5e1;
-  font-weight: 800;
-  color: #001d34;
-  font-size: 16px;
-}
+/* ── Content Layout & Drawers ─────────────────────────────────────────── */
+.content-layout { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+.main-content { width: 100%; }
 
 .availability-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 1200;
-  background: rgba(15, 23, 42, 0.28);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(7px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px 16px;
+  position: fixed; inset: 0; z-index: 1200;
+  background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center; padding: 24px;
 }
-
 .availability-drawer {
-  width: min(980px, 100%);
-  max-height: 90vh;
-  background: #fff;
-  border-radius: 20px;
-  border: 1px solid #e2e8f0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  width: min(1000px, 100%); max-height: 90vh; background: #fff;
+  border-radius: 24px; display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: 0 25px 50px rgba(0,0,0,0.2);
 }
+.availability-drawer-header { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; }
+.availability-drawer-header h3 { font-size: 24px; font-weight: 800; color: #001d34; margin: 0; }
+.availability-room-list { padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
+.availability-room-card { display: flex; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; }
+.availability-room-image { width: 280px; }
+.availability-room-image img { width: 100%; height: 100%; object-fit: cover; }
+.availability-room-content { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
 
-.availability-drawer-header {
-  padding: 16px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid #e2e8f0;
-}
+/* Confirm Drawer */
+.booking-confirm-drawer { width: min(800px, 100%); }
+.booking-confirm-content { padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
+.booking-summary-card { display: flex; background: #f8fafc; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; }
+.booking-summary-image { width: 200px; }
+.booking-summary-image img { width: 100%; height: 100%; object-fit: cover; }
+.booking-summary-info { padding: 16px; flex: 1; }
+.booking-price-card, .booking-form-card { border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; }
+.booking-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
-.availability-drawer-header h3 {
-  margin: 0;
-  font-size: 22px;
-  color: #001d34;
-}
-
-.availability-drawer-header p {
-  margin: 4px 0 0;
-  font-size: 13px;
-  color: #64748b;
-}
-
-.availability-close-btn {
-  border: 1px solid #cbd5e1;
-  background: #fff;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-.availability-room-list {
-  overflow: auto;
-  padding: 16px 20px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.availability-room-card {
-  display: flex;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  overflow: hidden;
-  background: #fff;
-}
-
-.availability-room-image {
-  width: 240px;
-  min-height: 180px;
-}
-
-.availability-room-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.availability-room-content {
-  flex: 1;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.availability-room-content h4 {
-  margin: 0;
-  font-size: 22px;
-  color: #015081;
-}
-
-.availability-room-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px 18px;
-}
-
-.availability-room-meta span {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  color: #475569;
-}
-
-.availability-room-meta .material-symbols-outlined {
-  font-size: 18px;
-  color: #94a3b8;
-}
-
-.availability-room-footer {
-  margin-top: auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-}
-
-.availability-loading {
-  padding: 36px 20px;
-  text-align: center;
-  color: #015081;
-}
-
-.availability-loading p {
-  margin: 8px 0 0;
-  font-size: 14px;
-}
-
-.availability-empty-card {
-  margin: 20px;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  background: #f8fafc;
-  padding: 20px;
-}
-
-.availability-empty-card h4 {
-  margin: 0 0 8px;
-  font-size: 20px;
-  color: #001d34;
-}
-
-.availability-empty-card p {
-  margin: 0;
-  color: #475569;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.availability-empty-actions {
-  margin-top: 16px;
-  display: flex;
-  gap: 10px;
-}
-
-.view-similar-btn {
-  width: auto;
-  padding: 10px 18px;
-}
-
-.booking-confirm-drawer {
-  width: min(860px, 100%);
-}
-
-.booking-confirm-content {
-  padding: 18px 20px;
-  display: grid;
-  gap: 12px;
-  overflow: auto;
-}
-
-.booking-summary-card {
-  display: flex;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  overflow: hidden;
-  background: #f8fafc;
-}
-
-.booking-summary-image {
-  width: 200px;
-  min-height: 120px;
-}
-
-.booking-summary-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.booking-summary-info {
-  padding: 14px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.booking-summary-info h4 {
-  margin: 0;
-  color: #015081;
-  font-size: 20px;
-}
-
-.booking-summary-info p {
-  margin: 0;
-  color: #475569;
-  font-size: 14px;
-}
-
-.booking-price-card,
-.booking-form-card {
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 16px;
-  background: #fff;
-}
-
-.booking-price-card h5,
-.booking-form-card h5 {
-  margin: 0 0 14px;
-  font-size: 16px;
-  color: #001d34;
-}
-
-.booking-form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.booking-field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.booking-field span {
-  color: #015081;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.booking-field input,
-.booking-field textarea {
-  border: 1px solid #cbd5e1;
-  border-radius: 10px;
-  padding: 10px 12px;
-  font-size: 14px;
-  color: #334155;
-  font-family: inherit;
-  background: #fff;
-}
-
-.booking-field input:focus,
-.booking-field textarea:focus {
-  outline: none;
-  border-color: #008f90;
-  box-shadow: 0 0 0 3px rgba(0, 143, 144, 0.1);
-}
-
-.booking-field-full {
-  grid-column: 1 / -1;
-}
-
-.booking-error-text {
-  margin: 10px 0 0;
-  color: #b42318;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.booking-confirm-footer {
-  padding: 16px 20px 20px;
-  border-top: 1px solid #e2e8f0;
-}
-
-.booking-feedback-drawer {
-  width: min(740px, 100%);
-}
-
-.booking-feedback-card {
-  margin: 18px 20px 0;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  background: #f8fafc;
-  padding: 16px;
-}
-
-.booking-feedback-card p {
-  margin: 0 0 8px;
-  color: #334155;
-  font-size: 14px;
-}
-
-.booking-feedback-card p:last-child {
-  margin-bottom: 0;
-}
-
-.booking-feedback-actions {
-  margin: 16px 20px 20px;
-}
-
-.availability-drawer-enter-active,
-.availability-drawer-leave-active {
-  transition: opacity 0.2s ease;
-}
-
-.availability-drawer-enter-active .availability-drawer,
-.availability-drawer-leave-active .availability-drawer {
-  transition: transform 0.25s ease;
-}
-
-.availability-drawer-enter-from,
-.availability-drawer-leave-to {
-  opacity: 0;
-}
-
-.availability-drawer-enter-from .availability-drawer,
-.availability-drawer-leave-to .availability-drawer {
-  transform: translateY(24px);
-}
+/* Transitions */
+.availability-drawer-enter-active, .availability-drawer-leave-active { transition: all 0.3s ease; }
+.availability-drawer-enter-from, .availability-drawer-leave-to { opacity: 0; transform: scale(0.95); }
 
 @media (max-width: 768px) {
-  .availability-overlay {
-    padding: 0;
-    align-items: flex-end;
-  }
-
-  .availability-drawer {
-    border-radius: 16px 16px 0 0;
-    max-height: 94vh;
-  }
-
-  .availability-room-card {
-    flex-direction: column;
-  }
-
-  .availability-room-image {
-    width: 100%;
-    height: 200px;
-  }
-
-  .availability-room-footer,
-  .availability-empty-actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .booking-summary-card {
-    flex-direction: column;
-  }
-
-  .booking-summary-image {
-    width: 100%;
-    min-height: 180px;
-  }
-
-  .booking-form-grid {
-    grid-template-columns: 1fr;
-  }
+  .hero-layout { grid-template-columns: 1fr; }
+  .gallery-main { height: 300px; }
+  .availability-room-card { flex-direction: column; }
+  .availability-room-image { width: 100%; height: 180px; }
+  .booking-form-grid { grid-template-columns: 1fr; }
+  .availability-overlay { padding: 0; align-items: flex-end; }
+  .availability-drawer { border-radius: 24px 24px 0 0; max-height: 95vh; }
 }
 </style>
