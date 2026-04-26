@@ -1,4 +1,5 @@
 import type { IReservationRepository } from '~/types/interfaces'
+import type { BookingConfirmation, BookingCreatePayload } from '~/types/interfaces'
 import type { Reservation } from '~/types/models'
 import { ReservationStatus } from '~/types/enums'
 import { AdminRepositoryFactory } from '~/repositories/factory'
@@ -52,6 +53,10 @@ export class ReservationService {
       throw new Error('Minimum stay is 1 night')
     }
     return this.repo.create(data)
+  }
+
+  async createBooking(payload: BookingCreatePayload): Promise<BookingConfirmation> {
+    return this.repo.createBooking(payload)
   }
 
   /** Confirm a pending reservation (admin) */

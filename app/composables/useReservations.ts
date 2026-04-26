@@ -1,6 +1,7 @@
 import { ref } from 'vue'
 import type { Reservation } from '~/types/models'
 import type { ReservationStatus } from '~/types/enums'
+import type { BookingConfirmation, BookingCreatePayload } from '~/types/interfaces'
 import { ReservationService, RoomService } from '~/services'
 import { ReservationStatus as ReservationStatusEnum } from '~/types/enums'
 import { useAuth } from '~/composables/useAuth'
@@ -30,6 +31,10 @@ export function useReservations() {
     const created = await execute(() => reservationService.book(data), null)
     if (created) reservations.value.push(created)
     return created
+  }
+
+  async function createBooking(payload: BookingCreatePayload): Promise<BookingConfirmation | null> {
+    return execute(() => reservationService.createBooking(payload), null)
   }
 
   async function updateStatus(id: number, status: ReservationStatus, reason?: string) {
@@ -85,5 +90,17 @@ export function useReservations() {
     })
   }
 
-  return { reservations, reservation, loading, error, fetchAll, fetchByAccount, fetchById, create, updateStatus, finalizeReservation }
+  return {
+    reservations,
+    reservation,
+    loading,
+    error,
+    fetchAll,
+    fetchByAccount,
+    fetchById,
+    create,
+    createBooking,
+    updateStatus,
+    finalizeReservation,
+  }
 }

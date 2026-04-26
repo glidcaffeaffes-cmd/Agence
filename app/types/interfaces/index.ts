@@ -1,5 +1,15 @@
-export type { IHotelRepository, HotelAvailabilityFilters } from './IHotelRepository'
-export type { IReservationRepository } from './IReservationRepository'
+export type {
+  IHotelRepository,
+  HotelAvailabilityFilters,
+  HotelAvailabilitySummary,
+  HotelRoomAvailabilityRequest,
+  HotelAvailableRoomOption,
+} from './IHotelRepository'
+export type {
+  IReservationRepository,
+  BookingCreatePayload,
+  BookingConfirmation,
+} from './IReservationRepository'
 export type { IAccountRepository } from './IAccountRepository'
 export type { IOfferRepository } from './IOfferRepository'
 export type { IRoomRepository } from './IRoomRepository'

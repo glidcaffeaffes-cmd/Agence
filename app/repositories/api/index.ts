@@ -1,6 +1,15 @@
-import type { IHotelRepository, HotelAvailabilityFilters } from '~/types/interfaces/IHotelRepository'
+import type {
+  IHotelRepository,
+  HotelAvailabilityFilters,
+  HotelAvailabilitySummary,
+  HotelRoomAvailabilityRequest,
+} from '~/types/interfaces/IHotelRepository'
 import type { IAccountRepository } from '~/types/interfaces/IAccountRepository'
-import type { IReservationRepository } from '~/types/interfaces/IReservationRepository'
+import type {
+  IReservationRepository,
+  BookingConfirmation,
+  BookingCreatePayload,
+} from '~/types/interfaces/IReservationRepository'
 import type { IOfferRepository } from '~/types/interfaces/IOfferRepository'
 import type { IComplaintRepository } from '~/types/interfaces/IComplaintRepository'
 import type { IRoomRepository } from '~/types/interfaces/IRoomRepository'
@@ -156,6 +165,16 @@ export class ApiHotelRepository implements IHotelRepository {
     })
     const dtos = await apiGetCached<HotelDTO[]>(path)
     return dtos.map(HotelMapper.fromDto)
+  }
+
+  async checkAvailability(
+    hotelId: number,
+    payload: HotelRoomAvailabilityRequest,
+  ): Promise<HotelAvailabilitySummary> {
+    return apiRequest<HotelAvailabilitySummary>(`/hotels/${hotelId}/check-availability`, {
+      method: 'POST',
+      body: payload,
+    })
   }
 
   async create(hotel: Omit<Hotel, 'id'>): Promise<Hotel> {
@@ -394,6 +413,15 @@ export class ApiReservationRepository implements IReservationRepository {
     })
     invalidateApiCache('/reservations', '/stats', '/hotels/search/availability')
     return ReservationMapper.fromDto(dto)
+  }
+
+  async createBooking(payload: BookingCreatePayload): Promise<BookingConfirmation> {
+    const confirmation = await apiRequest<BookingConfirmation>('/bookings', {
+      method: 'POST',
+      body: payload,
+    })
+    invalidateApiCache('/reservations', '/hotels/search/availability')
+    return confirmation
   }
 
   async updateStatus(id: number, status: ReservationStatus, reason?: string): Promise<Reservation> {

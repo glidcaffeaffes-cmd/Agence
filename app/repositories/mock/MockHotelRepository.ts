@@ -1,4 +1,9 @@
-import type { IHotelRepository, HotelAvailabilityFilters } from '~/types/interfaces'
+import type {
+  IHotelRepository,
+  HotelAvailabilityFilters,
+  HotelAvailabilitySummary,
+  HotelRoomAvailabilityRequest,
+} from '~/types/interfaces'
 import type { Hotel } from '~/types/models'
 import { mockHotels } from './data/hotels'
 import { mockRooms } from './data/rooms'
@@ -78,6 +83,71 @@ export class MockHotelRepository implements IHotelRepository {
 
       return availableRooms.length >= roomsRequested
     })
+  }
+
+  async checkAvailability(
+    hotelId: number,
+    payload: HotelRoomAvailabilityRequest,
+  ): Promise<HotelAvailabilitySummary> {
+    const checkIn = this.parseDateInput(payload.checkIn)
+    const checkOut = this.parseDateInput(payload.checkOut)
+
+    if (checkOut <= checkIn) {
+      throw new Error('checkOut must be after checkIn')
+    }
+
+    const totalGuests = Math.max(1, payload.adults + payload.children)
+    const nights = Math.max(
+      1,
+      Math.round((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24)),
+    )
+
+    const rooms = mockRooms
+      .filter((room) => room.hotelId === hotelId && room.available && room.capacity >= totalGuests)
+      .filter((room) => {
+        const hasBlockingReservation = mockReservations.some((reservation) =>
+          reservation.roomId === room.id &&
+          ![ReservationStatus.CANCELLED, ReservationStatus.REFUSED].includes(reservation.status) &&
+          new Date(reservation.checkInDate).getTime() < checkOut.getTime() &&
+          new Date(reservation.checkOutDate).getTime() > checkIn.getTime(),
+        )
+
+        return !hasBlockingReservation
+      })
+      .map((room) => ({
+        id: room.id,
+        hotelId: room.hotelId,
+        title: room.type || `Room ${room.number}`,
+        maxGuests: room.capacity,
+        bedType: '1 King Size Bed',
+        roomSize: 32,
+        pricePerNight: room.pricePerNight,
+        image:
+          room.image ||
+          room.photos?.[0] ||
+          'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=400&q=80',
+      }))
+      .sort((a, b) => a.pricePerNight - b.pricePerNight)
+
+    const selectedPricePerNight = rooms[0]?.pricePerNight ?? 0
+    const basePrice = selectedPricePerNight * nights
+    const cityTax = nights * 5
+    const total = basePrice + cityTax
+
+    return {
+      available: rooms.length > 0,
+      nights,
+      basePrice,
+      cityTax,
+      total,
+      selectedPricePerNight,
+      rooms,
+      guests: {
+        adults: payload.adults,
+        children: payload.children,
+        total: totalGuests,
+      },
+    }
   }
 
   async getFeatured(): Promise<Hotel[]> {
