@@ -11,19 +11,23 @@
           <p class="wishlist-header__eyebrow">Saved hotels</p>
           <h1 class="wishlist-header__title">My Wishlist</h1>
         </div>
-        <span class="wishlist-header__count">{{ wishlistHotels.length }} saved</span>
+        <span class="wishlist-header__count">{{ hotelIds.length }} saved</span>
       </header>
 
-      <div v-if="wishlistHotels.length > 0" class="wishlist-grid">
+      <div v-if="hotels.length > 0" class="wishlist-grid">
         <HotelCard
-          v-for="hotel in wishlistHotels"
+          v-for="hotel in hotels"
           :key="hotel.id"
           :hotel="hotel"
           :min-price="getHotelMinPrice(hotel.id)"
         />
       </div>
 
-      <div v-else class="wishlist-empty">
+      <div v-if="isLoading" class="wishlist-loading">
+        <span class="material-symbols-outlined spin">progress_activity</span>
+      </div>
+
+      <div v-else-if="hotelIds.length === 0" class="wishlist-empty">
         <span class="material-symbols-outlined">favorite</span>
         <h2>Your wishlist is empty</h2>
         <p>Save hotels from the hotel list and they will appear here.</p>
@@ -36,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useAuth } from '~/composables/useAuth'
 import { useAuthPrompt } from '~/composables/useAuthPrompt'
 import { useHotels } from '~/composables/useHotels'
@@ -45,36 +49,74 @@ import { useWishlist } from '~/composables/useWishlist'
 
 const { isAuthenticated } = useAuth()
 const { open: openAuthPrompt } = useAuthPrompt()
-const { hotels, fetchAll: fetchHotels } = useHotels()
+const { hotels, fetchPaginated, totalPages, currentPage, loading: isLoading } = useHotels()
 const { rooms, fetchAll: fetchRooms } = useRooms()
 const { hotelIds, hydrate } = useWishlist()
-
-const wishlistHotels = computed(() => {
-  const savedIds = new Set(hotelIds.value)
-  return hotels.value.filter((hotel) => savedIds.has(hotel.id))
-})
+const pageSize = 6
 
 function getHotelMinPrice(hotelId: number) {
   const hotelRooms = rooms.value.filter((room) => room.hotelId === hotelId)
-  if (hotelRooms.length === 0) {
-    return 0
-  }
-
+  if (hotelRooms.length === 0) return 0
   return Math.min(...hotelRooms.map((room) => room.pricePerNight))
+}
+
+async function loadPage(page: number) {
+  if (hotelIds.value.length === 0) {
+    hotels.value = []
+    return
+  }
+  await fetchPaginated({
+    page,
+    limit: pageSize,
+    ids: hotelIds.value,
+  })
+}
+
+function handleScroll() {
+  if (currentPage.value >= totalPages.value || isLoading.value) return
+  const nearBottom = document.documentElement.scrollTop + window.innerHeight >= document.documentElement.offsetHeight - 300
+  if (nearBottom) loadPage(currentPage.value + 1)
 }
 
 onMounted(async () => {
   hydrate()
+  window.addEventListener('scroll', handleScroll)
   if (!isAuthenticated.value) {
-    openAuthPrompt({
-      redirectTo: '/wishlist',
-    })
+    openAuthPrompt({ redirectTo: '/wishlist' })
   }
-  await Promise.all([fetchHotels(), fetchRooms()])
+  await fetchRooms()
+  await loadPage(1)
 })
+
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
+
+// Reload when wishlist IDs change (add/remove)
+watch(hotelIds, () => {
+  hotels.value = []
+  loadPage(1)
+}, { deep: true })
 </script>
 
 <style scoped>
+.wishlist-loading {
+  display: flex;
+  justify-content: center;
+  padding: 32px;
+  color: var(--color-primary-500);
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+  font-size: 32px;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
 .wishlist-page {
   min-height: 100vh;
   background:
@@ -131,6 +173,66 @@ onMounted(async () => {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 24px;
+}
+
+.wishlist-results-meta {
+  margin-bottom: 16px;
+  color: var(--color-gray-500);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.wishlist-pagination {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.wishlist-pagination__btn,
+.wishlist-pagination__number {
+  min-width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--color-gray-200) 78%, white 22%);
+  background: white;
+  color: var(--color-navy-500);
+  font-size: 0.9rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.wishlist-pagination__btn {
+  padding: 0 12px;
+}
+
+.wishlist-pagination__btn:hover:not(:disabled),
+.wishlist-pagination__number:hover {
+  border-color: var(--color-primary-300);
+  background: var(--color-primary-50);
+  color: var(--color-primary-600);
+}
+
+.wishlist-pagination__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.wishlist-pagination__number--active {
+  border-color: var(--color-primary-600);
+  background: var(--color-primary-600);
+  color: #fff;
+}
+
+.wishlist-pagination__btn .material-symbols-outlined {
+  font-size: 18px;
 }
 
 .wishlist-empty {
@@ -209,6 +311,10 @@ onMounted(async () => {
 
   .wishlist-grid {
     grid-template-columns: 1fr;
+  }
+
+  .wishlist-pagination {
+    justify-content: flex-start;
   }
 }
 </style>

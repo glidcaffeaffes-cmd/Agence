@@ -4,6 +4,8 @@ export type {
   HotelAvailabilitySummary,
   HotelRoomAvailabilityRequest,
   HotelAvailableRoomOption,
+  HotelFetchOptions,
+  PaginatedResult,
 } from './IHotelRepository'
 export type {
   IReservationRepository,

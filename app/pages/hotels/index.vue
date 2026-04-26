@@ -208,12 +208,12 @@
         </div>
 
         <div class="results-info">
-          <strong>{{ filteredHotels.length }}</strong> hôtels trouvés
+          <strong>{{ hotels.length }}</strong> hôtels affichés
         </div>
 
-        <div v-if="filteredHotels.length > 0" :class="['hotels-container', `hotels-container--${viewMode}`]">
+        <div v-if="hotels.length > 0" :class="['hotels-container', `hotels-container--${viewMode}`]">
           <HotelCard 
-            v-for="hotel in filteredHotels" 
+            v-for="hotel in hotels" 
             :key="hotel.id" 
             :hotel="hotel" 
             :min-price="getHotelMinPrice(hotel.id)" 
@@ -224,6 +224,10 @@
         <div v-else class="empty-results-state">
           <span class="material-symbols-outlined">hotel_class</span>
           <p>Aucun établissement ne correspond à votre sélection.</p>
+        </div>
+
+        <div v-if="isLoading" class="loading-sentinel">
+          <span class="material-symbols-outlined spin">progress_activity</span>
         </div>
       </main>
     </div>
@@ -236,14 +240,12 @@ import { useDestinations } from '~/composables/useDestinations'
 import { useHotels } from '~/composables/useHotels'
 import { useRooms } from '~/composables/useRooms'
 
-// Props/Data
-const { hotels, fetchAll: fetchHotels, fetchAvailable: fetchAvailableHotels } = useHotels()
+const { hotels, fetchPaginated, totalPages, currentPage, loading: isLoading } = useHotels()
 const { rooms, fetchAll: fetchRooms } = useRooms()
 const { destinations, fetchDestinations } = useDestinations()
 const route = useRoute()
 const router = useRouter()
 
-// State
 const filtersSidebarRef = ref<HTMLElement | null>(null)
 const today = startOfDay(new Date())
 const priceRange = ref([0, 1000])
@@ -253,6 +255,7 @@ const searchQuery = ref('')
 const sortBy = ref('note')
 const viewMode = useCookie<'grid' | 'list'>('hotel-view-mode', { default: () => 'grid' })
 const activeFilterPanel = ref<'guests' | null>(null)
+const pageSize = 6
 const checkInDate = ref<Date | null>(null)
 const checkOutDate = ref<Date | null>(null)
 const adults = ref(2)
@@ -265,14 +268,10 @@ const childAgeOptions = Array.from({ length: 17 }, (_, index) => ({
   value: index + 1,
 }))
 const checkOutMinDate = computed(() => {
-  if (!checkInDate.value) {
-    return today
-  }
-
+  if (!checkInDate.value) return today
   return addDays(startOfDay(checkInDate.value), 1)
 })
 
-// Static 24 Tunisian governorates — always shown regardless of DB content
 const TUNISIA_CITIES = [
   'Ariana', 'Béja', 'Ben Arous', 'Bizerte', 'Gabès', 'Gafsa',
   'Jendouba', 'Kairouan', 'Kasserine', 'Kébili', 'La Manouba', 'Le Kef',
@@ -285,14 +284,12 @@ const cityOptions = [
   ...TUNISIA_CITIES.map((city) => ({ label: city, value: city })),
 ]
 
-
 const sortOptions = [
   { label: 'Note', value: 'note' },
   { label: 'Prix croissant', value: 'price_asc' },
   { label: 'Prix décroissant', value: 'price_desc' }
 ]
 
-// Logic
 function getHotelMinPrice(hotelId: number) {
   const hotelRooms = rooms.value.filter(r => r.hotelId === hotelId)
   if (hotelRooms.length === 0) return 0
@@ -303,35 +300,35 @@ function getHotelRoomCount(hotelId: number) {
   return rooms.value.filter(r => r.hotelId === hotelId).length
 }
 
-const filteredHotels = computed(() => {
-  let list = hotels.value.filter(h => {
-    if (searchQuery.value && !h.name.toLowerCase().includes(searchQuery.value.toLowerCase()) && !h.city.toLowerCase().includes(searchQuery.value.toLowerCase())) return false
+/** Build fetch options from current filter state */
+function buildFetchOptions(page: number) {
+  const checkIn = checkInDate.value ? formatDateForQuery(checkInDate.value) : undefined
+  const checkOut = checkOutDate.value ? formatDateForQuery(checkOutDate.value) : undefined
+  const hasAvailability = Boolean(selectedCity.value || checkIn || checkOut)
+  return {
+    page,
+    limit: pageSize,
+    sortBy: sortBy.value,
+    search: searchQuery.value || undefined,
+    stars: selectedStars.value.length > 0 ? selectedStars.value : undefined,
+    minPrice: priceRange.value[0] > 0 ? priceRange.value[0] : undefined,
+    maxPrice: priceRange.value[1] < 1000 ? priceRange.value[1] : undefined,
+    city: hasAvailability ? selectedCity.value : undefined,
+    checkIn: hasAvailability ? checkIn : undefined,
+    checkOut: hasAvailability ? checkOut : undefined,
+    guests: hasAvailability ? (adults.value + children.value) : undefined,
+    rooms: hasAvailability ? roomsRequested.value : undefined,
+  }
+}
 
-    if (selectedStars.value.length > 0 && !selectedStars.value.includes(h.stars)) return false
-
-    if (selectedCity.value && h.city !== selectedCity.value) return false
-
-    const minP = getHotelMinPrice(h.id)
-    if (minP < priceRange.value[0] || minP > priceRange.value[1]) return false
-
-    return true
-  })
-
-  if (sortBy.value === 'note') list.sort((a, b) => b.stars - a.stars)
-  else if (sortBy.value === 'price_asc') list.sort((a, b) => getHotelMinPrice(a.id) - getHotelMinPrice(b.id))
-  else if (sortBy.value === 'price_desc') list.sort((a, b) => getHotelMinPrice(b.id) - getHotelMinPrice(a.id))
-
-  return list
-})
+async function loadPage(page: number) {
+  await fetchPaginated(buildFetchOptions(page))
+}
 
 function applyFilters() {
   normalizeStayDates()
   activeFilterPanel.value = null
-
-  router.replace({
-    path: '/hotels',
-    query: buildRouteQuery(),
-  })
+  router.replace({ path: '/hotels', query: buildRouteQuery() })
 }
 
 function resetFilters() {
@@ -348,7 +345,6 @@ function resetFilters() {
   childAges.value = [14]
   travelWithPets.value = false
   activeFilterPanel.value = null
-
   router.replace({ path: '/hotels' })
 }
 
@@ -371,59 +367,28 @@ function applyRouteFilters() {
   roomsRequested.value = Math.max(1, Number.isNaN(roomCount) ? 2 : roomCount)
   childAges.value = parseChildAges(childAgesQuery, children.value)
   travelWithPets.value = typeof route.query.pets === 'string' && route.query.pets === '1'
-
   normalizeStayDates()
 }
 
 async function loadHotelsFromRoute() {
-  const city = typeof route.query.city === 'string' ? route.query.city : null
-  const checkIn = typeof route.query.checkIn === 'string' ? route.query.checkIn : undefined
-  const checkOut = typeof route.query.checkOut === 'string' ? route.query.checkOut : undefined
-  const adults = Number.parseInt(typeof route.query.adults === 'string' ? route.query.adults : '0', 10)
-  const children = Number.parseInt(typeof route.query.children === 'string' ? route.query.children : '0', 10)
-  const roomCount = Number.parseInt(typeof route.query.rooms === 'string' ? route.query.rooms : '1', 10)
-  const guests = Math.max(0, (Number.isNaN(adults) ? 0 : adults) + (Number.isNaN(children) ? 0 : children))
-  const hasDateQuery = Boolean(checkIn && checkOut)
-  const hasAvailabilityQuery = Boolean(city || hasDateQuery || guests > 0 || roomCount > 1)
-
-  if (hasAvailabilityQuery) {
-    await fetchAvailableHotels({
-      city,
-      checkIn,
-      checkOut,
-      guests: guests || undefined,
-      rooms: Number.isNaN(roomCount) ? 1 : roomCount,
-    })
-    return
-  }
-
-  await fetchHotels()
+  hotels.value = []
+  await loadPage(1)
 }
 
 function buildRouteQuery() {
   const query: Record<string, string> = {}
-
-  if (selectedCity.value) {
-    query.city = selectedCity.value
-  }
-
+  if (selectedCity.value) query.city = selectedCity.value
   if (checkInDate.value && checkOutDate.value) {
     query.checkIn = formatDateForQuery(checkInDate.value)
     query.checkOut = formatDateForQuery(checkOutDate.value)
   }
-
   query.adults = String(adults.value)
   query.children = String(children.value)
   query.rooms = String(roomsRequested.value)
-
   if (children.value > 0 && childAges.value.length > 0) {
     query.childAges = childAges.value.join(',')
   }
-
-  if (travelWithPets.value) {
-    query.pets = '1'
-  }
-
+  if (travelWithPets.value) query.pets = '1'
   return query
 }
 
@@ -512,23 +477,60 @@ function handleClickOutside(event: MouseEvent) {
   }
 }
 
+function handleScroll() {
+  if (currentPage.value >= totalPages.value || isLoading.value) return
+  const nearBottom = document.documentElement.scrollTop + window.innerHeight >= document.documentElement.offsetHeight - 300
+  if (nearBottom) {
+    loadPage(currentPage.value + 1)
+  }
+}
+
 onMounted(async () => {
   document.addEventListener('click', handleClickOutside)
+  window.addEventListener('scroll', handleScroll)
   await fetchDestinations()
   await fetchRooms()
 })
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside)
+  window.removeEventListener('scroll', handleScroll)
 })
 
 watch(() => route.query, async () => {
   applyRouteFilters()
   await loadHotelsFromRoute()
 }, { deep: true, immediate: true })
+
+// Re-fetch from page 1 when sidebar filters change (not route)
+let filterDebounce: ReturnType<typeof setTimeout> | null = null
+watch([priceRange, selectedStars, sortBy], () => {
+  if (filterDebounce) clearTimeout(filterDebounce)
+  filterDebounce = setTimeout(() => {
+    hotels.value = []
+    loadPage(1)
+  }, 300)
+}, { deep: true })
 </script>
 
 <style scoped>
+.loading-sentinel {
+  display: flex;
+  justify-content: center;
+  padding: 32px;
+  color: var(--color-primary-500);
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+  font-size: 32px;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
 .hotels-page {
   background:
     radial-gradient(circle at top, color-mix(in srgb, var(--color-primary-50) 72%, white 28%) 0%, transparent 45%),
@@ -1437,9 +1439,18 @@ watch(() => route.query, async () => {
   margin-bottom: 20px;
   font-size: 14px;
   color: var(--color-gray-500);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .results-info strong { color: var(--color-navy-500); font-weight: 800; }
+
+.results-info__range {
+  color: var(--color-gray-400);
+  font-weight: 600;
+}
 
 .sort-view-container {
   display: flex;
@@ -1496,6 +1507,14 @@ watch(() => route.query, async () => {
   .hotels-container--grid {
     grid-template-columns: 1fr;
   }
+
+  .results-info {
+    margin-bottom: 16px;
+  }
+
+  .page-pagination {
+    justify-content: flex-start;
+  }
 }
 
 .hotels-container--list {
@@ -1516,6 +1535,59 @@ watch(() => route.query, async () => {
   font-size: 56px;
   margin-bottom: 16px;
   color: var(--color-gray-300);
+}
+
+.page-pagination {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.page-pagination__btn,
+.page-pagination__number {
+  min-width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid var(--color-gray-200);
+  background: white;
+  color: var(--color-navy-500);
+  font-size: 14px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.page-pagination__btn {
+  padding: 0 12px;
+}
+
+.page-pagination__btn:hover:not(:disabled),
+.page-pagination__number:hover {
+  border-color: var(--color-primary-300);
+  background: var(--color-primary-50);
+  color: var(--color-primary-600);
+}
+
+.page-pagination__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.page-pagination__number--active {
+  border-color: var(--color-primary-600);
+  background: var(--color-primary-600);
+  color: white;
+}
+
+.page-pagination__btn .material-symbols-outlined {
+  font-size: 18px;
 }
 
 /* Cursors */

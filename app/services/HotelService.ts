@@ -24,6 +24,11 @@ export class HotelService {
     return this.repo.getAll()
   }
 
+  /** Fetch a page of hotels with optional filters */
+  async fetchPaginated(options: import('~/types/interfaces/IHotelRepository').HotelFetchOptions): Promise<import('~/types/interfaces/IHotelRepository').PaginatedResult<Hotel>> {
+    return this.repo.fetchPaginated(options)
+  }
+
   /** Fetch a single hotel by ID, throws if not found */
   async getById(id: number): Promise<Hotel> {
     const hotel = await this.repo.getById(id)
