@@ -784,11 +784,15 @@ const flatShareItems = computed(() => {
     }},
     { label: 'Facebook', svg: FB_SVG, click: () => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank') },
     { label: 'WhatsApp', svg: WA_SVG, click: () => window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`, '_blank') },
-    { label: 'Email', icon: 'mail', click: () => {
-      const subject = `Check out this hotel on VoyageHub: ${hotel.value!.name}`;
-      const body = `Hi,\n\nI found this amazing hotel on VoyageHub and thought you might like it:\n\n${hotel.value!.name}\n${url}\n\nEnjoy!`;
-      window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
-    } },
+    { 
+      label: 'Email', 
+      icon: 'mail', 
+      click: () => {
+        const subject = `Check out this hotel on VoyageHub: ${hotel.value!.name}`;
+        const body = `Hi,\n\nI found this amazing hotel on VoyageHub and thought you might like it:\n\n${hotel.value!.name}\n${url}\n\nEnjoy!`;
+        window.open(`https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
+      }
+    },
     { label: 'Instagram', svg: IG_SVG, click: () => {
       if (navigator.share) {
         navigator.share({ title: hotel.value!.name, text: text, url: url }).catch(() => {});
