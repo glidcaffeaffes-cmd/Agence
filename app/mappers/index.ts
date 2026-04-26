@@ -49,6 +49,23 @@ function summarizePaymentMethod(methods?: PaymentMethod[]) {
   return primary ? `${primary.brand.toUpperCase()} ending in ${primary.last4}` : ''
 }
 
+function normalizeAuthorName(authorName?: string | null) {
+  const value = (authorName ?? '').trim()
+  if (!value) return undefined
+
+  const lowered = value.toLowerCase()
+  if (
+    lowered === 'undefined' ||
+    lowered === 'undefined undefined' ||
+    lowered === 'null' ||
+    lowered === 'null null'
+  ) {
+    return undefined
+  }
+
+  return value
+}
+
 function fallbackHotelImages(id: number) {
   return [hotelFallbackImages[id % hotelFallbackImages.length]]
 }
@@ -578,13 +595,14 @@ export const ReviewMapper = {
   fromDto(dto: ReviewDTO): Review {
     const reservationProfile = dto.reservation?.account?.profile
     const reservationName = reservationProfile ? `${reservationProfile.prenom} ${reservationProfile.nom}` : undefined
+    const authorName = normalizeAuthorName(dto.authorName) || normalizeAuthorName(reservationName)
 
     return {
       id: dto.id,
       reservationId: dto.reservationId ?? undefined,
       accountId: dto.accountId ?? dto.reservation?.accountId ?? 0,
       hotelId: dto.reservation?.chambre?.hotelId ?? dto.hotelId ?? 0,
-      authorName: dto.authorName || reservationName,
+      authorName,
       rating: dto.note,
       comment: dto.commentaire ?? '',
       publicationDate: dto.datePublication,

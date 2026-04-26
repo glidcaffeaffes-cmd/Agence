@@ -279,12 +279,15 @@ async function handleSubmitReview() {
   }
 
   if (!newReviewText.value.trim() || !hotel.value) return
+  const firstName = currentProfile.value?.firstName?.trim() ?? ''
+  const lastName = currentProfile.value?.lastName?.trim() ?? ''
+  const authorName = `${firstName} ${lastName}`.trim() || 'Anonymous Guest'
   submitting.value = true
   submitSuccess.value = false
   await submitReview({
     hotelId: hotel.value.id,
     accountId: currentProfile.value?.accountId,
-    authorName: currentProfile.value ? `${currentProfile.value.prenom} ${currentProfile.value.nom}` : 'Anonymous Guest',
+    authorName,
     rating: newReviewRating.value,
     comment: newReviewText.value,
     visible: true
