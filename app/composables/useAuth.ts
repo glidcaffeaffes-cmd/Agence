@@ -18,10 +18,20 @@ export function useAuth() {
     authCookie.value = account ? { account, profile } : null
   }
 
+  function isVirtualAdminAccount(account: Account | null) {
+    return Boolean(account && account.role === 'admin' && account.id < 0)
+  }
+
   async function hydrateProfile(account: Account | null) {
     if (!account) {
       currentProfile.value = null
       persistAuthState(null, null)
+      return
+    }
+
+    if (isVirtualAdminAccount(account)) {
+      currentProfile.value = null
+      persistAuthState(account, null)
       return
     }
 
@@ -41,6 +51,12 @@ export function useAuth() {
     if (!currentAccount.value) {
       currentProfile.value = null
       persistAuthState(null, null)
+      return null
+    }
+
+    if (isVirtualAdminAccount(currentAccount.value)) {
+      currentProfile.value = null
+      persistAuthState(currentAccount.value, null)
       return null
     }
 
@@ -77,8 +93,10 @@ export function useAuth() {
         return false
       }
 
-      const profile = await service.getProfile(account.id)
-      const mergedProfile = ProfileMapper.merge(profile, account)
+      const profile = isVirtualAdminAccount(account)
+        ? null
+        : await service.getProfile(account.id)
+      const mergedProfile = profile ? ProfileMapper.merge(profile, account) : null
       
       currentProfile.value = mergedProfile
       currentAccount.value = account
