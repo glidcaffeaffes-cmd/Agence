@@ -75,7 +75,7 @@ export class MockReservationRepository implements IReservationRepository {
       numberOfNights: nights,
       totalAmount: total,
       confirmationCode,
-      status: ReservationStatusEnum.CONFIRMED,
+      status: ReservationStatusEnum.PENDING,
     }
 
     this.reservations.push(reservation)

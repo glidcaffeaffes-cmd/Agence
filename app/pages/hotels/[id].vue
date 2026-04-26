@@ -656,11 +656,11 @@
             @click="closeSuccessModal"
           >
             <section class="availability-drawer booking-feedback-drawer" @click.stop>
-              <header class="availability-drawer-header">
-                <div>
-                  <h3>Reservation Confirmed</h3>
-                  <p>Your room has been successfully reserved. A confirmation email has been sent.</p>
-                </div>
+                <header class="availability-drawer-header">
+                  <div>
+                    <h3>Reservation Submitted</h3>
+                    <p>Your booking is now pending confirmation. You will receive an email update once approved.</p>
+                  </div>
                 <button
                   type="button"
                   class="availability-close-btn"
