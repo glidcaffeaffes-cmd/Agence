@@ -240,7 +240,7 @@ import { useDestinations } from '~/composables/useDestinations'
 import { useHotels } from '~/composables/useHotels'
 import { useRooms } from '~/composables/useRooms'
 
-const { hotels, fetchPaginated, totalPages, currentPage, loading: isLoading } = useHotels()
+const { hotels, fetchPaginated, loading: isLoading } = useHotels()
 const { rooms, fetchAll: fetchRooms } = useRooms()
 const { destinations, fetchDestinations } = useDestinations()
 const route = useRoute()
@@ -255,7 +255,8 @@ const searchQuery = ref('')
 const sortBy = ref('note')
 const viewMode = useCookie<'grid' | 'list'>('hotel-view-mode', { default: () => 'grid' })
 const activeFilterPanel = ref<'guests' | null>(null)
-const pageSize = 6
+const pageSize = 1000
+const initialized = ref(false)
 const checkInDate = ref<Date | null>(null)
 const checkOutDate = ref<Date | null>(null)
 const adults = ref(2)
@@ -477,34 +478,29 @@ function handleClickOutside(event: MouseEvent) {
   }
 }
 
-function handleScroll() {
-  if (currentPage.value >= totalPages.value || isLoading.value) return
-  const nearBottom = document.documentElement.scrollTop + window.innerHeight >= document.documentElement.offsetHeight - 300
-  if (nearBottom) {
-    loadPage(currentPage.value + 1)
-  }
-}
-
 onMounted(async () => {
   document.addEventListener('click', handleClickOutside)
-  window.addEventListener('scroll', handleScroll)
   await fetchDestinations()
   await fetchRooms()
+  applyRouteFilters()
+  await loadHotelsFromRoute()
+  initialized.value = true
 })
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside)
-  window.removeEventListener('scroll', handleScroll)
 })
 
 watch(() => route.query, async () => {
+  if (!initialized.value) return
   applyRouteFilters()
   await loadHotelsFromRoute()
-}, { deep: true, immediate: true })
+}, { deep: true })
 
 // Re-fetch from page 1 when sidebar filters change (not route)
 let filterDebounce: ReturnType<typeof setTimeout> | null = null
 watch([priceRange, selectedStars, sortBy], () => {
+  if (!initialized.value) return
   if (filterDebounce) clearTimeout(filterDebounce)
   filterDebounce = setTimeout(() => {
     hotels.value = []
