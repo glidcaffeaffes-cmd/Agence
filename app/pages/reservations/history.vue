@@ -103,7 +103,12 @@
           </div>
 
           <!-- Results Timeline -->
-          <div v-else class="history-timeline">
+          <div v-else class="history-results">
+            <div class="history-meta">
+              Showing {{ visibleRangeStart }}-{{ visibleRangeEnd }} of {{ filtered.length }} reservations
+            </div>
+
+            <div class="history-timeline">
             <template v-for="(group, year) in grouped" :key="year">
               <div class="timeline-header">
                 <span class="timeline-year">{{ year }}</span>
@@ -201,6 +206,40 @@
                 </div>
               </div>
             </template>
+            </div>
+
+            <div v-if="showPagination" class="history-pagination">
+              <button
+                type="button"
+                class="history-pagination__btn"
+                :disabled="currentPage === 1"
+                @click="goToPage(currentPage - 1)"
+              >
+                <span class="material-symbols-outlined">chevron_left</span>
+                Prev
+              </button>
+
+              <button
+                v-for="page in visiblePages"
+                :key="page"
+                type="button"
+                class="history-pagination__number"
+                :class="{ 'history-pagination__number--active': page === currentPage }"
+                @click="goToPage(page)"
+              >
+                {{ page }}
+              </button>
+
+              <button
+                type="button"
+                class="history-pagination__btn"
+                :disabled="currentPage === totalPages"
+                @click="goToPage(currentPage + 1)"
+              >
+                Next
+                <span class="material-symbols-outlined">chevron_right</span>
+              </button>
+            </div>
           </div>
 
           <transition name="booking-modal">
@@ -372,7 +411,7 @@
 
 <script setup lang="ts">
 definePageMeta({ middleware: "auth" });
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useAuth } from "~/composables/useAuth";
 import { useReservations } from "~/composables/useReservations";
 import { useHotels } from "~/composables/useHotels";
@@ -403,6 +442,8 @@ const selectedReservationId = ref<number | null>(null);
 const cancelling = ref(false);
 const cancelError = ref("");
 const cancelSuccessData = ref<BookingCancellationConfirmation | null>(null);
+const currentPage = ref(1);
+const pageSize = 6;
 
 const loading = computed(() => rLoading.value || hLoading.value);
 
@@ -441,17 +482,54 @@ const filtered = computed(() =>
   }),
 );
 
+const sortedFiltered = computed(() =>
+  [...filtered.value].sort((a, b) => b.checkInDate.localeCompare(a.checkInDate)),
+);
+
+const totalPages = computed(() => Math.max(1, Math.ceil(filtered.value.length / pageSize)));
+const showPagination = computed(() => filtered.value.length > pageSize);
+
+const paginatedFiltered = computed(() => {
+  const start = (currentPage.value - 1) * pageSize;
+  return sortedFiltered.value.slice(start, start + pageSize);
+});
+
+const visibleRangeStart = computed(() => {
+  if (filtered.value.length === 0) return 0;
+  return (currentPage.value - 1) * pageSize + 1;
+});
+
+const visibleRangeEnd = computed(() => {
+  if (filtered.value.length === 0) return 0;
+  return Math.min(filtered.value.length, currentPage.value * pageSize);
+});
+
+const visiblePages = computed(() => {
+  const pages: number[] = [];
+  const start = Math.max(1, currentPage.value - 2);
+  const end = Math.min(totalPages.value, start + 4);
+  const adjustedStart = Math.max(1, end - 4);
+
+  for (let page = adjustedStart; page <= end; page += 1) {
+    pages.push(page);
+  }
+
+  return pages;
+});
+
 const grouped = computed<Record<string, typeof filtered.value>>(() => {
   const result: Record<string, typeof filtered.value> = {};
-  for (const r of [...filtered.value].sort((a, b) =>
-    b.checkInDate.localeCompare(a.checkInDate),
-  )) {
+  for (const r of paginatedFiltered.value) {
     const year = r.checkInDate.substring(0, 4);
     if (!result[year]) result[year] = [];
     result[year].push(r);
   }
   return result;
 });
+
+function goToPage(page: number) {
+  currentPage.value = Math.min(Math.max(1, page), totalPages.value);
+}
 
 const selectedReservation = computed<Reservation | null>(() => {
   if (selectedReservationId.value == null) return null;
@@ -467,6 +545,7 @@ function resetFilters() {
   search.value = "";
   statusFilter.value = "";
   yearFilter.value = "";
+  currentPage.value = 1;
 }
 
 function formatDate(d: string) {
@@ -631,6 +710,20 @@ onMounted(async () => {
   ]);
   await hydrateCancellationPreviews();
 });
+
+watch([search, statusFilter, yearFilter], () => {
+  currentPage.value = 1;
+});
+
+watch(filtered, () => {
+  if (currentPage.value > totalPages.value) {
+    currentPage.value = totalPages.value;
+  }
+
+  if (currentPage.value < 1) {
+    currentPage.value = 1;
+  }
+});
 </script>
 
 <style scoped>
@@ -724,6 +817,18 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 32px;
+}
+
+.history-results {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.history-meta {
+  color: var(--color-text-muted);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 /* Control Panel (Filters) */
@@ -1317,6 +1422,59 @@ onMounted(async () => {
   transform: translateY(14px);
 }
 
+.history-pagination {
+  margin-top: 6px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.history-pagination__btn,
+.history-pagination__number {
+  min-width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid var(--color-border-soft);
+  background: #fff;
+  color: var(--color-heading);
+  font-size: 14px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.history-pagination__btn {
+  padding: 0 12px;
+}
+
+.history-pagination__btn:hover:not(:disabled),
+.history-pagination__number:hover {
+  border-color: var(--color-primary-300);
+  background: var(--color-primary-25);
+  color: var(--color-primary-600);
+}
+
+.history-pagination__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.history-pagination__number--active {
+  border-color: var(--color-primary-600);
+  background: var(--color-primary-600);
+  color: #fff;
+}
+
+.history-pagination__btn .material-symbols-outlined {
+  font-size: 18px;
+}
+
 /* Status Badges Colors */
 .badge--confirmed {
   background: rgba(0, 103, 104, 0.9);
@@ -1377,6 +1535,10 @@ onMounted(async () => {
   .booking-modal-footer {
     flex-direction: column-reverse;
     align-items: stretch;
+  }
+
+  .history-pagination {
+    justify-content: flex-start;
   }
 }
 

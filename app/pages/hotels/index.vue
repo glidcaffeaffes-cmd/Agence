@@ -209,11 +209,14 @@
 
         <div class="results-info">
           <strong>{{ filteredHotels.length }}</strong> hôtels trouvés
+          <span v-if="filteredHotels.length > 0" class="results-info__range">
+            • Showing {{ visibleRangeStart }}-{{ visibleRangeEnd }}
+          </span>
         </div>
 
         <div v-if="filteredHotels.length > 0" :class="['hotels-container', `hotels-container--${viewMode}`]">
           <HotelCard 
-            v-for="hotel in filteredHotels" 
+            v-for="hotel in paginatedHotels" 
             :key="hotel.id" 
             :hotel="hotel" 
             :min-price="getHotelMinPrice(hotel.id)" 
@@ -224,6 +227,39 @@
         <div v-else class="empty-results-state">
           <span class="material-symbols-outlined">hotel_class</span>
           <p>Aucun établissement ne correspond à votre sélection.</p>
+        </div>
+
+        <div v-if="showPagination" class="page-pagination">
+          <button
+            type="button"
+            class="page-pagination__btn"
+            :disabled="currentPage === 1"
+            @click="goToPage(currentPage - 1)"
+          >
+            <span class="material-symbols-outlined">chevron_left</span>
+            Prev
+          </button>
+
+          <button
+            v-for="page in visiblePages"
+            :key="page"
+            type="button"
+            class="page-pagination__number"
+            :class="{ 'page-pagination__number--active': page === currentPage }"
+            @click="goToPage(page)"
+          >
+            {{ page }}
+          </button>
+
+          <button
+            type="button"
+            class="page-pagination__btn"
+            :disabled="currentPage === totalPages"
+            @click="goToPage(currentPage + 1)"
+          >
+            Next
+            <span class="material-symbols-outlined">chevron_right</span>
+          </button>
         </div>
       </main>
     </div>
@@ -253,6 +289,8 @@ const searchQuery = ref('')
 const sortBy = ref('note')
 const viewMode = useCookie<'grid' | 'list'>('hotel-view-mode', { default: () => 'grid' })
 const activeFilterPanel = ref<'guests' | null>(null)
+const currentPage = ref(1)
+const pageSize = 6
 const checkInDate = ref<Date | null>(null)
 const checkOutDate = ref<Date | null>(null)
 const adults = ref(2)
@@ -324,9 +362,44 @@ const filteredHotels = computed(() => {
   return list
 })
 
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredHotels.value.length / pageSize)))
+const showPagination = computed(() => filteredHotels.value.length > pageSize)
+const paginatedHotels = computed(() => {
+  const start = (currentPage.value - 1) * pageSize
+  return filteredHotels.value.slice(start, start + pageSize)
+})
+
+const visibleRangeStart = computed(() => {
+  if (filteredHotels.value.length === 0) return 0
+  return (currentPage.value - 1) * pageSize + 1
+})
+
+const visibleRangeEnd = computed(() => {
+  if (filteredHotels.value.length === 0) return 0
+  return Math.min(filteredHotels.value.length, currentPage.value * pageSize)
+})
+
+const visiblePages = computed(() => {
+  const pages: number[] = []
+  const start = Math.max(1, currentPage.value - 2)
+  const end = Math.min(totalPages.value, start + 4)
+  const adjustedStart = Math.max(1, end - 4)
+
+  for (let page = adjustedStart; page <= end; page += 1) {
+    pages.push(page)
+  }
+
+  return pages
+})
+
+function goToPage(page: number) {
+  currentPage.value = Math.min(Math.max(1, page), totalPages.value)
+}
+
 function applyFilters() {
   normalizeStayDates()
   activeFilterPanel.value = null
+  currentPage.value = 1
 
   router.replace({
     path: '/hotels',
@@ -348,6 +421,7 @@ function resetFilters() {
   childAges.value = [14]
   travelWithPets.value = false
   activeFilterPanel.value = null
+  currentPage.value = 1
 
   router.replace({ path: '/hotels' })
 }
@@ -524,8 +598,15 @@ onBeforeUnmount(() => {
 
 watch(() => route.query, async () => {
   applyRouteFilters()
+  currentPage.value = 1
   await loadHotelsFromRoute()
 }, { deep: true, immediate: true })
+
+watch(filteredHotels, () => {
+  if (currentPage.value > totalPages.value) {
+    currentPage.value = totalPages.value
+  }
+})
 </script>
 
 <style scoped>
@@ -1437,9 +1518,18 @@ watch(() => route.query, async () => {
   margin-bottom: 20px;
   font-size: 14px;
   color: var(--color-gray-500);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .results-info strong { color: var(--color-navy-500); font-weight: 800; }
+
+.results-info__range {
+  color: var(--color-gray-400);
+  font-weight: 600;
+}
 
 .sort-view-container {
   display: flex;
@@ -1496,6 +1586,14 @@ watch(() => route.query, async () => {
   .hotels-container--grid {
     grid-template-columns: 1fr;
   }
+
+  .results-info {
+    margin-bottom: 16px;
+  }
+
+  .page-pagination {
+    justify-content: flex-start;
+  }
 }
 
 .hotels-container--list {
@@ -1516,6 +1614,59 @@ watch(() => route.query, async () => {
   font-size: 56px;
   margin-bottom: 16px;
   color: var(--color-gray-300);
+}
+
+.page-pagination {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.page-pagination__btn,
+.page-pagination__number {
+  min-width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid var(--color-gray-200);
+  background: white;
+  color: var(--color-navy-500);
+  font-size: 14px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.page-pagination__btn {
+  padding: 0 12px;
+}
+
+.page-pagination__btn:hover:not(:disabled),
+.page-pagination__number:hover {
+  border-color: var(--color-primary-300);
+  background: var(--color-primary-50);
+  color: var(--color-primary-600);
+}
+
+.page-pagination__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.page-pagination__number--active {
+  border-color: var(--color-primary-600);
+  background: var(--color-primary-600);
+  color: white;
+}
+
+.page-pagination__btn .material-symbols-outlined {
+  font-size: 18px;
 }
 
 /* Cursors */
