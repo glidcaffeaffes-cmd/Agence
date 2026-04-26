@@ -117,6 +117,39 @@ export class ApiHotelRepository implements IHotelRepository {
     return dtos.map(HotelMapper.fromDto)
   }
 
+  async fetchPaginated(options: import('~/types/interfaces/IHotelRepository').HotelFetchOptions): Promise<import('~/types/interfaces/IHotelRepository').PaginatedResult<Hotel>> {
+    const isAvailability = Boolean(options.city || options.checkIn || options.checkOut || options.guests || options.rooms)
+    const endpoint = isAvailability ? '/hotels/search/availability' : '/hotels'
+
+    const params = new URLSearchParams()
+    params.set('page', String(options.page))
+    params.set('limit', String(options.limit))
+
+    if (options.ids && options.ids.length > 0) params.set('ids', options.ids.join(','))
+    if (options.minPrice !== undefined) params.set('minPrice', String(options.minPrice))
+    if (options.maxPrice !== undefined) params.set('maxPrice', String(options.maxPrice))
+    if (options.stars && options.stars.length > 0) params.set('stars', options.stars.join(','))
+    if (options.search) params.set('search', options.search)
+    if (options.sortBy) params.set('sortBy', options.sortBy)
+
+    if (options.city) params.set('city', options.city)
+    if (options.checkIn) params.set('checkIn', options.checkIn)
+    if (options.checkOut) params.set('checkOut', options.checkOut)
+    if (options.guests !== undefined) params.set('guests', String(options.guests))
+    if (options.rooms !== undefined) params.set('rooms', String(options.rooms))
+
+    const path = `${endpoint}?${params.toString()}`
+    const dto = await apiGetCached<{ items: HotelDTO[]; total: number; page: number; limit: number; totalPages: number }>(path)
+
+    return {
+      items: dto.items.map(HotelMapper.fromDto),
+      total: dto.total,
+      page: dto.page,
+      limit: dto.limit,
+      totalPages: dto.totalPages,
+    }
+  }
+
   async getById(id: number): Promise<Hotel | null> {
     try {
       const dto = await apiGetCached<HotelDTO>(`/hotels/${id}`)

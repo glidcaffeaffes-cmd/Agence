@@ -41,12 +41,38 @@ export interface HotelAvailabilitySummary {
   }
 }
 
+export interface PaginatedResult<T> {
+  items: T[]
+  total: number
+  page: number
+  limit: number
+  totalPages: number
+}
+
+export interface HotelFetchOptions {
+  page: number
+  limit: number
+  ids?: number[]
+  minPrice?: number
+  maxPrice?: number
+  stars?: number[]
+  search?: string
+  sortBy?: string
+  // availability
+  city?: string | null
+  checkIn?: string
+  checkOut?: string
+  guests?: number
+  rooms?: number
+}
+
 /**
  * Contract for Hotel data access.
  * SOLID: Interface Segregation — separate read/write concerns.
  */
 export interface IHotelRepository {
   getAll(): Promise<Hotel[]>
+  fetchPaginated(options: HotelFetchOptions): Promise<PaginatedResult<Hotel>>
   getById(id: number): Promise<Hotel | null>
   getByCity(city: string): Promise<Hotel[]>
   search(query: string): Promise<Hotel[]>

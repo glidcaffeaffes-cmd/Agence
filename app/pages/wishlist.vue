@@ -11,56 +11,23 @@
           <p class="wishlist-header__eyebrow">Saved hotels</p>
           <h1 class="wishlist-header__title">My Wishlist</h1>
         </div>
-        <span class="wishlist-header__count">{{ wishlistHotels.length }} saved</span>
+        <span class="wishlist-header__count">{{ hotelIds.length }} saved</span>
       </header>
 
-      <div v-if="wishlistHotels.length > 0" class="wishlist-results-meta">
-        Showing {{ visibleRangeStart }}-{{ visibleRangeEnd }} of {{ wishlistHotels.length }}
-      </div>
-
-      <div v-if="wishlistHotels.length > 0" class="wishlist-grid">
+      <div v-if="hotels.length > 0" class="wishlist-grid">
         <HotelCard
-          v-for="hotel in paginatedWishlistHotels"
+          v-for="hotel in hotels"
           :key="hotel.id"
           :hotel="hotel"
           :min-price="getHotelMinPrice(hotel.id)"
         />
       </div>
 
-      <div v-if="showPagination" class="wishlist-pagination">
-        <button
-          type="button"
-          class="wishlist-pagination__btn"
-          :disabled="currentPage === 1"
-          @click="goToPage(currentPage - 1)"
-        >
-          <span class="material-symbols-outlined">chevron_left</span>
-          Prev
-        </button>
-
-        <button
-          v-for="page in visiblePages"
-          :key="page"
-          type="button"
-          class="wishlist-pagination__number"
-          :class="{ 'wishlist-pagination__number--active': page === currentPage }"
-          @click="goToPage(page)"
-        >
-          {{ page }}
-        </button>
-
-        <button
-          type="button"
-          class="wishlist-pagination__btn"
-          :disabled="currentPage === totalPages"
-          @click="goToPage(currentPage + 1)"
-        >
-          Next
-          <span class="material-symbols-outlined">chevron_right</span>
-        </button>
+      <div v-if="isLoading" class="wishlist-loading">
+        <span class="material-symbols-outlined spin">progress_activity</span>
       </div>
 
-      <div v-else class="wishlist-empty">
+      <div v-else-if="hotelIds.length === 0" class="wishlist-empty">
         <span class="material-symbols-outlined">favorite</span>
         <h2>Your wishlist is empty</h2>
         <p>Save hotels from the hotel list and they will appear here.</p>
@@ -73,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useAuth } from '~/composables/useAuth'
 import { useAuthPrompt } from '~/composables/useAuthPrompt'
 import { useHotels } from '~/composables/useHotels'
@@ -82,88 +49,74 @@ import { useWishlist } from '~/composables/useWishlist'
 
 const { isAuthenticated } = useAuth()
 const { open: openAuthPrompt } = useAuthPrompt()
-const { hotels, fetchAll: fetchHotels } = useHotels()
+const { hotels, fetchPaginated, totalPages, currentPage, loading: isLoading } = useHotels()
 const { rooms, fetchAll: fetchRooms } = useRooms()
 const { hotelIds, hydrate } = useWishlist()
-const currentPage = ref(1)
 const pageSize = 6
-
-const wishlistHotels = computed(() => {
-  const savedIds = new Set(hotelIds.value)
-  return hotels.value.filter((hotel) => savedIds.has(hotel.id))
-})
-
-const totalPages = computed(() => Math.max(1, Math.ceil(wishlistHotels.value.length / pageSize)))
-const showPagination = computed(() => wishlistHotels.value.length > pageSize)
-const paginatedWishlistHotels = computed(() => {
-  const start = (currentPage.value - 1) * pageSize
-  return wishlistHotels.value.slice(start, start + pageSize)
-})
-
-const visibleRangeStart = computed(() => {
-  if (wishlistHotels.value.length === 0) {
-    return 0
-  }
-
-  return (currentPage.value - 1) * pageSize + 1
-})
-
-const visibleRangeEnd = computed(() => {
-  if (wishlistHotels.value.length === 0) {
-    return 0
-  }
-
-  return Math.min(wishlistHotels.value.length, currentPage.value * pageSize)
-})
-
-const visiblePages = computed(() => {
-  const pages: number[] = []
-  const start = Math.max(1, currentPage.value - 2)
-  const end = Math.min(totalPages.value, start + 4)
-  const adjustedStart = Math.max(1, end - 4)
-
-  for (let page = adjustedStart; page <= end; page += 1) {
-    pages.push(page)
-  }
-
-  return pages
-})
-
-function goToPage(page: number) {
-  currentPage.value = Math.min(Math.max(1, page), totalPages.value)
-}
 
 function getHotelMinPrice(hotelId: number) {
   const hotelRooms = rooms.value.filter((room) => room.hotelId === hotelId)
-  if (hotelRooms.length === 0) {
-    return 0
-  }
-
+  if (hotelRooms.length === 0) return 0
   return Math.min(...hotelRooms.map((room) => room.pricePerNight))
+}
+
+async function loadPage(page: number) {
+  if (hotelIds.value.length === 0) {
+    hotels.value = []
+    return
+  }
+  await fetchPaginated({
+    page,
+    limit: pageSize,
+    ids: hotelIds.value,
+  })
+}
+
+function handleScroll() {
+  if (currentPage.value >= totalPages.value || isLoading.value) return
+  const nearBottom = document.documentElement.scrollTop + window.innerHeight >= document.documentElement.offsetHeight - 300
+  if (nearBottom) loadPage(currentPage.value + 1)
 }
 
 onMounted(async () => {
   hydrate()
+  window.addEventListener('scroll', handleScroll)
   if (!isAuthenticated.value) {
-    openAuthPrompt({
-      redirectTo: '/wishlist',
-    })
+    openAuthPrompt({ redirectTo: '/wishlist' })
   }
-  await Promise.all([fetchHotels(), fetchRooms()])
+  await fetchRooms()
+  await loadPage(1)
 })
 
-watch(wishlistHotels, () => {
-  if (currentPage.value > totalPages.value) {
-    currentPage.value = totalPages.value
-  }
-
-  if (currentPage.value < 1) {
-    currentPage.value = 1
-  }
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', handleScroll)
 })
+
+// Reload when wishlist IDs change (add/remove)
+watch(hotelIds, () => {
+  hotels.value = []
+  loadPage(1)
+}, { deep: true })
 </script>
 
 <style scoped>
+.wishlist-loading {
+  display: flex;
+  justify-content: center;
+  padding: 32px;
+  color: var(--color-primary-500);
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+  font-size: 32px;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
 .wishlist-page {
   min-height: 100vh;
   background:
