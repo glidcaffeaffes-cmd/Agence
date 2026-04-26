@@ -24,6 +24,14 @@ export class ReservationService {
     return this.repo.getAll()
   }
 
+  async fetchPaginated(
+    options: import('~/types/interfaces/IReservationRepository').ReservationFetchOptions,
+  ): Promise<
+    import('~/types/interfaces/IHotelRepository').PaginatedResult<Reservation>
+  > {
+    return this.repo.fetchPaginated(options)
+  }
+
   /** Single reservation by ID */
   async getById(id: number): Promise<Reservation> {
     const res = await this.repo.getById(id)
