@@ -116,6 +116,17 @@ export function useReservations() {
     getCancellationPreview,
     cancelBooking,
     updateStatus,
+    fetchPaginated: async (
+      options: import('~/types/interfaces/IReservationRepository').ReservationFetchOptions,
+    ) => {
+      return execute(() => reservationService.fetchPaginated(options), {
+        items: [],
+        total: 0,
+        page: 1,
+        limit: 10,
+        totalPages: 0,
+      })
+    },
     finalizeReservation,
   }
 }

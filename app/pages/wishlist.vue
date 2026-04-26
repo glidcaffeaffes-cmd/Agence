@@ -14,20 +14,13 @@
         <span class="wishlist-header__count">{{ hotelIds.length }} saved</span>
       </header>
 
-      <div v-if="hotels.length > 0" class="wishlist-grid">
-        <HotelCard
-          v-for="hotel in hotels"
-          :key="hotel.id"
-          :hotel="hotel"
-          :min-price="getHotelMinPrice(hotel.id)"
-        />
-      </div>
-
-      <div v-if="isLoading" class="wishlist-loading">
+      <!-- Loading state (initial only) -->
+      <div v-if="isFetching && hotels.length === 0" class="wishlist-loading">
         <span class="material-symbols-outlined spin">progress_activity</span>
       </div>
 
-      <div v-else-if="hotelIds.length === 0" class="wishlist-empty">
+      <!-- Empty wishlist -->
+      <div v-else-if="!isFetching && hotelIds.length === 0" class="wishlist-empty">
         <span class="material-symbols-outlined">favorite</span>
         <h2>Your wishlist is empty</h2>
         <p>Save hotels from the hotel list and they will appear here.</p>
@@ -35,6 +28,23 @@
           Browse hotels
         </NuxtLink>
       </div>
+
+      <!-- Hotel grid -->
+      <template v-else-if="hotels.length > 0">
+        <div class="wishlist-grid">
+          <HotelCard
+            v-for="hotel in hotels"
+            :key="hotel.id"
+            :hotel="hotel"
+            :min-price="getHotelMinPrice(hotel.id)"
+          />
+        </div>
+
+        <!-- Load-more spinner -->
+        <div v-if="isFetching" class="wishlist-loading">
+          <span class="material-symbols-outlined spin">progress_activity</span>
+        </div>
+      </template>
     </section>
   </main>
 </template>
@@ -49,10 +59,14 @@ import { useWishlist } from '~/composables/useWishlist'
 
 const { isAuthenticated } = useAuth()
 const { open: openAuthPrompt } = useAuthPrompt()
-const { hotels, fetchPaginated, totalPages, currentPage, loading: isLoading } = useHotels()
+const { hotels, fetchPaginated, totalPages, currentPage } = useHotels()
 const { rooms, fetchAll: fetchRooms } = useRooms()
-const { hotelIds, hydrate } = useWishlist()
+// useWishlist already calls hydrate() internally via watch(accountId, { immediate: true })
+// so hotelIds is populated before onMounted runs — we must NOT call hydrate() again
+const { hotelIds } = useWishlist()
 const pageSize = 6
+const isFetching = ref(false)
+const initialized = ref(false)  // guard to block watch during initial load
 
 function getHotelMinPrice(hotelId: number) {
   const hotelRooms = rooms.value.filter((room) => room.hotelId === hotelId)
@@ -65,35 +79,42 @@ async function loadPage(page: number) {
     hotels.value = []
     return
   }
-  await fetchPaginated({
-    page,
-    limit: pageSize,
-    ids: hotelIds.value,
-  })
+  isFetching.value = true
+  try {
+    await fetchPaginated({
+      page,
+      limit: pageSize,
+      ids: [...hotelIds.value],
+    })
+  } finally {
+    isFetching.value = false
+  }
 }
 
 function handleScroll() {
-  if (currentPage.value >= totalPages.value || isLoading.value) return
-  const nearBottom = document.documentElement.scrollTop + window.innerHeight >= document.documentElement.offsetHeight - 300
+  if (currentPage.value >= totalPages.value || isFetching.value) return
+  const nearBottom =
+    document.documentElement.scrollTop + window.innerHeight >=
+    document.documentElement.offsetHeight - 300
   if (nearBottom) loadPage(currentPage.value + 1)
 }
 
 onMounted(async () => {
-  hydrate()
-  window.addEventListener('scroll', handleScroll)
   if (!isAuthenticated.value) {
     openAuthPrompt({ redirectTo: '/wishlist' })
   }
-  await fetchRooms()
-  await loadPage(1)
+  window.addEventListener('scroll', handleScroll)
+  await Promise.all([fetchRooms(), loadPage(1)])
+  initialized.value = true
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', handleScroll)
 })
 
-// Reload when wishlist IDs change (add/remove)
+// Only react to wishlist changes AFTER the initial load to prevent loop
 watch(hotelIds, () => {
+  if (!initialized.value) return
   hotels.value = []
   loadPage(1)
 }, { deep: true })

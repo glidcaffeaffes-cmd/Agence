@@ -417,6 +417,38 @@ export class ApiReservationRepository implements IReservationRepository {
     return dtos.map(ReservationMapper.fromDto)
   }
 
+  async fetchPaginated(
+    options: import('~/types/interfaces/IReservationRepository').ReservationFetchOptions,
+  ): Promise<
+    import('~/types/interfaces/IHotelRepository').PaginatedResult<Reservation>
+  > {
+    const params = new URLSearchParams()
+    params.set('page', String(options.page))
+    params.set('limit', String(options.limit))
+
+    if (options.accountId) params.set('accountId', String(options.accountId))
+    if (options.hotelId) params.set('hotelId', String(options.hotelId))
+    if (options.status) params.set('status', options.status)
+    if (options.search) params.set('search', options.search)
+
+    const path = `/reservations?${params.toString()}`
+    const dto = await apiGetCached<{
+      items: ReservationDTO[]
+      total: number
+      page: number
+      limit: number
+      totalPages: number
+    }>(path)
+
+    return {
+      items: dto.items.map(ReservationMapper.fromDto),
+      total: dto.total,
+      page: dto.page,
+      limit: dto.limit,
+      totalPages: dto.totalPages,
+    }
+  }
+
   async getById(id: number): Promise<Reservation | null> {
     try {
       const dto = await apiGetCached<ReservationDTO>(`/reservations/${id}`)

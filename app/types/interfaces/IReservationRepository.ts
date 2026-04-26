@@ -1,5 +1,6 @@
 import type { Reservation } from '../models'
 import type { ReservationStatus } from '../enums'
+import type { PaginatedResult } from './IHotelRepository'
 
 export interface BookingCreatePayload {
   hotelId: number
@@ -87,16 +88,36 @@ export interface BookingCancellationConfirmation {
   }
 }
 
+export interface ReservationFetchOptions {
+  page: number
+  limit: number
+  accountId?: number
+  hotelId?: number
+  status?: ReservationStatus
+  search?: string
+}
+
 export interface IReservationRepository {
   getAll(): Promise<Reservation[]>
+  fetchPaginated(
+    options: ReservationFetchOptions,
+  ): Promise<PaginatedResult<Reservation>>
   getById(id: number): Promise<Reservation | null>
   getByAccount(accountId: number): Promise<Reservation[]>
   getByHotel(hotelId: number): Promise<Reservation[]>
   getByStatus(status: ReservationStatus): Promise<Reservation[]>
-  create(reservation: Omit<Reservation, 'id' | 'confirmationCode'>): Promise<Reservation>
+  create(
+    reservation: Omit<Reservation, 'id' | 'confirmationCode'>,
+  ): Promise<Reservation>
   createBooking(payload: BookingCreatePayload): Promise<BookingConfirmation>
-  getCancellationPreview(bookingId: number): Promise<BookingCancellationPreview>
+  getCancellationPreview(
+    bookingId: number,
+  ): Promise<BookingCancellationPreview>
   cancelBooking(bookingId: number): Promise<BookingCancellationConfirmation>
-  updateStatus(id: number, status: ReservationStatus, reason?: string): Promise<Reservation>
+  updateStatus(
+    id: number,
+    status: ReservationStatus,
+    reason?: string,
+  ): Promise<Reservation>
   delete(id: number): Promise<void>
 }

@@ -76,7 +76,7 @@
           </div>
 
           <!-- Empty State -->
-          <div v-else-if="filtered.length === 0" class="empty-display">
+          <div v-else-if="reservations.length === 0" class="empty-display">
             <div class="empty-card">
               <div class="empty-icon-box">
                 <span class="material-symbols-outlined">luggage</span>
@@ -105,7 +105,7 @@
           <!-- Results Timeline -->
           <div v-else class="history-results">
             <div class="history-meta">
-              Showing {{ visibleRangeStart }}-{{ visibleRangeEnd }} of {{ filtered.length }} reservations
+              Showing {{ reservations.length }} reservations
             </div>
 
             <div class="history-timeline">
@@ -208,37 +208,9 @@
             </template>
             </div>
 
-            <div v-if="showPagination" class="history-pagination">
-              <button
-                type="button"
-                class="history-pagination__btn"
-                :disabled="currentPage === 1"
-                @click="goToPage(currentPage - 1)"
-              >
-                <span class="material-symbols-outlined">chevron_left</span>
-                Prev
-              </button>
-
-              <button
-                v-for="page in visiblePages"
-                :key="page"
-                type="button"
-                class="history-pagination__number"
-                :class="{ 'history-pagination__number--active': page === currentPage }"
-                @click="goToPage(page)"
-              >
-                {{ page }}
-              </button>
-
-              <button
-                type="button"
-                class="history-pagination__btn"
-                :disabled="currentPage === totalPages"
-                @click="goToPage(currentPage + 1)"
-              >
-                Next
-                <span class="material-symbols-outlined">chevron_right</span>
-              </button>
+            <div v-if="isFetching" class="loader-wrap bottom-loader">
+              <span class="material-symbols-outlined spin">progress_activity</span>
+              <p>Loading more reservations…</p>
             </div>
           </div>
 
@@ -411,7 +383,7 @@
 
 <script setup lang="ts">
 definePageMeta({ middleware: "auth" });
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { useAuth } from "~/composables/useAuth";
 import { useReservations } from "~/composables/useReservations";
 import { useHotels } from "~/composables/useHotels";
@@ -425,7 +397,7 @@ const { accountId } = useAuth();
 const {
   reservations,
   loading: rLoading,
-  fetchByAccount,
+  fetchPaginated,
   getCancellationPreview,
   cancelBooking,
 } = useReservations();
@@ -442,8 +414,11 @@ const selectedReservationId = ref<number | null>(null);
 const cancelling = ref(false);
 const cancelError = ref("");
 const cancelSuccessData = ref<BookingCancellationConfirmation | null>(null);
+const isFetching = ref(false);
+const totalPages = ref(1);
 const currentPage = ref(1);
-const pageSize = 6;
+const totalItems = ref(0);
+const initialized = ref(false);
 
 const loading = computed(() => rLoading.value || hLoading.value);
 
@@ -466,60 +441,10 @@ function getHotel(id: number) {
   return hotels.value.find((h) => h.id === id);
 }
 
-const filtered = computed(() =>
-  reservations.value.filter((r) => {
-    const hotel = getHotel(r.hotelId);
-    const matchSearch =
-      !search.value ||
-      r.confirmationCode.toLowerCase().includes(search.value.toLowerCase()) ||
-      (hotel &&
-        hotel.name.toLowerCase().includes(search.value.toLowerCase())) ||
-      (hotel && hotel.city.toLowerCase().includes(search.value.toLowerCase()));
-    const matchStatus = !statusFilter.value || r.status === statusFilter.value;
-    const matchYear =
-      !yearFilter.value || r.checkInDate.startsWith(yearFilter.value);
-    return matchSearch && matchStatus && matchYear;
-  }),
-);
 
-const sortedFiltered = computed(() =>
-  [...filtered.value].sort((a, b) => b.checkInDate.localeCompare(a.checkInDate)),
-);
-
-const totalPages = computed(() => Math.max(1, Math.ceil(filtered.value.length / pageSize)));
-const showPagination = computed(() => filtered.value.length > pageSize);
-
-const paginatedFiltered = computed(() => {
-  const start = (currentPage.value - 1) * pageSize;
-  return sortedFiltered.value.slice(start, start + pageSize);
-});
-
-const visibleRangeStart = computed(() => {
-  if (filtered.value.length === 0) return 0;
-  return (currentPage.value - 1) * pageSize + 1;
-});
-
-const visibleRangeEnd = computed(() => {
-  if (filtered.value.length === 0) return 0;
-  return Math.min(filtered.value.length, currentPage.value * pageSize);
-});
-
-const visiblePages = computed(() => {
-  const pages: number[] = [];
-  const start = Math.max(1, currentPage.value - 2);
-  const end = Math.min(totalPages.value, start + 4);
-  const adjustedStart = Math.max(1, end - 4);
-
-  for (let page = adjustedStart; page <= end; page += 1) {
-    pages.push(page);
-  }
-
-  return pages;
-});
-
-const grouped = computed<Record<string, typeof filtered.value>>(() => {
-  const result: Record<string, typeof filtered.value> = {};
-  for (const r of paginatedFiltered.value) {
+const grouped = computed<Record<string, Reservation[]>>(() => {
+  const result: Record<string, Reservation[]> = {};
+  for (const r of reservations.value) {
     const year = r.checkInDate.substring(0, 4);
     if (!result[year]) result[year] = [];
     result[year].push(r);
@@ -527,8 +452,48 @@ const grouped = computed<Record<string, typeof filtered.value>>(() => {
   return result;
 });
 
-function goToPage(page: number) {
-  currentPage.value = Math.min(Math.max(1, page), totalPages.value);
+async function loadPage(page: number) {
+  if (isFetching.value || !accountId.value) return;
+  if (page > 1 && page > totalPages.value) return;
+
+  isFetching.value = true;
+  try {
+    const result = await fetchPaginated({
+      page,
+      limit: 10,
+      accountId: accountId.value,
+      status: statusFilter.value as any,
+      search: search.value,
+    });
+
+    if (page === 1) {
+      reservations.value = result.items;
+    } else {
+      const existingIds = new Set(reservations.value.map((r) => r.id));
+      const newItems = result.items.filter((item) => !existingIds.has(item.id));
+      reservations.value = [...reservations.value, ...newItems];
+    }
+
+    totalPages.value = result.totalPages;
+    currentPage.value = result.page;
+    totalItems.value = result.total;
+
+    await hydrateCancellationPreviews();
+  } finally {
+    isFetching.value = false;
+  }
+}
+
+function handleScroll() {
+  const scrollHeight = document.documentElement.scrollHeight;
+  const scrollTop = window.scrollY || document.documentElement.scrollTop;
+  const clientHeight = document.documentElement.clientHeight;
+
+  if (scrollTop + clientHeight >= scrollHeight - 100) {
+    if (!isFetching.value && currentPage.value < totalPages.value) {
+      loadPage(currentPage.value + 1);
+    }
+  }
 }
 
 const selectedReservation = computed<Reservation | null>(() => {
@@ -704,25 +669,21 @@ async function confirmCancellation() {
 }
 
 onMounted(async () => {
+  window.addEventListener("scroll", handleScroll);
   await Promise.all([
-    accountId.value ? fetchByAccount(accountId.value) : Promise.resolve(),
     fetchHotels(),
+    loadPage(1),
   ]);
-  await hydrateCancellationPreviews();
+  initialized.value = true;
+});
+
+onUnmounted(() => {
+  window.removeEventListener("scroll", handleScroll);
 });
 
 watch([search, statusFilter, yearFilter], () => {
-  currentPage.value = 1;
-});
-
-watch(filtered, () => {
-  if (currentPage.value > totalPages.value) {
-    currentPage.value = totalPages.value;
-  }
-
-  if (currentPage.value < 1) {
-    currentPage.value = 1;
-  }
+  if (!initialized.value) return;
+  loadPage(1);
 });
 </script>
 
