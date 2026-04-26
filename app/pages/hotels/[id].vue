@@ -204,13 +204,13 @@
                   </div>
                 </div>
                 
-                <div class="hi-guest-field-container">
+                <div class="hi-guest-field-container" ref="guestPanelContainerRef">
                   <label class="filter-label">Guests</label>
                   <button
                     type="button"
                     class="guest-trigger"
                     :class="{ 'guest-trigger--open': isGuestPanelOpen }"
-                    @click="isGuestPanelOpen = !isGuestPanelOpen"
+                    @click="toggleGuestPanel"
                   >
                     <span class="material-symbols-outlined guest-trigger__icon">person</span>
                     <span class="guest-trigger__copy">
@@ -220,7 +220,12 @@
                     <span class="material-symbols-outlined guest-trigger__chevron">expand_more</span>
                   </button>
 
-                  <div v-if="isGuestPanelOpen" class="guest-panel" @click.stop>
+                  <div 
+                    v-if="isGuestPanelOpen" 
+                    class="guest-panel"
+                    :class="{ 'guest-panel--top': guestPanelSide === 'top' }"
+                    @click.stop
+                  >
                     <div class="guest-counter-row">
                       <div class="guest-counter-copy"><strong>Adults</strong><span>Ages 18+</span></div>
                       <div class="guest-counter-control">
@@ -1036,7 +1041,19 @@ const childAgeOptions = Array.from({ length: 17 }, (_, index) => ({
   value: index + 1,
 }));
 const isGuestPanelOpen = ref(false);
+const guestPanelSide = ref<"top" | "bottom">("bottom");
 const bookingPanelRef = ref<HTMLElement | null>(null);
+
+function toggleGuestPanel(event: MouseEvent) {
+  isGuestPanelOpen.value = !isGuestPanelOpen.value;
+  if (isGuestPanelOpen.value && event.currentTarget instanceof HTMLElement) {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const windowHeight = window.innerHeight;
+    const spaceBelow = windowHeight - rect.bottom;
+    // If less than 380px below, open at top
+    guestPanelSide.value = spaceBelow < 300 ? "top" : "bottom";
+  }
+}
 
 const availabilityLoading = ref(false);
 const showRoomsDrawer = ref(false);
@@ -2133,9 +2150,14 @@ onBeforeUnmount(() => {
 
 .hi-booking--horizontal .guest-panel {
   top: calc(100% + 12px);
-  right: 0; /* Align to the right edge of the Guests field */
+  right: 0;
   left: auto;
-  width: 320px; /* Slightly wider for better UX */
+  width: 320px;
+}
+
+.hi-booking--horizontal .guest-panel--top {
+  top: auto;
+  bottom: calc(100% + 12px);
 }
 
 .hi-booking--horizontal .hi-book-btn {
