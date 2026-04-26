@@ -178,21 +178,192 @@
                     </div>
 
                     <div class="journey-card__footer">
-                      <NuxtLink
-                        :to="`/hotels/${r.hotelId}`"
+                      <button
+                        type="button"
                         class="btn-card-action"
+                        @click="openDetailsModal(r.id)"
                       >
                         View Details
                         <span class="material-symbols-outlined"
                           >arrow_forward</span
                         >
-                      </NuxtLink>
+                      </button>
+                      <button
+                        v-if="showCancelButton(r.id)"
+                        type="button"
+                        class="btn-card-cancel"
+                        @click="openCancelConfirmation(r.id)"
+                      >
+                        Cancel Reservation
+                      </button>
                     </div>
                   </div>
                 </div>
               </div>
             </template>
           </div>
+
+          <transition name="booking-modal">
+            <div
+              v-if="showDetailsModal && selectedReservation && selectedPreview"
+              class="booking-modal-overlay"
+              @click="closeDetailsModal"
+            >
+              <section class="booking-modal-card" @click.stop>
+                <header class="booking-modal-header">
+                  <div>
+                    <h3>Booking Details</h3>
+                    <p>REF: {{ selectedPreview.bookingReference }}</p>
+                  </div>
+                  <button type="button" class="booking-close-btn" @click="closeDetailsModal">
+                    <span class="material-symbols-outlined">close</span>
+                  </button>
+                </header>
+
+                <div class="booking-modal-content">
+                  <div class="booking-info-grid">
+                    <div class="booking-info-item">
+                      <span class="booking-info-label">Hotel</span>
+                      <strong>{{ selectedPreview.hotelName }}</strong>
+                    </div>
+                    <div class="booking-info-item">
+                      <span class="booking-info-label">Room</span>
+                      <strong>{{ selectedPreview.roomName }}</strong>
+                    </div>
+                    <div class="booking-info-item">
+                      <span class="booking-info-label">Stay dates</span>
+                      <strong>{{ formatDate(selectedPreview.stay.checkIn) }} – {{ formatDate(selectedPreview.stay.checkOut) }}</strong>
+                    </div>
+                    <div class="booking-info-item">
+                      <span class="booking-info-label">Total paid</span>
+                      <strong>{{ formatCurrency(selectedPreview.refund.totalPaid) }}</strong>
+                    </div>
+                  </div>
+
+                  <article class="policy-card">
+                    <h4>Cancellation policy</h4>
+                    <p>{{ selectedPreview.policy.description }}</p>
+                    <div class="policy-meta">
+                      <div>
+                        <span>Cancellation deadline</span>
+                        <strong>{{ formatDeadline(selectedPreview.cancellationDeadline) }}</strong>
+                      </div>
+                      <div>
+                        <span>Refund info</span>
+                        <strong>{{ formatRefundType(selectedPreview.refund.type) }} · {{ formatCurrency(selectedPreview.refund.amount) }}</strong>
+                      </div>
+                    </div>
+                  </article>
+                </div>
+
+                <footer class="booking-modal-footer">
+                  <button
+                    v-if="selectedPreview.cancellationAllowed"
+                    type="button"
+                    class="btn-card-cancel"
+                    @click="openCancelConfirmation(selectedReservation.id)"
+                  >
+                    Cancel Reservation
+                  </button>
+                  <button type="button" class="btn-card-action" @click="closeDetailsModal">
+                    Close
+                  </button>
+                </footer>
+              </section>
+            </div>
+          </transition>
+
+          <transition name="booking-modal">
+            <div
+              v-if="showCancelModal && selectedReservation && selectedPreview"
+              class="booking-modal-overlay"
+              @click="closeCancelModal"
+            >
+              <section class="booking-modal-card booking-modal-card--compact" @click.stop>
+                <header class="booking-modal-header">
+                  <div>
+                    <h3>Cancel your reservation?</h3>
+                    <p>
+                      Are you sure you want to cancel this booking?
+                      This action may affect your refund based on the cancellation policy.
+                    </p>
+                  </div>
+                  <button type="button" class="booking-close-btn" @click="closeCancelModal">
+                    <span class="material-symbols-outlined">close</span>
+                  </button>
+                </header>
+
+                <div class="booking-modal-content">
+                  <div class="booking-info-grid">
+                    <div class="booking-info-item">
+                      <span class="booking-info-label">Booking reference</span>
+                      <strong>{{ selectedPreview.bookingReference }}</strong>
+                    </div>
+                    <div class="booking-info-item">
+                      <span class="booking-info-label">Hotel</span>
+                      <strong>{{ selectedPreview.hotelName }}</strong>
+                    </div>
+                    <div class="booking-info-item">
+                      <span class="booking-info-label">Room</span>
+                      <strong>{{ selectedPreview.roomName }}</strong>
+                    </div>
+                    <div class="booking-info-item">
+                      <span class="booking-info-label">Stay dates</span>
+                      <strong>{{ formatDate(selectedPreview.stay.checkIn) }} – {{ formatDate(selectedPreview.stay.checkOut) }}</strong>
+                    </div>
+                  </div>
+                  <article class="policy-card">
+                    <h4>Refund amount</h4>
+                    <p>{{ formatRefundType(selectedPreview.refund.type) }} — {{ formatCurrency(selectedPreview.refund.amount) }}</p>
+                  </article>
+                  <p v-if="cancelError" class="cancel-error">{{ cancelError }}</p>
+                </div>
+
+                <footer class="booking-modal-footer">
+                  <button type="button" class="btn-ghost" @click="closeCancelModal">Keep Reservation</button>
+                  <button type="button" class="btn-primary" :disabled="cancelling" @click="confirmCancellation">
+                    {{ cancelling ? "Cancelling..." : "Confirm Cancellation" }}
+                  </button>
+                </footer>
+              </section>
+            </div>
+          </transition>
+
+          <transition name="booking-modal">
+            <div
+              v-if="showCancelSuccess && cancelSuccessData"
+              class="booking-modal-overlay"
+              @click="closeCancelSuccess"
+            >
+              <section class="booking-modal-card booking-modal-card--compact" @click.stop>
+                <header class="booking-modal-header">
+                  <div>
+                    <h3>Reservation Cancelled</h3>
+                    <p>
+                      Your reservation has been successfully cancelled.
+                      A confirmation email has been sent.
+                    </p>
+                  </div>
+                  <button type="button" class="booking-close-btn" @click="closeCancelSuccess">
+                    <span class="material-symbols-outlined">close</span>
+                  </button>
+                </header>
+
+                <div class="booking-modal-content">
+                  <article class="policy-card">
+                    <p><strong>Booking reference:</strong> {{ cancelSuccessData.bookingReference }}</p>
+                    <p><strong>Cancellation date:</strong> {{ formatDateTime(cancelSuccessData.cancellationDate) }}</p>
+                    <p><strong>Refund summary:</strong> {{ formatRefundType(cancelSuccessData.refund.type) }} · {{ formatCurrency(cancelSuccessData.refund.amount) }}</p>
+                  </article>
+                </div>
+
+                <footer class="booking-modal-footer">
+                  <button type="button" class="btn-primary" @click="closeCancelSuccess">View My Bookings</button>
+                  <NuxtLink to="/hotels" class="btn-ghost" @click="closeCancelSuccess">Back to Hotels</NuxtLink>
+                </footer>
+              </section>
+            </div>
+          </transition>
         </main>
       </div>
     </div>
@@ -205,14 +376,33 @@ import { ref, computed, onMounted } from "vue";
 import { useAuth } from "~/composables/useAuth";
 import { useReservations } from "~/composables/useReservations";
 import { useHotels } from "~/composables/useHotels";
+import type {
+  BookingCancellationConfirmation,
+  BookingCancellationPreview,
+} from "~/types/interfaces";
+import type { Reservation } from "~/types/models";
 
 const { accountId } = useAuth();
-const { reservations, loading: rLoading, fetchByAccount } = useReservations();
+const {
+  reservations,
+  loading: rLoading,
+  fetchByAccount,
+  getCancellationPreview,
+  cancelBooking,
+} = useReservations();
 const { hotels, fetchAll: fetchHotels, loading: hLoading } = useHotels();
 
 const search = ref("");
 const statusFilter = ref("");
 const yearFilter = ref("");
+const cancellationPreviews = ref<Record<number, BookingCancellationPreview>>({});
+const showDetailsModal = ref(false);
+const showCancelModal = ref(false);
+const showCancelSuccess = ref(false);
+const selectedReservationId = ref<number | null>(null);
+const cancelling = ref(false);
+const cancelError = ref("");
+const cancelSuccessData = ref<BookingCancellationConfirmation | null>(null);
 
 const loading = computed(() => rLoading.value || hLoading.value);
 
@@ -263,6 +453,16 @@ const grouped = computed<Record<string, typeof filtered.value>>(() => {
   return result;
 });
 
+const selectedReservation = computed<Reservation | null>(() => {
+  if (selectedReservationId.value == null) return null;
+  return reservations.value.find((entry) => entry.id === selectedReservationId.value) ?? null;
+});
+
+const selectedPreview = computed<BookingCancellationPreview | null>(() => {
+  if (selectedReservationId.value == null) return null;
+  return cancellationPreviews.value[selectedReservationId.value] ?? null;
+});
+
 function resetFilters() {
   search.value = "";
   statusFilter.value = "";
@@ -306,11 +506,130 @@ function badgeClass(s: string) {
   return map[s] ?? "";
 }
 
+function formatDateTime(d: string) {
+  return new Date(d).toLocaleString("en-US", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function formatDeadline(deadline: string | null) {
+  if (!deadline) return "Not available";
+  return formatDateTime(deadline);
+}
+
+function formatRefundType(type: "FULL" | "PARTIAL" | "NONE") {
+  if (type === "FULL") return "Full refund";
+  if (type === "PARTIAL") return "Partial refund";
+  return "No refund";
+}
+
+function showCancelButton(reservationId: number) {
+  const preview = cancellationPreviews.value[reservationId];
+  return Boolean(preview?.cancellationAllowed);
+}
+
+async function ensureCancellationPreview(reservationId: number) {
+  if (cancellationPreviews.value[reservationId]) {
+    return cancellationPreviews.value[reservationId];
+  }
+
+  const preview = await getCancellationPreview(reservationId);
+  if (preview) {
+    cancellationPreviews.value[reservationId] = preview;
+    return preview;
+  }
+
+  return null;
+}
+
+async function hydrateCancellationPreviews() {
+  const entries = await Promise.all(
+    reservations.value.map(async (reservation) => {
+      const preview = await getCancellationPreview(reservation.id);
+      return preview ? [reservation.id, preview] : null;
+    }),
+  );
+
+  const nextMap: Record<number, BookingCancellationPreview> = {};
+  for (const entry of entries) {
+    if (!entry) continue;
+    const [id, preview] = entry;
+    nextMap[id] = preview;
+  }
+
+  cancellationPreviews.value = nextMap;
+}
+
+async function openDetailsModal(reservationId: number) {
+  selectedReservationId.value = reservationId;
+  cancelError.value = "";
+  const preview = await ensureCancellationPreview(reservationId);
+  if (!preview) return;
+  showDetailsModal.value = true;
+}
+
+function closeDetailsModal() {
+  showDetailsModal.value = false;
+}
+
+async function openCancelConfirmation(reservationId: number) {
+  selectedReservationId.value = reservationId;
+  cancelError.value = "";
+  const preview = await ensureCancellationPreview(reservationId);
+  if (!preview) return;
+  if (!preview.cancellationAllowed) {
+    cancelError.value = preview.reason || "This reservation cannot be cancelled.";
+    showDetailsModal.value = true;
+    return;
+  }
+  showCancelModal.value = true;
+}
+
+function closeCancelModal() {
+  showCancelModal.value = false;
+  cancelError.value = "";
+}
+
+function closeCancelSuccess() {
+  showCancelSuccess.value = false;
+}
+
+async function confirmCancellation() {
+  if (selectedReservationId.value == null) return;
+  cancelling.value = true;
+  cancelError.value = "";
+
+  try {
+    const confirmation = await cancelBooking(selectedReservationId.value);
+    if (!confirmation) {
+      cancelError.value = "Unable to cancel this reservation.";
+      return;
+    }
+
+    cancelSuccessData.value = confirmation;
+    showCancelModal.value = false;
+    showDetailsModal.value = false;
+    showCancelSuccess.value = true;
+
+    if (accountId.value) {
+      await fetchByAccount(accountId.value);
+      await hydrateCancellationPreviews();
+    }
+  } finally {
+    cancelling.value = false;
+  }
+}
+
 onMounted(async () => {
   await Promise.all([
     accountId.value ? fetchByAccount(accountId.value) : Promise.resolve(),
     fetchHotels(),
   ]);
+  await hydrateCancellationPreviews();
 });
 </script>
 
@@ -785,7 +1104,8 @@ onMounted(async () => {
 .journey-card__footer {
   margin-top: auto;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .btn-card-action {
@@ -802,6 +1122,199 @@ onMounted(async () => {
 .btn-card-action:hover {
   color: var(--color-primary-800);
   gap: 12px;
+}
+
+.btn-card-cancel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  color: #b42318;
+  background: #fff;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-card-cancel:hover {
+  border-color: rgba(220, 38, 38, 0.4);
+  background: rgba(220, 38, 38, 0.06);
+}
+
+.booking-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(15, 23, 42, 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.booking-modal-card {
+  width: min(860px, 100%);
+  max-height: 90vh;
+  overflow: auto;
+  background: #fff;
+  border: 1px solid var(--color-border-soft);
+  border-radius: 18px;
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.18);
+}
+
+.booking-modal-card--compact {
+  width: min(720px, 100%);
+}
+
+.booking-modal-header {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--color-border-soft);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.booking-modal-header h3 {
+  margin: 0;
+  font-size: 26px;
+  color: var(--color-heading);
+}
+
+.booking-modal-header p {
+  margin: 6px 0 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.booking-close-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border-soft);
+  background: #fff;
+  color: var(--color-text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.booking-modal-content {
+  padding: 18px 20px;
+  display: grid;
+  gap: 14px;
+}
+
+.booking-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.booking-info-item {
+  border: 1px solid var(--color-border-soft);
+  border-radius: 12px;
+  background: var(--color-surface);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.booking-info-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.booking-info-item strong {
+  font-size: 14px;
+  color: var(--color-heading);
+}
+
+.policy-card {
+  border: 1px solid var(--color-border-soft);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--color-surface) 80%, white 20%);
+  padding: 14px;
+}
+
+.policy-card h4 {
+  margin: 0 0 8px;
+  color: var(--color-heading);
+  font-size: 18px;
+}
+
+.policy-card p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.policy-meta {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.policy-meta span {
+  display: block;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.policy-meta strong {
+  color: var(--color-heading);
+  font-size: 14px;
+}
+
+.booking-modal-footer {
+  border-top: 1px solid var(--color-border-soft);
+  padding: 16px 20px 20px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+}
+
+.cancel-error {
+  margin: 0;
+  color: #b42318;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.booking-modal-enter-active,
+.booking-modal-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.booking-modal-enter-active .booking-modal-card,
+.booking-modal-leave-active .booking-modal-card {
+  transition: transform 0.2s ease;
+}
+
+.booking-modal-enter-from,
+.booking-modal-leave-to {
+  opacity: 0;
+}
+
+.booking-modal-enter-from .booking-modal-card,
+.booking-modal-leave-to .booking-modal-card {
+  transform: translateY(14px);
 }
 
 /* Status Badges Colors */
@@ -855,6 +1368,16 @@ onMounted(async () => {
     width: 100%;
     height: 180px;
   }
+
+  .booking-info-grid,
+  .policy-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-modal-footer {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
 }
 
 @media (max-width: 600px) {
@@ -868,6 +1391,27 @@ onMounted(async () => {
   .status-pills {
     overflow-x: auto;
     padding-bottom: 8px;
+  }
+
+  .journey-card__footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-card-action,
+  .btn-card-cancel {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .booking-modal-overlay {
+    padding: 10px;
+    align-items: flex-end;
+  }
+
+  .booking-modal-card {
+    border-radius: 16px 16px 0 0;
+    max-height: 94vh;
   }
 }
 </style>

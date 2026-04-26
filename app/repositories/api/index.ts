@@ -8,6 +8,8 @@ import type { IAccountRepository } from '~/types/interfaces/IAccountRepository'
 import type {
   IReservationRepository,
   BookingConfirmation,
+  BookingCancellationConfirmation,
+  BookingCancellationPreview,
   BookingCreatePayload,
 } from '~/types/interfaces/IReservationRepository'
 import type { IOfferRepository } from '~/types/interfaces/IOfferRepository'
@@ -419,6 +421,18 @@ export class ApiReservationRepository implements IReservationRepository {
     const confirmation = await apiRequest<BookingConfirmation>('/bookings', {
       method: 'POST',
       body: payload,
+    })
+    invalidateApiCache('/reservations', '/hotels/search/availability')
+    return confirmation
+  }
+
+  async getCancellationPreview(bookingId: number): Promise<BookingCancellationPreview> {
+    return apiRequest<BookingCancellationPreview>(`/bookings/${bookingId}/cancellation-preview`)
+  }
+
+  async cancelBooking(bookingId: number): Promise<BookingCancellationConfirmation> {
+    const confirmation = await apiRequest<BookingCancellationConfirmation>(`/bookings/${bookingId}/cancel`, {
+      method: 'PATCH',
     })
     invalidateApiCache('/reservations', '/hotels/search/availability')
     return confirmation

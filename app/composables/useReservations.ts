@@ -1,7 +1,12 @@
 import { ref } from 'vue'
 import type { Reservation } from '~/types/models'
 import type { ReservationStatus } from '~/types/enums'
-import type { BookingConfirmation, BookingCreatePayload } from '~/types/interfaces'
+import type {
+  BookingCancellationConfirmation,
+  BookingCancellationPreview,
+  BookingConfirmation,
+  BookingCreatePayload,
+} from '~/types/interfaces'
 import { ReservationService, RoomService } from '~/services'
 import { ReservationStatus as ReservationStatusEnum } from '~/types/enums'
 import { useAuth } from '~/composables/useAuth'
@@ -35,6 +40,14 @@ export function useReservations() {
 
   async function createBooking(payload: BookingCreatePayload): Promise<BookingConfirmation | null> {
     return execute(() => reservationService.createBooking(payload), null)
+  }
+
+  async function getCancellationPreview(bookingId: number): Promise<BookingCancellationPreview | null> {
+    return execute(() => reservationService.getCancellationPreview(bookingId), null)
+  }
+
+  async function cancelBooking(bookingId: number): Promise<BookingCancellationConfirmation | null> {
+    return execute(() => reservationService.cancelBooking(bookingId), null)
   }
 
   async function updateStatus(id: number, status: ReservationStatus, reason?: string) {
@@ -100,6 +113,8 @@ export function useReservations() {
     fetchById,
     create,
     createBooking,
+    getCancellationPreview,
+    cancelBooking,
     updateStatus,
     finalizeReservation,
   }

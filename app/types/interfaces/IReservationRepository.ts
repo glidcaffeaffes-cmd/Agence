@@ -42,6 +42,51 @@ export interface BookingConfirmation {
   }
 }
 
+export interface BookingCancellationPreview {
+  bookingId: number
+  bookingReference: string
+  hotelName: string
+  roomName: string
+  stay: {
+    checkIn: string
+    checkOut: string
+    nights: number
+  }
+  cancellationAllowed: boolean
+  cancellationDeadline: string | null
+  policy: {
+    label: string
+    description: string
+  }
+  refund: {
+    type: 'FULL' | 'PARTIAL' | 'NONE'
+    amount: number
+    chargeAmount: number
+    totalPaid: number
+  }
+  reason: string | null
+}
+
+export interface BookingCancellationConfirmation {
+  cancelled: boolean
+  bookingId: number
+  bookingReference: string
+  cancellationDate: string
+  hotelName: string
+  roomName: string
+  stay: {
+    checkIn: string
+    checkOut: string
+    nights: number
+  }
+  refund: {
+    type: 'FULL' | 'PARTIAL' | 'NONE'
+    amount: number
+    chargeAmount: number
+    totalPaid: number
+  }
+}
+
 export interface IReservationRepository {
   getAll(): Promise<Reservation[]>
   getById(id: number): Promise<Reservation | null>
@@ -50,6 +95,8 @@ export interface IReservationRepository {
   getByStatus(status: ReservationStatus): Promise<Reservation[]>
   create(reservation: Omit<Reservation, 'id' | 'confirmationCode'>): Promise<Reservation>
   createBooking(payload: BookingCreatePayload): Promise<BookingConfirmation>
+  getCancellationPreview(bookingId: number): Promise<BookingCancellationPreview>
+  cancelBooking(bookingId: number): Promise<BookingCancellationConfirmation>
   updateStatus(id: number, status: ReservationStatus, reason?: string): Promise<Reservation>
   delete(id: number): Promise<void>
 }
