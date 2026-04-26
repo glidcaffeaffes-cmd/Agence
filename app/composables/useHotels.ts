@@ -1,6 +1,10 @@
 import { ref } from 'vue'
 import type { Hotel } from '~/types/models'
-import type { HotelAvailabilityFilters } from '~/types/interfaces'
+import type {
+  HotelAvailabilityFilters,
+  HotelAvailabilitySummary,
+  HotelRoomAvailabilityRequest,
+} from '~/types/interfaces'
 import { HotelService } from '~/services'
 import { useAsyncAction } from '~/composables/useAsyncAction'
 
@@ -37,10 +41,45 @@ export function useHotels() {
     hotels.value = await execute(() => service.searchAvailability(filters), [])
   }
 
+  async function checkAvailability(
+    hotelId: number,
+    payload: HotelRoomAvailabilityRequest,
+  ): Promise<HotelAvailabilitySummary> {
+    return execute(() => service.checkAvailability(hotelId, payload), {
+      available: false,
+      nights: 0,
+      basePrice: 0,
+      cityTax: 0,
+      total: 0,
+      selectedPricePerNight: 0,
+      rooms: [],
+      guests: {
+        adults: payload.adults,
+        children: payload.children,
+        total: payload.adults + payload.children,
+      },
+    })
+  }
+
   async function getById(id: number) {
     await fetchById(id)
     return hotel.value
   }
 
-  return { hotels, hotel, featured, selectedHotel, loading, error, fetchAll, fetchById, getById, fetchFeatured, search, findAvailable, fetchAvailable }
+  return {
+    hotels,
+    hotel,
+    featured,
+    selectedHotel,
+    loading,
+    error,
+    fetchAll,
+    fetchById,
+    getById,
+    fetchFeatured,
+    search,
+    findAvailable,
+    fetchAvailable,
+    checkAvailability,
+  }
 }
