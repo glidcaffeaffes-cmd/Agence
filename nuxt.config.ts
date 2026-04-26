@@ -66,7 +66,10 @@ export default defineNuxtConfig({
   primevue: {
     importTheme: { from: '@primeuix/themes/aura', as: 'Aura' },
     options: {
-      ripple: true
+      ripple: true,
+    },
+    composables: {
+      exclude: ['useToast']
     }
   },
   app: {
