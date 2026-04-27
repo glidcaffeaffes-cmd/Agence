@@ -45,12 +45,18 @@ export function useReservations() {
     return execute(() => reservationService.createBooking(payload), null)
   }
 
-  async function getCancellationPreview(bookingId: number): Promise<BookingCancellationPreview | null> {
-    return execute(() => reservationService.getCancellationPreview(bookingId), null)
+  async function getCancellationPreview(
+    bookingId: number,
+    accountId?: number,
+  ): Promise<BookingCancellationPreview | null> {
+    return execute(() => reservationService.getCancellationPreview(bookingId, accountId), null)
   }
 
-  async function cancelBooking(bookingId: number): Promise<BookingCancellationConfirmation | null> {
-    return execute(() => reservationService.cancelBooking(bookingId), null)
+  async function cancelBooking(
+    bookingId: number,
+    accountId?: number,
+  ): Promise<BookingCancellationConfirmation | null> {
+    return execute(() => reservationService.cancelBooking(bookingId, accountId), null)
   }
 
   async function createCheckoutSession(

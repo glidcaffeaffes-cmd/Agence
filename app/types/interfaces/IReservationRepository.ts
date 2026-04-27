@@ -142,8 +142,12 @@ export interface IReservationRepository {
   createBooking(payload: BookingCreatePayload): Promise<BookingConfirmation>
   getCancellationPreview(
     bookingId: number,
+    accountId?: number,
   ): Promise<BookingCancellationPreview>
-  cancelBooking(bookingId: number): Promise<BookingCancellationConfirmation>
+  cancelBooking(
+    bookingId: number,
+    accountId?: number,
+  ): Promise<BookingCancellationConfirmation>
   createCheckoutSession(
     payload: CreateCheckoutSessionPayload,
   ): Promise<CheckoutSessionResponse>

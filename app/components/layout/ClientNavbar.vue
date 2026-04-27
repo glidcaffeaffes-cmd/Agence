@@ -122,7 +122,7 @@
                       {{ getNotificationIcon(notification.type) }}
                     </span>
                     <span class="notification-item__content">
-                      <span class="notification-item__message">{{ notification.message }}</span>
+                      <span class="notification-item__message">{{ formatNotificationMessage(notification.message) }}</span>
                       <span class="notification-item__meta">
                         {{ formatNotificationDate(notification.sentDate) }}
                       </span>
@@ -428,6 +428,16 @@ function formatNotificationDate(value: string) {
     day: "numeric",
     year: "numeric",
   }).format(date);
+}
+
+function formatNotificationMessage(message: string) {
+  if (!message) return "";
+
+  return message
+    .replace(/\bVH-\d{4}-[A-Z0-9]+\b/gi, "")
+    .replace(/\s{2,}/g, " ")
+    .replace(/\s+([,.!?:;])/g, "$1")
+    .trim();
 }
 
 async function openNotification(id: number, type: NotificationType, isRead: boolean) {

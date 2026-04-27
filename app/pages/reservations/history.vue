@@ -76,7 +76,7 @@
           </div>
 
           <!-- Empty State -->
-          <div v-else-if="reservations.length === 0" class="empty-display">
+          <div v-else-if="filteredReservations.length === 0" class="empty-display">
             <div class="empty-card">
               <div class="empty-icon-box">
                 <span class="material-symbols-outlined">luggage</span>
@@ -105,7 +105,7 @@
           <!-- Results Timeline -->
           <div v-else class="history-results">
             <div class="history-meta">
-              Showing {{ reservations.length }} reservations
+              Showing {{ filteredReservations.length }} reservations
             </div>
 
             <div class="history-timeline">
@@ -194,9 +194,11 @@
                         >
                       </button>
                       <button
-                        v-if="showCancelButton(r.id)"
+                        v-if="showCancelButton(r.status)"
                         type="button"
                         class="btn-card-cancel"
+                        :disabled="isCancelDisabled(r.id)"
+                        :title="cancelButtonReason(r.id)"
                         @click="openCancelConfirmation(r.id)"
                       >
                         Cancel Reservation
@@ -387,6 +389,7 @@ import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { useAuth } from "~/composables/useAuth";
 import { useReservations } from "~/composables/useReservations";
 import { useHotels } from "~/composables/useHotels";
+import { ReservationStatus } from "~/types/enums";
 import type {
   BookingCancellationConfirmation,
   BookingCancellationPreview,
@@ -442,15 +445,32 @@ function getHotel(id: number) {
 }
 
 
+const filteredReservations = computed(() => {
+  if (!yearFilter.value) return reservations.value;
+  return reservations.value.filter(
+    (reservation) => reservation.checkInDate.substring(0, 4) === yearFilter.value,
+  );
+});
+
 const grouped = computed<Record<string, Reservation[]>>(() => {
   const result: Record<string, Reservation[]> = {};
-  for (const r of reservations.value) {
+  for (const r of filteredReservations.value) {
     const year = r.checkInDate.substring(0, 4);
     if (!result[year]) result[year] = [];
     result[year].push(r);
   }
   return result;
 });
+
+function mapStatusFilterToBackend(status: string) {
+  if (status === ReservationStatus.CONFIRMED) return "CONFIRMEE";
+  if (status === ReservationStatus.CANCELLED) return "ANNULEE";
+  if (status === ReservationStatus.COMPLETED) return "TERMINEE";
+  if (status === ReservationStatus.PENDING) return "EN_ATTENTE";
+  if (status === ReservationStatus.BLOCKED) return "BLOQUEE";
+  if (status === ReservationStatus.REFUSED) return "REFUSEE";
+  return undefined;
+}
 
 async function loadPage(page: number) {
   if (isFetching.value || !accountId.value) return;
@@ -462,7 +482,7 @@ async function loadPage(page: number) {
       page,
       limit: 10,
       accountId: accountId.value,
-      status: statusFilter.value as any,
+      status: mapStatusFilterToBackend(statusFilter.value) as any,
       search: search.value,
     });
 
@@ -571,9 +591,22 @@ function formatRefundType(type: "FULL" | "PARTIAL" | "NONE") {
   return "No refund";
 }
 
-function showCancelButton(reservationId: number) {
+function showCancelButton(status: ReservationStatus) {
+  return [ReservationStatus.PENDING, ReservationStatus.CONFIRMED].includes(status);
+}
+
+function isCancelDisabled(reservationId: number) {
   const preview = cancellationPreviews.value[reservationId];
-  return Boolean(preview?.cancellationAllowed);
+  if (!preview) return false;
+  return !preview.cancellationAllowed;
+}
+
+function cancelButtonReason(reservationId: number) {
+  const preview = cancellationPreviews.value[reservationId];
+  if (!preview) return "";
+  return preview.cancellationAllowed
+    ? ""
+    : preview.reason || "This reservation cannot be cancelled.";
 }
 
 async function ensureCancellationPreview(reservationId: number) {
@@ -581,7 +614,7 @@ async function ensureCancellationPreview(reservationId: number) {
     return cancellationPreviews.value[reservationId];
   }
 
-  const preview = await getCancellationPreview(reservationId);
+  const preview = await getCancellationPreview(reservationId, accountId.value || undefined);
   if (preview) {
     cancellationPreviews.value[reservationId] = preview;
     return preview;
@@ -593,7 +626,7 @@ async function ensureCancellationPreview(reservationId: number) {
 async function hydrateCancellationPreviews() {
   const entries = await Promise.all(
     reservations.value.map(async (reservation) => {
-      const preview = await getCancellationPreview(reservation.id);
+      const preview = await getCancellationPreview(reservation.id, accountId.value || undefined);
       return preview ? [reservation.id, preview] : null;
     }),
   );
@@ -648,7 +681,10 @@ async function confirmCancellation() {
   cancelError.value = "";
 
   try {
-    const confirmation = await cancelBooking(selectedReservationId.value);
+    const confirmation = await cancelBooking(
+      selectedReservationId.value,
+      accountId.value || undefined,
+    );
     if (!confirmation) {
       cancelError.value = "Unable to cancel this reservation.";
       return;
@@ -1208,6 +1244,11 @@ watch([search, statusFilter, yearFilter], () => {
 .btn-card-cancel:hover {
   border-color: rgba(220, 38, 38, 0.4);
   background: rgba(220, 38, 38, 0.06);
+}
+
+.btn-card-cancel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .booking-modal-overlay {

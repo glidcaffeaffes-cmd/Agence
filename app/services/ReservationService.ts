@@ -75,12 +75,18 @@ export class ReservationService {
     return this.repo.createBooking(payload)
   }
 
-  async getCancellationPreview(bookingId: number): Promise<BookingCancellationPreview> {
-    return this.repo.getCancellationPreview(bookingId)
+  async getCancellationPreview(
+    bookingId: number,
+    accountId?: number,
+  ): Promise<BookingCancellationPreview> {
+    return this.repo.getCancellationPreview(bookingId, accountId)
   }
 
-  async cancelBooking(bookingId: number): Promise<BookingCancellationConfirmation> {
-    return this.repo.cancelBooking(bookingId)
+  async cancelBooking(
+    bookingId: number,
+    accountId?: number,
+  ): Promise<BookingCancellationConfirmation> {
+    return this.repo.cancelBooking(bookingId, accountId)
   }
 
   async createCheckoutSession(

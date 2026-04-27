@@ -154,10 +154,16 @@ export class MockReservationRepository implements IReservationRepository {
     }
   }
 
-  async getCancellationPreview(bookingId: number): Promise<BookingCancellationPreview> {
+  async getCancellationPreview(
+    bookingId: number,
+    accountId?: number,
+  ): Promise<BookingCancellationPreview> {
     const reservation = this.reservations.find((entry) => entry.id === bookingId)
     if (!reservation) {
       throw new Error('Booking not found')
+    }
+    if (accountId && reservation.accountId !== accountId) {
+      throw new Error('You are not allowed to cancel this reservation')
     }
 
     const now = new Date()
@@ -196,8 +202,11 @@ export class MockReservationRepository implements IReservationRepository {
     }
   }
 
-  async cancelBooking(bookingId: number): Promise<BookingCancellationConfirmation> {
-    const preview = await this.getCancellationPreview(bookingId)
+  async cancelBooking(
+    bookingId: number,
+    accountId?: number,
+  ): Promise<BookingCancellationConfirmation> {
+    const preview = await this.getCancellationPreview(bookingId, accountId)
     if (!preview.cancellationAllowed) {
       throw new Error(preview.reason || 'This reservation cannot be cancelled')
     }

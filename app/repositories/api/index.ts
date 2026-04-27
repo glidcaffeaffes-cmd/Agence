@@ -501,14 +501,25 @@ export class ApiReservationRepository implements IReservationRepository {
     return confirmation
   }
 
-  async getCancellationPreview(bookingId: number): Promise<BookingCancellationPreview> {
-    return apiRequest<BookingCancellationPreview>(`/bookings/${bookingId}/cancellation-preview`)
+  async getCancellationPreview(
+    bookingId: number,
+    accountId?: number,
+  ): Promise<BookingCancellationPreview> {
+    return apiRequest<BookingCancellationPreview>(
+      buildApiPath(`/bookings/${bookingId}/cancellation-preview`, { accountId }),
+    )
   }
 
-  async cancelBooking(bookingId: number): Promise<BookingCancellationConfirmation> {
-    const confirmation = await apiRequest<BookingCancellationConfirmation>(`/bookings/${bookingId}/cancel`, {
-      method: 'PATCH',
-    })
+  async cancelBooking(
+    bookingId: number,
+    accountId?: number,
+  ): Promise<BookingCancellationConfirmation> {
+    const confirmation = await apiRequest<BookingCancellationConfirmation>(
+      buildApiPath(`/bookings/${bookingId}/cancel`, { accountId }),
+      {
+        method: 'PATCH',
+      },
+    )
     invalidateApiCache('/reservations', '/hotels/search/availability')
     return confirmation
   }
