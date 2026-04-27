@@ -377,7 +377,6 @@ export const PaymentMethodMapper = {
     return {
       id: dto.id,
       accountId: dto.accountId,
-      cardholderName: dto.cardholderName,
       brand: dto.brand,
       last4: dto.last4,
       expiryMonth: dto.expiryMonth,

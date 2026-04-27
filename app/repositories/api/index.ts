@@ -360,18 +360,30 @@ export class ApiAccountRepository implements IAccountRepository {
   async createPaymentMethod(
     accountId: number,
     data: {
-      cardholderName: string
-      brand: PaymentMethod['brand']
-      cardNumber: string
-      expiryMonth: number
-      expiryYear: number
       isDefault?: boolean
     },
+  ): Promise<{ sessionId: string; url: string }> {
+    const result = await apiRequest<{ sessionId: string; url: string }>(
+      `/accounts/${accountId}/payment-methods`,
+      {
+        method: 'POST',
+        body: data,
+      },
+    )
+    return result
+  }
+
+  async confirmPaymentMethodSession(
+    accountId: number,
+    sessionId: string,
   ): Promise<PaymentMethod> {
-    const dto = await apiRequest<PaymentMethodDTO>(`/accounts/${accountId}/payment-methods`, {
-      method: 'POST',
-      body: data,
-    })
+    const dto = await apiRequest<PaymentMethodDTO>(
+      `/accounts/${accountId}/payment-methods/confirm-session`,
+      {
+        method: 'POST',
+        body: { sessionId },
+      },
+    )
     invalidateApiCache(`/accounts/${accountId}/profile`, `/accounts/${accountId}/payment-methods`, '/accounts')
     return PaymentMethodMapper.fromDto(dto)
   }
@@ -380,11 +392,6 @@ export class ApiAccountRepository implements IAccountRepository {
     accountId: number,
     paymentMethodId: number,
     data: Partial<{
-      cardholderName: string
-      brand: PaymentMethod['brand']
-      cardNumber: string
-      expiryMonth: number
-      expiryYear: number
       isDefault: boolean
     }>,
   ): Promise<PaymentMethod> {

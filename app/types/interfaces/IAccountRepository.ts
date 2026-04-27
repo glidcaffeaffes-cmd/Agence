@@ -16,23 +16,17 @@ export interface IAccountRepository {
   createPaymentMethod(
     accountId: number,
     data: {
-      cardholderName: string
-      brand: PaymentMethod['brand']
-      cardNumber: string
-      expiryMonth: number
-      expiryYear: number
       isDefault?: boolean
     },
+  ): Promise<{ sessionId: string; url: string }>
+  confirmPaymentMethodSession(
+    accountId: number,
+    sessionId: string,
   ): Promise<PaymentMethod>
   updatePaymentMethod(
     accountId: number,
     paymentMethodId: number,
     data: Partial<{
-      cardholderName: string
-      brand: PaymentMethod['brand']
-      cardNumber: string
-      expiryMonth: number
-      expiryYear: number
       isDefault: boolean
     }>,
   ): Promise<PaymentMethod>

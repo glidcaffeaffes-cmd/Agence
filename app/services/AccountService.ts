@@ -83,26 +83,23 @@ export class AccountService {
   async createPaymentMethod(
     accountId: number,
     data: {
-      cardholderName: string
-      brand: PaymentMethod['brand']
-      cardNumber: string
-      expiryMonth: number
-      expiryYear: number
       isDefault?: boolean
     },
-  ): Promise<PaymentMethod> {
+  ): Promise<{ sessionId: string; url: string }> {
     return this.repo.createPaymentMethod(accountId, data)
+  }
+
+  async confirmPaymentMethodSession(
+    accountId: number,
+    sessionId: string,
+  ): Promise<PaymentMethod> {
+    return this.repo.confirmPaymentMethodSession(accountId, sessionId)
   }
 
   async updatePaymentMethod(
     accountId: number,
     paymentMethodId: number,
     data: Partial<{
-      cardholderName: string
-      brand: PaymentMethod['brand']
-      cardNumber: string
-      expiryMonth: number
-      expiryYear: number
       isDefault: boolean
     }>,
   ): Promise<PaymentMethod> {

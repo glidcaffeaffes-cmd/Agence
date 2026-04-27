@@ -100,47 +100,50 @@ export class MockAccountRepository implements IAccountRepository {
   async createPaymentMethod(
     accountId: number,
     data: {
-      cardholderName: string
-      brand: PaymentMethod['brand']
-      cardNumber: string
-      expiryMonth: number
-      expiryYear: number
       isDefault?: boolean
     },
-  ): Promise<PaymentMethod> {
-    const isDefault = data.isDefault ?? !this.paymentMethods.some(method => method.accountId === accountId)
-    if (isDefault) {
-      this.paymentMethods = this.paymentMethods.map(method =>
-        method.accountId === accountId ? { ...method, isDefault: false } : method,
-      )
-    }
-
-    const method: PaymentMethod = {
+  ): Promise<{ sessionId: string; url: string }> {
+    const sessionId = `mock_session_${Date.now()}`
+    const syntheticCard: PaymentMethod = {
       id: Date.now(),
       accountId,
-      cardholderName: data.cardholderName,
-      brand: data.brand,
-      last4: data.cardNumber.slice(-4),
-      expiryMonth: data.expiryMonth,
-      expiryYear: data.expiryYear,
-      isDefault,
+      brand: 'visa',
+      last4: '4242',
+      expiryMonth: 8,
+      expiryYear: new Date().getFullYear() + 4,
+      isDefault: data.isDefault ?? !this.paymentMethods.some(method => method.accountId === accountId),
       createdAt: new Date().toISOString(),
     }
 
-    this.paymentMethods.push(method)
+    this.paymentMethods = this.paymentMethods.filter(method => method.accountId !== accountId || !syntheticCard.isDefault)
+      .concat(syntheticCard)
     this.syncProfilePaymentState(accountId)
-    return method
+
+    return {
+      sessionId,
+      url: `/profile?tab=Billing&setup=success&session_id=${sessionId}`,
+    }
+  }
+
+  async confirmPaymentMethodSession(
+    accountId: number,
+    _sessionId: string,
+  ): Promise<PaymentMethod> {
+    const existing = this.paymentMethods
+      .filter(method => method.accountId === accountId)
+      .sort((a, b) => Number(b.isDefault) - Number(a.isDefault))[0]
+
+    if (!existing) {
+      throw new Error('No payment method found for this session')
+    }
+
+    return existing
   }
 
   async updatePaymentMethod(
     accountId: number,
     paymentMethodId: number,
     data: Partial<{
-      cardholderName: string
-      brand: PaymentMethod['brand']
-      cardNumber: string
-      expiryMonth: number
-      expiryYear: number
       isDefault: boolean
     }>,
   ): Promise<PaymentMethod> {
@@ -158,11 +161,6 @@ export class MockAccountRepository implements IAccountRepository {
     const current = this.paymentMethods[index]
     this.paymentMethods[index] = {
       ...current,
-      ...(data.cardholderName !== undefined && { cardholderName: data.cardholderName }),
-      ...(data.brand !== undefined && { brand: data.brand }),
-      ...(data.cardNumber !== undefined && { last4: data.cardNumber.slice(-4) }),
-      ...(data.expiryMonth !== undefined && { expiryMonth: data.expiryMonth }),
-      ...(data.expiryYear !== undefined && { expiryYear: data.expiryYear }),
       ...(data.isDefault !== undefined && { isDefault: data.isDefault }),
     }
 

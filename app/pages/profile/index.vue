@@ -313,6 +313,10 @@
                               v-model="formData.passportNumber"
                               class="form-input"
                               placeholder="e.g. AB123456"
+                              maxlength="9"
+                              autocapitalize="characters"
+                              spellcheck="false"
+                              @input="onPassportInput"
                             />
                             <span
                               class="material-symbols-outlined state-icon"
@@ -324,6 +328,9 @@
                               }}</span
                             >
                           </div>
+                          <p v-if="passportValidationMessage" class="form-error">
+                            {{ passportValidationMessage }}
+                          </p>
                         </div>
                         <div class="form-group"></div>
                       </div>
@@ -480,20 +487,28 @@
                       <button
                         type="button"
                         class="btn-update"
-                        @click="showPaymentForm = !showPaymentForm"
+                        :disabled="loading || paymentSetupLoading"
+                        @click="startStripePaymentMethodSetup()"
                       >
-                        <span class="material-symbols-outlined">{{
-                          showPaymentForm ? "close" : "add"
-                        }}</span>
+                        <span class="material-symbols-outlined">add</span>
                         {{
-                          showPaymentForm
-                            ? "Cancel"
-                            : paymentMethods.length
-                              ? "Add Payment Method"
-                              : "Add Your First Card"
+                          paymentMethods.length
+                            ? "Add Payment Method"
+                            : "Add Your First Card"
                         }}
                       </button>
                     </div>
+                    <p
+                      v-if="paymentSetupFeedback.message"
+                      :class="[
+                        'payment-setup-feedback',
+                        paymentSetupFeedback.type === 'error'
+                          ? 'payment-setup-feedback--error'
+                          : 'payment-setup-feedback--success',
+                      ]"
+                    >
+                      {{ paymentSetupFeedback.message }}
+                    </p>
 
                     <div
                       v-if="paymentMethods.length"
@@ -523,7 +538,6 @@
                         </div>
 
                         <div class="payment-card__meta">
-                          <span>{{ method.cardholderName }}</span>
                           <span>
                             Expires
                             {{ String(method.expiryMonth).padStart(2, "0") }}/{{
@@ -571,105 +585,14 @@
                         <button
                           type="button"
                           class="btn-update"
-                          @click="showPaymentForm = true"
+                          :disabled="loading || paymentSetupLoading"
+                          @click="startStripePaymentMethodSetup()"
                         >
                           <span class="material-symbols-outlined">add</span>
                           Add Payment Method
                         </button>
                       </div>
                     </div>
-
-                    <form
-                      v-if="showPaymentForm"
-                      class="payment-form"
-                      @submit.prevent="savePaymentMethod"
-                    >
-                      <div class="form-row">
-                        <div class="form-group">
-                          <label class="form-label">Cardholder Name</label>
-                          <input
-                            v-model="paymentForm.cardholderName"
-                            type="text"
-                            class="form-input"
-                            placeholder="Mohamed Amin"
-                          />
-                        </div>
-                        <div class="form-group">
-                          <label class="form-label">Card Brand</label>
-                          <select
-                            v-model="paymentForm.brand"
-                            class="form-input"
-                          >
-                            <option
-                              v-for="brand in paymentBrands"
-                              :key="brand.value"
-                              :value="brand.value"
-                            >
-                              {{ brand.label }}
-                            </option>
-                          </select>
-                        </div>
-                      </div>
-
-                      <div class="form-row">
-                        <div class="form-group">
-                          <label class="form-label">Card Number</label>
-                          <input
-                            v-model="paymentForm.cardNumber"
-                            type="text"
-                            inputmode="numeric"
-                            class="form-input"
-                            placeholder="4242424242424242"
-                          />
-                        </div>
-                        <div class="form-row form-row--compact">
-                          <div class="form-group">
-                            <label class="form-label">Expiry Month</label>
-                            <input
-                              v-model="paymentForm.expiryMonth"
-                              type="number"
-                              min="1"
-                              max="12"
-                              class="form-input"
-                              placeholder="08"
-                            />
-                          </div>
-                          <div class="form-group">
-                            <label class="form-label">Expiry Year</label>
-                            <input
-                              v-model="paymentForm.expiryYear"
-                              type="number"
-                              :min="currentYear"
-                              :max="currentYear + 25"
-                              class="form-input"
-                              placeholder="2030"
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      <label class="checkbox-row">
-                        <input
-                          v-model="paymentForm.isDefault"
-                          type="checkbox"
-                        />
-                        <span>Set as default payment method</span>
-                      </label>
-
-                      <p v-if="paymentFormError" class="form-error">
-                        {{ paymentFormError }}
-                      </p>
-
-                      <div class="form-actions">
-                        <button
-                          type="submit"
-                          class="btn-update"
-                          :disabled="loading"
-                        >
-                          {{ loading ? "Saving..." : "Save Payment Method" }}
-                        </button>
-                      </div>
-                    </form>
                   </div>
                 </section>
               </div>
@@ -769,7 +692,7 @@ import {
   onBeforeUnmount,
   nextTick,
 } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import type { PaymentMethod } from "~/types/models";
 import { useAuth } from "~/composables/useAuth";
 import {
@@ -783,16 +706,17 @@ import {
 import phoneExamplesData from "libphonenumber-js/examples.mobile";
 
 const route = useRoute();
+const router = useRouter();
 const {
   currentProfile,
   updateProfile,
   createPaymentMethod,
+  confirmPaymentMethodSession,
   updatePaymentMethod,
   removePaymentMethod,
   loading,
 } = useAuth();
 const activeTab = ref("Account Settings");
-const currentYear = new Date().getFullYear();
 const defaultPhoneCountry: CountryCode = "TN";
 const phoneExamples = phoneExamplesData as Record<string, string>;
 
@@ -883,6 +807,7 @@ onMounted(() => {
   }
 
   document.addEventListener("mousedown", handlePhoneCountryOutsideClick);
+  void handlePaymentSetupReturn();
 });
 
 onBeforeUnmount(() => {
@@ -940,14 +865,6 @@ const travelPrefOptions = [
   "Ski",
 ];
 
-const paymentBrands: { value: PaymentMethod["brand"]; label: string }[] = [
-  { value: "visa", label: "Visa" },
-  { value: "mastercard", label: "Mastercard" },
-  { value: "amex", label: "American Express" },
-  { value: "discover", label: "Discover" },
-  { value: "other", label: "Other" },
-];
-
 const formData = ref({
   firstName: "",
   lastName: "",
@@ -959,6 +876,16 @@ const formData = ref({
   preferredDestinations: [] as string[],
   travelPreferences: [] as string[],
 });
+const PASSPORT_MIN_LENGTH = 6;
+const PASSPORT_MAX_LENGTH = 9;
+
+function sanitizePassportInput(value: string) {
+  return value
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "")
+    .slice(0, PASSPORT_MAX_LENGTH);
+}
+
 const phoneValidationMessage = computed(() => {
   const digits = formData.value.phone.replace(/\D/g, "");
   if (!digits) {
@@ -989,16 +916,29 @@ const phoneValidationMessage = computed(() => {
 
   return "";
 });
-const paymentForm = ref({
-  cardholderName: "",
-  brand: "visa" as PaymentMethod["brand"],
-  cardNumber: "",
-  expiryMonth: "",
-  expiryYear: "",
-  isDefault: true,
+const passportValidationMessage = computed(() => {
+  const passport = sanitizePassportInput(formData.value.passportNumber.trim());
+  if (!passport) {
+    return "";
+  }
+
+  if (passport.length < PASSPORT_MIN_LENGTH || passport.length > PASSPORT_MAX_LENGTH) {
+    return `Passport number must be ${PASSPORT_MIN_LENGTH}-${PASSPORT_MAX_LENGTH} characters.`;
+  }
+
+  const hasLetter = /[A-Z]/.test(passport);
+  const hasDigit = /\d/.test(passport);
+  if (!hasLetter || !hasDigit) {
+    return "Passport number must include at least one letter and one number.";
+  }
+
+  return "";
 });
-const paymentFormError = ref("");
-const showPaymentForm = ref(false);
+const paymentSetupLoading = ref(false);
+const paymentSetupFeedback = ref<{ type: "success" | "error"; message: string }>({
+  type: "success",
+  message: "",
+});
 const paymentMethods = computed(
   () => currentProfile.value?.paymentMethods ?? [],
 );
@@ -1013,7 +953,7 @@ watch(
         lastName: profile.lastName || "",
         phone: phoneData.national,
         dateOfBirth: profile.dateOfBirth || "",
-        passportNumber: profile.passportNumber || "",
+        passportNumber: sanitizePassportInput(profile.passportNumber || ""),
         bio: profile.bio || "",
         preferredDestinations: profile.preferredDestinations || [],
         travelPreferences: profile.travelPreferences || [],
@@ -1033,13 +973,17 @@ async function saveProfile() {
     alert(phoneValidationMessage.value);
     return;
   }
+  if (formData.value.passportNumber && passportValidationMessage.value) {
+    alert(passportValidationMessage.value);
+    return;
+  }
 
   const success = await updateProfile({
     ...formData.value,
     phone: normalizePhoneForSave(formData.value.phone),
     firstName: formData.value.firstName.trim(),
     lastName: formData.value.lastName.trim(),
-    passportNumber: formData.value.passportNumber.trim(),
+    passportNumber: sanitizePassportInput(formData.value.passportNumber.trim()),
     bio: formData.value.bio.trim(),
     preferredDestinations: formData.value.preferredDestinations
       .map((city) => city.trim())
@@ -1066,57 +1010,66 @@ async function updateNotifications() {
 
 // ─── Field State Logic ───
 
-async function savePaymentMethod() {
-  paymentFormError.value = "";
-
-  const digitsOnly = paymentForm.value.cardNumber.replace(/\D/g, "");
-  const expiryMonth = Number(paymentForm.value.expiryMonth);
-  const expiryYear = Number(paymentForm.value.expiryYear);
-
-  if (!paymentForm.value.cardholderName.trim()) {
-    paymentFormError.value = "Cardholder name is required.";
-    return;
-  }
-
-  if (digitsOnly.length < 12) {
-    paymentFormError.value = "Enter a valid card number.";
-    return;
-  }
-
-  if (!Number.isInteger(expiryMonth) || expiryMonth < 1 || expiryMonth > 12) {
-    paymentFormError.value = "Expiry month must be between 1 and 12.";
-    return;
-  }
-
-  if (!Number.isInteger(expiryYear) || expiryYear < currentYear) {
-    paymentFormError.value = "Enter a valid expiry year.";
-    return;
-  }
-
-  const success = await createPaymentMethod({
-    cardholderName: paymentForm.value.cardholderName.trim(),
-    brand: paymentForm.value.brand,
-    cardNumber: digitsOnly,
-    expiryMonth,
-    expiryYear,
-    isDefault:
-      paymentMethods.value.length === 0 ? true : paymentForm.value.isDefault,
-  });
-
-  if (success) {
-    paymentForm.value = {
-      cardholderName: "",
-      brand: "visa",
-      cardNumber: "",
-      expiryMonth: "",
-      expiryYear: "",
+async function startStripePaymentMethodSetup() {
+  paymentSetupFeedback.value = { type: "success", message: "" };
+  paymentSetupLoading.value = true;
+  try {
+    const session = await createPaymentMethod({
       isDefault: paymentMethods.value.length === 0,
-    };
-    showPaymentForm.value = false;
-    alert("Payment method saved successfully!");
-  } else {
-    paymentFormError.value = "Failed to save payment method. Please try again.";
+    });
+    if (!session?.url) {
+      paymentSetupFeedback.value = {
+        type: "error",
+        message: "Unable to open Stripe right now. Please try again.",
+      };
+      return;
+    }
+
+    if (import.meta.client) {
+      window.location.href = session.url;
+    }
+  } finally {
+    paymentSetupLoading.value = false;
   }
+}
+
+async function handlePaymentSetupReturn() {
+  const setupStatus = route.query.setup?.toString();
+  const sessionId = route.query.session_id?.toString();
+
+  if (setupStatus === "cancel") {
+    paymentSetupFeedback.value = {
+      type: "error",
+      message: "Card setup was canceled. You can try again anytime.",
+    };
+    const nextQuery = { ...route.query };
+    delete nextQuery.setup;
+    await router.replace({ query: nextQuery });
+    return;
+  }
+
+  if (!sessionId) {
+    return;
+  }
+
+  paymentSetupLoading.value = true;
+  const success = await confirmPaymentMethodSession(sessionId);
+  paymentSetupLoading.value = false;
+
+  paymentSetupFeedback.value = success
+    ? {
+        type: "success",
+        message: "Payment method added successfully.",
+      }
+    : {
+        type: "error",
+        message: "We could not confirm your card. Please try again.",
+      };
+
+  const nextQuery = { ...route.query };
+  delete nextQuery.session_id;
+  delete nextQuery.setup;
+  await router.replace({ query: nextQuery });
 }
 
 async function setDefaultPaymentMethod(paymentMethodId: number) {
@@ -1149,6 +1102,12 @@ function getFieldState(key: string, value: any) {
       ? "form-group--incomplete"
       : "form-group--completed";
   }
+  if (key === "passportNumber") {
+    if (!hasValue(value)) return "form-group--incomplete";
+    return passportValidationMessage.value
+      ? "form-group--incomplete"
+      : "form-group--completed";
+  }
   if (hasValue(value)) return "form-group--completed";
   return "form-group--incomplete";
 }
@@ -1158,6 +1117,10 @@ function getFieldStatusText(key: string, value: any) {
     if (!hasValue(value)) return "Missing information";
     return phoneValidationMessage.value ? "Invalid number" : "Completed";
   }
+  if (key === "passportNumber") {
+    if (!hasValue(value)) return "Missing information";
+    return passportValidationMessage.value ? "Invalid format" : "Completed";
+  }
   if (hasValue(value)) return "Completed";
   return "Missing information";
 }
@@ -1165,6 +1128,10 @@ function getFieldStatusText(key: string, value: any) {
 function getFieldIcon(key: string, value: any) {
   if (key === "phone") {
     if (hasValue(value) && !phoneValidationMessage.value) return "check_circle";
+    return "error";
+  }
+  if (key === "passportNumber") {
+    if (hasValue(value) && !passportValidationMessage.value) return "check_circle";
     return "error";
   }
   if (hasValue(value)) return "check_circle";
@@ -1181,6 +1148,12 @@ function onPhoneInput(event: Event) {
     digits = digits.slice(0, -1);
   }
   formData.value.phone = digits;
+}
+
+function onPassportInput(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const sanitized = sanitizePassportInput(input.value || "");
+  formData.value.passportNumber = sanitized;
 }
 
 function togglePhoneCountryMenu() {
@@ -1251,8 +1224,18 @@ function normalizePhoneForSave(phone: string) {
 }
 
 function formatCardBrand(brand: PaymentMethod["brand"]) {
-  const item = paymentBrands.find((entry) => entry.value === brand);
-  return item?.label ?? brand.toUpperCase();
+  switch (brand) {
+    case "visa":
+      return "Visa";
+    case "mastercard":
+      return "Mastercard";
+    case "amex":
+      return "American Express";
+    case "discover":
+      return "Discover";
+    default:
+      return "Card";
+  }
 }
 </script>
 
@@ -1865,6 +1848,20 @@ input[type="date"] ~ .state-icon {
   color: var(--color-danger-600);
   font-size: 0.875rem;
   font-weight: 600;
+}
+
+.payment-setup-feedback {
+  margin: 4px 0 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.payment-setup-feedback--success {
+  color: var(--color-success-600);
+}
+
+.payment-setup-feedback--error {
+  color: var(--color-danger-600);
 }
 
 .empty-vault {

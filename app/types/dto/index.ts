@@ -49,7 +49,7 @@ export interface ProfileDTO {
 export interface PaymentMethodDTO {
   id: number
   accountId: number
-  cardholderName: string
+  cardholderName?: string | null
   brand: 'visa' | 'mastercard' | 'amex' | 'discover' | 'other'
   last4: string
   expiryMonth: number

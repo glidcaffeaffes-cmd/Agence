@@ -1,5 +1,5 @@
 import { ref, computed } from 'vue'
-import type { Account, PaymentMethod, Profile } from '~/types/models'
+import type { Account, Profile } from '~/types/models'
 import { ProfileMapper } from '~/mappers'
 import { useCookie } from '#app'
 import { AccountService } from '~/services'
@@ -203,13 +203,25 @@ export function useAuth() {
   }
 
   async function createPaymentMethod(data: {
-    cardholderName: string
-    brand: PaymentMethod['brand']
-    cardNumber: string
-    expiryMonth: number
-    expiryYear: number
     isDefault?: boolean
   }) {
+    if (!currentAccount.value) {
+      return null
+    }
+
+    loading.value = true
+    error.value = null
+    try {
+      return await service.createPaymentMethod(currentAccount.value.id, data)
+    } catch (e: any) {
+      error.value = e.message
+      return null
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function confirmPaymentMethodSession(sessionId: string) {
     if (!currentAccount.value) {
       return false
     }
@@ -217,7 +229,7 @@ export function useAuth() {
     loading.value = true
     error.value = null
     try {
-      await service.createPaymentMethod(currentAccount.value.id, data)
+      await service.confirmPaymentMethodSession(currentAccount.value.id, sessionId)
       await refreshProfile()
       return true
     } catch (e: any) {
@@ -231,11 +243,6 @@ export function useAuth() {
   async function updatePaymentMethod(
     paymentMethodId: number,
     data: Partial<{
-      cardholderName: string
-      brand: PaymentMethod['brand']
-      cardNumber: string
-      expiryMonth: number
-      expiryYear: number
       isDefault: boolean
     }>,
   ) {
@@ -332,6 +339,7 @@ export function useAuth() {
     logout,
     updateProfile,
     createPaymentMethod,
+    confirmPaymentMethodSession,
     updatePaymentMethod,
     removePaymentMethod,
     changePassword,
