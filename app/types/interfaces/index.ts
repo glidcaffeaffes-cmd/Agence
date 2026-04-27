@@ -15,6 +15,7 @@ export type {
   BookingCancellationConfirmation,
   CreateCheckoutSessionPayload,
   CheckoutSessionResponse,
+  CheckoutSessionSummary,
 } from './IReservationRepository'
 export type { IAccountRepository } from './IAccountRepository'
 export type { IOfferRepository } from './IOfferRepository'

@@ -888,6 +888,43 @@
                 </article>
 
                 <article class="booking-form-card">
+                  <h5>Payment option</h5>
+                  <div class="payment-option-grid">
+                    <label
+                      class="payment-option-item"
+                      :class="{ 'payment-option-item--active': selectedPaymentOption === 'PAY_NOW' }"
+                    >
+                      <input
+                        v-model="selectedPaymentOption"
+                        type="radio"
+                        name="paymentOption"
+                        value="PAY_NOW"
+                      />
+                      <div>
+                        <strong>Pay now by card</strong>
+                        <span>Secure checkout with Stripe</span>
+                      </div>
+                    </label>
+
+                    <label
+                      class="payment-option-item"
+                      :class="{ 'payment-option-item--active': selectedPaymentOption === 'PAY_AT_HOTEL' }"
+                    >
+                      <input
+                        v-model="selectedPaymentOption"
+                        type="radio"
+                        name="paymentOption"
+                        value="PAY_AT_HOTEL"
+                      />
+                      <div>
+                        <strong>Pay at hotel</strong>
+                        <span>Confirm booking now, pay at check-in</span>
+                      </div>
+                    </label>
+                  </div>
+                </article>
+
+                <article class="booking-form-card">
                   <h5>Guest details</h5>
                   <div class="booking-form-grid">
                     <label class="booking-field">
@@ -933,10 +970,16 @@
                 <button
                   type="button"
                   class="primary-checkout-btn"
-                  :disabled="bookingLoading"
+                  :disabled="bookingLoading || redirectingToPayment"
                   @click="handleConfirmReservation"
                 >
-                  {{ bookingLoading ? "Confirming..." : "Confirm Reservation" }}
+                  {{
+                    bookingLoading || redirectingToPayment
+                      ? "Redirecting to Payment..."
+                      : selectedPaymentOption === "PAY_AT_HOTEL"
+                        ? "Confirm Reservation"
+                        : "Proceed to Payment"
+                  }}
                 </button>
               </footer>
             </section>
@@ -955,11 +998,8 @@
             >
               <header class="availability-drawer-header">
                 <div>
-                  <h3>Reservation Submitted</h3>
-                  <p>
-                    Your booking is now pending confirmation. You will receive
-                    an email update once approved.
-                  </p>
+                  <h3>{{ bookingSuccessTitle }}</h3>
+                  <p>{{ bookingSuccessDescription }}</p>
                 </div>
                 <button
                   type="button"
@@ -1080,6 +1120,7 @@ const { rooms, fetchByHotel } = useRooms();
 const { reviews, fetchByHotel: fetchReviews, submitReview } = useReviews();
 const {
   createBooking,
+  createCheckoutSession,
   loading: bookingLoading,
   error: bookingApiError,
 } = useReservations();
@@ -1232,13 +1273,11 @@ const lightboxThumbsRef = ref<HTMLElement | null>(null);
 function openLightbox(idx: number) {
   lightboxIndex.value = idx;
   lightboxOpen.value = true;
-  document.body.style.overflow = "hidden";
   nextTick(() => scrollThumbIntoView(lightboxThumbsRef.value, idx));
 }
 
 function closeLightbox() {
   lightboxOpen.value = false;
-  document.body.style.overflow = "";
 }
 
 function prevLightbox() {
@@ -1391,6 +1430,8 @@ const showBookingDrawer = ref(false);
 const showBookingSuccess = ref(false);
 const showRoomUnavailable = ref(false);
 const bookingConfirmation = ref<BookingConfirmation | null>(null);
+const redirectingToPayment = ref(false);
+const selectedPaymentOption = ref<"PAY_NOW" | "PAY_AT_HOTEL">("PAY_NOW");
 const bookingForm = ref({
   fullName: "",
   email: "",
@@ -1540,6 +1581,35 @@ const bookingGuestsLabel = computed(() => {
   return `${adultsLabel}, ${children.value} child${children.value > 1 ? "ren" : ""}`;
 });
 
+const bookingSuccessTitle = computed(() =>
+  bookingConfirmation.value?.paymentOption === "PAY_AT_HOTEL"
+    ? "Reservation Confirmed"
+    : "Reservation Submitted",
+);
+
+const bookingSuccessDescription = computed(() =>
+  bookingConfirmation.value?.paymentOption === "PAY_AT_HOTEL"
+    ? "Your booking is confirmed. You can pay at hotel check-in."
+    : "Your booking is now pending payment confirmation.",
+);
+
+const isAnyModalOpen = computed(
+  () =>
+    lightboxOpen.value ||
+    showRoomsDrawer.value ||
+    showBookingDrawer.value ||
+    showBookingSuccess.value ||
+    showRoomUnavailable.value,
+);
+
+watch(
+  isAnyModalOpen,
+  (open) => {
+    document.body.style.overflow = open ? "hidden" : "";
+  },
+  { immediate: true },
+);
+
 function updateGuestCount(type: "adults" | "children", delta: number) {
   if (type === "adults") {
     adults.value = Math.max(1, adults.value + delta);
@@ -1569,6 +1639,7 @@ function handleGlobalKeydown(event: KeyboardEvent) {
   showBookingDrawer.value = false;
   showBookingSuccess.value = false;
   showRoomUnavailable.value = false;
+  redirectingToPayment.value = false;
 }
 
 watch(checkInDate, (value) => {
@@ -1585,6 +1656,7 @@ watch([checkInDate, checkOutDate, adults, children], () => {
   showBookingDrawer.value = false;
   showBookingSuccess.value = false;
   showRoomUnavailable.value = false;
+  redirectingToPayment.value = false;
 });
 
 watch(
@@ -1603,6 +1675,7 @@ async function handleCheckAvailability() {
   showBookingDrawer.value = false;
   showBookingSuccess.value = false;
   showRoomUnavailable.value = false;
+  redirectingToPayment.value = false;
   availabilityLoading.value = true;
   showRoomsDrawer.value = true;
 
@@ -1635,6 +1708,7 @@ function prefillBookingForm() {
 function handleReserveNow(room: HotelAvailableRoomOption) {
   selectedRoomId.value = room.id;
   selectedBookingRoom.value = room;
+  selectedPaymentOption.value = "PAY_NOW";
   bookingFormError.value = "";
   prefillBookingForm();
   showRoomsDrawer.value = false;
@@ -1648,10 +1722,12 @@ function closeRoomsDrawer() {
 function closeBookingDrawer() {
   showBookingDrawer.value = false;
   bookingFormError.value = "";
+  redirectingToPayment.value = false;
 }
 
 function closeSuccessModal() {
   showBookingSuccess.value = false;
+  redirectingToPayment.value = false;
 }
 
 async function openAvailableRoomsFromUnavailable() {
@@ -1692,6 +1768,7 @@ async function handleConfirmReservation() {
   }
 
   bookingFormError.value = "";
+  redirectingToPayment.value = true;
   const confirmation = await createBooking({
     hotelId: hotel.value.id,
     roomId: selectedBookingRoom.value.id,
@@ -1704,6 +1781,7 @@ async function handleConfirmReservation() {
     phone,
     specialRequests: bookingForm.value.specialRequests.trim() || undefined,
     accountId: accountId.value,
+    paymentOption: selectedPaymentOption.value,
   });
 
   if (!confirmation) {
@@ -1712,16 +1790,41 @@ async function handleConfirmReservation() {
     if (reason.toLowerCase().includes("no longer available")) {
       showBookingDrawer.value = false;
       showRoomUnavailable.value = true;
+      redirectingToPayment.value = false;
       return;
     }
     bookingFormError.value = reason;
+    redirectingToPayment.value = false;
     return;
   }
 
   bookingConfirmation.value = confirmation;
   showBookingDrawer.value = false;
   showRoomsDrawer.value = false;
-  showBookingSuccess.value = true;
+
+  if (selectedPaymentOption.value === "PAY_AT_HOTEL") {
+    showBookingSuccess.value = true;
+    redirectingToPayment.value = false;
+    return;
+  }
+
+  const checkoutSession = await createCheckoutSession({
+    tripId: hotel.value.id,
+    userId: accountId.value,
+    totalPrice: confirmation.pricing.total,
+    bookingId: confirmation.bookingId,
+  });
+
+  if (!checkoutSession?.url) {
+    bookingFormError.value =
+      bookingApiError.value ||
+      "Unable to initialize secure payment. Please try again.";
+    redirectingToPayment.value = false;
+    showBookingDrawer.value = true;
+    return;
+  }
+
+  window.location.assign(checkoutSession.url);
 }
 
 function viewSimilarRooms() {
@@ -3455,6 +3558,53 @@ onBeforeUnmount(() => {
   gap: var(--space-4);
 }
 
+.payment-option-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.payment-option-item {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  cursor: pointer;
+  transition: var(--transition-hover);
+}
+
+.payment-option-item:hover {
+  border-color: color-mix(in srgb, var(--color-primary-300) 70%, white 30%);
+}
+
+.payment-option-item input[type="radio"] {
+  margin-top: 2px;
+  accent-color: var(--color-primary);
+}
+
+.payment-option-item strong {
+  display: block;
+  color: var(--color-heading);
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.payment-option-item span {
+  display: block;
+  color: var(--color-text-soft);
+  font-size: var(--font-size-caption);
+  margin-top: 2px;
+}
+
+.payment-option-item--active {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary-50) 55%, white 45%);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary-100) 50%, transparent 50%);
+}
+
 /* Transitions */
 /* ── Availability drawer extra styles ───────────────────────────────── */
 .availability-close-btn {
@@ -3637,6 +3787,12 @@ onBeforeUnmount(() => {
   display: flex;
   gap: var(--space-3);
   flex-wrap: wrap;
+}
+
+@media (max-width: 860px) {
+  .payment-option-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* No reviews state */

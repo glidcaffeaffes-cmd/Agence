@@ -5,6 +5,7 @@ import type {
   BookingCancellationConfirmation,
   BookingCancellationPreview,
   BookingConfirmation,
+  CheckoutSessionSummary,
   BookingCreatePayload,
   CheckoutSessionResponse,
   CreateCheckoutSessionPayload,
@@ -56,6 +57,13 @@ export function useReservations() {
     payload: CreateCheckoutSessionPayload,
   ): Promise<CheckoutSessionResponse | null> {
     return execute(() => reservationService.createCheckoutSession(payload), null)
+  }
+
+  async function getCheckoutSessionSummary(
+    sessionId: string,
+    userId: number,
+  ): Promise<CheckoutSessionSummary | null> {
+    return execute(() => reservationService.getCheckoutSessionSummary(sessionId, userId), null)
   }
 
   async function updateStatus(id: number, status: ReservationStatus, reason?: string) {
@@ -124,6 +132,7 @@ export function useReservations() {
     getCancellationPreview,
     cancelBooking,
     createCheckoutSession,
+    getCheckoutSessionSummary,
     updateStatus,
     fetchPaginated: async (
       options: import('~/types/interfaces/IReservationRepository').ReservationFetchOptions,

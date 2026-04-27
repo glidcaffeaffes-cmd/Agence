@@ -13,6 +13,7 @@ import type {
   BookingCreatePayload,
   CreateCheckoutSessionPayload,
   CheckoutSessionResponse,
+  CheckoutSessionSummary,
 } from '~/types/interfaces/IReservationRepository'
 import type { IOfferRepository } from '~/types/interfaces/IOfferRepository'
 import type { IComplaintRepository } from '~/types/interfaces/IComplaintRepository'
@@ -512,6 +513,16 @@ export class ApiReservationRepository implements IReservationRepository {
       method: 'POST',
       body: payload,
     })
+  }
+
+  async getCheckoutSessionSummary(
+    sessionId: string,
+    userId: number,
+  ): Promise<CheckoutSessionSummary> {
+    return apiRequest<CheckoutSessionSummary>(
+      buildApiPath(`/payments/checkout-session/${sessionId}/summary`, { userId }),
+      { method: 'GET' },
+    )
   }
 
   async updateStatus(id: number, status: ReservationStatus, reason?: string): Promise<Reservation> {

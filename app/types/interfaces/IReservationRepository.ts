@@ -14,6 +14,7 @@ export interface BookingCreatePayload {
   phone: string
   specialRequests?: string
   accountId?: number
+  paymentOption?: 'PAY_NOW' | 'PAY_AT_HOTEL'
 }
 
 export interface BookingConfirmation {
@@ -41,6 +42,7 @@ export interface BookingConfirmation {
     phone: string
     specialRequests: string | null
   }
+  paymentOption: 'PAY_NOW' | 'PAY_AT_HOTEL'
 }
 
 export interface BookingCancellationPreview {
@@ -100,6 +102,22 @@ export interface CheckoutSessionResponse {
   url: string
 }
 
+export interface CheckoutSessionSummary {
+  sessionId: string
+  paymentStatus: string
+  bookingStatus: string
+  bookingReference: string
+  hotelName: string
+  roomName: string
+  checkIn: string
+  checkOut: string
+  nights: number
+  guests: number
+  roomPrice: number
+  taxes: number
+  totalPaid: number
+}
+
 export interface ReservationFetchOptions {
   page: number
   limit: number
@@ -129,6 +147,10 @@ export interface IReservationRepository {
   createCheckoutSession(
     payload: CreateCheckoutSessionPayload,
   ): Promise<CheckoutSessionResponse>
+  getCheckoutSessionSummary(
+    sessionId: string,
+    userId: number,
+  ): Promise<CheckoutSessionSummary>
   updateStatus(
     id: number,
     status: ReservationStatus,

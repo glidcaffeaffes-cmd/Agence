@@ -5,6 +5,7 @@ import type {
   BookingConfirmation,
   BookingCreatePayload,
   CheckoutSessionResponse,
+  CheckoutSessionSummary,
   CreateCheckoutSessionPayload,
 } from '~/types/interfaces'
 import type { Reservation } from '~/types/models'
@@ -86,6 +87,13 @@ export class ReservationService {
     payload: CreateCheckoutSessionPayload,
   ): Promise<CheckoutSessionResponse> {
     return this.repo.createCheckoutSession(payload)
+  }
+
+  async getCheckoutSessionSummary(
+    sessionId: string,
+    userId: number,
+  ): Promise<CheckoutSessionSummary> {
+    return this.repo.getCheckoutSessionSummary(sessionId, userId)
   }
 
   /** Confirm a pending reservation (admin) */

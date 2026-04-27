@@ -4,6 +4,7 @@ import type {
   BookingCancellationPreview,
   BookingCreatePayload,
   BookingConfirmation,
+  CheckoutSessionSummary,
   CheckoutSessionResponse,
   CreateCheckoutSessionPayload,
 } from '~/types/interfaces'
@@ -105,6 +106,7 @@ export class MockReservationRepository implements IReservationRepository {
     const roomPrice = roomPricePerNight * nights
     const taxes = nights * 5
     const total = roomPrice + taxes
+    const paymentOption = payload.paymentOption === 'PAY_AT_HOTEL' ? 'PAY_AT_HOTEL' : 'PAY_NOW'
     const confirmationCode = `VH-${new Date().getFullYear()}-${String(this.reservations.length + 1).padStart(3, '0')}`
 
     const reservation: Reservation = {
@@ -118,13 +120,13 @@ export class MockReservationRepository implements IReservationRepository {
       numberOfNights: nights,
       totalAmount: total,
       confirmationCode,
-      status: ReservationStatusEnum.PENDING,
+      status: paymentOption === 'PAY_AT_HOTEL' ? ReservationStatusEnum.CONFIRMED : ReservationStatusEnum.PENDING,
     }
 
     this.reservations.push(reservation)
 
     return {
-      confirmed: true,
+      confirmed: paymentOption === 'PAY_AT_HOTEL',
       bookingReference: confirmationCode,
       bookingId: reservation.id,
       hotelName: 'Selected Hotel',
@@ -148,6 +150,7 @@ export class MockReservationRepository implements IReservationRepository {
         phone: payload.phone,
         specialRequests: payload.specialRequests ?? null,
       },
+      paymentOption,
     }
   }
 
@@ -236,7 +239,42 @@ export class MockReservationRepository implements IReservationRepository {
 
     return {
       sessionId: `cs_test_${payload.bookingId}`,
-      url: '/payment/success',
+      url: `/payment/success?session_id=cs_test_${payload.bookingId}&booking_id=${payload.bookingId}`,
+    }
+  }
+
+  async getCheckoutSessionSummary(
+    sessionId: string,
+    userId: number,
+  ): Promise<CheckoutSessionSummary> {
+    const bookingId = Number.parseInt(sessionId.replace('cs_test_', ''), 10)
+    const reservation = this.reservations.find((entry) => entry.id === bookingId)
+
+    if (!reservation) {
+      throw new Error('Booking not found')
+    }
+
+    if (reservation.accountId !== userId) {
+      throw new Error('Checkout session does not belong to this user')
+    }
+
+    const roomPrice = Math.max(0, reservation.totalAmount - reservation.numberOfNights * 5)
+    const taxes = reservation.totalAmount - roomPrice
+
+    return {
+      sessionId,
+      paymentStatus: 'paid',
+      bookingStatus: reservation.status,
+      bookingReference: reservation.confirmationCode,
+      hotelName: `Hotel #${reservation.hotelId}`,
+      roomName: `Room #${reservation.roomId}`,
+      checkIn: reservation.checkInDate,
+      checkOut: reservation.checkOutDate,
+      nights: reservation.numberOfNights,
+      guests: reservation.numberOfGuests,
+      roomPrice,
+      taxes,
+      totalPaid: reservation.totalAmount,
     }
   }
 
