@@ -1606,6 +1606,9 @@ const isAnyModalOpen = computed(
 watch(
   isAnyModalOpen,
   (open) => {
+    if (!import.meta.client) {
+      return;
+    }
     document.body.style.overflow = open ? "hidden" : "";
   },
   { immediate: true },
@@ -1881,7 +1884,9 @@ onBeforeUnmount(() => {
   document.removeEventListener("click", closeGuestPanelOnOutside);
   document.removeEventListener("keydown", handleGlobalKeydown);
   document.removeEventListener("keydown", handleLightboxKeydown);
-  document.body.style.overflow = "";
+  if (import.meta.client) {
+    document.body.style.overflow = "";
+  }
 });
 </script>
 
