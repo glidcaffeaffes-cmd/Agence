@@ -1432,6 +1432,7 @@ const showRoomUnavailable = ref(false);
 const bookingConfirmation = ref<BookingConfirmation | null>(null);
 const redirectingToPayment = ref(false);
 const selectedPaymentOption = ref<"PAY_NOW" | "PAY_AT_HOTEL">("PAY_NOW");
+const PAYMENT_RESULT_ACCESS_KEY = "vh_payment_result_access";
 const bookingForm = ref({
   fullName: "",
   email: "",
@@ -1583,13 +1584,13 @@ const bookingGuestsLabel = computed(() => {
 
 const bookingSuccessTitle = computed(() =>
   bookingConfirmation.value?.paymentOption === "PAY_AT_HOTEL"
-    ? "Reservation Confirmed"
+    ? "Reservation Submitted"
     : "Reservation Submitted",
 );
 
 const bookingSuccessDescription = computed(() =>
   bookingConfirmation.value?.paymentOption === "PAY_AT_HOTEL"
-    ? "Your booking is confirmed. You can pay at hotel check-in."
+    ? "Your booking is pending. You will pay at hotel check-in."
     : "Your booking is now pending payment confirmation.",
 );
 
@@ -1824,6 +1825,9 @@ async function handleConfirmReservation() {
     return;
   }
 
+  if (typeof window !== "undefined") {
+    sessionStorage.setItem(PAYMENT_RESULT_ACCESS_KEY, "1");
+  }
   window.location.assign(checkoutSession.url);
 }
 

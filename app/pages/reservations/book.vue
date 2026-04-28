@@ -67,6 +67,7 @@ const roomService = new RoomService()
 const { selectedHotel } = useHotels()
 const { accountId, currentAccount, currentProfile } = useAuth()
 const { createBooking, createCheckoutSession } = useReservations()
+const PAYMENT_RESULT_ACCESS_KEY = 'vh_payment_result_access'
 
 const isPaying = ref(false)
 const errorMessage = ref('')
@@ -199,6 +200,9 @@ async function payNow() {
       throw new Error('Unable to create Stripe checkout session.')
     }
 
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem(PAYMENT_RESULT_ACCESS_KEY, '1')
+    }
     window.location.assign(session.url)
   } catch (error: any) {
     errorMessage.value = error?.message || 'Payment failed. Please try again.'

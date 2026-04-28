@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <section class="top-destinations">
     <div class="td-container">
       <div class="td-header">
@@ -15,7 +15,7 @@
         </div>
       </div>
 
-      <!-- Cities row — only cities with hotels, up to 7 -->
+      <!-- Cities row â€” only cities with hotels, up to 7 -->
       <div v-else-if="displayed.length > 0" class="td-track">
         <button
           v-for="dest in displayed"
@@ -40,7 +40,7 @@
         </button>
       </div>
 
-      <!-- Fallback: no hotels yet — show top 7 cities as preview -->
+      <!-- Fallback: no hotels yet â€” show top 7 cities as preview -->
       <div v-else class="td-track">
         <button
           v-for="city in FALLBACK_CITIES"
@@ -75,68 +75,76 @@ const { destinations, loading, fetchDestinations } = useDestinations()
 
 onMounted(fetchDestinations)
 
-// ─── All 24 Tunisian Governorates ─────────────────────────────────────────────
+// All 24 Tunisian governorates
 const ALL_TUNISIA_CITIES = [
-  'Ariana', 'Béja', 'Ben Arous', 'Bizerte', 'Gabès', 'Gafsa',
-  'Jendouba', 'Kairouan', 'Kasserine', 'Kébili', 'La Manouba', 'Le Kef',
-  'Mahdia', 'Médenine', 'Monastir', 'Nabeul', 'Sfax', 'Sidi Bouzid',
+  'Ariana', 'Beja', 'Ben Arous', 'Bizerte', 'Gabes', 'Gafsa',
+  'Jendouba', 'Kairouan', 'Kasserine', 'Kebili', 'La Manouba', 'Le Kef',
+  'Mahdia', 'Medenine', 'Monastir', 'Nabeul', 'Sfax', 'Sidi Bouzid',
   'Siliana', 'Sousse', 'Tataouine', 'Tozeur', 'Tunis', 'Zaghouan',
 ]
 
 // 7 most iconic fallback cities when no hotels exist yet
 const FALLBACK_CITIES = ['Tunis', 'Sousse', 'Sfax', 'Monastir', 'Kairouan', 'Tozeur', 'Bizerte']
 
-// ─── Wikimedia Commons images for every Tunisian governorate ──────────────────
-const CITY_IMAGES: Record<string, string> = {
-  Ariana:       'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Ariana_city_2014.jpg/640px-Ariana_city_2014.jpg',
-  'Béja':       'https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Beja_mosque.jpg/640px-Beja_mosque.jpg',
-  'Ben Arous':  'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Ben_Arous_city.jpg/640px-Ben_Arous_city.jpg',
-  Bizerte:      'https://upload.wikimedia.org/wikipedia/commons/b/b2/Old-Port-Bizerte.jpg',
-  'Gabès':      'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Gabes_oasis.jpg/640px-Gabes_oasis.jpg',
-  Gafsa:        'https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Gafsa_oasis_historical.jpg/640px-Gafsa_oasis_historical.jpg',
-  Jendouba:     'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Bulla_Regia_Tunisia.jpg/640px-Bulla_Regia_Tunisia.jpg',
-  Kairouan:     'https://upload.wikimedia.org/wikipedia/commons/d/de/Grande_Mosqu%C3%A9e_de_Kairouan%2C_vue_d%27ensemble.jpg',
-  Kasserine:    'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Jebel_Chambi.jpg/640px-Jebel_Chambi.jpg',
-  'Kébili':     'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Douz_oasis_Tunisia.jpg/640px-Douz_oasis_Tunisia.jpg',
-  'La Manouba': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Manouba_city_Tunisia.jpg/640px-Manouba_city_Tunisia.jpg',
-  'Le Kef':     'https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Le_kef_Tunisia.jpg/640px-Le_kef_Tunisia.jpg',
-  Mahdia:       'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Mahdia_medina_Tunisia.jpg/640px-Mahdia_medina_Tunisia.jpg',
-  'Médenine':   'https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Ksar_Ouled_Soltane%2C_Tunisia.jpg/640px-Ksar_Ouled_Soltane%2C_Tunisia.jpg',
-  Monastir:     'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Monastir_ribat_Tunisia.jpg/640px-Monastir_ribat_Tunisia.jpg',
-  Nabeul:       'https://upload.wikimedia.org/wikipedia/commons/8/83/Montage_ville_de_Nabeul.png',
-  Sfax:         'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Sfax_medina_walls.jpg/640px-Sfax_medina_walls.jpg',
-  'Sidi Bouzid':'https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Sidi_Bouzid_Tunisia.jpg/640px-Sidi_Bouzid_Tunisia.jpg',
-  Siliana:      'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Siliana_Tunisia.jpg/640px-Siliana_Tunisia.jpg',
-  Sousse:       'https://upload.wikimedia.org/wikipedia/commons/b/ba/Medina_of_Sousse-130323.jpg',
-  Tataouine:    'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Ksar_Hadada%2C_Tunisia.jpg/640px-Ksar_Hadada%2C_Tunisia.jpg',
-  Tozeur:       'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Tozeur_oasis.jpg/640px-Tozeur_oasis.jpg',
-  Tunis:        'https://upload.wikimedia.org/wikipedia/commons/1/14/Panorama_-_Medina_de_Tunis.jpg',
-  Zaghouan:     'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Zaghouan_aqueduct_Tunisia.jpg/640px-Zaghouan_aqueduct_Tunisia.jpg',
+const CITY_IMAGE_QUERY: Record<string, string> = {
+  ariana: 'Ariana Tunisia cityscape',
+  beja: 'Beja Tunisia old town',
+  'ben arous': 'Ben Arous Tunisia skyline',
+  bizerte: 'Bizerte Tunisia harbor',
+  gabes: 'Gabes Tunisia oasis',
+  gafsa: 'Gafsa Tunisia landscape',
+  jendouba: 'Jendouba Tunisia nature',
+  kairouan: 'Kairouan Tunisia mosque',
+  kasserine: 'Kasserine Tunisia mountain',
+  kebili: 'Kebili Tunisia desert oasis',
+  'la manouba': 'Manouba Tunisia city',
+  'le kef': 'Le Kef Tunisia medina',
+  mahdia: 'Mahdia Tunisia coast',
+  medenine: 'Medenine Tunisia ksar',
+  monastir: 'Monastir Tunisia ribat',
+  nabeul: 'Nabeul Tunisia medina',
+  sfax: 'Sfax Tunisia medina',
+  'sidi bouzid': 'Sidi Bouzid Tunisia city',
+  siliana: 'Siliana Tunisia hills',
+  sousse: 'Sousse Tunisia medina',
+  tataouine: 'Tataouine Tunisia ksar',
+  tozeur: 'Tozeur Tunisia palm oasis',
+  tunis: 'Tunis Tunisia medina',
+  zaghouan: 'Zaghouan Tunisia aqueduct',
 }
 
-// Generic fallback for any unrecognized city
-const DEFAULT_IMAGE = 'https://upload.wikimedia.org/wikipedia/commons/1/14/Panorama_-_Medina_de_Tunis.jpg'
+const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=900&q=80'
 
-// ─── Computed: only Tunisian cities that have hotels, up to 7, desc by count ──
-const tunisiaCitiesLower = new Set(ALL_TUNISIA_CITIES.map((c) => c.toLowerCase()))
+const normalizeCityKey = (value: string) =>
+  value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase()
+
+// Computed: only Tunisian cities that have hotels, up to 7, desc by count
+const tunisiaCitiesLower = new Set(ALL_TUNISIA_CITIES.map((c) => normalizeCityKey(c)))
 
 const displayed = computed(() => {
   return destinations.value
-    .filter((d) => d.count > 0 && tunisiaCitiesLower.has(d.ville.toLowerCase()))
+    .filter((d) => d.count > 0 && tunisiaCitiesLower.has(normalizeCityKey(d.ville)))
     .sort((a, b) => b.count - a.count)
     .slice(0, 7)
 })
 
 function cityImage(ville: string): string {
-  return CITY_IMAGES[ville] ?? DEFAULT_IMAGE
+  const cityKey = normalizeCityKey(ville)
+  const query = CITY_IMAGE_QUERY[cityKey] ?? `${ville} Tunisia city`
+  return `https://source.unsplash.com/900x900/?${encodeURIComponent(query)}`
 }
 
-// Improved error handler: tries default image, then removes the src to show broken-image gracefully
+// Improved error handler: tries default image, then stops retrying
 const failedImages = new Set<string>()
 function onImgError(e: Event, ville: string) {
   const img = e.target as HTMLImageElement
-  if (!failedImages.has(ville)) {
-    failedImages.add(ville)
+  const cityKey = normalizeCityKey(ville)
+  if (!failedImages.has(cityKey)) {
+    failedImages.add(cityKey)
     img.src = DEFAULT_IMAGE
   }
 }
@@ -147,7 +155,7 @@ function navigateToCity(ville: string) {
 </script>
 
 <style scoped>
-/* ─── Section ────────────────────────────────────────────── */
+/* â”€â”€â”€ Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .top-destinations {
   background: var(--color-white);
   padding: 32px 0 36px;
@@ -159,7 +167,7 @@ function navigateToCity(ville: string) {
   padding: 0 32px;
 }
 
-/* ─── Header ─────────────────────────────────────────────── */
+/* â”€â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .td-header {
   text-align: center;
   margin-bottom: 28px;
@@ -180,7 +188,7 @@ function navigateToCity(ville: string) {
   line-height: 1.5;
 }
 
-/* ─── Cities Track ───────────────────────────────────────── */
+/* â”€â”€â”€ Cities Track â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .td-track {
   display: flex;
   align-items: flex-start;
@@ -195,7 +203,7 @@ function navigateToCity(ville: string) {
 
 .td-track::-webkit-scrollbar { display: none; }
 
-/* ─── City Item ──────────────────────────────────────────── */
+/* â”€â”€â”€ City Item â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .td-item {
   display: flex;
   flex-direction: column;
@@ -219,7 +227,7 @@ function navigateToCity(ville: string) {
   border-color: var(--color-primary-300);
 }
 
-/* ─── Circle Image ───────────────────────────────────────── */
+/* â”€â”€â”€ Circle Image â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .td-circle-wrap {
   width: 110px;
   height: 110px;
@@ -254,7 +262,7 @@ function navigateToCity(ville: string) {
 
 .td-item:hover .td-circle img { transform: scale(1.1); }
 
-/* ─── Labels ─────────────────────────────────────────────── */
+/* â”€â”€â”€ Labels â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .td-name {
   font-size: 13px;
   font-weight: 800;
@@ -271,7 +279,7 @@ function navigateToCity(ville: string) {
   text-align: center;
 }
 
-/* ─── Skeleton ───────────────────────────────────────────── */
+/* â”€â”€â”€ Skeleton â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .td-item--skeleton { cursor: default; pointer-events: none; }
 
 .td-circle--skeleton {
@@ -299,7 +307,7 @@ function navigateToCity(ville: string) {
   100% { background-position: -200% 0; }
 }
 
-/* ─── Responsive ─────────────────────────────────────────── */
+/* â”€â”€â”€ Responsive â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @media (max-width: 768px) {
   .td-track { justify-content: flex-start; }
 

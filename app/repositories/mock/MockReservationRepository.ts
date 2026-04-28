@@ -120,13 +120,13 @@ export class MockReservationRepository implements IReservationRepository {
       numberOfNights: nights,
       totalAmount: total,
       confirmationCode,
-      status: paymentOption === 'PAY_AT_HOTEL' ? ReservationStatusEnum.CONFIRMED : ReservationStatusEnum.PENDING,
+      status: ReservationStatusEnum.PENDING,
     }
 
     this.reservations.push(reservation)
 
     return {
-      confirmed: paymentOption === 'PAY_AT_HOTEL',
+      confirmed: false,
       bookingReference: confirmationCode,
       bookingId: reservation.id,
       hotelName: 'Selected Hotel',

@@ -14,7 +14,10 @@ import { computed, onBeforeUnmount, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
-const hideFooter = computed(() => ['/login', '/register'].includes(route.path))
+const hideFooter = computed(() => {
+  if (route.meta?.hideFooter) return true
+  return ['/login', '/register'].includes(route.path)
+})
 
 let promoBadgeObserver
 let promoBadgeInterval

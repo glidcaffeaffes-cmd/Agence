@@ -695,10 +695,7 @@ async function confirmCancellation() {
     showDetailsModal.value = false;
     showCancelSuccess.value = true;
 
-    if (accountId.value) {
-      await fetchByAccount(accountId.value);
-      await hydrateCancellationPreviews();
-    }
+    await loadPage(1);
   } finally {
     cancelling.value = false;
   }
