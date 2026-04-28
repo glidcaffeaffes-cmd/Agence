@@ -174,20 +174,12 @@
                   </span>
                 </div>
                 <div class="detail-item">
-                  <span class="detail-label">Account ID</span>
-                  <strong>{{ selectedReservation.accountId }}</strong>
+                  <span class="detail-label">User</span>
+                  <strong>{{ userName(selectedReservation) }}</strong>
                 </div>
                 <div class="detail-item" v-if="selectedReservation.paymentStatus">
                   <span class="detail-label">Payment Status</span>
                   <strong>{{ selectedReservation.paymentStatus }}</strong>
-                </div>
-                <div class="detail-item">
-                  <span class="detail-label">Created At</span>
-                  <strong>{{ formatDateTime(selectedReservation.createdAt) }}</strong>
-                </div>
-                <div class="detail-item">
-                  <span class="detail-label">Updated At</span>
-                  <strong>{{ formatDateTime(selectedReservation.updatedAt) }}</strong>
                 </div>
               </div>
             </div>
@@ -305,6 +297,14 @@ function formatDate(value: string) {
 
 function formatDateTime(value: string) {
   return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(value))
+}
+
+function userName(reservation: any) {
+  const profile = reservation.account?.profile
+  if (profile?.firstName || profile?.lastName) {
+    return `${profile.firstName || ''} ${profile.lastName || ''}`.trim()
+  }
+  return `User #${reservation.accountId}`
 }
 
 function formatCurrency(value: number) {
