@@ -38,6 +38,58 @@ function resolveErrorMessage(error: unknown, fallback: string) {
   return data.message || data.error || fallback
 }
 
+function mapOfferErrorMessage(path: string, method: ApiMethod, rawMessage: string, status?: number) {
+  const isOfferPath = path.startsWith('/offres')
+  if (!isOfferPath) return rawMessage
+
+  const msg = (rawMessage || '').toLowerCase()
+
+  if (status === 502 || status === 503 || status === 504) {
+    return 'Cannot reach backend service. Ensure API server is running on port 3001, then retry.'
+  }
+
+  if (status === 404) {
+    if (method === 'PATCH' || method === 'PUT') {
+      return 'This offer no longer exists. Refresh the list and try again.'
+    }
+    if (method === 'DELETE') {
+      return 'Offer already removed. Refresh the list.'
+    }
+    return 'Offer not found.'
+  }
+
+  if (status === 400) {
+    if (msg.includes('overlap')) {
+      return 'An active offer already exists for this hotel in the selected date range.'
+    }
+    if (msg.includes('datefin must be after datedebut')) {
+      return 'End date must be after start date.'
+    }
+    if (msg.includes('datedebut is not a valid date') || msg.includes('datefin is not a valid date')) {
+      return 'Invalid date format. Please select valid start and end dates.'
+    }
+    if (msg.includes('invalid hotelid') || msg.includes('hotel not found')) {
+      return 'Selected hotel does not exist anymore. Refresh hotels and retry.'
+    }
+    if (msg.includes('inactive hotel')) {
+      return 'Cannot create an offer for an inactive hotel.'
+    }
+    if (msg.includes('chambreids')) {
+      return 'Some selected rooms are invalid for this hotel.'
+    }
+  }
+
+  if (status === 401) {
+    return 'Your session expired. Please sign in again.'
+  }
+
+  if (status && status >= 500) {
+    return 'Server error while processing offer. Please retry in a few seconds.'
+  }
+
+  return rawMessage
+}
+
 function normalizeMethod(method?: string): ApiMethod {
   const normalized = (method || 'GET').toUpperCase()
   if (normalized === 'POST' || normalized === 'PATCH' || normalized === 'PUT' || normalized === 'DELETE') {
@@ -118,16 +170,22 @@ export async function apiRequest<T>(path: string, options?: Parameters<typeof $f
     }
 
     const resolvedMessage = resolveErrorMessage(error, `Request failed: ${path}`)
+    const friendlyMessage = mapOfferErrorMessage(
+      path,
+      method,
+      resolvedMessage,
+      error?.statusCode || error?.status,
+    )
 
     if (shouldToastError && import.meta.client) {
       const { error: showError } = useAppToast()
       showError(
-        requestOptions?.toast?.errorMessage || resolvedMessage,
+        requestOptions?.toast?.errorMessage || friendlyMessage,
         requestOptions?.toast?.errorSummary || 'Action failed',
       )
     }
 
-    throw new Error(resolvedMessage)
+    throw new Error(friendlyMessage)
   }
 }
 

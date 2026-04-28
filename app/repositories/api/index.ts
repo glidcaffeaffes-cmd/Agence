@@ -733,14 +733,13 @@ export class ApiOfferRepository implements IOfferRepository {
   }
 
   async getActive(): Promise<Offer[]> {
-    const now = new Date().toISOString()
-    const offers = await this.getAll()
-    return offers.filter((offer) => offer.active && offer.startDate <= now && offer.endDate >= now)
+    const dtos = await apiGetCached<OfferDTO[]>('/offres/active')
+    return dtos.map(OfferMapper.fromDto)
   }
 
   async getByHotel(hotelId: number): Promise<Offer[]> {
-    const offers = await this.getAll()
-    return offers.filter((offer) => offer.hotelId === hotelId)
+    const dtos = await apiGetCached<OfferDTO[]>(`/offres/hotel/${hotelId}`)
+    return dtos.map(OfferMapper.fromDto)
   }
 
   async create(offer: Omit<Offer, 'id'>): Promise<Offer> {
