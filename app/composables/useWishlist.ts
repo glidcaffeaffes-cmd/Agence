@@ -6,6 +6,7 @@ import { useAppToast } from '~/composables/useAppToast'
 import { apiRequest } from '~/repositories/api/client'
 
 const LEGACY_STORAGE_PREFIX = 'voyagehub_wishlist'
+let wishlistHydrationPromise: Promise<void> | null = null
 
 interface WishlistListResponse {
   accountId: number
@@ -78,16 +79,30 @@ export function useWishlist() {
   const { open } = useAuthPrompt()
   const { success: toastSuccess, info: toastInfo, error: toastError } = useAppToast()
   const hotelIds = useState<number[]>('wishlist_hotel_ids', () => [])
+  const watchInitialized = useState<boolean>('wishlist_watch_initialized', () => false)
+  const hydratedAccountId = useState<number>('wishlist_hydrated_account_id', () => 0)
 
-  async function hydrate() {
+  async function hydrate(force = false) {
     if (!isAuthenticated.value || accountId.value <= 0) {
       hotelIds.value = []
+      hydratedAccountId.value = 0
+      wishlistHydrationPromise = null
       return
     }
 
+    const currentAccountId = accountId.value
+    if (!force && hydratedAccountId.value === currentAccountId) {
+      return
+    }
+
+    if (wishlistHydrationPromise) {
+      return wishlistHydrationPromise
+    }
+
+    wishlistHydrationPromise = (async () => {
     try {
       const response = await apiRequest<WishlistListResponse>(
-        `/accounts/${accountId.value}/wishlist`,
+        `/accounts/${currentAccountId}/wishlist`,
       )
 
       const serverIds = Array.isArray(response.hotelIds)
@@ -99,13 +114,13 @@ export function useWishlist() {
       hotelIds.value = serverIds
 
       // One-time migration from legacy local storage to backend persistence.
-      const legacyIds = readLegacyStoredIds(accountId.value)
+      const legacyIds = readLegacyStoredIds(currentAccountId)
       const missingLegacyIds = legacyIds.filter((id) => !serverIds.includes(id))
       if (missingLegacyIds.length > 0) {
         await Promise.all(
           missingLegacyIds.map((id) =>
             apiRequest<WishlistMutationResponse>(
-              `/accounts/${accountId.value}/wishlist`,
+              `/accounts/${currentAccountId}/wishlist`,
               {
                 method: 'POST',
                 body: { hotelId: id },
@@ -119,7 +134,7 @@ export function useWishlist() {
         )
 
         const refreshed = await apiRequest<WishlistListResponse>(
-          `/accounts/${accountId.value}/wishlist`,
+          `/accounts/${currentAccountId}/wishlist`,
         )
         hotelIds.value = Array.isArray(refreshed.hotelIds)
           ? refreshed.hotelIds
@@ -128,11 +143,18 @@ export function useWishlist() {
           : []
       }
 
-      clearLegacyStoredIds(accountId.value)
+      clearLegacyStoredIds(currentAccountId)
+      hydratedAccountId.value = currentAccountId
     } catch {
       // Keep UI stable if wishlist API is temporarily unavailable.
       hotelIds.value = []
+      hydratedAccountId.value = 0
+    } finally {
+      wishlistHydrationPromise = null
     }
+    })()
+
+    return wishlistHydrationPromise
   }
 
   function requireAuth() {
@@ -286,13 +308,17 @@ export function useWishlist() {
     return isWishlisted(hotelId) ? remove(hotelId) : add(hotelId)
   }
 
-  watch(
-    accountId,
-    () => {
-      void hydrate()
-    },
-    { immediate: true },
-  )
+  if (!watchInitialized.value) {
+    watchInitialized.value = true
+    watch(
+      accountId,
+      () => {
+        hydratedAccountId.value = 0
+        void hydrate()
+      },
+      { immediate: true },
+    )
+  }
 
   return {
     hotelIds,
