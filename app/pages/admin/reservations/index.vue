@@ -83,6 +83,7 @@
           :entries="calendarEntries"
           empty-label="No arrivals"
           :admin="true"
+          @event-click="handleCalendarClick"
         />
 
         <div v-else class="table-card">
@@ -295,6 +296,10 @@ async function deleteReservation(id: number) {
 watch([search, statusFilter, monthCursor], () => {
   loadReservations()
 })
+
+function handleCalendarClick(entry: any) {
+  alert(`Reservation ID: ${entry.id}\nHotel: ${entry.title}\nCode: ${entry.subtitle}\nAmount: ${entry.amountLabel || 'N/A'}`)
+}
 
 onMounted(loadReservations)
 </script>
