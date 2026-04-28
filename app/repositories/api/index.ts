@@ -231,6 +231,9 @@ export class ApiHotelRepository implements IHotelRepository {
     return apiRequest<HotelAvailabilitySummary>(`/hotels/${hotelId}/check-availability`, {
       method: 'POST',
       body: payload,
+      toast: {
+        silentSuccess: true,
+      },
     })
   }
 
