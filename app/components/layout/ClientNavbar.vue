@@ -54,13 +54,6 @@
             @click="handleWishlistNav"
             >Wishlist</NuxtLink
           >
-          <NuxtLink
-            to="/reservations/history"
-            class="client-navbar__link px-4 py-2 rounded-lg text-sm font-semibold transition-all"
-            active-class="client-navbar__link--active"
-            @click="handleReservationsNav"
-            >My Reservations</NuxtLink
-          >
         </nav>
       </div>
 
@@ -287,12 +280,6 @@
           @click="handleWishlistNav"
           >Wishlist</NuxtLink
         >
-        <NuxtLink
-          to="/reservations/history"
-          class="block px-4 py-3 rounded-xl text-base font-bold text-on-surface hover:bg-surface-container-lowest transition-colors"
-          @click="handleReservationsNav"
-          >My Reservations</NuxtLink
-        >
 
         <template v-if="isAuthenticated">
           <div class="h-px bg-outline-variant/30 my-4"></div>
@@ -474,21 +461,6 @@ function handleWishlistNav(event: MouseEvent) {
   mobileOpen.value = false;
   openAuthPrompt({
     redirectTo: "/wishlist",
-  });
-}
-
-function handleReservationsNav(event: MouseEvent) {
-  if (isAuthenticated.value) {
-    mobileOpen.value = false;
-    showUserMenu.value = false;
-    return;
-  }
-
-  event.preventDefault();
-  mobileOpen.value = false;
-  showUserMenu.value = false;
-  openAuthPrompt({
-    redirectTo: "/reservations/history",
   });
 }
 
