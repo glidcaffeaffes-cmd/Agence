@@ -18,37 +18,37 @@
       </header>
 
       <div class="profile-body">
-        <!-- Sidebar -->
-        <ProfileSidebar />
-
         <!-- Main -->
-        <main class="profile-main">
+        <main class="profile-main" style="flex: 1;">
           <!-- ProfileSidebar commented out for debugging -->
           <!-- <ProfileSidebar /> -->
-          <!-- Tabs -->
-          <div class="settings-tabs">
-            <button
-              v-for="tab in tabs"
-              :key="tab.key"
-              :class="['tab-button', { 'tab-button--active': activeTab === tab.key }]"
-              @click="activeTab = tab.key"
-            >
-              <span class="material-symbols-outlined">{{ tab.icon }}</span>
-              {{ tab.label }}
-            </button>
-          </div>
+        <!-- Tabs -->
+        <div class="settings-tabs">
+          <button
+            v-for="tab in tabs"
+            :key="tab.key"
+            :class="['tab-button', { 'tab-button--active': activeTab === tab.key }]"
+            @click="activeTab = tab.key"
+          >
+            <span class="material-symbols-outlined">{{ tab.icon }}</span>
+            {{ tab.label }}
+          </button>
+        </div>
+        <p>Active tab: {{ activeTab }}</p>
 
           <!-- Security Tab -->
-            <div v-if="activeTab === 'security'" class="content-card auth-card">
+          <div v-if="activeTab === 'security'" class="content-card auth-card">
             <div class="card-header">
               <div class="card-header__icon">
                 <span class="material-symbols-outlined">shield</span>
               </div>
               <div>
                 <h2 class="card-header__title">Authentication</h2>
+                <p class="card-header__sub">Manage your password and security settings</p>
               </div>
             </div>
             <div class="card-body">
+              <p>Change your password here.</p>
               <div class="auth-form-stack">
                 <div class="form-group">
                   <label class="form-label">Current Password</label>
