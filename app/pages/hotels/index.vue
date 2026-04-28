@@ -203,7 +203,7 @@
         </div>
 
         <div class="results-info">
-          <strong>{{ hotels.length }}</strong> hôtels affichés
+          <strong>{{ total }}</strong> hôtels
         </div>
 
         <div v-if="hotels.length > 0" :class="['hotels-container', `hotels-container--${viewMode}`]">
@@ -221,6 +221,8 @@
           <p>Aucun établissement ne correspond à votre sélection.</p>
         </div>
 
+        <div ref="infiniteSentinelRef" class="infinite-sentinel" aria-hidden="true"></div>
+
         <div v-if="isLoading" class="loading-sentinel">
           <span class="material-symbols-outlined spin">progress_activity</span>
         </div>
@@ -230,12 +232,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onBeforeUnmount, onMounted, watch } from 'vue'
+import { ref, computed, nextTick, onBeforeUnmount, onMounted, watch } from 'vue'
 import { useDestinations } from '~/composables/useDestinations'
 import { useHotels } from '~/composables/useHotels'
 import { useRooms } from '~/composables/useRooms'
 
-const { hotels, fetchPaginated, loading: isLoading } = useHotels()
+const { hotels, fetchPaginated, loading: isLoading, currentPage, totalPages, total } = useHotels()
 const { rooms, fetchAll: fetchRooms } = useRooms()
 const { destinations, fetchDestinations } = useDestinations()
 const route = useRoute()
@@ -250,7 +252,7 @@ const searchQuery = ref('')
 const sortBy = ref('note')
 const viewMode = useCookie<'grid' | 'list'>('hotel-view-mode', { default: () => 'grid' })
 const activeFilterPanel = ref<'guests' | null>(null)
-const pageSize = 1000
+const pageSize = 12
 const initialized = ref(false)
 const checkInDate = ref<Date | null>(null)
 const checkOutDate = ref<Date | null>(null)
@@ -258,6 +260,9 @@ const adults = ref(2)
 const children = ref(1)
 const roomsRequested = ref(2)
 const childAges = ref<number[]>([14])
+const infiniteSentinelRef = ref<HTMLElement | null>(null)
+const loadingNextPage = ref(false)
+let infiniteObserver: IntersectionObserver | null = null
 
 const childAgeOptions = Array.from({ length: 17 }, (_, index) => ({
   label: `${index + 1} years old`,
@@ -319,6 +324,43 @@ function buildFetchOptions(page: number) {
 
 async function loadPage(page: number) {
   await fetchPaginated(buildFetchOptions(page))
+}
+
+const hasMorePages = computed(() => currentPage.value < totalPages.value)
+
+async function loadNextPageIfNeeded() {
+  if (!initialized.value) return
+  if (!hasMorePages.value) return
+  if (isLoading.value || loadingNextPage.value) return
+
+  loadingNextPage.value = true
+  try {
+    await loadPage(currentPage.value + 1)
+  } finally {
+    loadingNextPage.value = false
+  }
+}
+
+function setupInfiniteObserver() {
+  if (typeof window === 'undefined') return
+
+  infiniteObserver?.disconnect()
+  infiniteObserver = new IntersectionObserver(
+    async (entries) => {
+      const [entry] = entries
+      if (!entry?.isIntersecting) return
+      await loadNextPageIfNeeded()
+    },
+    {
+      root: null,
+      rootMargin: '400px 0px',
+      threshold: 0,
+    },
+  )
+
+  if (infiniteSentinelRef.value) {
+    infiniteObserver.observe(infiniteSentinelRef.value)
+  }
 }
 
 function applyFilters() {
@@ -478,11 +520,15 @@ onMounted(async () => {
   await fetchRooms()
   applyRouteFilters()
   await loadHotelsFromRoute()
+  await nextTick()
+  setupInfiniteObserver()
   initialized.value = true
 })
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside)
+  infiniteObserver?.disconnect()
+  infiniteObserver = null
 })
 
 watch(() => route.query, async () => {
@@ -498,7 +544,7 @@ watch([priceRange, selectedStars, sortBy], () => {
   if (filterDebounce) clearTimeout(filterDebounce)
   filterDebounce = setTimeout(() => {
     hotels.value = []
-    loadPage(1)
+    void loadPage(1)
   }, 300)
 }, { deep: true })
 </script>
@@ -509,6 +555,10 @@ watch([priceRange, selectedStars, sortBy], () => {
   justify-content: center;
   padding: 32px;
   color: var(--color-primary-500);
+}
+.infinite-sentinel {
+  width: 100%;
+  height: 1px;
 }
 
 .spin {
@@ -1610,3 +1660,4 @@ watch([priceRange, selectedStars, sortBy], () => {
   cursor: text;
 }
 </style>
+

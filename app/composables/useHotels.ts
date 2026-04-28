@@ -17,12 +17,16 @@ export function useHotels() {
   const hotel = ref<Hotel | null>(null)
   const featured = ref<Hotel[]>([])
   const selectedHotel = ref<Hotel | null>(null)
+  const total = ref(0)
   const totalPages = ref(1)
   const currentPage = ref(1)
   const { loading, error, execute } = useAsyncAction()
 
   async function fetchAll() {
     hotels.value = await execute(() => service.getAll(), [])
+    total.value = hotels.value.length
+    currentPage.value = 1
+    totalPages.value = 1
   }
 
   async function fetchPaginated(options: HotelFetchOptions) {
@@ -37,6 +41,7 @@ export function useHotels() {
       }
       totalPages.value = res.totalPages
       currentPage.value = options.page
+      total.value = res.total
     }
   }
 
@@ -50,6 +55,9 @@ export function useHotels() {
 
   async function search(query: string) {
     hotels.value = await execute(() => service.search(query), [])
+    total.value = hotels.value.length
+    currentPage.value = 1
+    totalPages.value = 1
   }
 
   async function findAvailable(filters: HotelAvailabilityFilters) {
@@ -58,6 +66,9 @@ export function useHotels() {
 
   async function fetchAvailable(filters: HotelAvailabilityFilters) {
     hotels.value = await execute(() => service.searchAvailability(filters), [])
+    total.value = hotels.value.length
+    currentPage.value = 1
+    totalPages.value = 1
   }
 
   async function checkAvailability(
@@ -90,6 +101,7 @@ export function useHotels() {
     hotel,
     featured,
     selectedHotel,
+    total,
     totalPages,
     currentPage,
     loading,
