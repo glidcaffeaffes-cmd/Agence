@@ -344,7 +344,7 @@ function formatCurrency(value: number) {
 }
 
 .calendar-event--cancelled {
-  background: #f2f4f7;
+  background: #fef3f2;
 }
 
 .calendar-event--blocked {
