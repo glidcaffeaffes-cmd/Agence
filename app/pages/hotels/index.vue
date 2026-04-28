@@ -1364,7 +1364,7 @@ watch([priceRange, selectedStars, sortBy], () => {
 }
 
 .guest-age-select {
-  width: 6.2rem;
+  width: 45%;
 }
 
 .guest-age-select :deep(.p-select) {
@@ -1372,7 +1372,7 @@ watch([priceRange, selectedStars, sortBy], () => {
   border-radius: 0.65rem;
   border: 1px solid var(--color-gray-200);
   background: var(--color-gray-50);
-  min-height: 2.1rem;
+  max-height: 1rem !important;
   cursor: pointer;
 }
 
