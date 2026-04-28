@@ -77,7 +77,7 @@
           <div class="space-y-2">
             <div class="flex justify-between items-center">
               <label class="block text-sm font-semibold text-on-surface" for="password">Password</label>
-              <a href="#" class="text-sm font-medium text-primary hover:text-primary-container transition-colors">Forgot password?</a>
+              <NuxtLink to="/forgot-password" class="text-sm font-medium text-primary hover:text-primary-container transition-colors">Forgot password?</NuxtLink>
             </div>
             <div class="relative">
               <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline">lock</span>

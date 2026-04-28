@@ -72,10 +72,14 @@ export default defineNuxtConfig({
       exclude: ['useToast']
     }
   },
-  app: {
-    head: {
-      link: [...runtimeStylesheets],
-      script: [...runtimeScripts]
-    }
-  }
+   app: {
+     head: {
+       link: [...runtimeStylesheets],
+       script: [...runtimeScripts]
+     },
+     pageTransition: {
+       name: 'page',
+       mode: 'out-in'
+     }
+   }
 })

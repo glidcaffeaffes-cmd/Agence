@@ -16,7 +16,7 @@ import { useRoute } from 'vue-router'
 const route = useRoute()
 const hideFooter = computed(() => {
   if (route.meta?.hideFooter) return true
-  return ['/login', '/register'].includes(route.path)
+  return ['/login', '/register', '/forgot-password', '/reset-password'].includes(route.path)
 })
 
 let promoBadgeObserver

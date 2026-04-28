@@ -182,6 +182,34 @@ export function useAuth() {
     persistAuthState(null, null)
   }
 
+  async function requestPasswordReset(email: string) {
+    loading.value = true
+    error.value = null
+    try {
+      await service.requestPasswordReset(email)
+      return true
+    } catch (e: any) {
+      error.value = e.message
+      return false
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function resetPassword(token: string, newPassword: string) {
+    loading.value = true
+    error.value = null
+    try {
+      await service.resetPassword(token, newPassword)
+      return true
+    } catch (e: any) {
+      error.value = e.message
+      return false
+    } finally {
+      loading.value = false
+    }
+  }
+
   async function updateProfile(data: Partial<Profile>) {
     if (!currentAccount.value) {
       return false
@@ -336,6 +364,8 @@ export function useAuth() {
     login,
     loginGoogle,
     register,
+    requestPasswordReset,
+    resetPassword,
     logout,
     updateProfile,
     createPaymentMethod,

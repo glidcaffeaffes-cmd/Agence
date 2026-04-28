@@ -10,26 +10,44 @@
 
     <div class="profile-container">
       <header class="page-header">
-        <p class="page-header__label">Account</p>
+        <div>
+          <p class="page-header__label">Account</p>
+          <h1 class="page-header__title">Settings &amp; Security</h1>
+          <p class="page-header__sub">Manage your account preferences, security settings, and privacy options.</p>
+        </div>
       </header>
 
       <div class="profile-body">
-        <!-- Sidebar -->
-        <ProfileSidebar />
-
         <!-- Main -->
-        <main class="profile-main">
-          <!-- Authentication Card -->
-          <div class="content-card auth-card">
+        <main class="profile-main" style="flex: 1;">
+          <!-- Tabs -->
+          <div class="settings-tabs">
+            <button
+              v-for="tab in tabs"
+              :key="tab.key"
+              :class="['tab-button', { 'tab-button--active': activeTab === tab.key }]"
+              @click="console.log('clicked', tab.key); activeTab = tab.key"
+            >
+              <span class="material-symbols-outlined">{{ tab.icon }}</span>
+              {{ tab.label }}
+            </button>
+          </div>
+
+          <!-- Tab Content -->
+          <ClientOnly>
+          <!-- Security Tab -->
+          <div v-show="activeTab === 'security'" class="content-card auth-card fade-in-up">
             <div class="card-header">
               <div class="card-header__icon">
                 <span class="material-symbols-outlined">shield</span>
               </div>
               <div>
                 <h2 class="card-header__title">Authentication</h2>
+                <p class="card-header__sub">Manage your password and security settings</p>
               </div>
             </div>
             <div class="card-body">
+              <p>Change your password here.</p>
               <div class="auth-form-stack">
                 <div class="form-group">
                   <label class="form-label">Current Password</label>
@@ -73,6 +91,133 @@
               </div>
             </div>
           </div>
+
+          <!-- Profile Tab -->
+            <div v-show="activeTab === 'profile'" class="content-card profile-card fade-in-up">
+              <div class="card-header">
+                <div class="card-header__icon">
+                  <span class="material-symbols-outlined">person</span>
+                </div>
+                <div>
+                  <h2 class="card-header__title">Profile Information</h2>
+                  <p class="card-header__sub">Update your personal details</p>
+                </div>
+              </div>
+              <div class="card-body">
+                <p v-if="!currentProfile" class="info-message">Profile information is loading or not available.</p>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">First Name</label>
+                  <input v-model="profileForm.firstName" type="text" class="form-input" placeholder="Enter your first name" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Last Name</label>
+                  <input v-model="profileForm.lastName" type="text" class="form-input" placeholder="Enter your last name" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input v-model="profileForm.email" type="email" class="form-input" placeholder="Enter your email" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Phone Number</label>
+                <input v-model="profileForm.phone" type="tel" class="form-input" placeholder="Enter your phone number" />
+              </div>
+              <div class="card-actions">
+                <button @click="updateProfileHandler" type="button" class="btn-primary-action">
+                  <span class="material-symbols-outlined btn-icon">save</span>
+                  Update Profile
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notifications Tab -->
+            <div v-show="activeTab === 'notifications'" class="content-card notifications-card fade-in-up">
+              <div class="card-header">
+              <div class="card-header__icon">
+                <span class="material-symbols-outlined">notifications</span>
+              </div>
+              <div>
+                <h2 class="card-header__title">Notification Preferences</h2>
+                <p class="card-header__sub">Choose how you want to be notified</p>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="toggle-row">
+                <div>
+                  <span class="toggle-row__title">Email Bookings</span>
+                  <p class="toggle-row__sub">Receive email confirmations for bookings</p>
+                </div>
+                <label class="toggle-wrap">
+                  <input type="checkbox" class="sr-only" v-model="notificationSettings.emailBookings" />
+                  <span class="toggle-track"></span>
+                </label>
+              </div>
+              <div class="toggle-row">
+                <div>
+                  <span class="toggle-row__title">Promotional Emails</span>
+                  <p class="toggle-row__sub">Get updates on offers and promotions</p>
+                </div>
+                <label class="toggle-wrap">
+                  <input type="checkbox" class="sr-only" v-model="notificationSettings.emailPromotions" />
+                  <span class="toggle-track"></span>
+                </label>
+              </div>
+              <div class="toggle-row">
+                <div>
+                  <span class="toggle-row__title">SMS Reminders</span>
+                  <p class="toggle-row__sub">Receive SMS reminders for check-ins</p>
+                </div>
+                <label class="toggle-wrap">
+                  <input type="checkbox" class="sr-only" v-model="notificationSettings.smsReminders" />
+                  <span class="toggle-track"></span>
+                </label>
+              </div>
+              <div class="card-actions">
+                <button @click="saveNotificationsHandler" type="button" class="btn-primary-action">
+                  <span class="material-symbols-outlined btn-icon">save</span>
+                  Save Preferences
+                </button>
+              </div>
+             </div>
+             </div>
+
+          <!-- Privacy Tab -->
+            <div v-show="activeTab === 'privacy'" class="content-card privacy-card">
+               <div class="card-header">
+                 <div class="card-header__icon">
+                   <span class="material-symbols-outlined">privacy_tip</span>
+                 </div>
+                 <div>
+                   <h2 class="card-header__title">Privacy & Data</h2>
+                   <p class="card-header__sub">Control your data and account privacy</p>
+                 </div>
+               </div>
+               <div class="card-body">
+              <div class="toggle-row">
+                <div>
+                  <span class="toggle-row__title">Data Collection</span>
+                  <p class="toggle-row__sub">Allow us to collect usage data for improvements</p>
+                </div>
+                <label class="toggle-wrap">
+                  <input type="checkbox" class="sr-only" checked />
+                  <span class="toggle-track"></span>
+                </label>
+              </div>
+              <div class="card-actions">
+                <button type="button" class="btn-outline-action">
+                  <span class="material-symbols-outlined">download</span>
+                  Download My Data
+                </button>
+                <button type="button" class="btn-outline-action btn-danger">
+                  <span class="material-symbols-outlined">delete_forever</span>
+                  Delete Account
+                </button>
+              </div>
+            </div>
+          </div>
+          </ClientOnly>
         </main>
       </div>
     </div>
@@ -82,18 +227,55 @@
 <script setup lang="ts">
 definePageMeta({ middleware: "auth" });
 import { useAuth } from "~/composables/useAuth";
-import { ref, watch, computed } from "vue";
+import { ref, watch } from "vue";
 import { useAppToast } from "~/composables/useAppToast";
 
 const { currentProfile, updateProfile, changePassword, loading, error } =
   useAuth();
 const { success: toastSuccess, error: toastError, warn: toastWarn } = useAppToast();
 
+const activeTab = useState('settings-active-tab', () => 'security');
+
 const passwordForm = ref({
   currentPassword: "",
   newPassword: "",
   confirmPassword: "",
 });
+
+const profileForm = ref({
+  firstName: "John",
+  lastName: "Doe",
+  email: "john@example.com",
+  phone: "+1234567890",
+});
+
+watch(currentProfile, (profile) => {
+  if (profile) {
+    profileForm.value = {
+      firstName: profile.firstName || '',
+      lastName: profile.lastName || '',
+      email: profile.email || '',
+      phone: profile.phone || '',
+    };
+  }
+}, { immediate: true });
+
+onMounted(() => {
+  activeTab.value = 'security'
+})
+
+const notificationSettings = ref({
+  emailBookings: true,
+  emailPromotions: false,
+  smsReminders: true,
+});
+
+const tabs = [
+  { key: 'security', label: 'Security', icon: 'shield' },
+  { key: 'profile', label: 'Profile', icon: 'person' },
+  { key: 'notifications', label: 'Notifications', icon: 'notifications' },
+  { key: 'privacy', label: 'Privacy', icon: 'privacy_tip' },
+];
 
 async function changePasswordHandler() {
   if (!passwordForm.value.currentPassword || !passwordForm.value.newPassword) {
@@ -118,6 +300,20 @@ async function changePasswordHandler() {
   } else {
     toastError(error.value || "Failed to update password.");
   }
+}
+
+async function updateProfileHandler() {
+  const success = await updateProfile(profileForm.value);
+  if (success) {
+    alert("Profile updated successfully!");
+  } else {
+    alert(error.value || "Failed to update profile.");
+  }
+}
+
+async function saveNotificationsHandler() {
+  // TODO: Implement save notifications
+  alert("Notification preferences saved!");
 }
 </script>
 
@@ -177,6 +373,46 @@ async function changePasswordHandler() {
   gap: 24px;
 }
 
+.settings-tabs {
+  display: flex;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-xl);
+  padding: 8px;
+  overflow-x: auto;
+}
+
+.tab-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.tab-button:hover {
+  background: var(--color-bg-soft);
+  color: var(--color-text);
+}
+
+.tab-button--active {
+  background: var(--color-primary-600);
+  color: #fff;
+}
+
+.tab-button .material-symbols-outlined {
+  font-size: 16px;
+}
+
 /* ProfileSidebar.vue handles sidebar styles */
 
 /* Content cards */
@@ -188,7 +424,10 @@ async function changePasswordHandler() {
   overflow: hidden;
 }
 
-.auth-card {
+.auth-card,
+.profile-card,
+.notifications-card,
+.privacy-card {
   max-width: 800px;
 }
 
@@ -339,6 +578,16 @@ async function changePasswordHandler() {
   border-color: var(--color-primary-600);
 }
 
+.btn-danger {
+  border-color: #dc2626;
+  color: #dc2626;
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+  color: #fff;
+}
+
 /* MFA block */
 .mfa-block {
   display: flex;
@@ -471,6 +720,13 @@ input[type="checkbox"]:checked ~ .toggle-wrap .toggle-track::after {
   color: var(--color-text-muted);
 }
 
+.info-message {
+  color: var(--color-text-muted);
+  font-size: 14px;
+  text-align: center;
+  padding: 20px;
+}
+
 /* Responsive */
 @media (max-width: 900px) {
   .profile-body {
@@ -489,4 +745,6 @@ input[type="checkbox"]:checked ~ .toggle-wrap .toggle-track::after {
     align-items: flex-start;
   }
 }
+
+
 </style>

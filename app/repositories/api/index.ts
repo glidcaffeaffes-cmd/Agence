@@ -94,6 +94,25 @@ function monthLabel(key: string) {
   })
 }
 
+function toReservationApiStatus(status?: ReservationStatus) {
+  switch (status) {
+    case 'CONFIRMED':
+      return 'CONFIRMEE'
+    case 'BLOCKED':
+      return 'BLOQUEE'
+    case 'CANCELLED':
+      return 'ANNULEE'
+    case 'REFUSED':
+      return 'REFUSEE'
+    case 'COMPLETED':
+      return 'TERMINEE'
+    case 'PENDING':
+      return 'EN_ATTENTE'
+    default:
+      return undefined
+  }
+}
+
 function buildRecentMonthKeys(count: number) {
   const keys: string[] = []
   const cursor = new Date()
@@ -240,6 +259,20 @@ export class ApiHotelRepository implements IHotelRepository {
 }
 
 export class ApiAccountRepository implements IAccountRepository {
+  async requestPasswordReset(email: string): Promise<{ success: boolean; message: string }> {
+    return apiRequest<{ success: boolean; message: string }>('/auth/forgot-password', {
+      method: 'POST',
+      body: { email },
+    })
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<{ success: boolean; message: string }> {
+    return apiRequest<{ success: boolean; message: string }>('/auth/reset-password', {
+      method: 'POST',
+      body: { token, newPassword },
+    })
+  }
+
   async getAll(): Promise<Account[]> {
     const dtos = await apiGetCached<AccountDTO[]>('/accounts')
     return dtos.map(AccountMapper.fromDto)
@@ -440,18 +473,19 @@ export class ApiReservationRepository implements IReservationRepository {
   }
 
   async fetchPaginated(
-    options: import('~/types/interfaces/IReservationRepository').ReservationFetchOptions,
-  ): Promise<
-    import('~/types/interfaces/IHotelRepository').PaginatedResult<Reservation>
-  > {
+    options: ReservationFetchOptions,
+  ): Promise<PaginatedResult<Reservation>> {
     const params = new URLSearchParams()
     params.set('page', String(options.page))
     params.set('limit', String(options.limit))
 
     if (options.accountId) params.set('accountId', String(options.accountId))
     if (options.hotelId) params.set('hotelId', String(options.hotelId))
-    if (options.status) params.set('status', options.status)
+    const apiStatus = toReservationApiStatus(options.status)
+    if (apiStatus) params.set('status', apiStatus)
     if (options.search) params.set('search', options.search)
+    if (options.start) params.set('start', options.start)
+    if (options.end) params.set('end', options.end)
 
     const path = `/reservations?${params.toString()}`
     const dto = await apiGetCached<{

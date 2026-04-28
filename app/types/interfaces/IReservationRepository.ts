@@ -125,6 +125,8 @@ export interface ReservationFetchOptions {
   hotelId?: number
   status?: ReservationStatus
   search?: string
+  start?: string
+  end?: string
 }
 
 export interface IReservationRepository {

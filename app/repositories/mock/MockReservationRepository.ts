@@ -62,6 +62,16 @@ export class MockReservationRepository implements IReservationRepository {
       )
     }
 
+    if (options.start && options.end) {
+      const start = new Date(options.start).getTime()
+      const end = new Date(options.end).getTime()
+      items = items.filter((reservation) => {
+        const checkIn = new Date(reservation.checkInDate).getTime()
+        const checkOut = new Date(reservation.checkOutDate).getTime()
+        return checkIn < end && checkOut > start
+      })
+    }
+
     const total = items.length
     const page = Math.max(1, options.page)
     const limit = Math.max(1, options.limit)
@@ -280,7 +290,7 @@ export class MockReservationRepository implements IReservationRepository {
       checkIn: reservation.checkInDate,
       checkOut: reservation.checkOutDate,
       nights: reservation.numberOfNights,
-      guests: reservation.numberOfGuests,
+      guests: 1,
       roomPrice,
       taxes,
       totalPaid: reservation.totalAmount,

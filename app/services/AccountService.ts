@@ -17,6 +17,26 @@ export class AccountService {
     return this.repo.getAll()
   }
 
+  async requestPasswordReset(email: string): Promise<{ success: boolean; message: string }> {
+    if (!email.trim() || !email.includes('@')) {
+      throw new Error('Enter a valid email address')
+    }
+
+    return this.repo.requestPasswordReset(email.trim().toLowerCase())
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<{ success: boolean; message: string }> {
+    if (!token.trim()) {
+      throw new Error('Reset token is missing')
+    }
+
+    if (newPassword.length < 8) {
+      throw new Error('Password must be at least 8 characters')
+    }
+
+    return this.repo.resetPassword(token.trim(), newPassword)
+  }
+
   /** Single account by ID */
   async getById(id: number): Promise<Account> {
     const acc = await this.repo.getById(id)
@@ -46,7 +66,7 @@ export class AccountService {
    */
   async register(email: string, password: string): Promise<Account> {
     if (!email.includes('@')) throw new Error('Invalid email address')
-    if (password.length < 6) throw new Error('Password must be at least 6 characters')
+    if (password.length < 8) throw new Error('Password must be at least 8 characters')
     const existing = await this.repo.getByEmail(email.trim().toLowerCase())
     if (existing) throw new Error('An account with this email already exists')
     return this.repo.create({ email: email.trim().toLowerCase(), password, active: true, role: 'client' })
@@ -115,8 +135,8 @@ export class AccountService {
       throw new Error('Both current and new passwords are required')
     }
 
-    if (newPassword.length < 6) {
-      throw new Error('Password must be at least 6 characters')
+    if (newPassword.length < 8) {
+      throw new Error('Password must be at least 8 characters')
     }
 
     return this.repo.changePassword(accountId, oldPassword, newPassword)
