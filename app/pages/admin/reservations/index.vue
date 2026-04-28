@@ -301,8 +301,8 @@ function formatDateTime(value: string) {
 
 function userName(reservation: any) {
   const profile = reservation.account?.profile
-  if (profile?.firstName || profile?.lastName) {
-    return `${profile.firstName || ''} ${profile.lastName || ''}`.trim()
+  if (profile?.prenom || profile?.nom) {
+    return `${profile.prenom || ''} ${profile.nom || ''}`.trim()
   }
   return `User #${reservation.accountId}`
 }
