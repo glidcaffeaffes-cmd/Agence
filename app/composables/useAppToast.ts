@@ -33,7 +33,6 @@ export function useAppToast() {
     try {
       const toast = useToast()
       const message: ToastMessageOptions = {
-        group: 'app',
         severity: payload.severity,
         summary: payload.summary || normalizeSummary(payload.severity),
         detail: payload.detail,

@@ -1,9 +1,9 @@
 <script setup lang="ts">
+import Toast from "primevue/toast";
 </script>
 
 <template>
   <Toast
-    group="app"
     position="top-right"
     :pt="{
       root: { class: 'app-toast' },

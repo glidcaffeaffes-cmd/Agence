@@ -1105,6 +1105,7 @@ import { useRooms } from "~/composables/useRooms";
 import { useAuth } from "~/composables/useAuth";
 import { useAuthPrompt } from "~/composables/useAuthPrompt";
 import { useReservations } from "~/composables/useReservations";
+import { useAppToast } from "~/composables/useAppToast";
 import type { Hotel } from "~/types/models";
 import type {
   BookingConfirmation,
@@ -1124,6 +1125,7 @@ const {
   loading: bookingLoading,
   error: bookingApiError,
 } = useReservations();
+const { success: toastSuccess, info: toastInfo } = useAppToast();
 
 const hotel = ref<Hotel | null>(null);
 
@@ -1147,7 +1149,7 @@ const flatShareItems = computed(() => {
       icon: "link",
       click: () => {
         navigator.clipboard.writeText(url);
-        alert("Link copied to clipboard!");
+        toastSuccess("Link copied to clipboard.");
       },
     },
     {
@@ -1190,9 +1192,7 @@ const flatShareItems = computed(() => {
             .catch(() => {});
         } else {
           navigator.clipboard.writeText(url);
-          alert(
-            "Instagram sharing is best on mobile! Link copied to clipboard.",
-          );
+          toastInfo("Instagram sharing works best on mobile. Link copied.");
         }
       },
     },

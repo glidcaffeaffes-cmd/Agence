@@ -692,6 +692,7 @@ import {
 import { useRoute, useRouter } from "vue-router";
 import type { PaymentMethod } from "~/types/models";
 import { useAuth } from "~/composables/useAuth";
+import { useAppToast } from "~/composables/useAppToast";
 import {
   getCountries,
   getCountryCallingCode,
@@ -713,6 +714,7 @@ const {
   removePaymentMethod,
   loading,
 } = useAuth();
+const { success: toastSuccess, error: toastError, warn: toastWarn } = useAppToast();
 const activeTab = ref("Account Settings");
 const defaultPhoneCountry: CountryCode = "TN";
 const phoneExamples = phoneExamplesData as Record<string, string>;
@@ -962,11 +964,11 @@ watch(
 
 async function saveProfile() {
   if (formData.value.phone && phoneValidationMessage.value) {
-    alert(phoneValidationMessage.value);
+    toastWarn(phoneValidationMessage.value);
     return;
   }
   if (formData.value.passportNumber && passportValidationMessage.value) {
-    alert(passportValidationMessage.value);
+    toastWarn(passportValidationMessage.value);
     return;
   }
 
@@ -982,9 +984,9 @@ async function saveProfile() {
       .filter(Boolean),
   });
   if (success) {
-    alert("Profile updated successfully!");
+    toastSuccess("Profile updated successfully.");
   } else {
-    alert("Failed to update profile. Please try again.");
+    toastError("Failed to update profile. Please try again.");
   }
 }
 
@@ -994,9 +996,9 @@ async function updateNotifications() {
     notificationsPromotion: notificationSettings.value.promotion,
   });
   if (success) {
-    alert("Notification preferences updated successfully!");
+    toastSuccess("Notification preferences updated successfully.");
   } else {
-    alert("Failed to update preferences. Please try again.");
+    toastError("Failed to update preferences. Please try again.");
   }
 }
 
@@ -1069,15 +1071,19 @@ async function setDefaultPaymentMethod(paymentMethodId: number) {
     isDefault: true,
   });
   if (!success) {
-    alert("Failed to update payment method.");
+    toastError("Failed to update payment method.");
+    return;
   }
+  toastSuccess("Default payment method updated.");
 }
 
 async function deletePaymentMethod(paymentMethodId: number) {
   const success = await removePaymentMethod(paymentMethodId);
   if (!success) {
-    alert("Failed to remove payment method.");
+    toastError("Failed to remove payment method.");
+    return;
   }
+  toastSuccess("Payment method removed.");
 }
 
 function hasValue(val: any) {

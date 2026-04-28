@@ -113,8 +113,10 @@
 import { useAuth } from "~/composables/useAuth";
 import { computed } from "vue";
 import { useProfileCompletion } from "~/composables/useProfileCompletion";
+import { useAppToast } from "~/composables/useAppToast";
 
 const { currentProfile, updateProfile } = useAuth();
+const { success: toastSuccess, error: toastError } = useAppToast();
 const { percentage } = useProfileCompletion(currentProfile);
 const avatarInputRef = ref<HTMLInputElement | null>(null);
 const isUploadingAvatar = ref(false);
@@ -165,11 +167,12 @@ async function handleAvatarSelect(event: Event) {
     if (!success) {
       throw new Error("Unable to save profile photo");
     }
+    toastSuccess("Profile photo updated.");
   } catch (error) {
     console.error("Avatar upload failed:", error);
     const message =
       error instanceof Error ? error.message : "Image upload failed. Please try again.";
-    alert(message);
+    toastError(message);
   } finally {
     isUploadingAvatar.value = false;
     input.value = "";

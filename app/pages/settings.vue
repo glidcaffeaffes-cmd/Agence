@@ -83,9 +83,11 @@
 definePageMeta({ middleware: "auth" });
 import { useAuth } from "~/composables/useAuth";
 import { ref, watch, computed } from "vue";
+import { useAppToast } from "~/composables/useAppToast";
 
 const { currentProfile, updateProfile, changePassword, loading, error } =
   useAuth();
+const { success: toastSuccess, error: toastError, warn: toastWarn } = useAppToast();
 
 const passwordForm = ref({
   currentPassword: "",
@@ -95,11 +97,11 @@ const passwordForm = ref({
 
 async function changePasswordHandler() {
   if (!passwordForm.value.currentPassword || !passwordForm.value.newPassword) {
-    alert("Please complete all password fields.");
+    toastWarn("Please complete all password fields.");
     return;
   }
   if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
-    alert("The new password confirmation does not match.");
+    toastWarn("The new password confirmation does not match.");
     return;
   }
   const success = await changePassword(
@@ -112,9 +114,9 @@ async function changePasswordHandler() {
       newPassword: "",
       confirmPassword: "",
     };
-    alert("Password updated successfully!");
+    toastSuccess("Password updated successfully.");
   } else {
-    alert(error.value || "Failed to update password.");
+    toastError(error.value || "Failed to update password.");
   }
 }
 </script>

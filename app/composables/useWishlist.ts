@@ -2,6 +2,7 @@ import { computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuth } from '~/composables/useAuth'
 import { useAuthPrompt } from '~/composables/useAuthPrompt'
+import { useAppToast } from '~/composables/useAppToast'
 
 const STORAGE_PREFIX = 'voyagehub_wishlist'
 
@@ -45,6 +46,7 @@ export function useWishlist() {
   const route = useRoute()
   const { accountId, isAuthenticated } = useAuth()
   const { open } = useAuthPrompt()
+  const { success: toastSuccess, info: toastInfo } = useAppToast()
   const hotelIds = useState<number[]>('wishlist_hotel_ids', () => [])
 
   function hydrate() {
@@ -74,6 +76,7 @@ export function useWishlist() {
     if (!hotelIds.value.includes(hotelId)) {
       hotelIds.value = [...hotelIds.value, hotelId]
       writeStoredIds(accountId.value, hotelIds.value)
+      toastSuccess('Hotel saved to your wishlist.')
     }
 
     return true
@@ -84,8 +87,12 @@ export function useWishlist() {
       return false
     }
 
+    const beforeLength = hotelIds.value.length
     hotelIds.value = hotelIds.value.filter((item) => item !== hotelId)
     writeStoredIds(accountId.value, hotelIds.value)
+    if (hotelIds.value.length < beforeLength) {
+      toastInfo('Hotel removed from your wishlist.')
+    }
     return true
   }
 
