@@ -159,7 +159,8 @@ const cells = computed(() => {
 })
 
 function statusClass(status: string) {
-  switch (status) {
+  const upperStatus = status.toUpperCase()
+  switch (upperStatus) {
     case 'CONFIRMED':
       return 'calendar-event--confirmed'
     case 'COMPLETED':
