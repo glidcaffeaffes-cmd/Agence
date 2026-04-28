@@ -116,18 +116,18 @@ const FALLBACK_CITIES = [
 
 const CITY_IMAGES: Record<string, string> = {
   ariana:
-    "https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=900&q=80",
-  beja: "https://images.unsplash.com/photo-1548018560-c7196548e84d?auto=format&fit=crop&w=900&q=80",
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/TunisAveHabibBourguiba.jpg/330px-TunisAveHabibBourguiba.jpg",
+  beja: "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/0e/8e/1e/8c/caption.jpg?w=1200&h=-1&s=1",
   "ben arous":
-    "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=900&q=80",
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmyzh6lMfIVEIndEzKDlkvC2zF9r4p_weY_Q&s",
   bizerte:
     "https://media.tacdn.com/media/attractions-splice-spp-674x446/13/2a/23/0c.jpg",
   gabes:
-    "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80",
+    "https://voyage-tunisie.info/wp-content/uploads/2017/11/Gab%C3%A8s-tourisme.jpg",
   gafsa:
-    "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=900&q=80",
+    "https://polegafsa.com.tn/wp-content/uploads/2021/11/webElbayGafsaTourism.jpg",
   jendouba:
-    "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=900&q=80",
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTuYcJAMplb0cFJiTs5EUQXuZI8L_TMqoZtag&s",
   kairouan:
     "https://upload.wikimedia.org/wikipedia/commons/2/2b/Vue_a%C3%A9rienne_rapproch%C3%A9e_de_la_Grande_Mosqu%C3%A9e_de_Kairouan.jpg",
   kasserine:
