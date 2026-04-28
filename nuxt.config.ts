@@ -81,9 +81,6 @@ export default defineNuxtConfig({
        link: [...runtimeStylesheets],
        script: [...runtimeScripts]
      },
-     pageTransition: {
-       name: 'page',
-       mode: 'out-in'
-     }
+     pageTransition: false
    }
 })

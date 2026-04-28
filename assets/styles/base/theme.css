@@ -52,22 +52,6 @@ body {
   color: var(--color-text);
 }
 
-/* Page Transitions */
-.page-enter-active,
-.page-leave-active {
-  transition: var(--transition-page);
-}
-
-.page-enter-from {
-  opacity: 0;
-  transform: translateY(10px);
-}
-
-.page-leave-to {
-  opacity: 0;
-  transform: translateY(-10px);
-}
-
 /* Fade-in animations for elements */
 @keyframes fadeInUp {
   from {
