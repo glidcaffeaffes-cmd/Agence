@@ -294,7 +294,21 @@ const sortOptions = [
 function getHotelMinPrice(hotelId: number) {
   const hotelRooms = rooms.value.filter(r => r.hotelId === hotelId)
   if (hotelRooms.length === 0) return 0
-  return Math.min(...hotelRooms.map(r => r.pricePerNight))
+
+  const [minSelectedPrice, maxSelectedPrice] = priceRange.value
+  const safeMinPrice = Math.max(0, Math.min(minSelectedPrice, maxSelectedPrice))
+  const safeMaxPrice = Math.max(safeMinPrice, Math.max(minSelectedPrice, maxSelectedPrice))
+
+  const roomsInSelectedRange = hotelRooms.filter(
+    (room) => room.pricePerNight >= safeMinPrice && room.pricePerNight <= safeMaxPrice,
+  )
+
+  if (roomsInSelectedRange.length > 0) {
+    return Math.min(...roomsInSelectedRange.map((room) => room.pricePerNight))
+  }
+
+  // Fallback when no room matches current range (defensive; API should already filter these out).
+  return Math.min(...hotelRooms.map((room) => room.pricePerNight))
 }
 
 function getHotelRoomCount(hotelId: number) {
@@ -306,14 +320,17 @@ function buildFetchOptions(page: number) {
   const checkIn = checkInDate.value ? formatDateForQuery(checkInDate.value) : undefined
   const checkOut = checkOutDate.value ? formatDateForQuery(checkOutDate.value) : undefined
   const hasAvailability = Boolean(selectedCity.value || checkIn || checkOut)
+  const [minSelectedPrice, maxSelectedPrice] = priceRange.value
+  const safeMinPrice = Math.max(0, Math.min(minSelectedPrice, maxSelectedPrice))
+  const safeMaxPrice = Math.max(safeMinPrice, Math.max(minSelectedPrice, maxSelectedPrice))
   return {
     page,
     limit: pageSize,
     sortBy: sortBy.value,
     search: searchQuery.value || undefined,
     stars: selectedStars.value.length > 0 ? selectedStars.value : undefined,
-    minPrice: priceRange.value[0] > 0 ? priceRange.value[0] : undefined,
-    maxPrice: priceRange.value[1] < 1000 ? priceRange.value[1] : undefined,
+    minPrice: safeMinPrice,
+    maxPrice: safeMaxPrice,
     city: hasAvailability ? selectedCity.value : undefined,
     checkIn: hasAvailability ? checkIn : undefined,
     checkOut: hasAvailability ? checkOut : undefined,
@@ -876,7 +893,7 @@ watch([priceRange, selectedStars, sortBy], () => {
   width: 100%;
   background: linear-gradient(180deg, white 0%, color-mix(in srgb, var(--color-gray-50) 72%, white 28%) 100%);
   border: 1px solid color-mix(in srgb, var(--color-gray-200) 74%, white 26%);
-  border-radius: 8px;
+  border-radius: 10px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
   min-height: 2.3rem;
   display: flex;
@@ -933,9 +950,9 @@ watch([priceRange, selectedStars, sortBy], () => {
 :deep(.p-select-overlay) {
   background: white;
   border: 1px solid color-mix(in srgb, var(--color-gray-200) 76%, white 24%);
-  border-radius: 20px;
-  box-shadow: 0 28px 54px rgba(15, 23, 42, 0.18);
-  margin-top: 8px;
+  border-radius: 12px;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+  margin-top: 6px;
   overflow: hidden;
   z-index: 1000;
 }
@@ -955,12 +972,12 @@ watch([priceRange, selectedStars, sortBy], () => {
 }
 
 :deep(.p-select-option) {
-  padding: 10px 16px;
-  font-size: 14px;
+  padding: 8px 12px;
+  font-size: 13px;
   color: var(--color-gray-600);
   cursor: pointer;
   transition: background 0.2s;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 :deep(.p-select-option:hover),
@@ -1034,9 +1051,9 @@ watch([priceRange, selectedStars, sortBy], () => {
 :deep(.p-select-overlay) {
   background: white;
   border: 1px solid color-mix(in srgb, var(--color-gray-200) 76%, white 24%);
-  border-radius: 20px;
-  box-shadow: 0 28px 54px rgba(15, 23, 42, 0.18);
-  margin-top: 8px;
+  border-radius: 12px;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+  margin-top: 6px;
   overflow: hidden;
   z-index: 1000;
 }
@@ -1170,12 +1187,12 @@ watch([priceRange, selectedStars, sortBy], () => {
 }
 
 :deep(.p-select-option) {
-  padding: 10px 16px;
-  font-size: 14px;
+  padding: 8px 12px;
+  font-size: 13px;
   color: var(--color-gray-600);
   cursor: pointer;
   transition: background 0.2s;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 :deep(.p-select-option:hover),
@@ -1252,11 +1269,11 @@ watch([priceRange, selectedStars, sortBy], () => {
   top: auto;
   left: 0;
   width: 100%;
-  padding: 1rem;
+  padding: 0.85rem;
   background: white;
   border: 1px solid color-mix(in srgb, var(--color-gray-200) 76%, white 24%);
-  border-radius: 20px;
-  box-shadow: 0 -12px 42px rgba(15, 23, 42, 0.12);
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
   z-index: 1000;
 }
 
@@ -1299,7 +1316,7 @@ watch([priceRange, selectedStars, sortBy], () => {
   grid-template-columns: 2rem 2.2rem 2rem;
   align-items: center;
   border: 1px solid var(--color-gray-200);
-  border-radius: 0.8rem;
+  border-radius: 0.65rem;
   background: var(--color-gray-50);
   overflow: hidden;
 }
@@ -1338,7 +1355,7 @@ watch([priceRange, selectedStars, sortBy], () => {
 
 .guest-age-select :deep(.p-select) {
   width: 100%;
-  border-radius: 0.8rem;
+  border-radius: 0.65rem;
   border: 1px solid var(--color-gray-200);
   background: var(--color-gray-50);
   min-height: 2.1rem;
