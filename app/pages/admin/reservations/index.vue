@@ -82,6 +82,7 @@
           :month="monthCursor"
           :entries="calendarEntries"
           empty-label="No arrivals"
+          :admin="true"
         />
 
         <div v-else class="table-card">

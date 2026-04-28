@@ -24,6 +24,9 @@
           <div class="calendar-cell__header">
             <span class="calendar-cell__day">{{ cell.dayNumber }}</span>
             <span v-if="cell.entries.length" class="calendar-cell__count">{{ cell.entries.length }}</span>
+            <span v-if="admin && cell.totalRevenue > 0" class="calendar-cell__revenue">
+              {{ formatCurrency(cell.totalRevenue) }}
+            </span>
           </div>
 
           <div v-if="cell.entries.length" class="calendar-events">
@@ -72,9 +75,11 @@ const props = withDefaults(
     month: string
     entries: CalendarEntry[]
     emptyLabel?: string
+    admin?: boolean
   }>(),
   {
     emptyLabel: 'No stays',
+    admin: false,
   },
 )
 
@@ -116,6 +121,7 @@ const cells = computed(() => {
   const gridStart = addUtcDays(start, -start.getUTCDay())
   const monthValue = start.getUTCMonth()
   const entryMap = new Map<string, CalendarEntry[]>()
+  const revenueMap = new Map<string, number>()
 
   for (const entry of props.entries) {
     const startKey = isoKey(entry.start)
@@ -128,6 +134,12 @@ const cells = computed(() => {
       const dayEntries = entryMap.get(key) ?? []
       dayEntries.push(entry)
       entryMap.set(key, dayEntries)
+
+      if (props.admin && entry.amountLabel) {
+        const amount = parseFloat(entry.amountLabel.replace(/[^\d.-]/g, '')) || 0
+        revenueMap.set(key, (revenueMap.get(key) || 0) + amount)
+      }
+
       cursor = addUtcDays(cursor, 1)
     }
   }
@@ -141,6 +153,7 @@ const cells = computed(() => {
       inMonth: current.getUTCMonth() === monthValue,
       dayNumber: current.getUTCDate(),
       entries: (entryMap.get(key) ?? []).sort((left, right) => left.start.localeCompare(right.start)),
+      totalRevenue: revenueMap.get(key) || 0,
     }
   })
 })
@@ -158,6 +171,14 @@ function statusClass(status: string) {
     default:
       return 'calendar-event--blocked'
   }
+}
+
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: 'EUR',
+    maximumFractionDigits: 0,
+  }).format(value)
 }
 </script>
 
@@ -273,6 +294,17 @@ function statusClass(status: string) {
   color: var(--color-primary-700);
   font-size: 0.72rem;
   font-weight: 800;
+}
+
+.calendar-cell__revenue {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--color-success-700);
+  background: var(--color-success-50);
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-top: 2px;
+  display: block;
 }
 
 .calendar-events {
