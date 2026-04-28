@@ -1,8 +1,9 @@
 export default defineNuxtRouteMiddleware((to, from) => {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, currentAccount } = useAuth()
   
   if (isAuthenticated.value) {
-    const redirect = typeof to.query.redirect === 'string' ? to.query.redirect : '/profile'
-    return navigateTo(redirect.startsWith('/') ? redirect : '/profile')
+    const fallbackPath = currentAccount.value?.role === 'admin' ? '/admin' : '/profile'
+    const redirect = typeof to.query.redirect === 'string' ? to.query.redirect : fallbackPath
+    return navigateTo(redirect.startsWith('/') ? redirect : fallbackPath)
   }
 })

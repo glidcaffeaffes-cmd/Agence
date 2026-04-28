@@ -77,9 +77,9 @@
           <NuxtLink to="/" class="dropdown-item" @click="showMenu = false">
             <span class="material-symbols-outlined">open_in_new</span> Voir le site
           </NuxtLink>
-          <a href="/login" class="dropdown-item dropdown-item--danger">
-            <span class="material-symbols-outlined">logout</span> Se déconnecter
-          </a>
+          <button type="button" class="dropdown-item dropdown-item--danger" @click="handleLogout">
+            <span class="material-symbols-outlined">logout</span> Se deconnecter
+          </button>
         </div>
       </Transition>
     </div>
@@ -328,3 +328,4 @@ onMounted(() => {
 .dropdown-enter-active, .dropdown-leave-active { transition: opacity 0.2s ease, transform 0.2s ease; }
 .dropdown-enter-from, .dropdown-leave-to { opacity: 0; transform: translateY(-8px) scale(0.98); }
 </style>
+

@@ -48,6 +48,8 @@ body {
   min-height: 100vh;
   font-family: var(--font-family-base);
   line-height: inherit;
+  background-color: var(--color-bg-soft);
+  color: var(--color-text);
 }
 
 /* Page Transitions */
@@ -87,9 +89,6 @@ body {
 .fade-in-up:nth-child(3) { animation-delay: 0.3s; }
 .fade-in-up:nth-child(4) { animation-delay: 0.4s; }
 .fade-in-up:nth-child(5) { animation-delay: 0.5s; }
-  background-color: var(--color-bg-soft);
-  color: var(--color-text);
-}
 
 #__nuxt {
   min-height: 100vh;

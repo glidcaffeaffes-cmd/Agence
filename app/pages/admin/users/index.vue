@@ -57,10 +57,10 @@
             <td class="px-6 py-4">
               <span
                 class="inline-flex items-center gap-1.5 text-xs font-semibold"
-                :class="acc.active ? 'text-primary' : 'text-error'"
+                :class="isActive(acc) ? 'text-primary' : 'text-error'"
               >
-                <span class="h-1.5 w-1.5 rounded-full" :class="acc.active ? 'bg-primary' : 'bg-error'"></span>
-                {{ acc.active ? 'Actif' : 'Inactif' }}
+                <span class="h-1.5 w-1.5 rounded-full" :class="isActive(acc) ? 'bg-primary' : 'bg-error'"></span>
+                {{ isActive(acc) ? 'Actif' : 'Inactif' }}
               </span>
             </td>
             <td class="space-x-1 px-6 py-4 text-right">
@@ -72,11 +72,11 @@
               </button>
               <button
                 class="rounded-lg border border-transparent p-2 shadow-sm transition-all hover:border-surface-variant/30 hover:bg-white active:scale-90"
-                :class="acc.active ? 'text-error' : 'text-primary'"
-                :title="acc.active ? 'Desactiver' : 'Activer'"
+                :class="isActive(acc) ? 'text-error' : 'text-primary'"
+                :title="isActive(acc) ? 'Desactiver' : 'Activer'"
                 @click="toggleActive(acc)"
               >
-                <span class="material-symbols-outlined text-lg">{{ acc.active ? 'person_off' : 'how_to_reg' }}</span>
+                <span class="material-symbols-outlined text-lg">{{ isActive(acc) ? 'person_off' : 'how_to_reg' }}</span>
               </button>
             </td>
           </tr>
@@ -145,6 +145,10 @@ const loading = ref(false)
 const error = ref<string | null>(null)
 const editing = ref<Account | null>(null)
 
+function isActive(account: Account) {
+  return account.active !== false
+}
+
 function formatDate(value: string) {
   return new Date(value).toLocaleDateString('fr-FR', {
     day: 'numeric',
@@ -160,8 +164,9 @@ function openEdit(account: Account) {
 async function toggleActive(account: Account) {
   try {
     error.value = null
+    const active = isActive(account)
 
-    if (account.active) {
+    if (active) {
       await service.deactivate(account.id)
     } else {
       await service.update(account.id, { active: true })
@@ -169,7 +174,7 @@ async function toggleActive(account: Account) {
 
     const index = accounts.value.findIndex((entry) => entry.id === account.id)
     if (index !== -1) {
-      accounts.value[index] = { ...accounts.value[index], active: !account.active }
+      accounts.value[index] = { ...accounts.value[index], active: !active }
     }
   } catch (cause: any) {
     error.value = cause.message

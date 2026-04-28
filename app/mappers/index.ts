@@ -245,7 +245,7 @@ export const AccountMapper = {
       email: dto.email,
       password: '',
       registrationDate: dto.dateInscription,
-      active: dto.actif,
+      active: dto.actif ?? true,
       role: mapAccountRole(dto.role),
     }
   },
@@ -254,7 +254,7 @@ export const AccountMapper = {
     return {
       email: model.email,
       motDePasse: model.password,
-      actif: model.active,
+      ...(model.active !== undefined && { actif: model.active }),
       role: model.role === 'admin' ? 'ADMIN' : 'CLIENT',
     }
   },

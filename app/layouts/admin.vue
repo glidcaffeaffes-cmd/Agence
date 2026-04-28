@@ -82,10 +82,10 @@
           <span class="material-symbols-outlined">open_in_new</span>
           <span>View Site</span>
         </NuxtLink>
-        <a href="/login" class="nav-item nav-item--danger">
+        <button type="button" class="nav-item nav-item--danger w-full text-left" @click="handleLogout">
           <span class="material-symbols-outlined">logout</span>
           <span>Sign Out</span>
-        </a>
+        </button>
       </div>
     </aside>
 
@@ -102,7 +102,14 @@
 </template>
 
 <script setup lang="ts">
-// Admin Layout specifically tailored for the Exact UI Reproduction
+import { useAuth } from '~/composables/useAuth'
+
+const { logout } = useAuth()
+
+function handleLogout() {
+  logout()
+  navigateTo('/login')
+}
 </script>
 
 <style>
