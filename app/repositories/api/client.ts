@@ -17,6 +17,30 @@ type ApiRequestOptions<T> = Parameters<typeof $fetch<T>>[1] & {
   toast?: ApiToastOptions
 }
 
+function normalizeFetchOptions<T>(options?: Parameters<typeof $fetch<T>>[1]) {
+  const normalized = { ...(options || {}) } as Record<string, any>
+  delete normalized.toast
+
+  // Some backend endpoints return 204/empty payloads for successful mutations.
+  // Keep those as successful calls instead of throwing JSON parse errors.
+  if (!normalized.parseResponse) {
+    normalized.parseResponse = (text: string) => {
+      const body = text?.trim?.() ?? ''
+      if (!body) {
+        return null
+      }
+
+      try {
+        return JSON.parse(body)
+      } catch {
+        return body
+      }
+    }
+  }
+
+  return normalized as Parameters<typeof $fetch<T>>[1]
+}
+
 function useResponseCache() {
   return useState<Record<string, any>>('api_response_cache', () => ({}))
 }
@@ -151,7 +175,7 @@ export async function apiRequest<T>(path: string, options?: Parameters<typeof $f
   const shouldToastError = isMutationMethod(method) && !requestOptions?.toast?.silentError
 
   try {
-    const data = await $fetch<T>(`${resolveBaseUrl()}${path}`, options)
+    const data = await $fetch<T>(`${resolveBaseUrl()}${path}`, normalizeFetchOptions(options))
 
     if (shouldToastSuccess && import.meta.client) {
       const { success } = useAppToast()
