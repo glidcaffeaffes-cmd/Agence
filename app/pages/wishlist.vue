@@ -61,9 +61,7 @@ const { isAuthenticated } = useAuth()
 const { open: openAuthPrompt } = useAuthPrompt()
 const { hotels, fetchPaginated, totalPages, currentPage } = useHotels()
 const { rooms, fetchAll: fetchRooms } = useRooms()
-// useWishlist already calls hydrate() internally via watch(accountId, { immediate: true })
-// so hotelIds is populated before onMounted runs — we must NOT call hydrate() again
-const { hotelIds } = useWishlist()
+const { hotelIds, hydrate } = useWishlist()
 const pageSize = 6
 const isFetching = ref(false)
 const initialized = ref(false)  // guard to block watch during initial load
@@ -104,6 +102,7 @@ onMounted(async () => {
     openAuthPrompt({ redirectTo: '/wishlist' })
   }
   window.addEventListener('scroll', handleScroll)
+  await hydrate()
   await Promise.all([fetchRooms(), loadPage(1)])
   initialized.value = true
 })

@@ -25,13 +25,37 @@ function normalizeSummary(severity: ToastSeverity) {
 }
 
 export function useAppToast() {
+  function resolveToastService() {
+    if (!import.meta.client) {
+      return null
+    }
+
+    try {
+      return useToast()
+    } catch {
+      try {
+        const nuxtApp = useNuxtApp()
+        return nuxtApp.vueApp.config.globalProperties.$toast as
+          | { add: (message: ToastMessageOptions) => void }
+          | undefined
+          | null
+      } catch {
+        return null
+      }
+    }
+  }
+
   function show(payload: ToastPayload) {
     if (!import.meta.client) {
       return
     }
 
+    const toast = resolveToastService()
+    if (!toast) {
+      return
+    }
+
     try {
-      const toast = useToast()
       const message: ToastMessageOptions = {
         severity: payload.severity,
         summary: payload.summary || normalizeSummary(payload.severity),
