@@ -677,7 +677,7 @@ onUnmounted(() => {
 .state-box--error { color: #b42318; }
 .empty-link { display: inline-flex; justify-content: center; align-items: center; text-decoration: none; color: var(--color-primary-700); font-weight: 700; }
 .list-card { display: grid; gap: 14px; }
-.booking-card { animation: fadeInUp 0.5s ease-out; animation-fill-mode: both; }
+.booking-card { animation: fadeInUp var(--duration-slow) var(--easing-entrance); animation-fill-mode: both; }
 .booking-card:nth-child(1) { animation-delay: 0.1s; }
 .booking-card:nth-child(2) { animation-delay: 0.2s; }
 .booking-card:nth-child(3) { animation-delay: 0.3s; }
@@ -730,10 +730,7 @@ onUnmounted(() => {
 .booking-modal-enter-active .booking-modal-card, .booking-modal-leave-active .booking-modal-card { transition: transform 0.2s ease; }
 .booking-modal-enter-from, .booking-modal-leave-to { opacity: 0; }
 .booking-modal-enter-from .booking-modal-card, .booking-modal-leave-to .booking-modal-card { transform: translateY(14px); }
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+
 .spin { animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @media (max-width: 980px) {

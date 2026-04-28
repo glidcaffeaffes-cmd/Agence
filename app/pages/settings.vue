@@ -20,22 +20,23 @@
       <div class="profile-body">
         <!-- Main -->
         <main class="profile-main" style="flex: 1;">
-          <ClientOnly>
-            <!-- Tabs -->
-            <div class="settings-tabs">
-              <button
-                v-for="tab in tabs"
-                :key="tab.key"
-                :class="['tab-button', { 'tab-button--active': activeTab === tab.key }]"
-                @click="activeTab = tab.key"
-              >
-                <span class="material-symbols-outlined">{{ tab.icon }}</span>
-                {{ tab.label }}
-              </button>
-            </div>
+          <!-- Tabs -->
+          <div class="settings-tabs">
+            <button
+              v-for="tab in tabs"
+              :key="tab.key"
+              :class="['tab-button', { 'tab-button--active': activeTab === tab.key }]"
+              @click="console.log('clicked', tab.key); activeTab = tab.key"
+            >
+              <span class="material-symbols-outlined">{{ tab.icon }}</span>
+              {{ tab.label }}
+            </button>
+          </div>
 
-            <!-- Security Tab -->
-            <div v-if="activeTab === 'security'" class="content-card auth-card">
+          <!-- Tab Content -->
+          <ClientOnly>
+          <!-- Security Tab -->
+          <div v-show="activeTab === 'security'" class="content-card auth-card fade-in-up">
             <div class="card-header">
               <div class="card-header__icon">
                 <span class="material-symbols-outlined">shield</span>
@@ -92,7 +93,7 @@
           </div>
 
           <!-- Profile Tab -->
-            <div v-if="activeTab === 'profile'" class="content-card profile-card">
+            <div v-show="activeTab === 'profile'" class="content-card profile-card fade-in-up">
               <div class="card-header">
                 <div class="card-header__icon">
                   <span class="material-symbols-outlined">person</span>
@@ -132,7 +133,7 @@
           </div>
 
           <!-- Notifications Tab -->
-            <div v-if="activeTab === 'notifications'" class="content-card notifications-card">
+            <div v-show="activeTab === 'notifications'" class="content-card notifications-card fade-in-up">
               <div class="card-header">
               <div class="card-header__icon">
                 <span class="material-symbols-outlined">notifications</span>
@@ -182,8 +183,8 @@
              </div>
              </div>
 
-           <!-- Privacy Tab -->
-            <div v-if="activeTab === 'privacy'" class="content-card privacy-card">
+          <!-- Privacy Tab -->
+            <div v-show="activeTab === 'privacy'" class="content-card privacy-card">
                <div class="card-header">
                  <div class="card-header__icon">
                    <span class="material-symbols-outlined">privacy_tip</span>
@@ -226,10 +227,14 @@
 <script setup lang="ts">
 definePageMeta({ middleware: "auth" });
 import { useAuth } from "~/composables/useAuth";
-import { ref, watch, computed } from "vue";
+import { ref, watch, computed, onMounted } from "vue";
+
+console.log('settings page setup');
 
 const { currentProfile, updateProfile, changePassword, loading, error } =
   useAuth();
+
+const activeTab = useState('settings-active-tab', () => 'security');
 
 const passwordForm = ref({
   currentPassword: "",
@@ -254,6 +259,10 @@ watch(currentProfile, (profile) => {
     };
   }
 }, { immediate: true });
+
+onMounted(() => {
+  activeTab.value = 'security'
+})
 
 const notificationSettings = ref({
   emailBookings: true,
