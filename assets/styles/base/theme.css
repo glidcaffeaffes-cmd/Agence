@@ -122,3 +122,86 @@ a:hover {
   outline: none;
   box-shadow: var(--shadow-focus);
 }
+
+/* PrimeVue Toast */
+.app-toast.p-toast {
+  z-index: var(--z-toast);
+}
+
+.app-toast .app-toast__message.p-toast-message {
+  margin-bottom: var(--space-3);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  backdrop-filter: blur(2px);
+}
+
+.app-toast .app-toast__content.p-toast-message-content {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: start;
+  column-gap: var(--space-3);
+  padding: var(--space-4) var(--space-4) var(--space-4) var(--space-4);
+}
+
+.app-toast .app-toast__text.p-toast-message-text {
+  margin: 0;
+  display: grid;
+  row-gap: var(--space-1);
+}
+
+.app-toast .app-toast__summary.p-toast-summary {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-body-lg);
+  line-height: var(--line-height-tight);
+}
+
+.app-toast .app-toast__detail.p-toast-detail {
+  margin: 0;
+  color: var(--color-text-soft);
+  font-size: var(--font-size-body-md);
+  line-height: var(--line-height-normal);
+}
+
+.app-toast .app-toast__close.p-toast-close-button {
+  width: var(--space-8);
+  height: var(--space-8);
+  border-radius: var(--radius-full);
+  color: inherit;
+}
+
+.app-toast .p-toast-message-success {
+  background: var(--alert-success-bg);
+  border-color: var(--alert-success-border);
+  color: var(--alert-success-text);
+}
+
+.app-toast .p-toast-message-info {
+  background: var(--alert-info-bg);
+  border-color: var(--alert-info-border);
+  color: var(--alert-info-text);
+}
+
+.app-toast .p-toast-message-warn {
+  background: var(--alert-warning-bg);
+  border-color: var(--alert-warning-border);
+  color: var(--alert-warning-text);
+}
+
+.app-toast .p-toast-message-error {
+  background: var(--alert-danger-bg);
+  border-color: var(--alert-danger-border);
+  color: var(--alert-danger-text);
+}
+
+.app-toast .p-toast-icon-close {
+  font-size: var(--font-size-body-md);
+}
+
+.app-toast .p-toast-message-enter-active,
+.app-toast .p-toast-message-leave-active {
+  transition:
+    transform var(--duration-normal) var(--easing-standard),
+    opacity var(--duration-normal) var(--easing-standard);
+}
