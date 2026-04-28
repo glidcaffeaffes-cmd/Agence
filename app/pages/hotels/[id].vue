@@ -385,8 +385,9 @@
                             optionLabel="label"
                             optionValue="value"
                             class="child-age-select-premium"
+                            :pt="{ overlay: { class: 'child-age-overlay' } }"
                             placeholder="Age"
-                            appendTo="self"
+                            appendTo="body"
                           />
                         </div>
                       </div>
@@ -1403,7 +1404,7 @@ const adults = ref(2);
 const children = ref(0);
 const childAges = ref<number[]>([]); // age per child (1–17)
 const childAgeOptions = Array.from({ length: 17 }, (_, index) => ({
-  label: `${index + 1} years old`,
+  label: `${index + 1}`,
   value: index + 1,
 }));
 const isGuestPanelOpen = ref(false);
@@ -2665,6 +2666,7 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
+  align-items: flex-start;
 }
 .child-age-lbl {
   font-size: var(--font-size-caption);
@@ -4107,13 +4109,16 @@ onBeforeUnmount(() => {
 
 /* Child Age Select Premium */
 .child-age-select-premium {
-  width: 100% !important;
+  width: 96px !important;
+  max-width: 100% !important;
 }
 :deep(.child-age-select-premium.p-select) {
   background: var(--color-surface-2) !important;
   border: 1px solid var(--color-border) !important;
   border-radius: 10px !important;
   height: 38px !important;
+  width: 96px !important;
+  min-width: 96px !important;
   display: flex !important;
   align-items: center !important;
 }
@@ -4121,9 +4126,29 @@ onBeforeUnmount(() => {
   font-size: var(--font-size-body-sm) !important;
   font-weight: 600 !important;
   color: var(--color-text) !important;
-  padding: 0 10px !important;
+  padding: 0 8px !important;
+  text-align: center !important;
 }
 :deep(.child-age-select-premium .p-select-dropdown) {
-  width: 30px !important;
+  width: 26px !important;
+}
+:deep(.child-age-select-premium .p-select-overlay) {
+  width: 96px !important;
+  min-width: 96px !important;
+  max-width: 96px !important;
+}
+:deep(.child-age-overlay) {
+  width: 88px !important;
+  min-width: 88px !important;
+  max-width: 88px !important;
+}
+:deep(.child-age-select-premium .p-select-list) {
+  padding: 4px !important;
+}
+:deep(.child-age-select-premium .p-select-option) {
+  padding: 6px 8px !important;
+  font-size: 13px !important;
+  text-align: center !important;
+  border-radius: 6px !important;
 }
 </style>

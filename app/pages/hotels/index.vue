@@ -265,7 +265,7 @@ const loadingNextPage = ref(false)
 let infiniteObserver: IntersectionObserver | null = null
 
 const childAgeOptions = Array.from({ length: 17 }, (_, index) => ({
-  label: `${index + 1} years old`,
+  label: `${index + 1}`,
   value: index + 1,
 }))
 const checkOutMinDate = computed(() => {
@@ -793,7 +793,8 @@ watch([priceRange, selectedStars, sortBy], () => {
 
 .apply-btn:hover {
   transform: translateY(-1px);
-  filter: brightness(1.02);
+  filter: brightness(1.07);
+  box-shadow: 0 16px 28px rgba(0, 79, 81, 0.2);
 }
 
 .apply-btn:focus-visible {
@@ -811,10 +812,13 @@ watch([priceRange, selectedStars, sortBy], () => {
   font-size: 12px;
   cursor: pointer;
   text-decoration: underline;
+  border-radius: 8px;
+  transition: color 0.2s ease, background-color 0.2s ease;
 }
 
 .reset-btn:hover {
   color: var(--color-navy-500);
+  background: color-mix(in srgb, var(--color-gray-100) 65%, white 35%);
 }
 
 
@@ -950,9 +954,10 @@ watch([priceRange, selectedStars, sortBy], () => {
 :deep(.p-select-overlay) {
   background: white;
   border: 1px solid color-mix(in srgb, var(--color-gray-200) 76%, white 24%);
-  border-radius: 12px;
-  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
-  margin-top: 6px;
+  border-radius: 8px !important;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.1);
+  margin-top: 4px !important;
+  max-height: 240px !important;
   overflow: hidden;
   z-index: 1000;
 }
@@ -960,24 +965,27 @@ watch([priceRange, selectedStars, sortBy], () => {
 :deep(.destination-dropdown .p-select-overlay) {
   top: 100% !important;
   left: 0 !important;
-  min-width: 100%;
+  min-width: 100% !important;
   margin-top: 0;
   z-index: 1100;
 }
 
 :deep(.p-select-list) {
-  padding: 4px 0;
+  padding: 6px;
   list-style-type: none;
   margin: 0;
 }
 
 :deep(.p-select-option) {
-  padding: 8px 12px;
+  padding: 7px 10px;
   font-size: 13px;
   color: var(--color-gray-600);
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s, color 0.2s;
   font-weight: 600;
+  border-radius: 7px;
+  line-height: 1.25;
+  margin: 1px 0;
 }
 
 :deep(.p-select-option:hover),
@@ -987,8 +995,8 @@ watch([priceRange, selectedStars, sortBy], () => {
 }
 
 :deep(.p-select-option[data-p-selected="true"]) {
-  background: var(--color-primary-50);
-  color: var(--color-navy-500);
+  background: color-mix(in srgb, var(--color-primary-50) 78%, white 22%);
+  color: var(--color-primary-700);
   font-weight: 700;
 }
 
@@ -1265,11 +1273,11 @@ watch([priceRange, selectedStars, sortBy], () => {
 
 .guest-panel {
   position: absolute;
-  bottom: calc(100% + 0.5rem);
+  bottom: calc(100% - 1.5rem);
   top: auto;
   left: 0;
   width: 100%;
-  padding: 0.85rem;
+  padding: 16px;
   background: white;
   border: 1px solid color-mix(in srgb, var(--color-gray-200) 76%, white 24%);
   border-radius: 12px;
@@ -1333,6 +1341,12 @@ watch([priceRange, selectedStars, sortBy], () => {
   min-height: 2.1rem;
   color: var(--color-primary-600);
   cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.guest-counter-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-primary-50) 72%, white 28%);
+  color: var(--color-primary-700);
 }
 
 .guest-counter-btn:disabled {

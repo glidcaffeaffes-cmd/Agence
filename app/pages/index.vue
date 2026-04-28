@@ -429,7 +429,7 @@ const childAges = ref<number[]>([14]);
 const travelWithPets = ref(false);
 const quickStayOptions = [1, 2, 3, 7];
 const childAgeOptions = Array.from({ length: 17 }, (_, index) => ({
-  label: `${index + 1} years old`,
+  label: `${index + 1}`,
   value: index + 1,
 }));
 
