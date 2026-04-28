@@ -53,7 +53,7 @@
 
       <!-- Dropdown (same pattern as ClientNavbar's user-dropdown) -->
       <Transition name="dropdown">
-        <div v-if="showMenu" class="user-dropdown" @click.outside="showMenu = false">
+        <div v-if="showMenu" class="user-dropdown">
           <div class="dropdown-header">
             <div v-if="currentProfile?.photo" class="dropdown-avatar-wrap">
               <img :src="currentProfile.photo" alt="Avatar" class="dropdown-avatar" />
@@ -111,14 +111,20 @@ function handleSearch() {
 }
 
 // Close dropdown on outside click
+const closeDropdownOnOutsideClick = (e: MouseEvent) => {
+  const el = document.querySelector('.user-pill')
+  const dropdown = document.querySelector('.user-dropdown')
+  if (el && dropdown && !el.contains(e.target as Node) && !dropdown.contains(e.target as Node)) {
+    showMenu.value = false
+  }
+}
+
 onMounted(() => {
-  document.addEventListener('click', (e) => {
-    const el = document.querySelector('.user-pill')
-    const dropdown = document.querySelector('.user-dropdown')
-    if (el && dropdown && !el.contains(e.target as Node) && !dropdown.contains(e.target as Node)) {
-      showMenu.value = false
-    }
-  })
+  document.addEventListener('click', closeDropdownOnOutsideClick)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', closeDropdownOnOutsideClick)
 })
 </script>
 

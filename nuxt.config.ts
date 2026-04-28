@@ -25,6 +25,10 @@ export default defineNuxtConfig({
       include: [
         '@vue/devtools-core',
         '@vue/devtools-kit',
+        'firebase/app',
+        'firebase/auth',
+        'libphonenumber-js',
+        'libphonenumber-js/examples.mobile',
       ]
     }
   },
