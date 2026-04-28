@@ -15,7 +15,7 @@
           <p>Track your reservations, stay dates, and booking statuses.</p>
         </div>
         <NuxtLink to="/reservations/history" class="history-link">
-          Open detailed history
+          Open history & calendar
         </NuxtLink>
       </header>
 

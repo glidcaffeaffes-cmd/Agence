@@ -35,8 +35,8 @@ const hotelFallbackImages = [
   'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=1200',
 ]
 
-function inferRole(email: string): 'client' | 'admin' {
-  return email.toLowerCase().includes('admin') ? 'admin' : 'client'
+function mapAccountRole(role?: string | null): 'client' | 'admin' {
+  return String(role || '').toUpperCase() === 'ADMIN' ? 'admin' : 'client'
 }
 
 function normalizeDateInput(date?: string | null) {
@@ -246,7 +246,7 @@ export const AccountMapper = {
       password: '',
       registrationDate: dto.dateInscription,
       active: dto.actif,
-      role: dto.role ?? inferRole(dto.email),
+      role: mapAccountRole(dto.role),
     }
   },
 
@@ -255,6 +255,7 @@ export const AccountMapper = {
       email: model.email,
       motDePasse: model.password,
       actif: model.active,
+      role: model.role === 'admin' ? 'ADMIN' : 'CLIENT',
     }
   },
 
@@ -263,6 +264,7 @@ export const AccountMapper = {
       ...(model.email !== undefined && { email: model.email }),
       ...(model.password !== undefined && { motDePasse: model.password }),
       ...(model.active !== undefined && { actif: model.active }),
+      ...(model.role !== undefined && { role: model.role === 'admin' ? 'ADMIN' : 'CLIENT' }),
     }
   },
 }

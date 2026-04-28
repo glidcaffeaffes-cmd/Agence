@@ -8,6 +8,20 @@ export class MockAccountRepository implements IAccountRepository {
   private profiles: Profile[] = [...mockProfiles]
   private paymentMethods: PaymentMethod[] = []
 
+  async requestPasswordReset(_email: string): Promise<{ success: boolean; message: string }> {
+    return {
+      success: true,
+      message: 'If an account exists for this email, a reset link has been sent.',
+    }
+  }
+
+  async resetPassword(_token: string, _newPassword: string): Promise<{ success: boolean; message: string }> {
+    return {
+      success: true,
+      message: 'Password updated successfully.',
+    }
+  }
+
   async getAll(): Promise<Account[]> {
     return this.accounts
   }

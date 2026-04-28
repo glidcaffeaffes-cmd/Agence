@@ -1,6 +1,8 @@
 import type { Account, PaymentMethod, Profile } from '../models'
 
 export interface IAccountRepository {
+  requestPasswordReset(email: string): Promise<{ success: boolean; message: string }>
+  resetPassword(token: string, newPassword: string): Promise<{ success: boolean; message: string }>
   getAll(): Promise<Account[]>
   getById(id: number): Promise<Account | null>
   getByEmail(email: string): Promise<Account | null>
