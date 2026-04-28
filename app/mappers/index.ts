@@ -244,8 +244,8 @@ export const AccountMapper = {
       id: dto.id,
       email: dto.email,
       password: '',
-      registrationDate: dto.dateInscription,
-      active: dto.actif,
+      registrationDate: dto.dateInscription ?? new Date().toISOString(),
+      active: dto.actif ?? dto.active ?? true,
       role: dto.role ?? inferRole(dto.email),
     }
   },

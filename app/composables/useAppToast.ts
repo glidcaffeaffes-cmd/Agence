@@ -25,23 +25,26 @@ function normalizeSummary(severity: ToastSeverity) {
 }
 
 export function useAppToast() {
-  const toast = useToast()
-
   function show(payload: ToastPayload) {
     if (!import.meta.client) {
       return
     }
 
-    const message: ToastMessageOptions = {
-      group: 'app',
-      severity: payload.severity,
-      summary: payload.summary || normalizeSummary(payload.severity),
-      detail: payload.detail,
-      life: payload.sticky ? undefined : (payload.life ?? 4500),
-      sticky: payload.sticky ?? false,
-    }
+    try {
+      const toast = useToast()
+      const message: ToastMessageOptions = {
+        group: 'app',
+        severity: payload.severity,
+        summary: payload.summary || normalizeSummary(payload.severity),
+        detail: payload.detail,
+        life: payload.sticky ? undefined : (payload.life ?? 4500),
+        sticky: payload.sticky ?? false,
+      }
 
-    toast.add(message)
+      toast.add(message)
+    } catch {
+      // Do not break user flows if ToastService is temporarily unavailable.
+    }
   }
 
   function success(detail: string, summary = 'Success', life?: number) {

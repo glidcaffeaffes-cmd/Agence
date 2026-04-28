@@ -264,13 +264,25 @@ export class ApiAccountRepository implements IAccountRepository {
 
   async authenticate(email: string, password: string): Promise<Account | null> {
     try {
-      const dto = await apiRequest<AccountDTO>('/auth/login', {
+      const response = await apiRequest<AccountDTO | { account: AccountDTO }>('/auth/login', {
         method: 'POST',
         body: { email, password },
       })
+      const dto = ('account' in response ? response.account : response) as AccountDTO
       return AccountMapper.fromDto(dto)
-    } catch {
-      return null
+    } catch (error: any) {
+      const message = String(error?.message || '').toLowerCase()
+      const isInvalidCredentials =
+        message.includes('invalid credentials') ||
+        message.includes('invalid email or password') ||
+        message.includes('unauthorized') ||
+        message.includes('401')
+
+      if (isInvalidCredentials) {
+        return null
+      }
+
+      throw error
     }
   }
 
