@@ -177,6 +177,18 @@
                   <span class="detail-label">Account ID</span>
                   <strong>{{ selectedReservation.accountId }}</strong>
                 </div>
+                <div class="detail-item" v-if="selectedReservation.paymentStatus">
+                  <span class="detail-label">Payment Status</span>
+                  <strong>{{ selectedReservation.paymentStatus }}</strong>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Created At</span>
+                  <strong>{{ formatDateTime(selectedReservation.createdAt) }}</strong>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Updated At</span>
+                  <strong>{{ formatDateTime(selectedReservation.updatedAt) }}</strong>
+                </div>
               </div>
             </div>
             <div class="modal-footer">
@@ -216,7 +228,7 @@ const reservations = ref<Reservation[]>([])
 const hotels = ref<Hotel[]>([])
 const loading = ref(false)
 const error = ref<string | null>(null)
-const viewMode = ref<'table' | 'calendar'>('table')
+const viewMode = ref<'table' | 'calendar'>('calendar')
 const search = ref('')
 const statusFilter = ref<ReservationStatus | ''>('')
 const monthCursor = ref(currentMonthKey())
@@ -289,6 +301,10 @@ function hotelCity(hotelId: number) {
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(new Date(value))
+}
+
+function formatDateTime(value: string) {
+  return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(value))
 }
 
 function formatCurrency(value: number) {
@@ -471,6 +487,12 @@ onMounted(loadReservations)
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 15px;
+}
+
+@media (max-width: 600px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .detail-item {
