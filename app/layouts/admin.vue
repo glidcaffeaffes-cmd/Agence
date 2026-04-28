@@ -40,6 +40,10 @@
           <span class="material-symbols-outlined">handshake</span>
           <span>Partners</span>
         </NuxtLink>
+        <NuxtLink to="/admin/offers" active-class="nav-active" class="nav-item">
+          <span class="material-symbols-outlined">sell</span>
+          <span>Offers</span>
+        </NuxtLink>
         <NuxtLink to="/admin/complaints" active-class="nav-active" class="nav-item">
           <span class="material-symbols-outlined">forum</span>
           <span>Complaints</span>

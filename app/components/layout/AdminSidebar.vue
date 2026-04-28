@@ -37,6 +37,10 @@
           <i class="pi pi-users"></i>
           <span v-if="!collapsed">Partners</span>
         </NuxtLink>
+        <NuxtLink to="/admin/offers" class="sidebar-link" active-class="sidebar-link--active">
+          <i class="pi pi-tag"></i>
+          <span v-if="!collapsed">Offers</span>
+        </NuxtLink>
         <NuxtLink to="/admin/complaints" class="sidebar-link" active-class="sidebar-link--active">
           <i class="pi pi-exclamation-circle"></i>
           <span v-if="!collapsed">Complaints</span>
