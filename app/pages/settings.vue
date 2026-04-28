@@ -20,24 +20,22 @@
       <div class="profile-body">
         <!-- Main -->
         <main class="profile-main" style="flex: 1;">
-          <!-- ProfileSidebar commented out for debugging -->
-          <!-- <ProfileSidebar /> -->
-        <!-- Tabs -->
-        <div class="settings-tabs">
-          <button
-            v-for="tab in tabs"
-            :key="tab.key"
-            :class="['tab-button', { 'tab-button--active': activeTab === tab.key }]"
-            @click="activeTab = tab.key"
-          >
-            <span class="material-symbols-outlined">{{ tab.icon }}</span>
-            {{ tab.label }}
-          </button>
-        </div>
-        <p>Active tab: {{ activeTab }}</p>
+          <ClientOnly>
+            <!-- Tabs -->
+            <div class="settings-tabs">
+              <button
+                v-for="tab in tabs"
+                :key="tab.key"
+                :class="['tab-button', { 'tab-button--active': activeTab === tab.key }]"
+                @click="activeTab = tab.key"
+              >
+                <span class="material-symbols-outlined">{{ tab.icon }}</span>
+                {{ tab.label }}
+              </button>
+            </div>
 
-          <!-- Security Tab -->
-          <div v-if="activeTab === 'security'" class="content-card auth-card">
+            <!-- Security Tab -->
+            <div v-if="activeTab === 'security'" class="content-card auth-card">
             <div class="card-header">
               <div class="card-header__icon">
                 <span class="material-symbols-outlined">shield</span>
@@ -218,6 +216,7 @@
               </div>
             </div>
           </div>
+          </ClientOnly>
         </main>
       </div>
     </div>
