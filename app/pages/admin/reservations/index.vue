@@ -130,6 +130,72 @@
           </table>
         </div>
       </template>
+
+      <!-- Reservation Details Modal -->
+      <transition name="modal">
+        <div v-if="showDetailsModal && selectedReservation" class="modal-overlay" @click="closeDetails">
+          <div class="modal-content" @click.stop>
+            <div class="modal-header">
+              <h3>Reservation Details</h3>
+              <button @click="closeDetails" class="close-btn">
+                <span class="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="detail-grid">
+                <div class="detail-item">
+                  <span class="detail-label">Confirmation Code</span>
+                  <strong>{{ selectedReservation.confirmationCode }}</strong>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Hotel</span>
+                  <strong>{{ hotelName(selectedReservation.hotelId) }}</strong>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Location</span>
+                  <strong>{{ hotelCity(selectedReservation.hotelId) }}</strong>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Check-in</span>
+                  <strong>{{ formatDate(selectedReservation.checkInDate) }}</strong>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Check-out</span>
+                  <strong>{{ formatDate(selectedReservation.checkOutDate) }}</strong>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Total Amount</span>
+                  <strong>{{ formatCurrency(selectedReservation.totalAmount) }}</strong>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Status</span>
+                  <span class="status-pill" :class="statusClass(selectedReservation.status)">
+                    {{ formatStatus(selectedReservation.status) }}
+                  </span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Account ID</span>
+                  <strong>{{ selectedReservation.accountId }}</strong>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button @click="confirmReservation(selectedReservation.id)" class="btn-confirm" v-if="selectedReservation.status === 'PENDING'">
+                Confirm
+              </button>
+              <button @click="cancelReservation(selectedReservation.id)" class="btn-cancel">
+                Cancel
+              </button>
+              <button @click="deleteReservation(selectedReservation.id)" class="btn-delete">
+                Delete
+              </button>
+              <button @click="closeDetails" class="btn-close">
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </transition>
     </div>
   </div>
 </template>
@@ -154,6 +220,8 @@ const viewMode = ref<'table' | 'calendar'>('table')
 const search = ref('')
 const statusFilter = ref<ReservationStatus | ''>('')
 const monthCursor = ref(currentMonthKey())
+const showDetailsModal = ref(false)
+const selectedReservation = ref<Reservation | null>(null)
 
 const statusOptions = [
   { value: ReservationStatus.CONFIRMED, label: 'Confirmed' },
@@ -298,7 +366,13 @@ watch([search, statusFilter, monthCursor], () => {
 })
 
 function handleCalendarClick(entry: any) {
-  alert(`Reservation ID: ${entry.id}\nHotel: ${entry.title}\nCode: ${entry.subtitle}\nAmount: ${entry.amountLabel || 'N/A'}`)
+  selectedReservation.value = reservations.value.find(r => r.id === entry.id) || null
+  showDetailsModal.value = true
+}
+
+function closeDetails() {
+  showDetailsModal.value = false
+  selectedReservation.value = null
 }
 
 onMounted(loadReservations)
@@ -345,6 +419,127 @@ onMounted(loadReservations)
 .actions button:hover, .month-nav button:hover { background: #edf5fc; color: #006768; }
 .spin { animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #ddd;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-label {
+  font-size: 0.8rem;
+  color: #666;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.detail-item strong {
+  font-size: 1rem;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 20px;
+  border-top: 1px solid #ddd;
+}
+
+.btn-confirm, .btn-cancel, .btn-delete, .btn-close {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.btn-confirm {
+  background: #28a745;
+  color: white;
+}
+
+.btn-cancel {
+  background: #ffc107;
+  color: black;
+}
+
+.btn-delete {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-close {
+  background: #6c757d;
+  color: white;
+}
+
+.modal-enter-active, .modal-leave-active {
+  transition: opacity 0.3s;
+}
+
+.modal-enter-from, .modal-leave-to {
+  opacity: 0;
+}
+
+.modal-enter-active .modal-content, .modal-leave-active .modal-content {
+  transition: transform 0.3s;
+}
+
+.modal-enter-from .modal-content, .modal-leave-to .modal-content {
+  transform: scale(0.9);
+}
 @media (max-width: 980px) {
   .toolbar, .summary-grid { grid-template-columns: 1fr; }
   .month-nav strong { min-width: 110px; }
