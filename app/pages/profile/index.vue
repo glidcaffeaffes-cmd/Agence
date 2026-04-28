@@ -192,12 +192,9 @@
                                   v-if="selectedPhoneCountryData"
                                   :src="selectedPhoneCountryData.flagUrl"
                                   :alt="selectedPhoneCountryData.name"
-                                  class="phone-country-flag"
+                                  class="phone-country-flag phone-country-flag--trigger"
                                   loading="lazy"
                                 />
-                                <span class="phone-country-trigger__text">
-                                  {{ selectedPhoneCountryLabel }}
-                                </span>
                                 <span class="material-symbols-outlined">
                                   {{
                                     isPhoneCountryMenuOpen
@@ -762,11 +759,6 @@ const selectedPhoneCountryData = computed(
     phoneCountries.find((country) => country.code === defaultPhoneCountry) ||
     null,
 );
-const selectedPhoneCountryLabel = computed(() => {
-  const country = selectedPhoneCountryData.value;
-  if (!country) return "";
-  return country.code;
-});
 const selectedPhoneDialPrefix = computed(() => {
   const country = selectedPhoneCountryData.value;
   return country ? `+${country.dialCode}` : "";
@@ -1511,21 +1503,22 @@ function formatCardBrand(brand: PaymentMethod["brand"]) {
 }
 
 .phone-country-picker {
+  background-color: #ffffff !important;
   position: relative;
-  flex: 0 0 76px;
+  flex: 0 0 62px;
   z-index: 30;
-  border-right: 1.5px solid var(--color-border);
 }
 
 .phone-country-trigger {
   width: 100%;
   min-height: 52px;
-  padding: 8px;
+  padding: 8px 10px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  gap: 6px;
   background: transparent;
-  border: none;
+  border: 1.5px solid transparent;
   border-radius: 0;
   font-size: 11px;
   color: var(--color-text);
@@ -1539,7 +1532,8 @@ function formatCardBrand(brand: PaymentMethod["brand"]) {
 }
 
 .phone-country-trigger:hover {
-  background: #ffffff;
+  background: transparent;
+  border-color: var(--color-border);
 }
 
 .phone-country-trigger:focus {
@@ -1593,6 +1587,11 @@ function formatCardBrand(brand: PaymentMethod["brand"]) {
   object-fit: cover;
   flex-shrink: 0;
 }
+
+.phone-country-flag--trigger {
+  width: 28px;
+  height: 20px;
+}
 .input-icon-wrap {
   position: relative;
 }
@@ -1608,7 +1607,7 @@ function formatCardBrand(brand: PaymentMethod["brand"]) {
   background: transparent;
   padding-left: 72px;
   padding-right: 46px;
-  font-size: 18px;
+  font-size: 14px;
 }
 
 .form-input--phone:focus {
@@ -1632,7 +1631,7 @@ function formatCardBrand(brand: PaymentMethod["brand"]) {
   left: 14px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 800;
   color: var(--color-text-muted);
   pointer-events: none;
