@@ -15,7 +15,8 @@
           <span>Filtres</span>
         </div>
 
-        <div class="filter-section">
+        <div class="filters-scroll">
+          <div class="filter-section">
           <label class="filter-label">Prix par nuit</label>
           <div class="slider-wrapper">
             <Slider
@@ -30,9 +31,9 @@
               <span>{{ priceRange[1] }}€</span>
             </div>
           </div>
-        </div>
+          </div>
 
-        <div class="filter-section">
+          <div class="filter-section">
           <label class="filter-label">Classement</label>
           <div class="checkbox-group">
             <div v-for="star in [5, 4, 3]" :key="star" class="checkbox-field">
@@ -54,9 +55,9 @@
               </label>
             </div>
           </div>
-        </div>
+          </div>
 
-        <div class="filter-section filter-section--destination">
+          <div class="filter-section filter-section--destination">
           <label class="filter-label">Destination</label>
           <Select
             v-model="selectedCity"
@@ -67,11 +68,11 @@
             appendTo="self"
             class="full-width-select destination-dropdown"
           />
-        </div>
+          </div>
 
-        <div
-          class="filter-section filter-section--date filter-section--checkin"
-        >
+          <div
+            class="filter-section filter-section--date filter-section--checkin"
+          >
           <label class="filter-label">Check-in</label>
           <div class="date-picker-shell">
             <DatePicker
@@ -89,11 +90,11 @@
               >expand_more</span
             >
           </div>
-        </div>
+          </div>
 
-        <div
-          class="filter-section filter-section--date filter-section--checkout"
-        >
+          <div
+            class="filter-section filter-section--date filter-section--checkout"
+          >
           <label class="filter-label">Check-out</label>
           <div class="date-picker-shell">
             <DatePicker
@@ -111,14 +112,14 @@
               >expand_more</span
             >
           </div>
-        </div>
+          </div>
 
-        <div
-          class="filter-section filter-section--guests"
-          :class="{
-            'filter-section--guests-open': activeFilterPanel === 'guests',
-          }"
-        >
+          <div
+            class="filter-section filter-section--guests"
+            :class="{
+              'filter-section--guests-open': activeFilterPanel === 'guests',
+            }"
+          >
           <label class="filter-label">Guests & rooms</label>
           <button
             type="button"
@@ -236,6 +237,7 @@
               class="apply-btn guest-done-button"
               @click="activeFilterPanel = null"
             />
+          </div>
           </div>
         </div>
 
@@ -829,6 +831,31 @@ watch(
   .main-container {
     grid-template-columns: 1fr;
   }
+
+  .filters-sidebar {
+    position: static;
+    top: auto;
+    max-height: none;
+    overflow: visible;
+    padding-right: 20px;
+  }
+
+  .filters-scroll {
+    overflow: visible;
+    max-height: none;
+    padding-right: 0;
+    padding-bottom: 0;
+  }
+
+  .filter-actions {
+    position: static;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    margin-top: 20px;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
 }
 
 /* Filters Sidebar matched to User Mockup */
@@ -842,10 +869,35 @@ watch(
   border-radius: 16px;
   border: 1px solid color-mix(in srgb, var(--color-gray-200) 76%, white 24%);
   box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);
-  height: fit-content;
+  height: calc(100vh - 32px);
+  max-height: calc(100vh - 32px);
   position: sticky;
   top: 24px;
-  overflow: visible;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-right: 20px;
+  padding-bottom: 12px;
+  padding-left: 20px;
+  padding-top: 20px;
+}
+
+.filters-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: visible;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  padding-right: 6px;
+  padding-bottom: 120px;
+}
+
+.filters-scroll::-webkit-scrollbar {
+  display: none;
 }
 
 .sidebar-header {
@@ -929,6 +981,8 @@ watch(
 .slider-wrapper {
   padding-top: 8px;
   cursor: pointer;
+  width: calc(100% - 22px);
+  margin: 0 auto;
 }
 
 .slider-values {
@@ -970,10 +1024,24 @@ watch(
 /* Removed Toggle Switch CSS */
 
 .filter-actions {
-  margin-top: 32px;
+  margin-top: 0;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  position: absolute;
+  bottom: 0;
+  left: 20px;
+  right: 20px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, rgba(255, 255, 255, 0) 0%, transparent 100%) 0%,
+    rgba(255, 255, 255, 0.95) 22%,
+    rgba(255, 255, 255, 0.98) 100%
+  );
+  padding-top: 14px;
+  padding-bottom: 12px;
+  z-index: 30;
+  flex-shrink: 0;
 }
 
 .apply-btn {
@@ -997,6 +1065,7 @@ watch(
   transform: translateY(-1px);
   background: var(--color-primary-700);
   box-shadow: 0 16px 28px rgba(0, 79, 81, 0.2);
+  color: white;
 }
 
 .apply-btn:focus-visible {
@@ -1024,7 +1093,6 @@ watch(
 
 .reset-btn:hover {
   color: var(--color-navy-500);
-  background: color-mix(in srgb, var(--color-gray-100) 65%, white 35%);
 }
 
 /* Deep Customizations for PrimeVue Elements */

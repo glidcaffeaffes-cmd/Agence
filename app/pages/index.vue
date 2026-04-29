@@ -875,7 +875,14 @@ function formatDateForQuery(date: Date) {
 .hero-filter-search:hover {
   transform: translateY(-1px);
   background: var(--color-primary-700);
+  color: #fff !important;
   box-shadow: 0 18px 32px rgba(0, 80, 81, 0.38);
+}
+
+.hero-filter-search:hover :deep(.p-button-label),
+.hero-filter-search:hover :deep(.p-button-icon),
+.hero-filter-search:hover .material-symbols-outlined {
+  color: #fff !important;
 }
 
 .hero-filter-search :deep(.p-button-label),
@@ -1556,10 +1563,29 @@ function formatDateForQuery(date: Date) {
   box-shadow: 0 10px 20px rgba(0, 80, 81, 0.28) !important;
 }
 
+.guest-apply-button :deep(.p-button-label),
+.guest-apply-button :deep(.p-button-icon),
+.guest-apply-button .material-symbols-outlined {
+  color: #fff !important;
+}
+
 .guest-apply-button:hover {
   transform: translateY(-1px);
   background: var(--color-primary-700) !important;
+  color: #fff !important;
   box-shadow: 0 14px 24px rgba(0, 80, 81, 0.34) !important;
+}
+
+.guest-apply-button:hover :deep(.p-button-label),
+.guest-apply-button:hover :deep(.p-button-icon),
+.guest-apply-button:hover .material-symbols-outlined {
+  color: #fff !important;
+}
+
+.guest-apply-button:focus-visible :deep(.p-button-label),
+.guest-apply-button:focus-visible :deep(.p-button-icon),
+.guest-apply-button:focus-visible .material-symbols-outlined {
+  color: #fff !important;
 }
 
 .section-container {

@@ -532,8 +532,9 @@
                     <button
                       v-if="room.status === 'AVAILABLE'"
                       class="book-btn-outline"
+                      @click="handleReserveFromCard(room)"
                     >
-                      Select
+                      Reserver
                     </button>
                     <button v-else class="book-btn-outline disabled">
                       Unavailable
@@ -1905,6 +1906,18 @@ function prefillBookingForm() {
   bookingForm.value.email = currentProfile.value?.email?.trim() ?? "";
   bookingForm.value.phone = currentProfile.value?.phone?.trim() ?? "";
   bookingForm.value.specialRequests = "";
+}
+
+function handleReserveFromCard(room: any) {
+  const roomForBooking = {
+    ...room,
+    title: room.title ?? room.type ?? "Room",
+    image:
+      room.image ||
+      "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=400&q=80",
+  } as HotelAvailableRoomOption;
+
+  handleReserveNow(roomForBooking);
 }
 
 function handleReserveNow(room: HotelAvailableRoomOption) {
@@ -3336,14 +3349,13 @@ onBeforeUnmount(() => {
 
 /* ── Property Content ────────────────────────────────────────────────── */
 .content-section {
-  padding: var(--space-12) 0;
   border-bottom: 1px solid var(--color-border-soft);
 }
 .section-title {
   font-size: var(--font-size-h3);
   font-weight: var(--font-weight-bold);
   color: var(--color-heading);
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-5);
 }
 .hotel-description {
   font-size: var(--font-size-body-md);
@@ -3382,14 +3394,14 @@ onBeforeUnmount(() => {
 /* ── Rooms Grid ──────────────────────────────────────────────────────── */
 .rooms-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 24px;
-  margin-bottom: 40px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 32px;
 }
 .premium-room-card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-3xl);
+  border-radius: var(--radius-2xl);
   overflow: hidden;
   transition:
     transform var(--duration-normal) var(--easing-standard),
@@ -3402,7 +3414,7 @@ onBeforeUnmount(() => {
   box-shadow: var(--shadow-card-hover);
 }
 .room-image {
-  height: 200px;
+  height: 160px;
   overflow: hidden;
 }
 .room-image img {
@@ -3415,32 +3427,32 @@ onBeforeUnmount(() => {
   transform: scale(1.08);
 }
 .room-content {
-  padding: var(--space-6);
+  padding: var(--space-4);
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 .room-header h3 {
-  font-size: var(--font-size-title-md);
+  font-size: var(--font-size-title-sm);
   font-weight: var(--font-weight-bold);
   color: var(--color-heading);
-  margin: 0 0 var(--space-3);
+  margin: 0 0 var(--space-2);
 }
 .room-features {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  margin-bottom: var(--space-6);
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
 }
 .room-features span {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  font-size: var(--font-size-body-sm);
+  font-size: var(--font-size-body-xs);
   color: var(--color-text-soft);
 }
 .room-features .material-symbols-outlined {
-  font-size: 20px;
+  font-size: 18px;
   color: var(--color-primary);
 }
 .room-footer {
@@ -3457,7 +3469,7 @@ onBeforeUnmount(() => {
   gap: var(--space-1);
 }
 .price-val {
-  font-size: var(--font-size-title-md);
+  font-size: var(--font-size-title-sm);
   font-weight: var(--font-weight-bold);
   color: var(--color-primary-600);
 }
@@ -3473,18 +3485,18 @@ onBeforeUnmount(() => {
   border: 1px solid var(--color-primary-500);
   background: var(--color-surface);
   color: var(--color-primary-700);
-  padding: 11px 22px;
+  padding: 8px 16px;
   border-radius: var(--radius-lg);
   font-weight: var(--font-weight-bold);
-  font-size: var(--font-size-body-md);
+  font-size: var(--font-size-body-sm);
   cursor: pointer;
   transition: var(--transition-hover);
   white-space: nowrap;
   box-shadow: var(--shadow-xs);
 }
 .book-btn-outline:hover:not(.disabled) {
-  background: var(--color-primary-50);
-  color: var(--color-primary-700);
+  background: var(--color-primary-700);
+  color: #fff;
   border-color: var(--color-primary-600);
   transform: translateY(-1px);
   box-shadow: var(--shadow-sm);
@@ -3493,6 +3505,24 @@ onBeforeUnmount(() => {
   border-color: var(--color-disabled);
   color: var(--color-disabled-text);
   cursor: not-allowed;
+}
+
+@media (max-width: 1400px) {
+  .rooms-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1024px) {
+  .rooms-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .rooms-list {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ── Map ────────────────────────────────────────────────────────────── */
