@@ -148,11 +148,13 @@ a:hover {
 /* PrimeVue Toast */
 .app-toast.p-toast {
   z-index: var(--z-toast);
+  width: 400px;
+  max-width: calc(100vw - 24px);
 }
 
 .app-toast .app-toast__message.p-toast-message {
-  margin-bottom: var(--space-3);
-  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-2);
+  border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-lg);
   overflow: hidden;
@@ -163,32 +165,32 @@ a:hover {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: start;
-  column-gap: var(--space-3);
-  padding: var(--space-4) var(--space-4) var(--space-4) var(--space-4);
+  column-gap: var(--space-2);
+  padding: 12px 14px;
 }
 
 .app-toast .app-toast__text.p-toast-message-text {
   margin: 0;
   display: grid;
-  row-gap: var(--space-1);
+  row-gap: 4px;
 }
 
 .app-toast .app-toast__summary.p-toast-summary {
   font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-body-lg);
+  font-size: 16px;
   line-height: var(--line-height-tight);
 }
 
 .app-toast .app-toast__detail.p-toast-detail {
   margin: 0;
   color: var(--color-text-soft);
-  font-size: var(--font-size-body-md);
+  font-size: 13px;
   line-height: var(--line-height-normal);
 }
 
 .app-toast .app-toast__close.p-toast-close-button {
-  width: var(--space-8);
-  height: var(--space-8);
+  width: 30px;
+  height: 30px;
   border-radius: var(--radius-full);
   color: inherit;
 }
@@ -218,7 +220,7 @@ a:hover {
 }
 
 .app-toast .p-toast-icon-close {
-  font-size: var(--font-size-body-md);
+  font-size: 14px;
 }
 
 .app-toast .p-toast-message-enter-active,
