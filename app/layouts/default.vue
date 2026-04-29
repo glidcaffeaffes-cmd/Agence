@@ -6,6 +6,9 @@
     </main>
     <ClientFooter v-if="!hideFooter" />
     <AuthPromptModal />
+    <ClientOnly>
+      <ChatWidget />
+    </ClientOnly>
   </div>
 </template>
 
