@@ -60,6 +60,18 @@ function clearLegacyStoredIds(accountId: number) {
   }
 }
 
+function writeLegacyStoredIds(accountId: number, ids: number[]) {
+  if (typeof window === 'undefined' || accountId <= 0) {
+    return
+  }
+
+  try {
+    window.localStorage.setItem(getLegacyStorageKey(accountId), JSON.stringify(ids))
+  } catch {
+    // Ignore legacy-storage persistence failures.
+  }
+}
+
 type WishlistAction = 'saved' | 'removed' | 'noop' | 'blocked' | 'error'
 
 interface WishlistResult {
@@ -145,10 +157,16 @@ export function useWishlist() {
 
       clearLegacyStoredIds(currentAccountId)
       hydratedAccountId.value = currentAccountId
-    } catch {
+    } catch (cause: any) {
       // Keep UI stable if wishlist API is temporarily unavailable.
-      hotelIds.value = []
-      hydratedAccountId.value = 0
+      // Fallback to local persistence when backend wishlist routes are missing.
+      if (cause?.message?.includes('/wishlist')) {
+        hotelIds.value = readLegacyStoredIds(currentAccountId)
+        hydratedAccountId.value = currentAccountId
+      } else {
+        hotelIds.value = []
+        hydratedAccountId.value = 0
+      }
     } finally {
       wishlistHydrationPromise = null
     }
@@ -229,6 +247,17 @@ export function useWishlist() {
         message: 'Hotel saved to your wishlist.',
       }
     } catch (cause: any) {
+      if (cause?.message?.includes('/wishlist')) {
+        hotelIds.value = [...hotelIds.value, normalizedId]
+        writeLegacyStoredIds(accountId.value, hotelIds.value)
+        toastSuccess('Hotel saved to your wishlist.')
+        return {
+          success: true,
+          action: 'saved',
+          message: 'Hotel saved to your wishlist.',
+        }
+      }
+
       const message = cause?.message || 'Unable to save wishlist. Please try again.'
       toastError(message)
       return { success: false, action: 'error', message }
@@ -290,6 +319,17 @@ export function useWishlist() {
         message: 'Hotel removed from your wishlist.',
       }
     } catch (cause: any) {
+      if (cause?.message?.includes('/wishlist')) {
+        hotelIds.value = hotelIds.value.filter((item) => item !== normalizedId)
+        writeLegacyStoredIds(accountId.value, hotelIds.value)
+        toastInfo('Hotel removed from your wishlist.')
+        return {
+          success: true,
+          action: 'removed',
+          message: 'Hotel removed from your wishlist.',
+        }
+      }
+
       const message = cause?.message || 'Unable to update wishlist. Please try again.'
       toastError(message)
       return { success: false, action: 'error', message }

@@ -442,6 +442,7 @@ export const OfferMapper = {
       id: dto.id,
       hotelId: dto.hotelId,
       hotelName: dto.hotel?.nom,
+      hotelCity: dto.hotel?.ville,
       title: dto.titre,
       description: dto.description ?? '',
       discountRate: dto.tauxRemise,

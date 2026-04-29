@@ -252,7 +252,11 @@ async function saveOffer() {
     closeModal()
     await refresh()
   } catch (cause: any) {
-    modalError.value = cause?.message || 'Unable to save this offer.'
+    const message = cause?.message || 'Unable to save this offer.'
+    modalError.value =
+      message === 'An active offer already exists for this hotel in the selected date range.'
+        ? ''
+        : message
   }
 }
 

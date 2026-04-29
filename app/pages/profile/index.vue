@@ -337,7 +337,7 @@
                   <div class="form-actions">
                     <button
                       type="submit"
-                      :disabled="loading"
+                      :disabled="loading || !hasProfileChanges"
                       class="btn-update"
                     >
                       {{ loading ? "Updating..." : "Update Profile" }}
@@ -454,7 +454,7 @@
                   <div class="form-actions">
                     <button
                       type="submit"
-                      :disabled="loading"
+                      :disabled="loading || !hasProfileChanges"
                       class="btn-update"
                     >
                       Update Preferences
@@ -870,6 +870,7 @@ const formData = ref({
   preferredDestinations: [] as string[],
   travelPreferences: [] as string[],
 });
+const initialProfileSignature = ref("");
 const PASSPORT_MIN_LENGTH = 6;
 const PASSPORT_MAX_LENGTH = 9;
 
@@ -879,6 +880,57 @@ function sanitizePassportInput(value: string) {
     .replace(/[^A-Z0-9]/g, "")
     .slice(0, PASSPORT_MAX_LENGTH);
 }
+
+function normalizeProfileDraft() {
+  const firstName = formData.value.firstName.trim();
+  const lastName = formData.value.lastName.trim();
+  const phone = normalizePhoneForSave(formData.value.phone);
+  const dateOfBirth = formData.value.dateOfBirth.trim();
+  const passportNumber = sanitizePassportInput(formData.value.passportNumber.trim());
+  const bio = formData.value.bio.trim();
+  const preferredDestinations = formData.value.preferredDestinations
+    .map((city) => city.trim())
+    .filter(Boolean);
+  const travelPreferences = formData.value.travelPreferences
+    .map((pref) => pref.trim())
+    .filter(Boolean);
+
+  return {
+    firstName,
+    lastName,
+    phone,
+    dateOfBirth,
+    passportNumber,
+    bio,
+    preferredDestinations,
+    travelPreferences,
+  };
+}
+
+function buildProfileUpdatePayload() {
+  const normalized = normalizeProfileDraft();
+
+  return {
+    firstName: normalized.firstName,
+    lastName: normalized.lastName,
+    ...(normalized.phone ? { phone: normalized.phone } : {}),
+    ...(normalized.dateOfBirth ? { dateOfBirth: normalized.dateOfBirth } : {}),
+    ...(normalized.passportNumber
+      ? { passportNumber: normalized.passportNumber }
+      : {}),
+    ...(normalized.bio ? { bio: normalized.bio } : {}),
+    preferredDestinations: normalized.preferredDestinations,
+    travelPreferences: normalized.travelPreferences,
+  };
+}
+
+function profileSignatureFromDraft() {
+  return JSON.stringify(normalizeProfileDraft());
+}
+
+const hasProfileChanges = computed(
+  () => profileSignatureFromDraft() !== initialProfileSignature.value,
+);
 
 const phoneValidationMessage = computed(() => {
   const digits = formData.value.phone.replace(/\D/g, "");
@@ -957,12 +1009,17 @@ watch(
         reservation: profile.notificationsReservation,
         promotion: profile.notificationsPromotion,
       };
+      initialProfileSignature.value = profileSignatureFromDraft();
     }
   },
   { immediate: true },
 );
 
 async function saveProfile() {
+  if (!hasProfileChanges.value) {
+    return;
+  }
+
   if (formData.value.phone && phoneValidationMessage.value) {
     toastWarn(phoneValidationMessage.value);
     return;
@@ -972,18 +1029,9 @@ async function saveProfile() {
     return;
   }
 
-  const success = await updateProfile({
-    ...formData.value,
-    phone: normalizePhoneForSave(formData.value.phone),
-    firstName: formData.value.firstName.trim(),
-    lastName: formData.value.lastName.trim(),
-    passportNumber: sanitizePassportInput(formData.value.passportNumber.trim()),
-    bio: formData.value.bio.trim(),
-    preferredDestinations: formData.value.preferredDestinations
-      .map((city) => city.trim())
-      .filter(Boolean),
-  });
+  const success = await updateProfile(buildProfileUpdatePayload());
   if (success) {
+    initialProfileSignature.value = profileSignatureFromDraft();
     toastSuccess("Profile updated successfully.");
   } else {
     toastError("Failed to update profile. Please try again.");
@@ -1374,6 +1422,13 @@ function formatCardBrand(brand: PaymentMethod["brand"]) {
 .btn-update:hover {
   background: var(--color-primary-700);
   transform: translateY(-1px);
+}
+
+.btn-update:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .btn-update .material-symbols-outlined {

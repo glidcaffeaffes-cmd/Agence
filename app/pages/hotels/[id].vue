@@ -544,166 +544,239 @@
             </div>
           </section>
 
-          <!-- Location / Map -->
-          <section class="content-section">
-            <h2 class="section-title">Location</h2>
-            <div class="map-container-wrapper">
-              <div class="map-info-card">
-                <div class="map-icon-box">
-                  <span class="material-symbols-outlined">location_on</span>
-                </div>
-                <div class="map-address-details">
-                  <h3>Property Address</h3>
-                  <p>
-                    {{ hotel.address }}, {{ hotel.city }}, {{ hotel.country }}
+          <div class="location-reviews-grid">
+            <!-- Reviews -->
+            <section class="content-section no-border border-0 reviews-column">
+              <div class="reviews-header-advanced">
+                <div>
+                  <h2 class="section-title m-0">Guest Reviews</h2>
+                  <p class="reviews-subtitle">
+                    Average based on {{ reviews.length }} verified reviews
                   </p>
                 </div>
-              </div>
-              <div class="map-iframe-holder">
-                <iframe
-                  v-if="hotel.latitude && hotel.longitude"
-                  width="100%"
-                  height="450"
-                  style="border: 0; border-radius: 20px"
-                  loading="lazy"
-                  allowfullscreen
-                  referrerpolicy="no-referrer-when-downgrade"
-                  :src="`https://maps.google.com/maps?q=${hotel.latitude},${hotel.longitude}&t=&z=15&ie=UTF8&iwloc=&output=embed`"
-                ></iframe>
-                <iframe
-                  v-else
-                  width="100%"
-                  height="450"
-                  style="border: 0; border-radius: 20px"
-                  loading="lazy"
-                  allowfullscreen
-                  referrerpolicy="no-referrer-when-downgrade"
-                  :src="`https://maps.google.com/maps?q=${encodeURIComponent(hotel.address + ', ' + hotel.city)}&t=&z=15&ie=UTF8&iwloc=&output=embed`"
-                ></iframe>
-              </div>
-            </div>
-          </section>
-
-          <!-- Reviews -->
-          <section class="content-section no-border border-0">
-            <div class="reviews-header-advanced">
-              <div>
-                <h2 class="section-title m-0">Guest Reviews</h2>
-                <p class="reviews-subtitle">
-                  Average based on {{ reviews.length }} verified reviews
-                </p>
-              </div>
-              <div class="global-rating-block">
-                <span class="rating-score">{{
-                  (
-                    reviews.reduce((sum, r) => sum + r.rating, 0) /
-                      reviews.length || 0
-                  ).toFixed(1)
-                }}</span>
-                <div class="rating-context">
-                  <div class="stars-gold">
-                    <span v-for="i in 5" class="material-symbols-outlined"
-                      >star</span
-                    >
-                  </div>
-                  <span>Excellent</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Write a Review Form -->
-            <div class="feedback-form-container">
-              <h3 class="subsection-title">Write a Review</h3>
-              <div class="feedback-card">
-                <div class="rating-selector mb-3">
-                  <span class="rating-label">Your rating:</span>
-                  <div class="stars-interactive">
-                    <span
-                      v-for="i in 5"
-                      :key="'star-' + i"
-                      class="material-symbols-outlined star-btn"
-                      :class="{ active: i <= newReviewRating }"
-                      @click="newReviewRating = i"
-                      >star</span
-                    >
+                <div class="global-rating-block">
+                  <span class="rating-score">{{
+                    (
+                      reviews.reduce((sum, r) => sum + r.rating, 0) /
+                        reviews.length || 0
+                    ).toFixed(1)
+                  }}</span>
+                  <div class="rating-context">
+                    <div class="stars-gold">
+                      <span v-for="i in 5" class="material-symbols-outlined"
+                        >star</span
+                      >
+                    </div>
+                    <span>Excellent</span>
                   </div>
                 </div>
-                <textarea
-                  v-model="newReviewText"
-                  class="feedback-textarea"
-                  placeholder="Share your experience at this property..."
-                  rows="4"
-                ></textarea>
-                <div class="feedback-actions">
-                  <p v-if="submitSuccess" class="submit-success-msg">
-                    <span class="material-symbols-outlined">check_circle</span>
-                    Your review was submitted!
-                  </p>
-                  <button
-                    class="submit-review-btn"
-                    @click="handleSubmitReview"
-                    :disabled="!newReviewText.trim() || submitting"
+              </div>
+
+              <!-- Write a Review Form -->
+              <div class="feedback-form-container">
+                <h3 class="subsection-title">Write a Review</h3>
+                <div class="feedback-card">
+                  <div class="rating-selector mb-3">
+                    <span class="rating-label">Your rating:</span>
+                    <div class="stars-interactive">
+                      <span
+                        v-for="i in 5"
+                        :key="'star-' + i"
+                        class="material-symbols-outlined star-btn"
+                        :class="{ active: i <= newReviewRating }"
+                        @click="newReviewRating = i"
+                        >star</span
+                      >
+                    </div>
+                  </div>
+                  <textarea
+                    v-model="newReviewText"
+                    class="feedback-textarea"
+                    placeholder="Share your experience at this property..."
+                    rows="4"
+                  ></textarea>
+                  <div class="feedback-actions">
+                    <button
+                      class="submit-review-btn"
+                      @click="handleSubmitReview"
+                      :disabled="!newReviewText.trim() || submitting"
+                    >
+                      {{ submitting ? "Submitting..." : "Submit Review" }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Reviews List -->
+              <div class="all-reviews-section" v-if="reviews.length > 0">
+                <div class="reviews-list">
+                  <div
+                    class="review-card"
+                    v-for="review in visibleReviews"
+                    :key="review.id"
                   >
-                    {{ submitting ? "Submitting..." : "Submit Review" }}
-                  </button>
+                    <div class="reviewer-prof">
+                      <div class="avatar-circle">
+                        {{
+                          (review.authorName || String(review.accountId))
+                            .charAt(0)
+                            .toUpperCase()
+                        }}
+                      </div>
+                      <div class="reviewer-meta">
+                        <div class="reviewer-head">
+                          <strong>{{
+                            review.authorName || `Guest #${review.accountId}`
+                          }}</strong>
+                          <div class="review-stars-small">
+                            <span
+                              v-for="s in 5"
+                              :key="s"
+                              class="material-symbols-outlined"
+                              :class="{ active: s <= review.rating }"
+                              >star</span
+                            >
+                            <span class="review-rating-text"
+                              >{{ review.rating }}/5</span
+                            >
+                          </div>
+                        </div>
+                        <span>{{
+                          new Date(review.publicationDate).toLocaleDateString(
+                            "en-US",
+                            { year: "numeric", month: "long", day: "numeric" },
+                          )
+                        }}</span>
+                      </div>
+                    </div>
+                    <p class="review-body">{{ review.comment }}</p>
+                  </div>
                 </div>
-              </div>
-            </div>
-
-            <!-- All Reviews List -->
-            <div class="all-reviews-section" v-if="reviews.length > 0">
-              <h3 class="subsection-title">
-                All Reviews ({{ reviews.length }})
-              </h3>
-              <div class="reviews-list">
-                <div
-                  class="review-card"
-                  v-for="review in reviews"
-                  :key="review.id"
+                <button
+                  v-if="reviews.length > MAX_REVIEWS_PREVIEW"
+                  type="button"
+                  class="show-more-reviews-btn"
+                  @click="showAllReviewsModal = true"
                 >
-                  <div class="reviewer-prof">
-                    <div class="avatar-circle">
-                      {{
-                        (review.authorName || String(review.accountId))
-                          .charAt(0)
-                          .toUpperCase()
-                      }}
-                    </div>
-                    <div class="reviewer-meta">
-                      <strong>{{
-                        review.authorName || `Guest #${review.accountId}`
-                      }}</strong>
-                      <span>{{
-                        new Date(review.publicationDate).toLocaleDateString(
-                          "en-US",
-                          { year: "numeric", month: "long", day: "numeric" },
-                        )
-                      }}</span>
-                    </div>
+                  Show More Reviews
+                </button>
+              </div>
+              <div v-else class="no-reviews-msg">
+                <span class="material-symbols-outlined">rate_review</span>
+                <p>No reviews yet. Be the first to share your experience!</p>
+              </div>
+            </section>
+
+            <!-- Location / Map -->
+            <section class="content-section location-column">
+              <h2 class="section-title">Location</h2>
+              <div class="map-container-wrapper">
+                <div class="map-info-card">
+                  <div class="map-icon-box">
+                    <span class="material-symbols-outlined">location_on</span>
                   </div>
-                  <div class="review-stars-small">
-                    <span
-                      v-for="s in 5"
-                      :key="s"
-                      class="material-symbols-outlined"
-                      :class="{ active: s <= review.rating }"
-                      >star</span
-                    >
-                    <span class="review-rating-text"
-                      >{{ review.rating }}/5</span
-                    >
+                  <div class="map-address-details">
+                    <h3>Property Address</h3>
+                    <p>
+                      {{ hotel.address }}, {{ hotel.city }}, {{ hotel.country }}
+                    </p>
                   </div>
-                  <p class="review-body">{{ review.comment }}</p>
+                </div>
+                <div class="map-iframe-holder">
+                  <iframe
+                    v-if="hotel.latitude && hotel.longitude"
+                    width="100%"
+                    height="450"
+                    style="border: 0; border-radius: 20px"
+                    loading="lazy"
+                    allowfullscreen
+                    referrerpolicy="no-referrer-when-downgrade"
+                    :src="`https://maps.google.com/maps?q=${hotel.latitude},${hotel.longitude}&t=&z=15&ie=UTF8&iwloc=&output=embed`"
+                  ></iframe>
+                  <iframe
+                    v-else
+                    width="100%"
+                    height="450"
+                    style="border: 0; border-radius: 20px"
+                    loading="lazy"
+                    allowfullscreen
+                    referrerpolicy="no-referrer-when-downgrade"
+                    :src="`https://maps.google.com/maps?q=${encodeURIComponent(hotel.address + ', ' + hotel.city)}&t=&z=15&ie=UTF8&iwloc=&output=embed`"
+                  ></iframe>
                 </div>
               </div>
-            </div>
-            <div v-else class="no-reviews-msg">
-              <span class="material-symbols-outlined">rate_review</span>
-              <p>No reviews yet. Be the first to share your experience!</p>
-            </div>
-          </section>
+            </section>
+          </div>
         </main>
       </div>
+
+      <Teleport to="body">
+        <transition name="reviews-modal-fade">
+          <div
+            v-if="showAllReviewsModal"
+            class="reviews-modal-overlay"
+            @click.self="showAllReviewsModal = false"
+          >
+            <section class="reviews-modal-shell" @click.stop>
+              <header class="reviews-modal-header">
+                <h3>All Reviews ({{ reviews.length }})</h3>
+                <button
+                  type="button"
+                  class="reviews-modal-close"
+                  @click="showAllReviewsModal = false"
+                >
+                  <span class="material-symbols-outlined">close</span>
+                </button>
+              </header>
+              <div class="reviews-modal-body">
+                <div class="reviews-list">
+                  <div
+                    class="review-card"
+                    v-for="review in reviews"
+                    :key="`modal-${review.id}`"
+                  >
+                    <div class="reviewer-prof">
+                      <div class="avatar-circle">
+                        {{
+                          (review.authorName || String(review.accountId))
+                            .charAt(0)
+                            .toUpperCase()
+                        }}
+                      </div>
+                      <div class="reviewer-meta">
+                        <div class="reviewer-head">
+                          <strong>{{
+                            review.authorName || `Guest #${review.accountId}`
+                          }}</strong>
+                          <div class="review-stars-small">
+                            <span
+                              v-for="s in 5"
+                              :key="s"
+                              class="material-symbols-outlined"
+                              :class="{ active: s <= review.rating }"
+                              >star</span
+                            >
+                            <span class="review-rating-text"
+                              >{{ review.rating }}/5</span
+                            >
+                          </div>
+                        </div>
+                        <span>{{
+                          new Date(review.publicationDate).toLocaleDateString(
+                            "en-US",
+                            { year: "numeric", month: "long", day: "numeric" },
+                          )
+                        }}</span>
+                      </div>
+                    </div>
+                    <p class="review-body">{{ review.comment }}</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </transition>
+      </Teleport>
 
       <Teleport to="body">
         <transition name="availability-drawer">
@@ -893,7 +966,10 @@
                   <div class="payment-option-grid">
                     <label
                       class="payment-option-item"
-                      :class="{ 'payment-option-item--active': selectedPaymentOption === 'PAY_NOW' }"
+                      :class="{
+                        'payment-option-item--active':
+                          selectedPaymentOption === 'PAY_NOW',
+                      }"
                     >
                       <input
                         v-model="selectedPaymentOption"
@@ -909,7 +985,10 @@
 
                     <label
                       class="payment-option-item"
-                      :class="{ 'payment-option-item--active': selectedPaymentOption === 'PAY_AT_HOTEL' }"
+                      :class="{
+                        'payment-option-item--active':
+                          selectedPaymentOption === 'PAY_AT_HOTEL',
+                      }"
                     >
                       <input
                         v-model="selectedPaymentOption"
@@ -1353,6 +1432,11 @@ function handleLightboxKeydown(e: KeyboardEvent) {
   if (e.key === "Escape") closeLightbox();
 }
 const loading = ref(true);
+const MAX_REVIEWS_PREVIEW = 2;
+const showAllReviewsModal = ref(false);
+const visibleReviews = computed(() =>
+  reviews.value.slice(0, MAX_REVIEWS_PREVIEW),
+);
 
 const newReviewText = ref("");
 const newReviewRating = ref(5);
@@ -1601,7 +1685,8 @@ const isAnyModalOpen = computed(
     showRoomsDrawer.value ||
     showBookingDrawer.value ||
     showBookingSuccess.value ||
-    showRoomUnavailable.value,
+    showRoomUnavailable.value ||
+    showAllReviewsModal.value,
 );
 
 watch(
@@ -1644,6 +1729,7 @@ function handleGlobalKeydown(event: KeyboardEvent) {
   showBookingDrawer.value = false;
   showBookingSuccess.value = false;
   showRoomUnavailable.value = false;
+  showAllReviewsModal.value = false;
   redirectingToPayment.value = false;
 }
 
@@ -2643,6 +2729,12 @@ onBeforeUnmount(() => {
 .guest-done-button:hover {
   background: var(--color-primary-dark);
 }
+.all-reviews-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
 
 /* Child age selectors */
 .child-ages-section {
@@ -3137,7 +3229,7 @@ onBeforeUnmount(() => {
   overflow: hidden;
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
-  margin-bottom: 20px;
+  margin-bottom: 0;
 }
 .map-info-card {
   display: flex;
@@ -3175,12 +3267,35 @@ onBeforeUnmount(() => {
   padding: 12px;
 }
 
+.location-reviews-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-8);
+  align-items: start;
+}
+
+.location-column,
+.reviews-column {
+  align-self: start;
+}
+
+.reviews-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.location-column.content-section,
+.reviews-column.content-section {
+  padding-top: var(--space-8);
+  padding-bottom: var(--space-8);
+}
+
 /* ── Reviews ─────────────────────────────────────────────────────────── */
 .reviews-header-advanced {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 32px;
+  margin-bottom: var(--space-5);
   gap: 24px;
 }
 .reviews-subtitle {
@@ -3227,10 +3342,11 @@ onBeforeUnmount(() => {
 .reviews-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
+  gap: var(--space-3);
+  width: 100%;
 }
 .review-card {
-  padding: var(--space-6);
+  padding: var(--space-4);
   background: var(--color-surface);
   border: 1px solid var(--color-border-soft);
   border-radius: var(--radius-2xl);
@@ -3244,7 +3360,7 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   gap: var(--space-4);
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-2);
 }
 .avatar-circle {
   width: 44px;
@@ -3263,6 +3379,12 @@ onBeforeUnmount(() => {
   font-size: var(--font-size-body-md);
   color: var(--color-heading);
 }
+.reviewer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
 .reviewer-meta span {
   font-size: var(--font-size-caption);
   color: var(--color-text-muted);
@@ -3270,7 +3392,8 @@ onBeforeUnmount(() => {
 .review-stars-small {
   display: flex;
   gap: var(--space-1);
-  margin-bottom: var(--space-3);
+  margin-bottom: 0;
+  flex-shrink: 0;
 }
 .review-stars-small .material-symbols-outlined {
   font-size: 16px;
@@ -3282,14 +3405,16 @@ onBeforeUnmount(() => {
 }
 .review-body {
   font-size: var(--font-size-body-md);
-  line-height: 1.7;
+  line-height: 1.55;
   color: var(--color-text-soft);
+  margin: 0;
+  margin-top: var(--space-1);
 }
 
 /* Feedback Form */
 .feedback-form-container {
-  margin-top: var(--space-10);
-  padding-top: var(--space-8);
+  margin-top: var(--space-6);
+  padding: var(--space-5) 0;
   border-top: 1px solid var(--color-border-soft);
 }
 .feedback-card {
@@ -3613,7 +3738,8 @@ onBeforeUnmount(() => {
 .payment-option-item--active {
   border-color: var(--color-primary);
   background: color-mix(in srgb, var(--color-primary-50) 55%, white 45%);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary-100) 50%, transparent 50%);
+  box-shadow: 0 0 0 2px
+    color-mix(in srgb, var(--color-primary-100) 50%, transparent 50%);
 }
 
 /* Transitions */
@@ -3848,6 +3974,90 @@ onBeforeUnmount(() => {
   margin-left: var(--space-1);
 }
 
+.show-more-reviews-btn {
+  margin-top: var(--space-4);
+  width: fit-content;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-primary-600);
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-bold);
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+  transition: color var(--duration-fast) var(--easing-standard);
+}
+
+.show-more-reviews-btn:hover {
+  color: var(--color-primary-700);
+}
+
+.reviews-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-index-modal);
+  background: var(--color-overlay);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+}
+
+.reviews-modal-shell {
+  width: min(920px, 100%);
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border-radius: var(--radius-dialog);
+  box-shadow: var(--shadow-modal);
+  border: 1px solid var(--color-border-soft);
+  overflow: hidden;
+}
+
+.reviews-modal-header {
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--color-border-soft);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.reviews-modal-header h3 {
+  margin: 0;
+  font-size: var(--font-size-title-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-heading);
+}
+
+.reviews-modal-close {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition-hover);
+}
+
+.reviews-modal-close:hover {
+  background: var(--color-surface-2);
+  color: var(--color-heading);
+}
+
+.reviews-modal-body {
+  padding: var(--space-5);
+  overflow-y: auto;
+}
+
 /* Transitions */
 .availability-drawer-enter-active,
 .availability-drawer-leave-active {
@@ -3857,6 +4067,30 @@ onBeforeUnmount(() => {
 .availability-drawer-leave-to {
   opacity: 0;
   transform: scale(0.95);
+}
+
+.reviews-modal-fade-enter-active,
+.reviews-modal-fade-leave-active {
+  transition: all 0.28s ease;
+}
+
+.reviews-modal-fade-enter-from,
+.reviews-modal-fade-leave-to {
+  opacity: 0;
+  transform: scale(0.96);
+}
+
+@media (max-width: 1024px) {
+  .location-reviews-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+
+  .location-column.content-section,
+  .reviews-column.content-section {
+    padding-top: var(--space-6);
+    padding-bottom: var(--space-6);
+  }
 }
 
 .date-picker-shell {
