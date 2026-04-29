@@ -97,6 +97,11 @@ export interface CreateCheckoutSessionPayload {
   bookingId: number
 }
 
+export interface CancelUnpaidBookingPayload {
+  bookingId: number
+  userId: number
+}
+
 export interface CheckoutSessionResponse {
   sessionId: string
   url: string
@@ -153,6 +158,7 @@ export interface IReservationRepository {
   createCheckoutSession(
     payload: CreateCheckoutSessionPayload,
   ): Promise<CheckoutSessionResponse>
+  cancelUnpaidBooking(payload: CancelUnpaidBookingPayload): Promise<{ removed: boolean }>
   getCheckoutSessionSummary(
     sessionId: string,
     userId: number,

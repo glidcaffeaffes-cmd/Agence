@@ -328,7 +328,7 @@
         </div>
         <div class="hotels-grid">
           <HotelCard
-            v-for="hotel in featured"
+            v-for="hotel in featuredHotels"
             :key="hotel.id"
             :hotel="hotel"
             :min-price="getMinPrice(hotel.id)"
@@ -397,6 +397,10 @@ const { hotels, featured, fetchAll: fetchHotels, fetchFeatured } = useHotels();
 const { offers: activeOffers, fetchActive } = useOffers();
 const { rooms, fetchAll: fetchAllRooms } = useRooms();
 const router = useRouter();
+const FEATURED_HOTELS_LIMIT = 8;
+const featuredHotels = computed(() =>
+  featured.value.slice(0, FEATURED_HOTELS_LIMIT),
+);
 
 const benefits = [
   {

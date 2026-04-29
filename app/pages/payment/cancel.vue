@@ -15,9 +15,6 @@
       </header>
 
       <div class="actions">
-        <button class="btn-secondary" :disabled="retrying" @click="retryPayment">
-          {{ retrying ? 'Retrying...' : 'Retry Payment' }}
-        </button>
         <NuxtLink class="btn-primary" to="/my-bookings">Go to My Bookings</NuxtLink>
       </div>
 
@@ -35,10 +32,9 @@ import { useReservations } from '~/composables/useReservations'
 
 const route = useRoute()
 const { accountId } = useAuth()
-const { createCheckoutSession, fetchById, reservation, error } = useReservations()
+const { cancelUnpaidBooking } = useReservations()
 const PAYMENT_RESULT_ACCESS_KEY = 'vh_payment_result_access'
 
-const retrying = ref(false)
 const errorMessage = ref('')
 
 onMounted(async () => {
@@ -52,53 +48,29 @@ onMounted(async () => {
 
   if (!hasAccess) {
     await navigateTo('/')
+    return
   }
-})
-
-async function retryPayment() {
-  errorMessage.value = ''
 
   const bookingId = Number.parseInt(String(route.query.booking_id || ''), 10)
   if (!Number.isFinite(bookingId) || bookingId <= 0) {
-    errorMessage.value = 'We could not identify the booking to retry payment.'
+    errorMessage.value = 'We could not identify the booking that failed payment.'
     return
   }
 
   if (!accountId.value) {
-    errorMessage.value = 'You must be signed in to retry payment.'
+    errorMessage.value = 'You must be signed in to complete payment cleanup.'
     return
   }
 
-  retrying.value = true
-
   try {
-    await fetchById(bookingId)
-
-    if (!reservation.value) {
-      throw new Error('Booking not found.')
-    }
-
-    const session = await createCheckoutSession({
-      tripId: reservation.value.hotelId,
-      userId: accountId.value,
-      totalPrice: reservation.value.totalAmount,
+    await cancelUnpaidBooking({
       bookingId,
+      userId: accountId.value,
     })
-
-    if (!session?.url) {
-      throw new Error('Unable to initialize Stripe checkout.')
-    }
-
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem(PAYMENT_RESULT_ACCESS_KEY, '1')
-    }
-    window.location.assign(session.url)
   } catch (err: any) {
-    errorMessage.value = err?.message || error.value || 'Unable to retry payment. Please try again.'
-  } finally {
-    retrying.value = false
+    errorMessage.value = err?.message || 'Unable to clean up the failed payment booking.'
   }
-}
+})
 </script>
 
 <style scoped>

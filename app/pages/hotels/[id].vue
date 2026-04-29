@@ -1202,6 +1202,7 @@ const { reviews, fetchByHotel: fetchReviews, submitReview } = useReviews();
 const {
   createBooking,
   createCheckoutSession,
+  cancelUnpaidBooking,
   loading: bookingLoading,
   error: bookingApiError,
 } = useReservations();
@@ -1907,6 +1908,10 @@ async function handleConfirmReservation() {
   });
 
   if (!checkoutSession?.url) {
+    await cancelUnpaidBooking({
+      bookingId: confirmation.bookingId,
+      userId: accountId.value,
+    });
     bookingFormError.value =
       bookingApiError.value ||
       "Unable to initialize secure payment. Please try again.";

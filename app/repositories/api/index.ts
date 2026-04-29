@@ -11,6 +11,7 @@ import type {
   BookingCancellationConfirmation,
   BookingCancellationPreview,
   BookingCreatePayload,
+  CancelUnpaidBookingPayload,
   CreateCheckoutSessionPayload,
   CheckoutSessionResponse,
   CheckoutSessionSummary,
@@ -553,6 +554,9 @@ export class ApiReservationRepository implements IReservationRepository {
     const confirmation = await apiRequest<BookingConfirmation>('/bookings', {
       method: 'POST',
       body: payload,
+      toast: {
+        silentSuccess: true,
+      },
     })
     invalidateApiCache('/reservations', '/hotels/search/availability')
     return confirmation
@@ -587,6 +591,22 @@ export class ApiReservationRepository implements IReservationRepository {
     return apiRequest<CheckoutSessionResponse>('/payments/create-checkout-session', {
       method: 'POST',
       body: payload,
+      toast: {
+        silentSuccess: true,
+      },
+    })
+  }
+
+  async cancelUnpaidBooking(
+    payload: CancelUnpaidBookingPayload,
+  ): Promise<{ removed: boolean }> {
+    return apiRequest<{ removed: boolean }>('/payments/cancel-unpaid-booking', {
+      method: 'POST',
+      body: payload,
+      toast: {
+        silentSuccess: true,
+        silentError: true,
+      },
     })
   }
 
