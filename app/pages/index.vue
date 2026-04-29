@@ -378,7 +378,7 @@
         </div>
         <div class="offers-grid">
           <OfferCard
-            v-for="offer in activeOffers"
+            v-for="offer in limitedOffers"
             :key="offer.id"
             :offer="offer"
           />
@@ -401,6 +401,11 @@ const router = useRouter();
 const FEATURED_HOTELS_LIMIT = 8;
 const featuredHotels = computed(() =>
   featured.value.slice(0, FEATURED_HOTELS_LIMIT),
+);
+
+const OFFERS_LIMIT = 4;
+const limitedOffers = computed(() =>
+  activeOffers.value.slice(0, OFFERS_LIMIT),
 );
 
 const benefits = [
