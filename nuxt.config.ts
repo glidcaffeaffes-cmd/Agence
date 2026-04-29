@@ -36,7 +36,7 @@ export default defineNuxtConfig({
     cloudinaryApiKey: process.env.CLOUDINARY_API_KEY || '',
     cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET || '',
     public: {
-      apiBase: '/api',
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'https://agencedevoyageihm-production.up.railway.app/api',
       firebaseApiKey: process.env.NUXT_PUBLIC_FIREBASE_API_KEY || 'AIzaSyCUaicexGRjgBftHdU69pcgvoCKn9ePnXM',
       firebaseAuthDomain: process.env.NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'agence-2a560.firebaseapp.com',
       firebaseProjectId: process.env.NUXT_PUBLIC_FIREBASE_PROJECT_ID || 'agence-2a560',
