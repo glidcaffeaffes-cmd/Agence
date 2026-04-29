@@ -227,7 +227,7 @@ const tokens = [
 
 const sampleValues: Record<string, string> = {
   '{{user_name}}': 'Amina',
-  '{{reset_url}}': 'http://localhost:3000/reset-password?token=demo',
+  '{{reset_url}}': 'http://agence-bay.vercel.app//reset-password?token=demo',
   '{{hotel_name}}': 'Azure Palais',
   '{{check_in}}': '2026-06-21',
   '{{check_out}}': '2026-06-25',
