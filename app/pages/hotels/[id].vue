@@ -1197,7 +1197,7 @@
               <div class="availability-empty-actions booking-feedback-actions">
                 <button
                   type="button"
-                  class="primary-checkout-btn view-similar-btn"
+                  class="primary-checkout-btn"
                   @click="openMyBookingsHistory"
                 >
                   View My Bookings
