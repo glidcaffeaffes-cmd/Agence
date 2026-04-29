@@ -11,7 +11,7 @@
       <div class="absolute inset-0 bg-gradient-to-t from-primary/90 to-transparent"></div>
       <div class="relative z-10 px-12 text-center">
         <div class="mb-6 flex items-center justify-center gap-4">
-          <span class="material-symbols-outlined flex h-16 w-16 items-center justify-center leading-none text-white" style="font-size: 32px; display: flex; align-items: center; justify-content: center;">travel_explore</span>
+          <img :src="brandLogoUrl" alt="" class="h-16 w-16 rounded-2xl object-contain brightness-0 invert" aria-hidden="true" />
           <h1 class="m-0 text-4xl font-bold tracking-tight text-white">VoyageHub</h1>
         </div>
         <p class="mx-auto max-w-md text-lg leading-relaxed text-white">
@@ -24,7 +24,9 @@
     <div class="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-8 lg:p-10 relative">
       <!-- Mobile Brand Header -->
       <div class="absolute top-8 left-8 flex lg:hidden items-center gap-2">
-        <span class="material-symbols-outlined text-2xl text-primary">travel_explore</span>
+        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+          <img :src="brandLogoUrl" alt="" class="h-6 w-6 object-contain brightness-0 invert" aria-hidden="true" />
+        </span>
         <span class="font-bold text-xl text-secondary-container">VoyageHub</span>
       </div>
 
@@ -115,6 +117,8 @@
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuth } from '~/composables/useAuth'
+
+const brandLogoUrl = new URL('../../assets/images/logo.png', import.meta.url).href
 
 definePageMeta({
   middleware: 'guest'

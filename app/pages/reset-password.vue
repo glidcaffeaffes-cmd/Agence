@@ -17,7 +17,7 @@
       <div class="absolute inset-0 bg-gradient-to-t from-primary/90 to-transparent"></div>
       <div class="relative z-10 px-12 text-center text-white">
         <div class="mb-6 flex items-center justify-center gap-3">
-          <span class="material-symbols-outlined text-5xl text-accent">travel_explore</span>
+          <img :src="brandLogoUrl" alt="" class="h-16 w-16 rounded-2xl object-contain brightness-0 invert" aria-hidden="true" />
           <h1 class="text-4xl font-bold tracking-tight">VoyageHub</h1>
         </div>
         <p class="mx-auto max-w-md text-lg leading-relaxed text-primary-fixed">
@@ -28,7 +28,9 @@
 
     <div class="relative flex w-full items-center justify-center p-6 sm:p-8 lg:w-1/2 lg:p-10">
       <div class="absolute left-8 top-8 flex items-center gap-2 lg:hidden">
-        <span class="material-symbols-outlined text-2xl text-primary">travel_explore</span>
+        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+          <img :src="brandLogoUrl" alt="" class="h-6 w-6 object-contain brightness-0 invert" aria-hidden="true" />
+        </span>
         <span class="text-xl font-bold text-secondary-container">VoyageHub</span>
       </div>
 
@@ -161,6 +163,8 @@
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuth } from '~/composables/useAuth'
+
+const brandLogoUrl = new URL('../../assets/images/logo.png', import.meta.url).href
 
 definePageMeta({
   middleware: 'guest',

@@ -19,13 +19,14 @@
           class="client-navbar__brand flex items-center gap-2 hover:opacity-90 transition-opacity"
         >
           <div
-            class="client-navbar__brand-mark w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary-container flex items-center justify-center shadow-sm"
+            class="client-navbar__brand-mark w-10 h-10 rounded-xl flex items-center justify-center"
           >
-            <span
-              class="material-symbols-outlined text-white text-2xl"
-              style="font-variation-settings: &quot;FILL&quot; 1"
-              >bolt</span
-            >
+            <img
+              :src="brandLogoUrl"
+              alt=""
+              class="client-navbar__brand-logo h-8 w-8 object-contain"
+              aria-hidden="true"
+            />
           </div>
           <span
             class="client-navbar__brand-text text-xl font-bold tracking-tight"
@@ -325,6 +326,7 @@ import { useAuthPrompt } from "~/composables/useAuthPrompt";
 import { useNotifications } from "~/composables/useNotifications";
 import { NotificationType } from "~/types/enums";
 
+const brandLogoUrl = new URL("../../../assets/images/logo.png", import.meta.url).href;
 const { isAuthenticated, isAdmin, currentProfile, logout, accountId } = useAuth();
 const { open: openAuthPrompt } = useAuthPrompt();
 const { latestNotifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
@@ -528,6 +530,11 @@ watch(
   color: var(--color-primary-600);
 }
 
+.client-navbar__brand-logo {
+  filter: none;
+  transition: filter 0.25s ease;
+}
+
 .client-navbar__brand-text,
 .client-navbar__link,
 .client-navbar__icon-btn,
@@ -560,6 +567,10 @@ watch(
 .client-navbar--transparent .client-navbar__profile-chevron,
 .client-navbar--transparent .client-navbar__mobile-toggle {
   color: white;
+}
+
+.client-navbar--transparent .client-navbar__brand-logo {
+  filter: brightness(0) invert(1);
 }
 
 .client-navbar--transparent .client-navbar__brand-accent {

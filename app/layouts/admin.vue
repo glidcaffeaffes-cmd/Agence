@@ -5,7 +5,7 @@
       <!-- Brand -->
       <div class="px-6 py-5 flex-shrink-0 border-b mb-2" style="border-color: var(--color-primary-500);">
         <div class="flex items-center gap-2">
-          <span class="material-symbols-outlined text-2xl" style="color: var(--color-accent-500); font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">travel_explore</span>
+          <img :src="brandLogoUrl" alt="" class="h-8 w-8 rounded-lg object-contain brightness-0 invert" aria-hidden="true" />
           <h1 class="text-lg font-bold tracking-tight" style="color: var(--color-white);">VoyageHub</h1>
         </div>
       </div>
@@ -108,6 +108,7 @@
 <script setup lang="ts">
 import { useAuth } from '~/composables/useAuth'
 
+const brandLogoUrl = new URL('../../assets/images/logo.png', import.meta.url).href
 const { logout } = useAuth()
 
 function handleLogout() {

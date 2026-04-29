@@ -6,11 +6,7 @@
         <div class="footer-brand-col">
           <NuxtLink to="/" class="footer-brand">
             <span class="footer-brand-mark">
-              <span
-                class="material-symbols-outlined footer-brand-icon"
-                aria-hidden="true"
-                >bolt</span
-              >
+              <img :src="brandLogoUrl" alt="" class="footer-brand-logo" aria-hidden="true" />
             </span>
             <span class="brand-text"
               >Voyage<span class="brand-accent">Hub</span></span
@@ -115,6 +111,10 @@
   </footer>
 </template>
 
+<script setup lang="ts">
+const brandLogoUrl = new URL("../../../assets/images/logo.png", import.meta.url).href
+</script>
+
 <style scoped>
 .client-footer {
   background: linear-gradient(180deg, #f9fcff 0%, #eef5fb 100%);
@@ -152,20 +152,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(
-    135deg,
-    var(--color-primary-500),
-    var(--color-primary-container, #008283)
-  );
-  color: white;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
   flex-shrink: 0;
 }
 
-.footer-brand-icon {
-  font-size: 24px;
-  line-height: 1;
-  font-variation-settings: "FILL" 1;
+.footer-brand-logo {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
 }
 
 .footer-brand .brand-text {
