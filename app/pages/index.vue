@@ -268,6 +268,7 @@
                   :options="childAgeOptions"
                   optionLabel="label"
                   optionValue="value"
+                  overlayClass="guest-age-overlay"
                   class="guest-age-select"
                 />
               </div>
@@ -822,7 +823,7 @@ function formatDateForQuery(date: Date) {
 .hero-filter-trigger__value {
   min-width: 0;
   display: block;
-  font-size: 0.98rem;
+  font-size: 14px;
   font-weight: 700;
   line-height: 1.3;
   color: var(--color-heading);
@@ -1527,6 +1528,19 @@ function formatDateForQuery(date: Date) {
   font-weight: 500 !important;
 }
 
+.guest-age-select :deep(.p-select-label) {
+  padding: 4px 8px !important;
+}
+
+.guest-age-select :deep(.p-select-dropdown) {
+  padding: 4px !important;
+}
+
+.guest-age-select :deep(.guest-age-overlay) {
+  width: 100% !important;
+  min-width: 100% !important;
+}
+
 .guest-age-note {
   margin: 0;
   padding-bottom: 16px;
@@ -1537,9 +1551,10 @@ function formatDateForQuery(date: Date) {
   display: flex !important;
   justify-content: center;
   border: none !important;
-  border-radius: 0.9rem !important;
-  padding: 0.72rem 1rem !important;
-  font-weight: 800 !important;
+  border-radius: 8px !important;
+  padding: 8px 16px !important;
+  font-size: 14px;
+  font-weight: 700 !important;
   color: #fff !important;
   background: linear-gradient(
     145deg,
@@ -1905,14 +1920,23 @@ function formatDateForQuery(date: Date) {
 <style>
 /* ── Hero city-select overlay ────────────────────────────── */
 .p-select-overlay {
-  margin-top: 0.9rem !important;
-  border-radius: 1.5rem !important;
+  margin-top: 4px !important;
+  border-radius: 8px !important;
   border: 1px solid var(--color-border) !important;
   box-shadow: 0 16px 48px rgba(15, 23, 42, 0.14) !important;
   overflow: hidden;
   min-width: 280px !important;
   background: var(--color-surface-primary) !important;
   padding: 0.35rem 0 0.5rem !important;
+}
+
+.guest-age-overlay {
+  width: var(--p-anchor-width) !important;
+  min-width: 100px !important;
+}
+
+.guest-age-overlay .p-select-option {
+  padding: 4px !important;
 }
 
 /* Search input inside the overlay header */
