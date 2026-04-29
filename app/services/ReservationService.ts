@@ -7,6 +7,7 @@ import type {
   CheckoutSessionResponse,
   CheckoutSessionSummary,
   CancelUnpaidBookingPayload,
+  PayWithSavedCardPayload,
   CreateCheckoutSessionPayload,
 } from '~/types/interfaces'
 import type { Reservation } from '~/types/models'
@@ -100,6 +101,17 @@ export class ReservationService {
     payload: CancelUnpaidBookingPayload,
   ): Promise<{ removed: boolean }> {
     return this.repo.cancelUnpaidBooking(payload)
+  }
+
+  async payWithSavedCard(
+    payload: PayWithSavedCardPayload,
+  ): Promise<{
+    paid: boolean
+    bookingId: number
+    bookingReference: string
+    status: string
+  }> {
+    return this.repo.payWithSavedCard(payload)
   }
 
   async getCheckoutSessionSummary(

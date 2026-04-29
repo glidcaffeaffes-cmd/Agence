@@ -12,6 +12,7 @@ import type {
   BookingCancellationPreview,
   BookingCreatePayload,
   CancelUnpaidBookingPayload,
+  PayWithSavedCardPayload,
   CreateCheckoutSessionPayload,
   CheckoutSessionResponse,
   CheckoutSessionSummary,
@@ -606,6 +607,28 @@ export class ApiReservationRepository implements IReservationRepository {
       toast: {
         silentSuccess: true,
         silentError: true,
+      },
+    })
+  }
+
+  async payWithSavedCard(
+    payload: PayWithSavedCardPayload,
+  ): Promise<{
+    paid: boolean
+    bookingId: number
+    bookingReference: string
+    status: string
+  }> {
+    return apiRequest<{
+      paid: boolean
+      bookingId: number
+      bookingReference: string
+      status: string
+    }>('/payments/pay-with-saved-card', {
+      method: 'POST',
+      body: payload,
+      toast: {
+        silentSuccess: true,
       },
     })
   }
