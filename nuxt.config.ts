@@ -16,15 +16,13 @@ const runtimeScripts = [
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   buildDir: '.nuxt-build',
-  devtools: { enabled: true },
+  devtools: { enabled: false },
   devServer: {
     port: 3000
   },
   vite: {
     optimizeDeps: {
       include: [
-        '@vue/devtools-core',
-        '@vue/devtools-kit',
         'firebase/app',
         'firebase/auth',
         'libphonenumber-js',
@@ -38,7 +36,13 @@ export default defineNuxtConfig({
     cloudinaryApiKey: process.env.CLOUDINARY_API_KEY || '',
     cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET || '',
     public: {
-      apiBase: '/api'
+      apiBase: '/api',
+      firebaseApiKey: process.env.NUXT_PUBLIC_FIREBASE_API_KEY || 'AIzaSyCUaicexGRjgBftHdU69pcgvoCKn9ePnXM',
+      firebaseAuthDomain: process.env.NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'agence-2a560.firebaseapp.com',
+      firebaseProjectId: process.env.NUXT_PUBLIC_FIREBASE_PROJECT_ID || 'agence-2a560',
+      firebaseStorageBucket: process.env.NUXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'agence-2a560.firebasestorage.app',
+      firebaseMessagingSenderId: process.env.NUXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '502442263010',
+      firebaseAppId: process.env.NUXT_PUBLIC_FIREBASE_APP_ID || '1:502442263010:web:58cb205bf2ef26dd2f79bb',
     }
   },
   routeRules: {

@@ -39,6 +39,10 @@ function mapAccountRole(role?: string | null): 'client' | 'admin' {
   return String(role || '').toUpperCase() === 'ADMIN' ? 'admin' : 'client'
 }
 
+function mapAuthProvider(provider?: string | null): 'local' | 'google' {
+  return String(provider || '').toUpperCase() === 'GOOGLE' ? 'google' : 'local'
+}
+
 function normalizeDateInput(date?: string | null) {
   if (!date) return ''
   return date.slice(0, 10)
@@ -246,6 +250,8 @@ export const AccountMapper = {
       password: '',
       registrationDate: dto.dateInscription,
       active: dto.actif ?? true,
+      emailVerified: dto.emailVerified ?? false,
+      authProvider: mapAuthProvider(dto.authProvider),
       role: mapAccountRole(dto.role),
     }
   },

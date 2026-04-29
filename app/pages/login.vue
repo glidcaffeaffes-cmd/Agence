@@ -126,7 +126,7 @@ definePageMeta({
 
 const router = useRouter()
 const route = useRoute()
-const { login, loginGoogle, loading, error } = useAuth()
+const { login, loginGoogle, loading, error, pendingVerificationEmail } = useAuth()
 
 const email = ref('')
 const password = ref('')
@@ -139,10 +139,17 @@ async function handleLogin() {
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : ''
     const fallbackPath = currentAccount.value?.role === 'admin' ? '/admin' : '/'
     router.push(redirect.startsWith('/') ? redirect : fallbackPath)
+    return
+  }
+
+  if (error.value === 'Please verify your email before accessing your account.') {
+    pendingVerificationEmail.value = email.value.trim().toLowerCase()
+    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/'
+    router.push(`/verify-email?email=${encodeURIComponent(pendingVerificationEmail.value)}&redirect=${encodeURIComponent(redirect)}`)
   }
 }
 
-import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
 
 async function handleGoogleSignIn() {
   const { $firebaseAuth } = useNuxtApp()
@@ -176,6 +183,3 @@ async function handleGoogleSignIn() {
   }
 }
 </script>
-
-
-

@@ -264,6 +264,16 @@ export class ApiHotelRepository implements IHotelRepository {
 }
 
 export class ApiAccountRepository implements IAccountRepository {
+  async syncEmailVerification(accountId: number | null, idToken: string): Promise<{ verified: boolean }> {
+    return apiRequest<{ verified: boolean }>('/auth/sync-verification', {
+      method: 'POST',
+      body: accountId ? { accountId, idToken } : { idToken },
+      toast: {
+        silentSuccess: true,
+      },
+    })
+  }
+
   async requestPasswordReset(email: string): Promise<{ success: boolean; message: string }> {
     return apiRequest<{ success: boolean; message: string }>('/auth/forgot-password', {
       method: 'POST',

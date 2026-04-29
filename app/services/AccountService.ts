@@ -25,6 +25,10 @@ export class AccountService {
     return this.repo.requestPasswordReset(email.trim().toLowerCase())
   }
 
+  async syncEmailVerification(accountId: number | null, idToken: string): Promise<{ verified: boolean }> {
+    return this.repo.syncEmailVerification(accountId, idToken)
+  }
+
   async resetPassword(token: string, newPassword: string): Promise<{ success: boolean; message: string }> {
     if (!token.trim()) {
       throw new Error('Reset token is missing')
@@ -69,7 +73,14 @@ export class AccountService {
     if (password.length < 8) throw new Error('Password must be at least 8 characters')
     const existing = await this.repo.getByEmail(email.trim().toLowerCase())
     if (existing) throw new Error('An account with this email already exists')
-    return this.repo.create({ email: email.trim().toLowerCase(), password, active: true, role: 'client' })
+    return this.repo.create({
+      email: email.trim().toLowerCase(),
+      password,
+      active: true,
+      emailVerified: false,
+      authProvider: 'local',
+      role: 'client',
+    })
   }
 
   /** Update account fields */

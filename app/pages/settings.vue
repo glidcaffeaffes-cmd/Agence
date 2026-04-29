@@ -35,7 +35,7 @@
           <!-- Tab Content -->
           <ClientOnly>
           <!-- Security Tab -->
-          <div v-show="activeTab === 'security'" class="content-card auth-card fade-in-up">
+          <div v-if="showSecurityTab" v-show="activeTab === 'security'" class="content-card auth-card fade-in-up">
             <div class="card-header">
               <div class="card-header__icon">
                 <span class="material-symbols-outlined">shield</span>
@@ -133,10 +133,10 @@
 <script setup lang="ts">
 definePageMeta({ middleware: "auth" });
 import { useAuth } from "~/composables/useAuth";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { useAppToast } from "~/composables/useAppToast";
 
-const { changePassword, error } = useAuth();
+const { changePassword, error, currentAccount } = useAuth();
 const { success: toastSuccess, error: toastError, warn: toastWarn } = useAppToast();
 
 const activeTab = useState('settings-active-tab', () => 'security');
@@ -148,13 +148,16 @@ const passwordForm = ref({
 });
 
 onMounted(() => {
-  activeTab.value = 'security'
+  activeTab.value = showSecurityTab.value ? 'security' : 'privacy'
 })
 
-const tabs = [
-  { key: 'security', label: 'Security' },
-  { key: 'privacy', label: 'Privacy' },
-];
+const showSecurityTab = computed(() => currentAccount.value?.authProvider !== 'google')
+const tabs = computed(() => {
+  const result = [{ key: 'privacy', label: 'Privacy' }]
+  return showSecurityTab.value
+    ? [{ key: 'security', label: 'Security' }, ...result]
+    : result
+})
 
 async function changePasswordHandler() {
   if (!passwordForm.value.currentPassword || !passwordForm.value.newPassword) {

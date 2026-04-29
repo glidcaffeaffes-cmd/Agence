@@ -793,9 +793,30 @@ const phonePlaceholder = computed(() => {
   return phoneExamples[selectedPhoneCountry.value] || "";
 });
 
+function normalizeSingleTabQuery(
+  query: Record<string, any>,
+): Record<string, any> {
+  const nextQuery = { ...query };
+  const rawTab = nextQuery.tab;
+  if (Array.isArray(rawTab)) {
+    const firstValid = rawTab.find(
+      (value) => typeof value === "string" && value.trim().length > 0,
+    );
+    if (firstValid) {
+      nextQuery.tab = firstValid;
+    } else {
+      delete nextQuery.tab;
+    }
+  }
+  return nextQuery;
+}
+
 // Handle query param for tabs
 onMounted(() => {
-  const tabParam = route.query.tab?.toString();
+  const tabParamRaw = route.query.tab;
+  const tabParam = Array.isArray(tabParamRaw)
+    ? tabParamRaw[0]?.toString()
+    : tabParamRaw?.toString();
   if (tabParam) {
     activeTab.value = tabParam;
   }
@@ -813,6 +834,14 @@ onBeforeUnmount(() => {
 watch(
   () => route.query.tab,
   (newTab) => {
+    if (Array.isArray(newTab)) {
+      const nextQuery = normalizeSingleTabQuery(route.query);
+      void router.replace({ query: nextQuery });
+      if (newTab[0]) {
+        activeTab.value = newTab[0].toString();
+      }
+      return;
+    }
     if (newTab) {
       activeTab.value = newTab.toString();
     }
@@ -1084,7 +1113,7 @@ async function handlePaymentSetupReturn() {
       type: "error",
       message: "Card setup was canceled. You can try again anytime.",
     };
-    const nextQuery = { ...route.query };
+    const nextQuery = normalizeSingleTabQuery(route.query);
     delete nextQuery.setup;
     await router.replace({ query: nextQuery });
     return;
@@ -1108,7 +1137,7 @@ async function handlePaymentSetupReturn() {
         message: "We could not confirm your card. Please try again.",
       };
 
-  const nextQuery = { ...route.query };
+  const nextQuery = normalizeSingleTabQuery(route.query);
   delete nextQuery.session_id;
   delete nextQuery.setup;
   await router.replace({ query: nextQuery });

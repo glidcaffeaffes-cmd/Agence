@@ -87,7 +87,7 @@ function toHotelId(value: number) {
 
 export function useWishlist() {
   const route = useRoute()
-  const { accountId, isAuthenticated } = useAuth()
+  const { accountId, isAuthenticated, isVerified } = useAuth()
   const { open } = useAuthPrompt()
   const { success: toastSuccess, info: toastInfo, error: toastError } = useAppToast()
   const hotelIds = useState<number[]>('wishlist_hotel_ids', () => [])
@@ -177,6 +177,10 @@ export function useWishlist() {
 
   function requireAuth() {
     if (isAuthenticated.value) {
+      if (!isVerified.value) {
+        toastError('Please verify your email before accessing your account.')
+        return false
+      }
       return true
     }
 
