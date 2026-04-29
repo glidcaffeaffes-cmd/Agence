@@ -8,7 +8,8 @@
         <div class="hotel-card__chips">
           <span v-if="viewMode !== 'list'" class="hotel-card__chip">{{ hotel.city }}</span>
           <span v-if="viewMode === 'list'" class="hotel-card__chip hotel-card__chip--rating">
-            {{ hotel.stars }} <span class="material-symbols-outlined star-icon active" style="font-size: 17px; margin-left: 2px;">star</span>
+            <span class="hotel-card__rating-value">{{ hotel.stars }}</span>
+            <span class="material-symbols-outlined hotel-card__rating-star">star</span>
           </span>
         </div>
         <button v-if="viewMode !== 'list'" class="hotel-card__favorite" @click.stop="toggleFavorite" aria-label="Toggle favorite">
@@ -189,14 +190,25 @@ const reserveHotel = () => {
 }
 
 .hotel-card__chip--rating {
-  gap: 2px;
-  background: rgba(15, 23, 42, 0.4);
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(15, 23, 42, 0.52);
+  border-color: rgba(255, 255, 255, 0.32);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.24);
 }
 
-.hotel-card__chip--rating .star-icon-small {
-  font-size: 10px;
-  color: #cdaf5d;
-  font-variation-settings: 'FILL' 1;
+.hotel-card__rating-value {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+.hotel-card__rating-star {
+  font-size: 16px;
+  line-height: 1;
+  color: #f4c542;
+  font-variation-settings: 'FILL' 1, 'wght' 700, 'GRAD' 0, 'opsz' 24;
 }
 
 .hotel-card__chip {
@@ -411,7 +423,7 @@ const reserveHotel = () => {
 .hotel-card__name-list {
   margin: 0 0 8px 0;
   color: var(--color-navy-500);
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 800;
   line-height: 1.2;
 }
