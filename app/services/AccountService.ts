@@ -78,6 +78,7 @@ export class AccountService {
       password,
       active: true,
       emailVerified: false,
+      authProvider: 'local',
       role: 'client',
     })
   }

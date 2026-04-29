@@ -9,5 +9,6 @@ export interface Account {
   registrationDate: string
   active: boolean
   emailVerified: boolean
+  authProvider: 'local' | 'google'
   role: 'client' | 'admin'
 }

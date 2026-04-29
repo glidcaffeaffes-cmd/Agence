@@ -22,6 +22,7 @@ export interface AccountDTO {
   dateInscription: string
   actif?: boolean
   emailVerified?: boolean
+  authProvider?: 'LOCAL' | 'GOOGLE' | 'local' | 'google'
   role?: 'client' | 'admin' | 'CLIENT' | 'ADMIN'
   profile?: ProfileDTO | null
 }

@@ -58,6 +58,7 @@ export class MockAccountRepository implements IAccountRepository {
       password: data.uid,
       active: true,
       emailVerified: true,
+      authProvider: 'google',
       role: 'client',
     })
   }
@@ -68,6 +69,7 @@ export class MockAccountRepository implements IAccountRepository {
       id: Date.now(),
       registrationDate: new Date().toISOString().split('T')[0],
       emailVerified: account.emailVerified ?? false,
+      authProvider: account.authProvider ?? 'local',
     }
     this.accounts.push(newAccount)
     return newAccount
