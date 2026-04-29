@@ -687,7 +687,7 @@
                     v-if="hotel.latitude && hotel.longitude"
                     width="100%"
                     height="450"
-                    style="border: 0; border-radius: 20px"
+                    style="border: 0; border-radius: 8px"
                     loading="lazy"
                     allowfullscreen
                     referrerpolicy="no-referrer-when-downgrade"
@@ -697,7 +697,7 @@
                     v-else
                     width="100%"
                     height="450"
-                    style="border: 0; border-radius: 20px"
+                    style="border: 0; border-radius: 8px"
                     loading="lazy"
                     allowfullscreen
                     referrerpolicy="no-referrer-when-downgrade"
@@ -3343,7 +3343,7 @@ onBeforeUnmount(() => {
   font-size: var(--font-size-h3);
   font-weight: var(--font-weight-bold);
   color: var(--color-heading);
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-2);
 }
 .hotel-description {
   font-size: var(--font-size-body-md);
@@ -3498,7 +3498,7 @@ onBeforeUnmount(() => {
 /* ── Map ────────────────────────────────────────────────────────────── */
 .map-container-wrapper {
   background: var(--color-surface);
-  border-radius: var(--radius-3xl);
+  border-radius: 8px;
   overflow: hidden;
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
@@ -3508,7 +3508,7 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   gap: var(--space-4);
-  padding: var(--space-6);
+  padding: var(--space-4);
   background: #f8fafc;
   border-bottom: 1px solid var(--color-border-soft);
 }
@@ -3567,7 +3567,7 @@ onBeforeUnmount(() => {
 .reviews-header-advanced {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: start;
   margin-bottom: var(--space-5);
   gap: 24px;
 }
@@ -3582,7 +3582,7 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: var(--space-4);
   background: var(--color-surface-2);
-  padding: var(--space-4) var(--space-6);
+  padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-2xl);
   border: 1px solid var(--color-border);
 }
@@ -3692,15 +3692,15 @@ onBeforeUnmount(() => {
 }
 .feedback-card {
   background: var(--color-surface-2);
-  padding: var(--space-6);
-  border-radius: var(--radius-3xl);
+  padding: 12px 16px;
+  border-radius: 8px;
   border: 1px solid var(--color-border);
 }
 .rating-selector {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-2);
 }
 .rating-label {
   font-size: var(--font-size-body-md);
@@ -3709,10 +3709,10 @@ onBeforeUnmount(() => {
 }
 .stars-interactive {
   display: flex;
-  gap: var(--space-2);
+  gap: var(--space-1);
 }
 .star-btn {
-  font-size: 28px;
+  font-size: 20px;
   color: var(--color-border);
   cursor: pointer;
   transition: var(--transition-hover);
@@ -3728,10 +3728,10 @@ onBeforeUnmount(() => {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
   padding: var(--space-4);
-  font-size: var(--font-size-body-md);
+  font-size: 14px;
   font-family: inherit;
   resize: vertical;
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-2);
   outline: none;
   background: var(--color-surface);
   color: var(--color-text);
@@ -3760,7 +3760,7 @@ onBeforeUnmount(() => {
   background: #004d4d; /* Deep Teal matching main theme */
   color: #ffffff;
   border: none;
-  padding: 14px 32px;
+  padding: 8px 24px;
   border-radius: 12px;
   font-weight: 800;
   font-size: 15px;
