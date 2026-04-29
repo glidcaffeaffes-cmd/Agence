@@ -1032,12 +1032,6 @@ watch(
   bottom: 0;
   left: 20px;
   right: 20px;
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, rgba(255, 255, 255, 0) 0%, transparent 100%) 0%,
-    rgba(255, 255, 255, 0.95) 22%,
-    rgba(255, 255, 255, 0.98) 100%
-  );
   padding-top: 14px;
   padding-bottom: 12px;
   z-index: 30;
