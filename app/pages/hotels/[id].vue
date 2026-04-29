@@ -1054,14 +1054,102 @@
                   @click="handleConfirmReservation"
                 >
                   {{
-                    bookingLoading || redirectingToPayment
+                    redirectingToPayment
                       ? "Redirecting to Payment..."
-                      : selectedPaymentOption === "PAY_AT_HOTEL"
-                        ? "Confirm Reservation"
-                        : "Proceed to Payment"
+                      : bookingLoading
+                        ? selectedPaymentOption === "PAY_AT_HOTEL"
+                          ? "Confirming Reservation..."
+                          : "Preparing Payment..."
+                        : selectedPaymentOption === "PAY_AT_HOTEL"
+                          ? "Confirm Reservation"
+                          : "Proceed to Payment"
                   }}
                 </button>
               </footer>
+            </section>
+          </div>
+        </transition>
+
+        <transition name="availability-drawer">
+          <div
+            v-if="
+              showSavedCardChoice &&
+              pendingCardBookingConfirmation &&
+              selectedPaymentOption === 'PAY_NOW'
+            "
+            class="availability-overlay"
+            @click="closeSavedCardChoice"
+          >
+            <section
+              class="availability-drawer booking-feedback-drawer saved-card-drawer"
+              @click.stop
+            >
+              <header class="availability-drawer-header">
+                <div>
+                  <h3>Choose payment method</h3>
+                  <p>
+                    Use a saved card or add a new one before secure checkout.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  class="availability-close-btn"
+                  @click="closeSavedCardChoice"
+                >
+                  <span class="material-symbols-outlined">close</span>
+                </button>
+              </header>
+
+              <div class="saved-card-list">
+                <label
+                  v-for="method in savedPaymentMethods"
+                  :key="method.id"
+                  class="saved-card-item"
+                >
+                  <input
+                    v-model="selectedSavedCardId"
+                    type="radio"
+                    name="savedCard"
+                    :value="method.id"
+                  />
+                  <div class="saved-card-copy">
+                    <strong>
+                      {{ method.brand.toUpperCase() }} •••• {{ method.last4 }}
+                    </strong>
+                    <span>Expires {{ method.expiryMonth }}/{{ method.expiryYear }}</span>
+                  </div>
+                  <span v-if="method.isDefault" class="saved-card-badge">
+                    Default
+                  </span>
+                </label>
+              </div>
+
+              <div class="availability-empty-actions booking-feedback-actions">
+                <button
+                  type="button"
+                  class="book-btn-outline"
+                  :disabled="redirectingToPayment"
+                  @click="handlePayWithAnotherCard"
+                >
+                  {{
+                    redirectingToPayment
+                      ? "Redirecting to Payment..."
+                      : "Pay with another card"
+                  }}
+                </button>
+                <button
+                  type="button"
+                  class="primary-checkout-btn view-similar-btn"
+                  :disabled="redirectingToPayment || selectedSavedCardId == null"
+                  @click="handlePayNowWithSelectedCard"
+                >
+                  {{
+                    redirectingToPayment
+                      ? "Processing payment..."
+                      : "Continue"
+                  }}
+                </button>
+              </div>
             </section>
           </div>
         </transition>
@@ -1110,7 +1198,7 @@
                 <button
                   type="button"
                   class="primary-checkout-btn view-similar-btn"
-                  @click="navigateTo('/reservations/history')"
+                  @click="openMyBookingsHistory"
                 >
                   View My Bookings
                 </button>
@@ -1203,6 +1291,7 @@ const {
   createBooking,
   createCheckoutSession,
   cancelUnpaidBooking,
+  payWithSavedCard,
   loading: bookingLoading,
   error: bookingApiError,
 } = useReservations();
@@ -1516,8 +1605,11 @@ const showBookingDrawer = ref(false);
 const showBookingSuccess = ref(false);
 const showRoomUnavailable = ref(false);
 const bookingConfirmation = ref<BookingConfirmation | null>(null);
+const pendingCardBookingConfirmation = ref<BookingConfirmation | null>(null);
 const redirectingToPayment = ref(false);
 const selectedPaymentOption = ref<"PAY_NOW" | "PAY_AT_HOTEL">("PAY_NOW");
+const showSavedCardChoice = ref(false);
+const selectedSavedCardId = ref<number | null>(null);
 const PAYMENT_RESULT_ACCESS_KEY = "vh_payment_result_access";
 const bookingForm = ref({
   fullName: "",
@@ -1542,7 +1634,10 @@ function differenceInNights(checkIn: Date, checkOut: Date): number {
 }
 
 function formatDateForApi(date: Date) {
-  return date.toISOString().slice(0, 10);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 function formatDateForLabel(date: Date | null) {
@@ -1552,6 +1647,12 @@ function formatDateForLabel(date: Date | null) {
     day: "numeric",
     year: "numeric",
   }).format(date);
+}
+
+function formatMonthKey(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  return `${year}-${month}`;
 }
 
 function formatEuro(value: number) {
@@ -1667,6 +1768,9 @@ const bookingGuestsLabel = computed(() => {
   }
   return `${adultsLabel}, ${children.value} child${children.value > 1 ? "ren" : ""}`;
 });
+const savedPaymentMethods = computed(
+  () => currentProfile.value?.paymentMethods ?? [],
+);
 
 const bookingSuccessTitle = computed(() =>
   bookingConfirmation.value?.paymentOption === "PAY_AT_HOTEL"
@@ -1677,7 +1781,9 @@ const bookingSuccessTitle = computed(() =>
 const bookingSuccessDescription = computed(() =>
   bookingConfirmation.value?.paymentOption === "PAY_AT_HOTEL"
     ? "Your booking is pending. You will pay at hotel check-in."
-    : "Your booking is now pending payment confirmation.",
+    : bookingConfirmation.value?.confirmed
+      ? "Your payment was successful and your reservation is confirmed."
+      : "Your booking is now pending payment confirmation.",
 );
 
 const isAnyModalOpen = computed(
@@ -1685,6 +1791,7 @@ const isAnyModalOpen = computed(
     lightboxOpen.value ||
     showRoomsDrawer.value ||
     showBookingDrawer.value ||
+    showSavedCardChoice.value ||
     showBookingSuccess.value ||
     showRoomUnavailable.value ||
     showAllReviewsModal.value,
@@ -1746,8 +1853,11 @@ watch([checkInDate, checkOutDate, adults, children], () => {
   selectedRoomId.value = null;
   selectedBookingRoom.value = null;
   showBookingDrawer.value = false;
+  showSavedCardChoice.value = false;
   showBookingSuccess.value = false;
   showRoomUnavailable.value = false;
+  pendingCardBookingConfirmation.value = null;
+  selectedSavedCardId.value = null;
   redirectingToPayment.value = false;
 });
 
@@ -1822,6 +1932,88 @@ function closeSuccessModal() {
   redirectingToPayment.value = false;
 }
 
+async function closeSavedCardChoice() {
+  if (redirectingToPayment.value) return;
+  if (pendingCardBookingConfirmation.value && accountId.value) {
+    await cancelUnpaidBooking({
+      bookingId: pendingCardBookingConfirmation.value.bookingId,
+      userId: accountId.value,
+    });
+  }
+  showSavedCardChoice.value = false;
+  pendingCardBookingConfirmation.value = null;
+  selectedSavedCardId.value = null;
+}
+
+async function proceedToPaymentCheckout(confirmation: BookingConfirmation) {
+  if (!hotel.value || !accountId.value) return;
+  redirectingToPayment.value = true;
+  const checkoutSession = await createCheckoutSession({
+    tripId: hotel.value.id,
+    userId: accountId.value,
+    totalPrice: confirmation.pricing.total,
+    bookingId: confirmation.bookingId,
+  });
+
+  if (!checkoutSession?.url) {
+    await cancelUnpaidBooking({
+      bookingId: confirmation.bookingId,
+      userId: accountId.value,
+    });
+    bookingFormError.value =
+      bookingApiError.value ||
+      "Unable to initialize secure payment. Please try again.";
+    redirectingToPayment.value = false;
+    showSavedCardChoice.value = false;
+    pendingCardBookingConfirmation.value = null;
+    showBookingDrawer.value = true;
+    return;
+  }
+
+  if (typeof window !== "undefined") {
+    sessionStorage.setItem(PAYMENT_RESULT_ACCESS_KEY, "1");
+  }
+  window.location.assign(checkoutSession.url);
+}
+
+async function handlePayNowWithSelectedCard() {
+  if (!pendingCardBookingConfirmation.value || selectedSavedCardId.value == null)
+    return;
+  const paid = await payWithSavedCard({
+    bookingId: pendingCardBookingConfirmation.value.bookingId,
+    userId: accountId.value!,
+    paymentMethodId: selectedSavedCardId.value,
+  });
+  if (!paid?.paid) {
+    bookingFormError.value =
+      bookingApiError.value || "Unable to process payment with this card.";
+    return;
+  }
+
+  bookingConfirmation.value = {
+    ...pendingCardBookingConfirmation.value,
+    confirmed: true,
+  };
+  showSavedCardChoice.value = false;
+  pendingCardBookingConfirmation.value = null;
+  selectedSavedCardId.value = null;
+  showBookingSuccess.value = true;
+  redirectingToPayment.value = false;
+}
+
+async function handlePayWithAnotherCard() {
+  if (!pendingCardBookingConfirmation.value) return;
+  await proceedToPaymentCheckout(pendingCardBookingConfirmation.value);
+}
+
+function openMyBookingsHistory() {
+  const sourceDate = checkInDate.value;
+  const month = sourceDate
+    ? formatMonthKey(sourceDate)
+    : formatMonthKey(new Date());
+  navigateTo(`/reservations/history?month=${month}`);
+}
+
 async function openAvailableRoomsFromUnavailable() {
   showRoomUnavailable.value = false;
   await handleCheckAvailability();
@@ -1860,7 +2052,6 @@ async function handleConfirmReservation() {
   }
 
   bookingFormError.value = "";
-  redirectingToPayment.value = true;
   const confirmation = await createBooking({
     hotelId: hotel.value.id,
     roomId: selectedBookingRoom.value.id,
@@ -1890,40 +2081,27 @@ async function handleConfirmReservation() {
     return;
   }
 
-  bookingConfirmation.value = confirmation;
   showBookingDrawer.value = false;
   showRoomsDrawer.value = false;
 
   if (selectedPaymentOption.value === "PAY_AT_HOTEL") {
+    bookingConfirmation.value = confirmation;
     showBookingSuccess.value = true;
     redirectingToPayment.value = false;
     return;
   }
 
-  const checkoutSession = await createCheckoutSession({
-    tripId: hotel.value.id,
-    userId: accountId.value,
-    totalPrice: confirmation.pricing.total,
-    bookingId: confirmation.bookingId,
-  });
-
-  if (!checkoutSession?.url) {
-    await cancelUnpaidBooking({
-      bookingId: confirmation.bookingId,
-      userId: accountId.value,
-    });
-    bookingFormError.value =
-      bookingApiError.value ||
-      "Unable to initialize secure payment. Please try again.";
-    redirectingToPayment.value = false;
-    showBookingDrawer.value = true;
+  const methods = savedPaymentMethods.value;
+  if (methods.length === 0) {
+    await proceedToPaymentCheckout(confirmation);
     return;
   }
 
-  if (typeof window !== "undefined") {
-    sessionStorage.setItem(PAYMENT_RESULT_ACCESS_KEY, "1");
-  }
-  window.location.assign(checkoutSession.url);
+  pendingCardBookingConfirmation.value = confirmation;
+  selectedSavedCardId.value =
+    methods.find((method) => method.isDefault)?.id ?? methods[0]?.id ?? null;
+  showSavedCardChoice.value = true;
+  redirectingToPayment.value = false;
 }
 
 function viewSimilarRooms() {
@@ -2084,6 +2262,81 @@ onBeforeUnmount(() => {
 /* Custom Share Dropdown */
 .share-wrapper {
   position: relative;
+}
+
+.saved-card-drawer {
+  width: min(760px, 100%);
+}
+
+.saved-card-list {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.saved-card-item {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-3) var(--space-4);
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--space-3);
+  align-items: center;
+  background: var(--color-surface);
+  transition: var(--transition-hover);
+}
+
+.saved-card-item:hover {
+  border-color: var(--color-primary-300);
+  box-shadow: var(--shadow-sm);
+}
+
+.saved-card-item:has(input:checked) {
+  border-color: var(--color-primary-500);
+  background: color-mix(in srgb, var(--color-primary-50) 55%, white 45%);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary-100) 55%, transparent 45%);
+}
+
+.saved-card-item input[type="radio"] {
+  accent-color: var(--color-primary);
+}
+
+.saved-card-copy {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.saved-card-copy strong {
+  color: var(--color-heading);
+  font-size: var(--font-size-body-md);
+  font-weight: var(--font-weight-bold);
+}
+
+.saved-card-copy span {
+  color: var(--color-text-soft);
+  font-size: var(--font-size-body-sm);
+}
+
+.saved-card-badge {
+  border-radius: var(--radius-pill);
+  padding: 4px 10px;
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary-700);
+  background: var(--color-primary-50);
+  border: 1px solid var(--color-primary-100);
+}
+
+.saved-card-drawer .booking-feedback-actions {
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.saved-card-drawer .book-btn-outline,
+.saved-card-drawer .primary-checkout-btn {
+  min-width: 250px;
+  justify-content: center;
+  text-align: center;
 }
 
 .share-dropdown {
@@ -3206,20 +3459,27 @@ onBeforeUnmount(() => {
   font-weight: var(--font-weight-semibold);
 }
 .book-btn-outline {
-  border: 2px solid var(--color-primary-500);
-  background: transparent;
-  color: var(--color-primary-600);
-  padding: 10px 20px;
-  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-primary-500);
+  background: var(--color-surface);
+  color: var(--color-primary-700);
+  padding: 11px 22px;
+  border-radius: var(--radius-lg);
   font-weight: var(--font-weight-bold);
-  font-size: var(--font-size-body-sm);
+  font-size: var(--font-size-body-md);
   cursor: pointer;
   transition: var(--transition-hover);
   white-space: nowrap;
+  box-shadow: var(--shadow-xs);
 }
 .book-btn-outline:hover:not(.disabled) {
-  background: var(--color-primary-500);
-  color: #ffffff;
+  background: var(--color-primary-50);
+  color: var(--color-primary-700);
+  border-color: var(--color-primary-600);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 .book-btn-outline.disabled {
   border-color: var(--color-disabled);
@@ -3639,6 +3899,39 @@ onBeforeUnmount(() => {
   gap: var(--space-3);
 }
 
+.availability-book-btn {
+  border: 1px solid var(--color-primary-500);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-primary-500) 88%, white 12%) 0%,
+    var(--color-primary-600) 100%
+  );
+  color: var(--color-white);
+  min-width: 156px;
+  padding: 10px 18px;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-body-md);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: var(--transition-hover);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--color-primary-700) 24%, transparent 76%);
+}
+
+.availability-book-btn:hover {
+  transform: translateY(-1px);
+  background: linear-gradient(
+    180deg,
+    var(--color-primary-600) 0%,
+    color-mix(in srgb, var(--color-primary-700) 86%, black 14%) 100%
+  );
+  box-shadow: 0 12px 24px color-mix(in srgb, var(--color-primary-700) 30%, transparent 70%);
+}
+
+.availability-book-btn:active {
+  transform: translateY(0);
+}
+
 /* Confirm Drawer */
 .booking-confirm-drawer {
   width: min(800px, 100%);
@@ -3811,31 +4104,52 @@ onBeforeUnmount(() => {
 
 /* Primary CTA button */
 .primary-checkout-btn {
-  background: var(--color-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-primary-500) 86%, white 14%) 0%,
+    var(--color-primary-600) 100%
+  );
   color: #ffffff;
-  border: none;
+  border: 1px solid var(--color-primary-600);
   padding: 14px 32px;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   font-weight: var(--font-weight-bold);
   font-size: var(--font-size-body-md);
   cursor: pointer;
   transition: var(--transition-hover);
   letter-spacing: 0.02em;
+  box-shadow: 0 10px 22px color-mix(in srgb, var(--color-primary-700) 24%, transparent 76%);
 }
 .primary-checkout-btn:hover:not(:disabled) {
-  background: var(--color-primary-dark);
+  background: linear-gradient(
+    180deg,
+    var(--color-primary-600) 0%,
+    color-mix(in srgb, var(--color-primary-700) 86%, black 14%) 100%
+  );
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(0, 103, 104, 0.3);
+  box-shadow: 0 14px 26px color-mix(in srgb, var(--color-primary-700) 30%, transparent 70%);
 }
 .primary-checkout-btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
 .view-similar-btn {
-  background: var(--color-navy);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-navy) 84%, white 16%) 0%,
+    var(--color-navy) 100%
+  );
+  border-color: var(--color-navy);
 }
 .view-similar-btn:hover:not(:disabled) {
-  background: var(--color-navy-dark);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-navy) 92%, black 8%) 0%,
+    color-mix(in srgb, var(--color-navy) 78%, black 22%) 100%
+  );
 }
 
 /* Booking confirm footer */
@@ -3934,6 +4248,17 @@ onBeforeUnmount(() => {
 @media (max-width: 860px) {
   .payment-option-grid {
     grid-template-columns: 1fr;
+  }
+
+  .saved-card-drawer .booking-feedback-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .saved-card-drawer .book-btn-outline,
+  .saved-card-drawer .primary-checkout-btn {
+    width: 100%;
+    min-width: 0;
   }
 }
 

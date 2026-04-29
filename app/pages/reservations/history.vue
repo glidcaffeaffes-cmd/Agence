@@ -137,9 +137,9 @@
                 <div class="booking-actions">
                   <button class="btn-ghost" @click="openDetails(reservation.id)">View details</button>
                   <button
-                    v-if="showCancelButton(reservation.id)"
                     class="btn-cancel"
-                    :disabled="cancelling && selectedReservationId === reservation.id"
+                    :title="cancelButtonTitle(reservation)"
+                    :disabled="!canCancelReservation(reservation) || (cancelling && selectedReservationId === reservation.id)"
                     @click="openCancel(reservation.id)"
                   >
                     Cancel reservation
@@ -310,6 +310,7 @@ definePageMeta({ middleware: 'auth' })
 const { accountId } = useAuth()
 const reservationService = new ReservationService()
 const hotelService = new HotelService()
+const route = useRoute()
 
 const reservations = ref<Reservation[]>([])
 const hotels = ref<Hotel[]>([])
@@ -373,6 +374,15 @@ const calendarEntries = computed(() =>
 function currentMonthKey() {
   const now = new Date()
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+}
+
+function normalizeMonthKey(value: unknown) {
+  if (typeof value !== 'string') return null
+  if (!/^\d{4}-\d{2}$/.test(value)) return null
+  const [year, month] = value.split('-').map(Number)
+  if (!Number.isFinite(year) || !Number.isFinite(month)) return null
+  if (month < 1 || month > 12) return null
+  return `${year}-${String(month).padStart(2, '0')}`
 }
 
 function monthRange(key: string) {
@@ -452,8 +462,44 @@ function statusClass(status: ReservationStatus) {
   }
 }
 
-function showCancelButton(reservationId: number) {
-  return Boolean(cancellationPreviews.value[reservationId]?.cancellationAllowed)
+function canCancelReservation(reservation: Reservation) {
+  return getCancellationBlockReason(reservation) === null
+}
+
+function cancelButtonTitle(reservation: Reservation) {
+  const reason = getCancellationBlockReason(reservation)
+  return reason ?? 'Cancel this reservation'
+}
+
+function getCancellationBlockReason(reservation: Reservation): string | null {
+  const status = reservation.status
+
+  if (status === ReservationStatus.CONFIRMED) {
+    return 'Confirmed reservations cannot be cancelled.'
+  }
+  if (status === ReservationStatus.COMPLETED) {
+    return 'Completed reservations cannot be cancelled.'
+  }
+  if (status === ReservationStatus.CANCELLED) {
+    return 'This reservation is already cancelled.'
+  }
+  if (status === ReservationStatus.BLOCKED) {
+    return 'Blocked reservations cannot be cancelled.'
+  }
+  if (status === ReservationStatus.REFUSED) {
+    return 'Refused reservations cannot be cancelled.'
+  }
+
+  const preview = cancellationPreviews.value[reservation.id]
+  if (!preview) {
+    return 'Cancellation policy is still loading.'
+  }
+
+  if (!preview.cancellationAllowed) {
+    return preview.reason || 'This reservation cannot be cancelled.'
+  }
+
+  return null
 }
 
 async function hydrateCancellationPreviews() {
@@ -543,6 +589,16 @@ function closeDetails() {
 async function openCancel(reservationId: number) {
   selectedReservationId.value = reservationId
   cancelError.value = ''
+  const target = reservations.value.find((reservation) => reservation.id === reservationId)
+  if (!target) return
+
+  const existingReason = getCancellationBlockReason(target)
+  if (existingReason) {
+    cancelError.value = existingReason
+    showCancelModal.value = true
+    return
+  }
+
   const preview = await ensurePreview(reservationId)
   if (!preview) {
     cancelError.value = 'Unable to load cancellation policy.'
@@ -570,6 +626,17 @@ function closeSuccess() {
 
 async function confirmCancellation() {
   if (!selectedReservationId.value || !accountId.value) return
+
+  const target = reservations.value.find(
+    (reservation) => reservation.id === selectedReservationId.value,
+  )
+  if (!target) return
+
+  const blockReason = getCancellationBlockReason(target)
+  if (blockReason) {
+    cancelError.value = blockReason
+    return
+  }
 
   cancelling.value = true
   cancelError.value = ''
@@ -623,6 +690,10 @@ watch([statusFilter, monthCursor, accountId], () => {
 })
 
 onMounted(async () => {
+  const initialMonth = normalizeMonthKey(route.query.month)
+  if (initialMonth) {
+    monthCursor.value = initialMonth
+  }
   await Promise.all([hotelService.getAll().then((data) => { hotels.value = data }), loadReservations()])
   initialized.value = true
 })

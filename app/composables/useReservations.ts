@@ -9,6 +9,7 @@ import type {
   BookingCreatePayload,
   CheckoutSessionResponse,
   CancelUnpaidBookingPayload,
+  PayWithSavedCardPayload,
   CreateCheckoutSessionPayload,
 } from '~/types/interfaces'
 import { ReservationService, RoomService } from '~/services'
@@ -70,6 +71,17 @@ export function useReservations() {
     payload: CancelUnpaidBookingPayload,
   ): Promise<{ removed: boolean } | null> {
     return execute(() => reservationService.cancelUnpaidBooking(payload), null)
+  }
+
+  async function payWithSavedCard(
+    payload: PayWithSavedCardPayload,
+  ): Promise<{
+    paid: boolean
+    bookingId: number
+    bookingReference: string
+    status: string
+  } | null> {
+    return execute(() => reservationService.payWithSavedCard(payload), null)
   }
 
   async function getCheckoutSessionSummary(
@@ -146,6 +158,7 @@ export function useReservations() {
     cancelBooking,
     createCheckoutSession,
     cancelUnpaidBooking,
+    payWithSavedCard,
     getCheckoutSessionSummary,
     updateStatus,
     fetchPaginated: async (

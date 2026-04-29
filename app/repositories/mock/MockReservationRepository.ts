@@ -7,6 +7,7 @@ import type {
   CheckoutSessionSummary,
   CheckoutSessionResponse,
   CancelUnpaidBookingPayload,
+  PayWithSavedCardPayload,
   CreateCheckoutSessionPayload,
 } from '~/types/interfaces'
 import type { Reservation } from '~/types/models'
@@ -271,6 +272,31 @@ export class MockReservationRepository implements IReservationRepository {
       (entry) => !(entry.id === payload.bookingId && entry.accountId === payload.userId),
     )
     return { removed: this.reservations.length < before }
+  }
+
+  async payWithSavedCard(
+    payload: PayWithSavedCardPayload,
+  ): Promise<{
+    paid: boolean
+    bookingId: number
+    bookingReference: string
+    status: string
+  }> {
+    const reservation = this.reservations.find(
+      (entry) => entry.id === payload.bookingId && entry.accountId === payload.userId,
+    )
+    if (!reservation) {
+      throw new Error('Booking not found')
+    }
+
+    reservation.status = ReservationStatusEnum.CONFIRMED
+
+    return {
+      paid: true,
+      bookingId: reservation.id,
+      bookingReference: reservation.confirmationCode,
+      status: reservation.status,
+    }
   }
 
   async getCheckoutSessionSummary(
