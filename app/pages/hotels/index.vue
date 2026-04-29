@@ -9,7 +9,11 @@
 
     <div class="main-container">
       <!-- Filters Sidebar -->
-      <aside ref="filtersSidebarRef" class="filters-sidebar">
+      <aside
+        ref="filtersSidebarRef"
+        class="filters-sidebar"
+        :style="{ '--filters-sidebar-max-height': sidebarMaxHeight }"
+      >
         <div class="sidebar-header">
           <span class="material-symbols-outlined">filter_list</span>
           <span>Filtres</span>
@@ -17,101 +21,101 @@
 
         <div class="filters-scroll">
           <div class="filter-section">
-          <label class="filter-label">Prix par nuit</label>
-          <div class="slider-wrapper">
-            <Slider
-              v-model="priceRange"
-              range
-              :min="0"
-              :max="1000"
-              class="custom-slider"
-            />
-            <div class="slider-values">
-              <span>{{ priceRange[0] }}€</span>
-              <span>{{ priceRange[1] }}€</span>
+            <label class="filter-label">Prix par nuit</label>
+            <div class="slider-wrapper">
+              <Slider
+                v-model="priceRange"
+                range
+                :min="0"
+                :max="1000"
+                class="custom-slider"
+              />
+              <div class="slider-values">
+                <span>{{ priceRange[0] }}€</span>
+                <span>{{ priceRange[1] }}€</span>
+              </div>
             </div>
-          </div>
           </div>
 
           <div class="filter-section">
-          <label class="filter-label">Classement</label>
-          <div class="checkbox-group">
-            <div v-for="star in [5, 4, 3]" :key="star" class="checkbox-field">
-              <Checkbox
-                v-model="selectedStars"
-                :inputId="`star-${star}`"
-                :value="star"
-              />
-              <label
-                :for="`star-${star}`"
-                class="checkbox-label checkbox-label--rating"
-              >
-                <Rating
-                  :modelValue="star"
-                  readonly
-                  :cancel="false"
-                  class="filter-rating"
+            <label class="filter-label">Classement</label>
+            <div class="checkbox-group">
+              <div v-for="star in [5, 4, 3]" :key="star" class="checkbox-field">
+                <Checkbox
+                  v-model="selectedStars"
+                  :inputId="`star-${star}`"
+                  :value="star"
                 />
-              </label>
+                <label
+                  :for="`star-${star}`"
+                  class="checkbox-label checkbox-label--rating"
+                >
+                  <Rating
+                    :modelValue="star"
+                    readonly
+                    :cancel="false"
+                    class="filter-rating"
+                  />
+                </label>
+              </div>
             </div>
-          </div>
           </div>
 
           <div class="filter-section filter-section--destination">
-          <label class="filter-label">Destination</label>
-          <Select
-            v-model="selectedCity"
-            :options="cityOptions"
-            optionLabel="label"
-            optionValue="value"
-            placeholder="Toutes les villes"
-            appendTo="self"
-            class="full-width-select destination-dropdown"
-          />
+            <label class="filter-label">Destination</label>
+            <Select
+              v-model="selectedCity"
+              :options="cityOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Toutes les villes"
+              appendTo="self"
+              class="full-width-select destination-dropdown"
+            />
           </div>
 
           <div
             class="filter-section filter-section--date filter-section--checkin"
           >
-          <label class="filter-label">Check-in</label>
-          <div class="date-picker-shell">
-            <DatePicker
-              v-model="checkInDate"
-              showIcon
-              iconDisplay="input"
-              :manualInput="false"
-              :minDate="today"
-              appendTo="self"
-              placeholder="Choose check-in"
-              dateFormat="D, M d"
-              class="filter-date-picker"
-            />
-            <span class="material-symbols-outlined date-picker-shell__chevron"
-              >expand_more</span
-            >
-          </div>
+            <label class="filter-label">Check-in</label>
+            <div class="date-picker-shell">
+              <DatePicker
+                v-model="checkInDate"
+                showIcon
+                iconDisplay="input"
+                :manualInput="false"
+                :minDate="today"
+                appendTo="self"
+                placeholder="Choose check-in"
+                dateFormat="D, M d"
+                class="filter-date-picker"
+              />
+              <span class="material-symbols-outlined date-picker-shell__chevron"
+                >expand_more</span
+              >
+            </div>
           </div>
 
           <div
             class="filter-section filter-section--date filter-section--checkout"
           >
-          <label class="filter-label">Check-out</label>
-          <div class="date-picker-shell">
-            <DatePicker
-              v-model="checkOutDate"
-              showIcon
-              iconDisplay="input"
-              :manualInput="false"
-              :minDate="checkOutMinDate"
-              appendTo="self"
-              placeholder="Choose check-out"
-              dateFormat="D, M d"
-              class="filter-date-picker"
-            />
-            <span class="material-symbols-outlined date-picker-shell__chevron"
-              >expand_more</span
-            >
-          </div>
+            <label class="filter-label">Check-out</label>
+            <div class="date-picker-shell">
+              <DatePicker
+                v-model="checkOutDate"
+                showIcon
+                iconDisplay="input"
+                :manualInput="false"
+                :minDate="checkOutMinDate"
+                appendTo="self"
+                placeholder="Choose check-out"
+                dateFormat="D, M d"
+                class="filter-date-picker"
+              />
+              <span class="material-symbols-outlined date-picker-shell__chevron"
+                >expand_more</span
+              >
+            </div>
           </div>
 
           <div
@@ -120,124 +124,124 @@
               'filter-section--guests-open': activeFilterPanel === 'guests',
             }"
           >
-          <label class="filter-label">Guests & rooms</label>
-          <button
-            type="button"
-            class="guest-trigger"
-            :class="{ 'guest-trigger--open': activeFilterPanel === 'guests' }"
-            @click="toggleGuestPanel"
-          >
-            <span class="material-symbols-outlined guest-trigger__icon"
-              >person</span
-            >
-            <span class="guest-trigger__copy">
-              <strong>{{ guestSummary }}</strong>
-              <span>Adults, children, rooms</span>
-            </span>
-            <span class="material-symbols-outlined guest-trigger__chevron"
-              >expand_more</span
-            >
-          </button>
-
-          <div v-if="activeFilterPanel === 'guests'" class="guest-panel">
-            <div class="guest-counter-row">
-              <div class="guest-counter-copy">
-                <strong>Adults</strong>
-              </div>
-              <div class="guest-counter-control">
-                <Button
-                  type="button"
-                  text
-                  class="guest-counter-btn"
-                  @click="updateGuestCount('adults', -1)"
-                  :disabled="adults <= 1"
-                  >−</Button
-                >
-                <span>{{ adults }}</span>
-                <Button
-                  type="button"
-                  text
-                  class="guest-counter-btn"
-                  @click="updateGuestCount('adults', 1)"
-                  >+</Button
-                >
-              </div>
-            </div>
-
-            <div class="guest-counter-row">
-              <div class="guest-counter-copy">
-                <strong>Children</strong>
-              </div>
-              <div class="guest-counter-control">
-                <Button
-                  type="button"
-                  text
-                  class="guest-counter-btn"
-                  @click="updateGuestCount('children', -1)"
-                  :disabled="children <= 0"
-                  >−</Button
-                >
-                <span>{{ children }}</span>
-                <Button
-                  type="button"
-                  text
-                  class="guest-counter-btn"
-                  @click="updateGuestCount('children', 1)"
-                  >+</Button
-                >
-              </div>
-            </div>
-
-            <div v-if="children > 0" class="guest-age-grid">
-              <div
-                v-for="(_, index) in childAges"
-                :key="`child-age-${index}`"
-                class="guest-counter-row"
-              >
-                <label class="guest-age-label guest-counter-copy"
-                  ><strong>Age of child {{ index + 1 }}</strong></label
-                >
-                <Select
-                  v-model="childAges[index]"
-                  :options="childAgeOptions"
-                  optionLabel="label"
-                  optionValue="value"
-                  class="guest-age-select"
-                />
-              </div>
-            </div>
-
-            <div class="guest-counter-row">
-              <div class="guest-counter-copy">
-                <strong>Rooms</strong>
-              </div>
-              <div class="guest-counter-control">
-                <Button
-                  type="button"
-                  text
-                  class="guest-counter-btn"
-                  @click="updateGuestCount('rooms', -1)"
-                  :disabled="roomsRequested <= 1"
-                  >−</Button
-                >
-                <span>{{ roomsRequested }}</span>
-                <Button
-                  type="button"
-                  text
-                  class="guest-counter-btn"
-                  @click="updateGuestCount('rooms', 1)"
-                  >+</Button
-                >
-              </div>
-            </div>
-
-            <Button
+            <label class="filter-label">Guests & rooms</label>
+            <button
               type="button"
-              label="Apply"
-              class="apply-btn guest-done-button"
-              @click="activeFilterPanel = null"
-            />
-          </div>
+              class="guest-trigger"
+              :class="{ 'guest-trigger--open': activeFilterPanel === 'guests' }"
+              @click="toggleGuestPanel"
+            >
+              <span class="material-symbols-outlined guest-trigger__icon"
+                >person</span
+              >
+              <span class="guest-trigger__copy">
+                <strong>{{ guestSummary }}</strong>
+                <span>Adults, children, rooms</span>
+              </span>
+              <span class="material-symbols-outlined guest-trigger__chevron"
+                >expand_more</span
+              >
+            </button>
+
+            <div v-if="activeFilterPanel === 'guests'" class="guest-panel">
+              <div class="guest-counter-row">
+                <div class="guest-counter-copy">
+                  <strong>Adults</strong>
+                </div>
+                <div class="guest-counter-control">
+                  <Button
+                    type="button"
+                    text
+                    class="guest-counter-btn"
+                    @click="updateGuestCount('adults', -1)"
+                    :disabled="adults <= 1"
+                    >−</Button
+                  >
+                  <span>{{ adults }}</span>
+                  <Button
+                    type="button"
+                    text
+                    class="guest-counter-btn"
+                    @click="updateGuestCount('adults', 1)"
+                    >+</Button
+                  >
+                </div>
+              </div>
+
+              <div class="guest-counter-row">
+                <div class="guest-counter-copy">
+                  <strong>Children</strong>
+                </div>
+                <div class="guest-counter-control">
+                  <Button
+                    type="button"
+                    text
+                    class="guest-counter-btn"
+                    @click="updateGuestCount('children', -1)"
+                    :disabled="children <= 0"
+                    >−</Button
+                  >
+                  <span>{{ children }}</span>
+                  <Button
+                    type="button"
+                    text
+                    class="guest-counter-btn"
+                    @click="updateGuestCount('children', 1)"
+                    >+</Button
+                  >
+                </div>
+              </div>
+
+              <div v-if="children > 0" class="guest-age-grid">
+                <div
+                  v-for="(_, index) in childAges"
+                  :key="`child-age-${index}`"
+                  class="guest-counter-row"
+                >
+                  <label class="guest-age-label guest-counter-copy"
+                    ><strong>Age of child {{ index + 1 }}</strong></label
+                  >
+                  <Select
+                    v-model="childAges[index]"
+                    :options="childAgeOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                    class="guest-age-select"
+                  />
+                </div>
+              </div>
+
+              <div class="guest-counter-row">
+                <div class="guest-counter-copy">
+                  <strong>Rooms</strong>
+                </div>
+                <div class="guest-counter-control">
+                  <Button
+                    type="button"
+                    text
+                    class="guest-counter-btn"
+                    @click="updateGuestCount('rooms', -1)"
+                    :disabled="roomsRequested <= 1"
+                    >−</Button
+                  >
+                  <span>{{ roomsRequested }}</span>
+                  <Button
+                    type="button"
+                    text
+                    class="guest-counter-btn"
+                    @click="updateGuestCount('rooms', 1)"
+                    >+</Button
+                  >
+                </div>
+              </div>
+
+              <Button
+                type="button"
+                label="Apply"
+                class="apply-btn guest-done-button"
+                @click="activeFilterPanel = null"
+              />
+            </div>
           </div>
         </div>
 
@@ -354,6 +358,7 @@ const route = useRoute();
 const router = useRouter();
 
 const filtersSidebarRef = ref<HTMLElement | null>(null);
+const sidebarMaxHeight = ref("calc(100vh - 48px)");
 const today = startOfDay(new Date());
 const priceRange = ref([0, 1000]);
 const selectedStars = ref<number[]>([3, 4, 5]);
@@ -375,6 +380,7 @@ const childAges = ref<number[]>([14]);
 const infiniteSentinelRef = ref<HTMLElement | null>(null);
 const loadingNextPage = ref(false);
 let infiniteObserver: IntersectionObserver | null = null;
+let sidebarResizeObserver: ResizeObserver | null = null;
 
 const childAgeOptions = Array.from({ length: 17 }, (_, index) => ({
   label: `${index + 1}`,
@@ -711,19 +717,46 @@ function handleClickOutside(event: MouseEvent) {
   }
 }
 
+function updateSidebarMaxHeight() {
+  if (typeof window === "undefined") return;
+
+  const stickyTopOffset = 24;
+  const viewportBottomGap = 24;
+  const minSidebarHeight = 360;
+  const sidebarTop = filtersSidebarRef.value?.getBoundingClientRect().top;
+  const visibleTop = Math.max(sidebarTop ?? stickyTopOffset, stickyTopOffset);
+  const nextHeight = Math.max(
+    minSidebarHeight,
+    window.innerHeight - visibleTop - viewportBottomGap,
+  );
+
+  sidebarMaxHeight.value = `${Math.round(nextHeight)}px`;
+}
+
 onMounted(async () => {
   document.addEventListener("click", handleClickOutside);
+  window.addEventListener("resize", updateSidebarMaxHeight);
   await fetchDestinations();
   await fetchRooms();
   applyRouteFilters();
   await loadHotelsFromRoute();
   await nextTick();
+  updateSidebarMaxHeight();
+  if (typeof ResizeObserver !== "undefined" && filtersSidebarRef.value) {
+    sidebarResizeObserver = new ResizeObserver(() => {
+      updateSidebarMaxHeight();
+    });
+    sidebarResizeObserver.observe(filtersSidebarRef.value);
+  }
   setupInfiniteObserver();
   initialized.value = true;
 });
 
 onBeforeUnmount(() => {
   document.removeEventListener("click", handleClickOutside);
+  window.removeEventListener("resize", updateSidebarMaxHeight);
+  sidebarResizeObserver?.disconnect();
+  sidebarResizeObserver = null;
   infiniteObserver?.disconnect();
   infiniteObserver = null;
 });
@@ -835,6 +868,7 @@ watch(
   .filters-sidebar {
     position: static;
     top: auto;
+    height: auto;
     max-height: none;
     overflow: visible;
     padding-right: 20px;
@@ -869,13 +903,14 @@ watch(
   border-radius: 16px;
   border: 1px solid color-mix(in srgb, var(--color-gray-200) 76%, white 24%);
   box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);
-  height: calc(100vh - 32px);
-  max-height: calc(100vh - 32px);
+  height: var(--filters-sidebar-max-height);
+  max-height: var(--filters-sidebar-max-height);
   position: sticky;
   top: 24px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  align-self: start;
   gap: 0;
   padding-right: 20px;
   padding-bottom: 12px;
@@ -893,7 +928,7 @@ watch(
   -ms-overflow-style: none;
   scrollbar-width: none;
   padding-right: 6px;
-  padding-bottom: 120px;
+  padding-bottom: 24px;
 }
 
 .filters-scroll::-webkit-scrollbar {
@@ -1024,18 +1059,17 @@ watch(
 /* Removed Toggle Switch CSS */
 
 .filter-actions {
-  margin-top: 0;
+  margin-top: auto;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  position: absolute;
+  position: sticky;
   bottom: 0;
-  left: 20px;
-  right: 20px;
-  padding-top: 14px;
+  padding-top: 18px;
   padding-bottom: 12px;
   z-index: 30;
   flex-shrink: 0;
+  border-top: 1px solid color-mix(in srgb, var(--color-gray-200) 72%, white 28%);
 }
 
 .apply-btn {
