@@ -881,7 +881,7 @@
                     </button>
                     <button
                       type="button"
-                      class="primary-checkout-btn view-similar-btn"
+                      class="primary-checkout-btn"
                       @click="viewSimilarRooms"
                     >
                       View Similar Rooms
@@ -1139,7 +1139,7 @@
                 </button>
                 <button
                   type="button"
-                  class="primary-checkout-btn view-similar-btn"
+                  class="primary-checkout-btn"
                   :disabled="redirectingToPayment || selectedSavedCardId == null"
                   @click="handlePayNowWithSelectedCard"
                 >
@@ -2268,10 +2268,15 @@ onBeforeUnmount(() => {
   width: min(760px, 100%);
 }
 
+.saved-card-drawer .availability-drawer-header {
+  padding: var(--space-6) var(--space-6) var(--space-4);
+}
+
 .saved-card-list {
   display: grid;
   gap: var(--space-3);
-  margin-top: var(--space-2);
+  margin: 0;
+  padding: 0 var(--space-6) var(--space-5);
 }
 
 .saved-card-item {
@@ -2330,6 +2335,9 @@ onBeforeUnmount(() => {
 .saved-card-drawer .booking-feedback-actions {
   justify-content: flex-end;
   align-items: center;
+  padding: var(--space-5) var(--space-6) var(--space-6);
+  border-top: 1px solid var(--color-border-soft);
+  background: var(--color-surface);
 }
 
 .saved-card-drawer .book-btn-outline,
@@ -3900,32 +3908,27 @@ onBeforeUnmount(() => {
 }
 
 .availability-book-btn {
-  border: 1px solid var(--color-primary-500);
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--color-primary-500) 88%, white 12%) 0%,
-    var(--color-primary-600) 100%
-  );
+  background: var(--color-primary-600);
   color: var(--color-white);
-  min-width: 156px;
-  padding: 10px 18px;
-  border-radius: var(--radius-lg);
-  font-size: var(--font-size-body-md);
-  font-weight: var(--font-weight-bold);
-  letter-spacing: 0.01em;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
   cursor: pointer;
-  transition: var(--transition-hover);
-  box-shadow: 0 8px 20px color-mix(in srgb, var(--color-primary-700) 24%, transparent 76%);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 103, 104, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 156px;
+  height: 48px;
+  padding: 0 28px;
 }
 
 .availability-book-btn:hover {
-  transform: translateY(-1px);
-  background: linear-gradient(
-    180deg,
-    var(--color-primary-600) 0%,
-    color-mix(in srgb, var(--color-primary-700) 86%, black 14%) 100%
-  );
-  box-shadow: 0 12px 24px color-mix(in srgb, var(--color-primary-700) 30%, transparent 70%);
+  background: var(--color-primary-700);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 103, 104, 0.25);
 }
 
 .availability-book-btn:active {
@@ -4107,30 +4110,22 @@ onBeforeUnmount(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--color-primary-500) 86%, white 14%) 0%,
-    var(--color-primary-600) 100%
-  );
+  background: var(--color-primary-600);
   color: #ffffff;
-  border: 1px solid var(--color-primary-600);
-  padding: 14px 32px;
-  border-radius: var(--radius-lg);
-  font-weight: var(--font-weight-bold);
-  font-size: var(--font-size-body-md);
+  border: none;
+  height: 48px;
+  padding: 0 28px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
   cursor: pointer;
-  transition: var(--transition-hover);
-  letter-spacing: 0.02em;
-  box-shadow: 0 10px 22px color-mix(in srgb, var(--color-primary-700) 24%, transparent 76%);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 103, 104, 0.15);
 }
 .primary-checkout-btn:hover:not(:disabled) {
-  background: linear-gradient(
-    180deg,
-    var(--color-primary-600) 0%,
-    color-mix(in srgb, var(--color-primary-700) 86%, black 14%) 100%
-  );
-  transform: translateY(-1px);
-  box-shadow: 0 14px 26px color-mix(in srgb, var(--color-primary-700) 30%, transparent 70%);
+  background: var(--color-primary-700);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 103, 104, 0.25);
 }
 .primary-checkout-btn:disabled {
   opacity: 0.55;
@@ -4162,8 +4157,6 @@ onBeforeUnmount(() => {
 }
 .booking-confirm-footer .primary-checkout-btn {
   width: auto;
-  padding: 10px 28px;
-  font-size: var(--font-size-body-md);
 }
 
 /* Price breakdown rows in confirm drawer */
