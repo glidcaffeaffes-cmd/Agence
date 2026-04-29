@@ -226,7 +226,7 @@
           >
           <NuxtLink
             to="/register"
-            class="client-navbar__register px-4 py-1.5 rounded-xl text-sm font-bold text-white bg-primary hover:bg-primary-container shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5"
+            class="client-navbar__register px-4 py-1.5 rounded-xl text-sm font-bold text-white bg-primary hover:bg-primary-container hover:text-white shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5"
             >Register</NuxtLink
           >
         </template>

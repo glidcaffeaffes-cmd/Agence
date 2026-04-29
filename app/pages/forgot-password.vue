@@ -15,12 +15,12 @@
         class="absolute inset-0 h-full w-full object-cover opacity-60 mix-blend-overlay"
       />
       <div class="absolute inset-0 bg-gradient-to-t from-primary/90 to-transparent"></div>
-      <div class="relative z-10 px-12 text-center text-white">
-        <div class="mb-6 flex items-center justify-center gap-3">
-          <span class="material-symbols-outlined text-5xl text-accent">travel_explore</span>
-          <h1 class="text-4xl font-bold tracking-tight">VoyageHub</h1>
+      <div class="relative z-10 px-12 text-center">
+        <div class="mb-6 flex items-center justify-center gap-4">
+          <span class="material-symbols-outlined flex h-16 w-16 items-center justify-center leading-none text-white" style="font-size: 32px; display: flex; align-items: center; justify-content: center;">travel_explore</span>
+          <h1 class="m-0 text-4xl font-bold tracking-tight text-white">VoyageHub</h1>
         </div>
-        <p class="mx-auto max-w-md text-lg leading-relaxed text-primary-fixed">
+        <p class="mx-auto max-w-md text-lg leading-relaxed text-white">
           We will send a secure reset link to the email address linked to your account.
         </p>
       </div>
@@ -116,3 +116,6 @@ async function handleSubmit() {
   }
 }
 </script>
+
+
+

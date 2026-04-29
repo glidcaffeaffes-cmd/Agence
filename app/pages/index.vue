@@ -177,18 +177,27 @@
               ]"
             />
 
-            <div class="hero-filter-chip-row">
+            <div class="hero-filter-dates-footer">
+              <div class="hero-filter-chip-row">
+                <Button
+                  v-for="days in quickStayOptions"
+                  :key="days"
+                  type="button"
+                  size="small"
+                  severity="secondary"
+                  outlined
+                  class="hero-filter-chip"
+                  @click="applyQuickStay(days)"
+                >
+                  {{ days === 1 ? "1 day" : `${days} days` }}
+                </Button>
+              </div>
               <Button
-                v-for="days in quickStayOptions"
-                :key="days"
                 type="button"
-                size="small"
-                severity="secondary"
-                outlined
-                class="hero-filter-chip"
-                @click="applyQuickStay(days)"
+                class="hero-filter-apply-btn"
+                @click="applyDateSelection"
               >
-                {{ days === 1 ? "1 day" : `${days} days` }}
+                Apply
               </Button>
             </div>
           </div>
@@ -294,19 +303,10 @@
               </div>
             </div>
 
-            <div class="guest-pets-row">
-              <div class="guest-counter-copy">
-                <strong>Traveling with pets?</strong>
-                <span>We will keep that in your search details.</span>
-              </div>
-              <ToggleSwitch v-model="travelWithPets" />
-            </div>
-
             <Button
               type="button"
-              label="Done"
-              outlined
-              class="guest-done-button"
+              label="Apply"
+              class="guest-apply-button"
               @click="activeFilterPanel = null"
             />
           </div>
@@ -426,7 +426,6 @@ const adults = ref(2);
 const children = ref(1);
 const roomsRequested = ref(2);
 const childAges = ref<number[]>([14]);
-const travelWithPets = ref(false);
 const quickStayOptions = [1, 2, 3, 7];
 const childAgeOptions = Array.from({ length: 17 }, (_, index) => ({
   label: `${index + 1}`,
@@ -567,6 +566,10 @@ function applyQuickStay(days: number) {
   stayDates.value = [checkIn, addDays(checkIn, days)];
 }
 
+function applyDateSelection() {
+  activeFilterPanel.value = null;
+}
+
 function submitHeroSearch() {
   const [checkIn, checkOut] = selectedDateRange.value;
   activeFilterPanel.value = null;
@@ -583,7 +586,6 @@ function submitHeroSearch() {
       children: String(children.value),
       rooms: String(roomsRequested.value),
       ...(children.value > 0 ? { childAges: childAges.value.join(",") } : {}),
-      ...(travelWithPets.value ? { pets: "1" } : {}),
     },
   });
 }
@@ -1027,14 +1029,16 @@ function formatDateForQuery(date: Date) {
 .guest-age-label {
   display: block;
   color: var(--color-heading);
-  font-weight: 800;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .hero-filter-panel__header span,
 .guest-counter-copy span,
 .guest-age-note {
   color: var(--color-text-secondary);
-  font-size: 0.93rem;
+  font-size: 13px;
+  font-weight: 500;
   line-height: 1.5;
 }
 
@@ -1093,6 +1097,21 @@ function formatDateForQuery(date: Date) {
 .hero-datepicker--two-months
   :deep(
     .p-datepicker-group-container
+      > .p-datepicker-calendar-container:first-of-type
+      .p-datepicker-calendar
+  ),
+.hero-datepicker--two-months
+  :deep(
+    .p-datepicker-group-container
+      > .p-datepicker-group:first-of-type
+      .p-datepicker-calendar
+  ) {
+  border-right: 1px solid #cbd5e1 !important;
+}
+
+.hero-datepicker--two-months
+  :deep(
+    .p-datepicker-group-container
       > .p-datepicker-calendar-container:last-of-type
   ),
 .hero-datepicker--two-months
@@ -1100,24 +1119,14 @@ function formatDateForQuery(date: Date) {
   padding-left: 22px !important;
 }
 
-.hero-datepicker--two-months
-  :deep(
-    .p-datepicker-group-container
-      > .p-datepicker-calendar-container:first-of-type
-      .p-datepicker-day-view
-  ),
-.hero-datepicker--two-months
-  :deep(
-    .p-datepicker-group-container
-      > .p-datepicker-group:first-of-type
-      .p-datepicker-day-view
-  ) {
-  border-right: 2px solid #374151 !important;
-}
-
 .hero-datepicker :deep(.p-datepicker-calendar-container) {
   min-width: 0;
   flex: 1;
+}
+
+.hero-datepicker
+  :deep(.p-datepicker-calendar-container .p-datepicker-calendar:first-child) {
+  border-right: 1px solid #cbd5e1 !important;
 }
 
 .hero-datepicker :deep(.p-datepicker-header) {
@@ -1269,14 +1278,20 @@ function formatDateForQuery(date: Date) {
   box-shadow: 0 8px 18px rgba(0, 80, 81, 0.34);
 }
 
+.hero-filter-dates-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+  margin-top: 1.25rem;
+}
+
 .hero-filter-chip-row {
   display: flex;
   flex-wrap: wrap;
   gap: 0.65rem;
-  margin-top: 1.25rem;
   padding: 0.34rem;
   border-radius: 0.95rem;
-  background: color-mix(in srgb, var(--color-primary-25) 55%, white 45%);
 }
 
 .hero-filter-chip {
@@ -1316,6 +1331,33 @@ function formatDateForQuery(date: Date) {
 
 .hero-filter-chip :deep(.p-button-label) {
   font-weight: 700;
+}
+
+.hero-filter-apply-btn {
+  border: none !important;
+  border-radius: 0.8rem !important;
+  padding: 8px 16px !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  color: #fff !important;
+  background: linear-gradient(
+    145deg,
+    #0a7677 0%,
+    var(--color-primary-600) 100%
+  ) !important;
+  box-shadow: 0 8px 18px rgba(0, 80, 81, 0.3) !important;
+}
+
+.hero-filter-apply-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 22px rgba(0, 80, 81, 0.36) !important;
+}
+
+.hero-filter-apply-btn:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--color-primary-100) 62%, transparent 38%),
+    0 10px 20px rgba(0, 80, 81, 0.34) !important;
 }
 
 .hero-filter-field--destination {
@@ -1424,8 +1466,7 @@ function formatDateForQuery(date: Date) {
 
 .guest-counter-row + .guest-counter-row,
 .guest-age-grid,
-.guest-pets-row,
-.guest-done-button {
+.guest-apply-button {
   margin-top: 1rem;
 }
 
@@ -1446,14 +1487,16 @@ function formatDateForQuery(date: Date) {
 .guest-counter-control span {
   text-align: center;
   color: var(--color-heading);
-  font-size: 0.95rem;
-  font-weight: 800;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .guest-counter-btn {
   border: none;
   min-height: 2.4rem;
   color: var(--color-primary-600);
+  font-size: 13px !important;
+  font-weight: 500 !important;
 }
 
 .guest-counter-btn:disabled {
@@ -1462,7 +1505,9 @@ function formatDateForQuery(date: Date) {
 
 .guest-age-grid {
   display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.85rem;
+  padding-bottom: 8px;
 }
 
 .guest-age-item {
@@ -1475,26 +1520,38 @@ function formatDateForQuery(date: Date) {
   border-radius: 0.95rem;
 }
 
+.guest-age-select :deep(.p-select-label),
+.guest-age-select :deep(.p-select-dropdown),
+.guest-age-select :deep(.p-select-dropdown-icon) {
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+
 .guest-age-note {
   margin: 0;
+  padding-bottom: 16px;
 }
 
-.guest-pets-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--color-divider);
-}
-
-.guest-done-button {
-  width: 100%;
+.guest-apply-button {
+  width: 100% !important;
+  display: flex !important;
   justify-content: center;
+  border: none !important;
+  border-radius: 0.9rem !important;
+  padding: 0.72rem 1rem !important;
+  font-weight: 800 !important;
+  color: #fff !important;
+  background: linear-gradient(
+    145deg,
+    #0a7677 0%,
+    var(--color-primary-600) 100%
+  ) !important;
+  box-shadow: 0 10px 20px rgba(0, 80, 81, 0.28) !important;
 }
 
-.guest-pets-row :deep(.p-toggleswitch) {
-  flex-shrink: 0;
+.guest-apply-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 24px rgba(0, 80, 81, 0.34) !important;
 }
 
 .section-container {
@@ -1821,10 +1878,10 @@ function formatDateForQuery(date: Date) {
     border-radius: 0.62rem;
   }
 
-  .guest-counter-row,
-  .guest-pets-row {
+  .guest-counter-row{
     align-items: flex-start;
     flex-direction: column;
+    padding-bottom: 16px;
   }
 
   .hotels-grid,

@@ -9,12 +9,12 @@
     <div class="hidden lg:flex lg:w-1/2 relative bg-primary items-center justify-center overflow-hidden">
       <img src="https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?auto=format&fit=crop&q=80&w=2000" alt="Luxury Hotel Suite" class="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay" />
       <div class="absolute inset-0 bg-gradient-to-t from-primary/90 to-transparent"></div>
-      <div class="relative z-10 text-center text-white px-12">
-        <div class="flex items-center justify-center gap-3 mb-6">
-          <span class="material-symbols-outlined text-5xl text-accent">travel_explore</span>
-          <h1 class="text-4xl font-bold tracking-tight">VoyageHub</h1>
+      <div class="relative z-10 px-12 text-center">
+        <div class="mb-6 flex items-center justify-center gap-4">
+          <span class="material-symbols-outlined flex h-16 w-16 items-center justify-center leading-none text-white" style="font-size: 32px; display: flex; align-items: center; justify-content: center;">travel_explore</span>
+          <h1 class="m-0 text-4xl font-bold tracking-tight text-white">VoyageHub</h1>
         </div>
-        <p class="text-lg text-primary-fixed max-w-md mx-auto leading-relaxed">
+        <p class="mx-auto max-w-md text-lg leading-relaxed text-white">
           Join an exclusive network of travelers. Experience curated properties with exceptional architectural prestige.
         </p>
       </div>
@@ -335,3 +335,6 @@ async function handleGoogleSignIn() {
   }
 }
 </script>
+
+
+
