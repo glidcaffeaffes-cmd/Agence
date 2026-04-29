@@ -11,11 +11,17 @@
     <!-- Hero Section -->
     <section class="hero-premium">
       <div class="hero-shell">
-        <img
-          src="/images/hero.png"
-          alt="VoyageHub luxury resort"
+        <video
+          ref="heroVideo"
+          src="https://res.cloudinary.com/dncfxydui/video/upload/v1777499673/WhatsApp_Video_2026-04-29_at_22.52.04_hdgoer.mp4"
+          poster="/images/hero.png"
+          autoplay
+          loop
+          muted
+          playsinline
+          preload="auto"
           class="hero-backdrop"
-        />
+        ></video>
         <div class="hero-overlay"></div>
 
         <div class="hero-content">
@@ -427,6 +433,7 @@ const benefits = [
 ];
 
 const heroFilterRef = ref<HTMLElement | null>(null);
+const heroVideo = ref<HTMLVideoElement | null>(null);
 const activeFilterPanel = ref<"dates" | "guests" | "destination" | null>(null);
 const today = startOfDay(new Date());
 const selectedCity = ref<string | null>(null);

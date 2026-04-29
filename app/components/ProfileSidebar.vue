@@ -66,11 +66,11 @@
       <div class="sidebar-stats">
         <div class="stat-item">
           <span class="stat-label">Trips Completed</span>
-          <span class="stat-value stat-value--primary">12</span>
+          <span class="stat-value stat-value--primary">{{ tripsCompleted }}</span>
         </div>
         <div class="stat-item">
           <span class="stat-label">Saved Hotels</span>
-          <span class="stat-value">8</span>
+          <span class="stat-value">{{ savedHotelsCount }}</span>
         </div>
       </div>
 
@@ -114,9 +114,14 @@ import { useAuth } from "~/composables/useAuth";
 import { computed } from "vue";
 import { useProfileCompletion } from "~/composables/useProfileCompletion";
 import { useAppToast } from "~/composables/useAppToast";
+import { useWishlist } from "~/composables/useWishlist";
+import { useReservations } from "~/composables/useReservations";
+import { ReservationStatus } from "~/types/enums";
 
-const { currentProfile, updateProfile } = useAuth();
+const { currentProfile, updateProfile, accountId } = useAuth();
 const { success: toastSuccess, error: toastError } = useAppToast();
+const { count: savedHotelsCount, hydrate: hydrateWishlist } = useWishlist();
+const { reservations, fetchByAccount } = useReservations();
 const { percentage } = useProfileCompletion(currentProfile);
 const avatarInputRef = ref<HTMLInputElement | null>(null);
 const isUploadingAvatar = ref(false);
@@ -125,6 +130,21 @@ const isMounted = ref(false);
 onMounted(() => {
   isMounted.value = true;
 });
+
+const tripsCompleted = computed(() =>
+  reservations.value.filter(
+    (reservation) => reservation.status === ReservationStatus.COMPLETED,
+  ).length,
+);
+
+watch(
+  accountId,
+  async (id) => {
+    if (!id) return;
+    await Promise.all([fetchByAccount(id), hydrateWishlist()]);
+  },
+  { immediate: true },
+);
 
 const avatarCircumference = 2 * Math.PI * 48;
 const avatarDashOffset = computed(() => {
