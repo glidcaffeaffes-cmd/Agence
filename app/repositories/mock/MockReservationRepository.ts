@@ -6,6 +6,7 @@ import type {
   BookingConfirmation,
   CheckoutSessionSummary,
   CheckoutSessionResponse,
+  CancelUnpaidBookingPayload,
   CreateCheckoutSessionPayload,
 } from '~/types/interfaces'
 import type { Reservation } from '~/types/models'
@@ -260,6 +261,16 @@ export class MockReservationRepository implements IReservationRepository {
       sessionId: `cs_test_${payload.bookingId}`,
       url: `/payment/success?session_id=cs_test_${payload.bookingId}&booking_id=${payload.bookingId}`,
     }
+  }
+
+  async cancelUnpaidBooking(
+    payload: CancelUnpaidBookingPayload,
+  ): Promise<{ removed: boolean }> {
+    const before = this.reservations.length
+    this.reservations = this.reservations.filter(
+      (entry) => !(entry.id === payload.bookingId && entry.accountId === payload.userId),
+    )
+    return { removed: this.reservations.length < before }
   }
 
   async getCheckoutSessionSummary(

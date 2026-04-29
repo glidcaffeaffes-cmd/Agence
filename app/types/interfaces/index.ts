@@ -14,6 +14,7 @@ export type {
   BookingCancellationPreview,
   BookingCancellationConfirmation,
   CreateCheckoutSessionPayload,
+  CancelUnpaidBookingPayload,
   CheckoutSessionResponse,
   CheckoutSessionSummary,
 } from './IReservationRepository'
