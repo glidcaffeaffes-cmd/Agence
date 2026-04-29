@@ -86,7 +86,7 @@
             >
               <div
                 v-if="showNotificationsMenu"
-                class="notifications-dropdown absolute right-0 mt-3 w-[360px] bg-white border border-outline-variant/40 rounded-xl shadow-lg z-50 overflow-hidden"
+                class="notifications-dropdown absolute top-full right-0 mt-2 w-[360px] bg-white border border-outline-variant/40 rounded-xl shadow-lg z-50 overflow-hidden"
               >
                 <div class="notifications-head">
                   <h4>Notifications</h4>
@@ -596,7 +596,6 @@ watch(
 
 .client-navbar__icon-btn:hover {
   color: var(--color-primary-600);
-  background: var(--color-surface-secondary);
 }
 
 .client-navbar--transparent .client-navbar__icon-btn:hover {
@@ -651,6 +650,7 @@ watch(
 
 .notifications-dropdown {
   max-height: min(70vh, 520px);
+  margin: 0;
 }
 
 .notifications-head {

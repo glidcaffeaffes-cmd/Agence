@@ -1490,7 +1490,7 @@ function formatCardBrand(brand: PaymentMethod["brand"]) {
 .profile-form {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 8px;
 }
 
 .form-row {
@@ -1778,7 +1778,6 @@ input[type="date"] ~ .state-icon {
 }
 
 .form-actions {
-  padding-top: 24px;
   border-top: 1px solid var(--color-border-soft);
   display: flex;
   justify-content: flex-end;
