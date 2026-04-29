@@ -857,15 +857,10 @@ function formatDateForQuery(date: Date) {
   min-width: 10.65rem;
   min-height: 4.1rem;
   padding: 0 1.55rem;
-  border: none;
+  border: 1px solid var(--color-primary-600);
   border-radius: 1.2rem;
   margin-left: 0.3rem;
-  background: linear-gradient(
-    135deg,
-    #0a7677 0%,
-    var(--color-primary-600) 45%,
-    var(--color-primary-700) 100%
-  );
+  background: var(--color-primary-600);
   color: white;
   font-size: 0.98rem;
   font-weight: 700;
@@ -879,7 +874,7 @@ function formatDateForQuery(date: Date) {
 
 .hero-filter-search:hover {
   transform: translateY(-1px);
-  filter: brightness(1.02);
+  background: var(--color-primary-700);
   box-shadow: 0 18px 32px rgba(0, 80, 81, 0.38);
 }
 
@@ -1339,22 +1334,19 @@ function formatDateForQuery(date: Date) {
 }
 
 .hero-filter-apply-btn {
-  border: none !important;
+  border: 1px solid var(--color-primary-600) !important;
   border-radius: 0.8rem !important;
   padding: 8px 16px !important;
   font-size: 14px !important;
   font-weight: 800 !important;
   color: #fff !important;
-  background: linear-gradient(
-    145deg,
-    #0a7677 0%,
-    var(--color-primary-600) 100%
-  ) !important;
+  background: var(--color-primary-600) !important;
   box-shadow: 0 8px 18px rgba(0, 80, 81, 0.3) !important;
 }
 
 .hero-filter-apply-btn:hover {
   transform: translateY(-1px);
+  background: var(--color-primary-700) !important;
   box-shadow: 0 12px 22px rgba(0, 80, 81, 0.36) !important;
 }
 
@@ -1554,22 +1546,19 @@ function formatDateForQuery(date: Date) {
   width: 100% !important;
   display: flex !important;
   justify-content: center;
-  border: none !important;
+  border: 1px solid var(--color-primary-600) !important;
   border-radius: 8px !important;
   padding: 8px 16px !important;
   font-size: 14px;
   font-weight: 700 !important;
   color: #fff !important;
-  background: linear-gradient(
-    145deg,
-    #0a7677 0%,
-    var(--color-primary-600) 100%
-  ) !important;
+  background: var(--color-primary-600) !important;
   box-shadow: 0 10px 20px rgba(0, 80, 81, 0.28) !important;
 }
 
 .guest-apply-button:hover {
   transform: translateY(-1px);
+  background: var(--color-primary-700) !important;
   box-shadow: 0 14px 24px rgba(0, 80, 81, 0.34) !important;
 }
 

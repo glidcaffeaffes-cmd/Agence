@@ -18,7 +18,13 @@
         <div class="filter-section">
           <label class="filter-label">Prix par nuit</label>
           <div class="slider-wrapper">
-            <Slider v-model="priceRange" range :min="0" :max="1000" class="custom-slider" />
+            <Slider
+              v-model="priceRange"
+              range
+              :min="0"
+              :max="1000"
+              class="custom-slider"
+            />
             <div class="slider-values">
               <span>{{ priceRange[0] }}€</span>
               <span>{{ priceRange[1] }}€</span>
@@ -30,9 +36,21 @@
           <label class="filter-label">Classement</label>
           <div class="checkbox-group">
             <div v-for="star in [5, 4, 3]" :key="star" class="checkbox-field">
-              <Checkbox v-model="selectedStars" :inputId="`star-${star}`" :value="star" />
-              <label :for="`star-${star}`" class="checkbox-label checkbox-label--rating">
-                <Rating :modelValue="star" readonly :cancel="false" class="filter-rating" />
+              <Checkbox
+                v-model="selectedStars"
+                :inputId="`star-${star}`"
+                :value="star"
+              />
+              <label
+                :for="`star-${star}`"
+                class="checkbox-label checkbox-label--rating"
+              >
+                <Rating
+                  :modelValue="star"
+                  readonly
+                  :cancel="false"
+                  class="filter-rating"
+                />
               </label>
             </div>
           </div>
@@ -40,18 +58,20 @@
 
         <div class="filter-section filter-section--destination">
           <label class="filter-label">Destination</label>
-          <Select 
-            v-model="selectedCity" 
-            :options="cityOptions" 
-            optionLabel="label" 
-            optionValue="value" 
-            placeholder="Toutes les villes" 
+          <Select
+            v-model="selectedCity"
+            :options="cityOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Toutes les villes"
             appendTo="self"
-            class="full-width-select destination-dropdown" 
+            class="full-width-select destination-dropdown"
           />
         </div>
 
-        <div class="filter-section filter-section--date filter-section--checkin">
+        <div
+          class="filter-section filter-section--date filter-section--checkin"
+        >
           <label class="filter-label">Check-in</label>
           <div class="date-picker-shell">
             <DatePicker
@@ -65,11 +85,15 @@
               dateFormat="D, M d"
               class="filter-date-picker"
             />
-            <span class="material-symbols-outlined date-picker-shell__chevron">expand_more</span>
+            <span class="material-symbols-outlined date-picker-shell__chevron"
+              >expand_more</span
+            >
           </div>
         </div>
 
-        <div class="filter-section filter-section--date filter-section--checkout">
+        <div
+          class="filter-section filter-section--date filter-section--checkout"
+        >
           <label class="filter-label">Check-out</label>
           <div class="date-picker-shell">
             <DatePicker
@@ -83,11 +107,18 @@
               dateFormat="D, M d"
               class="filter-date-picker"
             />
-            <span class="material-symbols-outlined date-picker-shell__chevron">expand_more</span>
+            <span class="material-symbols-outlined date-picker-shell__chevron"
+              >expand_more</span
+            >
           </div>
         </div>
 
-        <div class="filter-section filter-section--guests" :class="{ 'filter-section--guests-open': activeFilterPanel === 'guests' }">
+        <div
+          class="filter-section filter-section--guests"
+          :class="{
+            'filter-section--guests-open': activeFilterPanel === 'guests',
+          }"
+        >
           <label class="filter-label">Guests & rooms</label>
           <button
             type="button"
@@ -95,12 +126,16 @@
             :class="{ 'guest-trigger--open': activeFilterPanel === 'guests' }"
             @click="toggleGuestPanel"
           >
-            <span class="material-symbols-outlined guest-trigger__icon">person</span>
+            <span class="material-symbols-outlined guest-trigger__icon"
+              >person</span
+            >
             <span class="guest-trigger__copy">
               <strong>{{ guestSummary }}</strong>
               <span>Adults, children, rooms</span>
             </span>
-            <span class="material-symbols-outlined guest-trigger__chevron">expand_more</span>
+            <span class="material-symbols-outlined guest-trigger__chevron"
+              >expand_more</span
+            >
           </button>
 
           <div v-if="activeFilterPanel === 'guests'" class="guest-panel">
@@ -109,9 +144,22 @@
                 <strong>Adults</strong>
               </div>
               <div class="guest-counter-control">
-                <Button type="button" text class="guest-counter-btn" @click="updateGuestCount('adults', -1)" :disabled="adults <= 1">−</Button>
+                <Button
+                  type="button"
+                  text
+                  class="guest-counter-btn"
+                  @click="updateGuestCount('adults', -1)"
+                  :disabled="adults <= 1"
+                  >−</Button
+                >
                 <span>{{ adults }}</span>
-                <Button type="button" text class="guest-counter-btn" @click="updateGuestCount('adults', 1)">+</Button>
+                <Button
+                  type="button"
+                  text
+                  class="guest-counter-btn"
+                  @click="updateGuestCount('adults', 1)"
+                  >+</Button
+                >
               </div>
             </div>
 
@@ -120,15 +168,34 @@
                 <strong>Children</strong>
               </div>
               <div class="guest-counter-control">
-                <Button type="button" text class="guest-counter-btn" @click="updateGuestCount('children', -1)" :disabled="children <= 0">−</Button>
+                <Button
+                  type="button"
+                  text
+                  class="guest-counter-btn"
+                  @click="updateGuestCount('children', -1)"
+                  :disabled="children <= 0"
+                  >−</Button
+                >
                 <span>{{ children }}</span>
-                <Button type="button" text class="guest-counter-btn" @click="updateGuestCount('children', 1)">+</Button>
+                <Button
+                  type="button"
+                  text
+                  class="guest-counter-btn"
+                  @click="updateGuestCount('children', 1)"
+                  >+</Button
+                >
               </div>
             </div>
 
             <div v-if="children > 0" class="guest-age-grid">
-              <div v-for="(_, index) in childAges" :key="`child-age-${index}`" class="guest-counter-row">
-                <label class="guest-age-label guest-counter-copy"><strong>Age of child {{ index + 1 }}</strong></label>
+              <div
+                v-for="(_, index) in childAges"
+                :key="`child-age-${index}`"
+                class="guest-counter-row"
+              >
+                <label class="guest-age-label guest-counter-copy"
+                  ><strong>Age of child {{ index + 1 }}</strong></label
+                >
                 <Select
                   v-model="childAges[index]"
                   :options="childAgeOptions"
@@ -144,21 +211,37 @@
                 <strong>Rooms</strong>
               </div>
               <div class="guest-counter-control">
-                <Button type="button" text class="guest-counter-btn" @click="updateGuestCount('rooms', -1)" :disabled="roomsRequested <= 1">−</Button>
+                <Button
+                  type="button"
+                  text
+                  class="guest-counter-btn"
+                  @click="updateGuestCount('rooms', -1)"
+                  :disabled="roomsRequested <= 1"
+                  >−</Button
+                >
                 <span>{{ roomsRequested }}</span>
-                <Button type="button" text class="guest-counter-btn" @click="updateGuestCount('rooms', 1)">+</Button>
+                <Button
+                  type="button"
+                  text
+                  class="guest-counter-btn"
+                  @click="updateGuestCount('rooms', 1)"
+                  >+</Button
+                >
               </div>
             </div>
 
-
-
-            <Button type="button" label="Apply" class="apply-btn guest-done-button" @click="activeFilterPanel = null" />
+            <Button
+              type="button"
+              label="Apply"
+              class="apply-btn guest-done-button"
+              @click="activeFilterPanel = null"
+            />
           </div>
         </div>
 
         <div class="filter-actions">
-          <button class="apply-btn" @click="applyFilters">Appliquer</button>
-          <button class="reset-btn" @click="resetFilters">Réinitialiser les filtres</button>
+          <button class="apply-btn" @click="applyFilters">Apply</button>
+          <button class="reset-btn" @click="resetFilters">Reset Filters</button>
         </div>
       </aside>
 
@@ -167,32 +250,36 @@
         <div class="search-sort-bar">
           <div class="search-input-wrap">
             <span class="material-symbols-outlined">search</span>
-            <input type="text" v-model="searchQuery" placeholder="Rechercher un hôtel..." />
+            <input
+              type="text"
+              v-model="searchQuery"
+              placeholder="Search for a hotel..."
+            />
           </div>
           <div class="sort-view-container">
             <div class="sort-wrap">
-              <span class="sort-label">Trier par:</span>
-              <Select 
-                v-model="sortBy" 
-                :options="sortOptions" 
-                optionLabel="label" 
-                optionValue="value" 
+              <span class="sort-label">Sort by:</span>
+              <Select
+                v-model="sortBy"
+                :options="sortOptions"
+                optionLabel="label"
+                optionValue="value"
                 appendTo="self"
-                class="sort-select-small" 
+                class="sort-select-small"
               />
             </div>
             <div class="view-toggles">
-              <button 
-                class="view-toggle-btn" 
-                :class="{ active: viewMode === 'grid' }" 
+              <button
+                class="view-toggle-btn"
+                :class="{ active: viewMode === 'grid' }"
                 @click="viewMode = 'grid'"
                 aria-label="Vue grille"
               >
                 <span class="material-symbols-outlined">grid_view</span>
               </button>
-              <button 
-                class="view-toggle-btn" 
-                :class="{ active: viewMode === 'list' }" 
+              <button
+                class="view-toggle-btn"
+                :class="{ active: viewMode === 'list' }"
                 @click="viewMode = 'list'"
                 aria-label="Vue liste"
               >
@@ -203,25 +290,32 @@
         </div>
 
         <div class="results-info">
-          <strong>{{ total }}</strong> hôtels
+          <strong>{{ total }}</strong> hotels
         </div>
 
-        <div v-if="hotels.length > 0" :class="['hotels-container', `hotels-container--${viewMode}`]">
-          <HotelCard 
-            v-for="hotel in hotels" 
-            :key="hotel.id" 
-            :hotel="hotel" 
-            :min-price="getHotelMinPrice(hotel.id)" 
+        <div
+          v-if="hotels.length > 0"
+          :class="['hotels-container', `hotels-container--${viewMode}`]"
+        >
+          <HotelCard
+            v-for="hotel in hotels"
+            :key="hotel.id"
+            :hotel="hotel"
+            :min-price="getHotelMinPrice(hotel.id)"
             :room-count="getHotelRoomCount(hotel.id)"
             :view-mode="viewMode"
           />
         </div>
         <div v-else class="empty-results-state">
           <span class="material-symbols-outlined">hotel_class</span>
-          <p>Aucun établissement ne correspond à votre sélection.</p>
+          <p>No establishments match your selection.</p>
         </div>
 
-        <div ref="infiniteSentinelRef" class="infinite-sentinel" aria-hidden="true"></div>
+        <div
+          ref="infiniteSentinelRef"
+          class="infinite-sentinel"
+          aria-hidden="true"
+        ></div>
 
         <div v-if="isLoading" class="loading-sentinel">
           <span class="material-symbols-outlined spin">progress_activity</span>
@@ -232,97 +326,150 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick, onBeforeUnmount, onMounted, watch } from 'vue'
-import { useDestinations } from '~/composables/useDestinations'
-import { useHotels } from '~/composables/useHotels'
-import { useRooms } from '~/composables/useRooms'
+import {
+  ref,
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  watch,
+} from "vue";
+import { useDestinations } from "~/composables/useDestinations";
+import { useHotels } from "~/composables/useHotels";
+import { useRooms } from "~/composables/useRooms";
 
-const { hotels, fetchPaginated, loading: isLoading, currentPage, totalPages, total } = useHotels()
-const { rooms, fetchAll: fetchRooms } = useRooms()
-const { destinations, fetchDestinations } = useDestinations()
-const route = useRoute()
-const router = useRouter()
+const {
+  hotels,
+  fetchPaginated,
+  loading: isLoading,
+  currentPage,
+  totalPages,
+  total,
+} = useHotels();
+const { rooms, fetchAll: fetchRooms } = useRooms();
+const { destinations, fetchDestinations } = useDestinations();
+const route = useRoute();
+const router = useRouter();
 
-const filtersSidebarRef = ref<HTMLElement | null>(null)
-const today = startOfDay(new Date())
-const priceRange = ref([0, 1000])
-const selectedStars = ref<number[]>([3, 4, 5])
-const selectedCity = ref<string | null>(null)
-const searchQuery = ref('')
-const sortBy = ref('note')
-const viewMode = useCookie<'grid' | 'list'>('hotel-view-mode', { default: () => 'grid' })
-const activeFilterPanel = ref<'guests' | null>(null)
-const pageSize = 12
-const initialized = ref(false)
-const checkInDate = ref<Date | null>(null)
-const checkOutDate = ref<Date | null>(null)
-const adults = ref(2)
-const children = ref(1)
-const roomsRequested = ref(2)
-const childAges = ref<number[]>([14])
-const infiniteSentinelRef = ref<HTMLElement | null>(null)
-const loadingNextPage = ref(false)
-let infiniteObserver: IntersectionObserver | null = null
+const filtersSidebarRef = ref<HTMLElement | null>(null);
+const today = startOfDay(new Date());
+const priceRange = ref([0, 1000]);
+const selectedStars = ref<number[]>([3, 4, 5]);
+const selectedCity = ref<string | null>(null);
+const searchQuery = ref("");
+const sortBy = ref("note");
+const viewMode = useCookie<"grid" | "list">("hotel-view-mode", {
+  default: () => "grid",
+});
+const activeFilterPanel = ref<"guests" | null>(null);
+const pageSize = 12;
+const initialized = ref(false);
+const checkInDate = ref<Date | null>(null);
+const checkOutDate = ref<Date | null>(null);
+const adults = ref(2);
+const children = ref(1);
+const roomsRequested = ref(2);
+const childAges = ref<number[]>([14]);
+const infiniteSentinelRef = ref<HTMLElement | null>(null);
+const loadingNextPage = ref(false);
+let infiniteObserver: IntersectionObserver | null = null;
 
 const childAgeOptions = Array.from({ length: 17 }, (_, index) => ({
   label: `${index + 1}`,
   value: index + 1,
-}))
+}));
 const checkOutMinDate = computed(() => {
-  if (!checkInDate.value) return today
-  return addDays(startOfDay(checkInDate.value), 1)
-})
+  if (!checkInDate.value) return today;
+  return addDays(startOfDay(checkInDate.value), 1);
+});
 
 const TUNISIA_CITIES = [
-  'Ariana', 'Béja', 'Ben Arous', 'Bizerte', 'Gabès', 'Gafsa',
-  'Jendouba', 'Kairouan', 'Kasserine', 'Kébili', 'La Manouba', 'Le Kef',
-  'Mahdia', 'Médenine', 'Monastir', 'Nabeul', 'Sfax', 'Sidi Bouzid',
-  'Siliana', 'Sousse', 'Tataouine', 'Tozeur', 'Tunis', 'Zaghouan',
-]
+  "Ariana",
+  "Béja",
+  "Ben Arous",
+  "Bizerte",
+  "Gabès",
+  "Gafsa",
+  "Jendouba",
+  "Kairouan",
+  "Kasserine",
+  "Kébili",
+  "La Manouba",
+  "Le Kef",
+  "Mahdia",
+  "Médenine",
+  "Monastir",
+  "Nabeul",
+  "Sfax",
+  "Sidi Bouzid",
+  "Siliana",
+  "Sousse",
+  "Tataouine",
+  "Tozeur",
+  "Tunis",
+  "Zaghouan",
+];
 
 const cityOptions = [
-  { label: 'Toutes les villes', value: null },
+  { label: "Toutes les villes", value: null },
   ...TUNISIA_CITIES.map((city) => ({ label: city, value: city })),
-]
+];
 
 const sortOptions = [
-  { label: 'Note', value: 'note' },
-  { label: 'Prix croissant', value: 'price_asc' },
-  { label: 'Prix décroissant', value: 'price_desc' }
-]
+  { label: "Note", value: "note" },
+  { label: "Price ascending", value: "price_asc" },
+  { label: "Price descending", value: "price_desc" },
+];
 
 function getHotelMinPrice(hotelId: number) {
-  const hotelRooms = rooms.value.filter(r => r.hotelId === hotelId)
-  if (hotelRooms.length === 0) return 0
+  const hotelRooms = rooms.value.filter((r) => r.hotelId === hotelId);
+  if (hotelRooms.length === 0) return 0;
 
-  const [minSelectedPrice, maxSelectedPrice] = priceRange.value
-  const safeMinPrice = Math.max(0, Math.min(minSelectedPrice, maxSelectedPrice))
-  const safeMaxPrice = Math.max(safeMinPrice, Math.max(minSelectedPrice, maxSelectedPrice))
+  const [minSelectedPrice, maxSelectedPrice] = priceRange.value;
+  const safeMinPrice = Math.max(
+    0,
+    Math.min(minSelectedPrice, maxSelectedPrice),
+  );
+  const safeMaxPrice = Math.max(
+    safeMinPrice,
+    Math.max(minSelectedPrice, maxSelectedPrice),
+  );
 
   const roomsInSelectedRange = hotelRooms.filter(
-    (room) => room.pricePerNight >= safeMinPrice && room.pricePerNight <= safeMaxPrice,
-  )
+    (room) =>
+      room.pricePerNight >= safeMinPrice && room.pricePerNight <= safeMaxPrice,
+  );
 
   if (roomsInSelectedRange.length > 0) {
-    return Math.min(...roomsInSelectedRange.map((room) => room.pricePerNight))
+    return Math.min(...roomsInSelectedRange.map((room) => room.pricePerNight));
   }
 
   // Fallback when no room matches current range (defensive; API should already filter these out).
-  return Math.min(...hotelRooms.map((room) => room.pricePerNight))
+  return Math.min(...hotelRooms.map((room) => room.pricePerNight));
 }
 
 function getHotelRoomCount(hotelId: number) {
-  return rooms.value.filter(r => r.hotelId === hotelId).length
+  return rooms.value.filter((r) => r.hotelId === hotelId).length;
 }
 
 /** Build fetch options from current filter state */
 function buildFetchOptions(page: number) {
-  const checkIn = checkInDate.value ? formatDateForQuery(checkInDate.value) : undefined
-  const checkOut = checkOutDate.value ? formatDateForQuery(checkOutDate.value) : undefined
-  const hasAvailability = Boolean(selectedCity.value || checkIn || checkOut)
-  const [minSelectedPrice, maxSelectedPrice] = priceRange.value
-  const safeMinPrice = Math.max(0, Math.min(minSelectedPrice, maxSelectedPrice))
-  const safeMaxPrice = Math.max(safeMinPrice, Math.max(minSelectedPrice, maxSelectedPrice))
+  const checkIn = checkInDate.value
+    ? formatDateForQuery(checkInDate.value)
+    : undefined;
+  const checkOut = checkOutDate.value
+    ? formatDateForQuery(checkOutDate.value)
+    : undefined;
+  const hasAvailability = Boolean(selectedCity.value || checkIn || checkOut);
+  const [minSelectedPrice, maxSelectedPrice] = priceRange.value;
+  const safeMinPrice = Math.max(
+    0,
+    Math.min(minSelectedPrice, maxSelectedPrice),
+  );
+  const safeMaxPrice = Math.max(
+    safeMinPrice,
+    Math.max(minSelectedPrice, maxSelectedPrice),
+  );
   return {
     page,
     limit: pageSize,
@@ -334,236 +481,275 @@ function buildFetchOptions(page: number) {
     city: hasAvailability ? selectedCity.value : undefined,
     checkIn: hasAvailability ? checkIn : undefined,
     checkOut: hasAvailability ? checkOut : undefined,
-    guests: hasAvailability ? (adults.value + children.value) : undefined,
+    guests: hasAvailability ? adults.value + children.value : undefined,
     rooms: hasAvailability ? roomsRequested.value : undefined,
-  }
+  };
 }
 
 async function loadPage(page: number) {
-  await fetchPaginated(buildFetchOptions(page))
+  await fetchPaginated(buildFetchOptions(page));
 }
 
-const hasMorePages = computed(() => currentPage.value < totalPages.value)
+const hasMorePages = computed(() => currentPage.value < totalPages.value);
 
 async function loadNextPageIfNeeded() {
-  if (!initialized.value) return
-  if (!hasMorePages.value) return
-  if (isLoading.value || loadingNextPage.value) return
+  if (!initialized.value) return;
+  if (!hasMorePages.value) return;
+  if (isLoading.value || loadingNextPage.value) return;
 
-  loadingNextPage.value = true
+  loadingNextPage.value = true;
   try {
-    await loadPage(currentPage.value + 1)
+    await loadPage(currentPage.value + 1);
   } finally {
-    loadingNextPage.value = false
+    loadingNextPage.value = false;
   }
 }
 
 function setupInfiniteObserver() {
-  if (typeof window === 'undefined') return
+  if (typeof window === "undefined") return;
 
-  infiniteObserver?.disconnect()
+  infiniteObserver?.disconnect();
   infiniteObserver = new IntersectionObserver(
     async (entries) => {
-      const [entry] = entries
-      if (!entry?.isIntersecting) return
-      await loadNextPageIfNeeded()
+      const [entry] = entries;
+      if (!entry?.isIntersecting) return;
+      await loadNextPageIfNeeded();
     },
     {
       root: null,
-      rootMargin: '400px 0px',
+      rootMargin: "400px 0px",
       threshold: 0,
     },
-  )
+  );
 
   if (infiniteSentinelRef.value) {
-    infiniteObserver.observe(infiniteSentinelRef.value)
+    infiniteObserver.observe(infiniteSentinelRef.value);
   }
 }
 
 function applyFilters() {
-  normalizeStayDates()
-  activeFilterPanel.value = null
-  router.replace({ path: '/hotels', query: buildRouteQuery() })
+  normalizeStayDates();
+  activeFilterPanel.value = null;
+  router.replace({ path: "/hotels", query: buildRouteQuery() });
 }
 
 function resetFilters() {
-  priceRange.value = [0, 1000]
-  selectedStars.value = [3, 4, 5]
-  selectedCity.value = null
-  searchQuery.value = ''
-  sortBy.value = 'note'
-  checkInDate.value = null
-  checkOutDate.value = null
-  adults.value = 2
-  children.value = 1
-  roomsRequested.value = 2
-  childAges.value = [14]
-  travelWithPets.value = false
-  activeFilterPanel.value = null
-  router.replace({ path: '/hotels' })
+  priceRange.value = [0, 1000];
+  selectedStars.value = [3, 4, 5];
+  selectedCity.value = null;
+  searchQuery.value = "";
+  sortBy.value = "note";
+  checkInDate.value = null;
+  checkOutDate.value = null;
+  adults.value = 2;
+  children.value = 1;
+  roomsRequested.value = 2;
+  childAges.value = [14];
+  travelWithPets.value = false;
+  activeFilterPanel.value = null;
+  router.replace({ path: "/hotels" });
 }
 
 function applyRouteFilters() {
-  const city = typeof route.query.city === 'string' ? route.query.city : null
-  const query = typeof route.query.q === 'string' ? route.query.q : ''
-  const checkIn = typeof route.query.checkIn === 'string' ? parseDate(route.query.checkIn) : null
-  const checkOut = typeof route.query.checkOut === 'string' ? parseDate(route.query.checkOut) : null
-  const adultsQuery = Number.parseInt(typeof route.query.adults === 'string' ? route.query.adults : '2', 10)
-  const childrenQuery = Number.parseInt(typeof route.query.children === 'string' ? route.query.children : '1', 10)
-  const roomCount = Number.parseInt(typeof route.query.rooms === 'string' ? route.query.rooms : '2', 10)
-  const childAgesQuery = typeof route.query.childAges === 'string' ? route.query.childAges : ''
+  const city = typeof route.query.city === "string" ? route.query.city : null;
+  const query = typeof route.query.q === "string" ? route.query.q : "";
+  const checkIn =
+    typeof route.query.checkIn === "string"
+      ? parseDate(route.query.checkIn)
+      : null;
+  const checkOut =
+    typeof route.query.checkOut === "string"
+      ? parseDate(route.query.checkOut)
+      : null;
+  const adultsQuery = Number.parseInt(
+    typeof route.query.adults === "string" ? route.query.adults : "2",
+    10,
+  );
+  const childrenQuery = Number.parseInt(
+    typeof route.query.children === "string" ? route.query.children : "1",
+    10,
+  );
+  const roomCount = Number.parseInt(
+    typeof route.query.rooms === "string" ? route.query.rooms : "2",
+    10,
+  );
+  const childAgesQuery =
+    typeof route.query.childAges === "string" ? route.query.childAges : "";
 
-  selectedCity.value = city
-  searchQuery.value = query
-  checkInDate.value = checkIn
-  checkOutDate.value = checkOut
-  adults.value = Math.max(1, Number.isNaN(adultsQuery) ? 2 : adultsQuery)
-  children.value = Math.max(0, Number.isNaN(childrenQuery) ? 1 : childrenQuery)
-  roomsRequested.value = Math.max(1, Number.isNaN(roomCount) ? 2 : roomCount)
-  childAges.value = parseChildAges(childAgesQuery, children.value)
-  normalizeStayDates()
+  selectedCity.value = city;
+  searchQuery.value = query;
+  checkInDate.value = checkIn;
+  checkOutDate.value = checkOut;
+  adults.value = Math.max(1, Number.isNaN(adultsQuery) ? 2 : adultsQuery);
+  children.value = Math.max(0, Number.isNaN(childrenQuery) ? 1 : childrenQuery);
+  roomsRequested.value = Math.max(1, Number.isNaN(roomCount) ? 2 : roomCount);
+  childAges.value = parseChildAges(childAgesQuery, children.value);
+  normalizeStayDates();
 }
 
 async function loadHotelsFromRoute() {
-  hotels.value = []
-  await loadPage(1)
+  hotels.value = [];
+  await loadPage(1);
 }
 
 function buildRouteQuery() {
-  const query: Record<string, string> = {}
-  if (selectedCity.value) query.city = selectedCity.value
+  const query: Record<string, string> = {};
+  if (selectedCity.value) query.city = selectedCity.value;
   if (checkInDate.value && checkOutDate.value) {
-    query.checkIn = formatDateForQuery(checkInDate.value)
-    query.checkOut = formatDateForQuery(checkOutDate.value)
+    query.checkIn = formatDateForQuery(checkInDate.value);
+    query.checkOut = formatDateForQuery(checkOutDate.value);
   }
-  query.adults = String(adults.value)
-  query.children = String(children.value)
-  query.rooms = String(roomsRequested.value)
+  query.adults = String(adults.value);
+  query.children = String(children.value);
+  query.rooms = String(roomsRequested.value);
   if (children.value > 0 && childAges.value.length > 0) {
-    query.childAges = childAges.value.join(',')
+    query.childAges = childAges.value.join(",");
   }
 
-  return query
+  return query;
 }
 
 function parseDate(value: string) {
-  const parsed = new Date(`${value}T00:00:00`)
-  return Number.isNaN(parsed.getTime()) ? null : parsed
+  const parsed = new Date(`${value}T00:00:00`);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
 function parseChildAges(value: string, count: number) {
   const parsed = value
-    .split(',')
+    .split(",")
     .map((entry) => Number.parseInt(entry, 10))
-    .filter((entry) => Number.isFinite(entry) && entry > 0)
+    .filter((entry) => Number.isFinite(entry) && entry > 0);
 
-  const next = parsed.slice(0, count)
+  const next = parsed.slice(0, count);
   while (next.length < count) {
-    next.push(14)
+    next.push(14);
   }
 
-  return next
+  return next;
 }
 
 function normalizeStayDates() {
-  if (checkInDate.value && checkOutDate.value && checkOutDate.value <= checkInDate.value) {
-    checkOutDate.value = addDays(checkInDate.value, 1)
+  if (
+    checkInDate.value &&
+    checkOutDate.value &&
+    checkOutDate.value <= checkInDate.value
+  ) {
+    checkOutDate.value = addDays(checkInDate.value, 1);
   }
 
   if (checkInDate.value && !checkOutDate.value) {
-    checkOutDate.value = addDays(checkInDate.value, 1)
+    checkOutDate.value = addDays(checkInDate.value, 1);
   }
 
   if (!checkInDate.value && checkOutDate.value) {
-    checkInDate.value = addDays(checkOutDate.value, -1)
+    checkInDate.value = addDays(checkOutDate.value, -1);
   }
 }
 
 function formatDateForQuery(date: Date) {
-  return startOfDay(date).toISOString().split('T')[0]
+  return startOfDay(date).toISOString().split("T")[0];
 }
 
 function startOfDay(date: Date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate())
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
 function addDays(date: Date, days: number) {
-  const next = new Date(date)
-  next.setDate(next.getDate() + days)
-  return next
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
 }
 
 function toggleGuestPanel() {
-  activeFilterPanel.value = activeFilterPanel.value === 'guests' ? null : 'guests'
+  activeFilterPanel.value =
+    activeFilterPanel.value === "guests" ? null : "guests";
 }
 
-function updateGuestCount(type: 'adults' | 'children' | 'rooms', delta: number) {
-  if (type === 'adults') adults.value = Math.max(1, adults.value + delta)
-  if (type === 'children') children.value = Math.max(0, children.value + delta)
-  if (type === 'rooms') roomsRequested.value = Math.max(1, roomsRequested.value + delta)
+function updateGuestCount(
+  type: "adults" | "children" | "rooms",
+  delta: number,
+) {
+  if (type === "adults") adults.value = Math.max(1, adults.value + delta);
+  if (type === "children") children.value = Math.max(0, children.value + delta);
+  if (type === "rooms")
+    roomsRequested.value = Math.max(1, roomsRequested.value + delta);
 }
 
 const guestSummary = computed(() => {
-  const adultLabel = `${adults.value} adult${adults.value > 1 ? 's' : ''}`
-  const childLabel = children.value ? ` · ${children.value} child${children.value > 1 ? 'ren' : ''}` : ''
-  const roomLabel = ` · ${roomsRequested.value} room${roomsRequested.value > 1 ? 's' : ''}`
-  return `${adultLabel}${childLabel}${roomLabel}`
-})
+  const adultLabel = `${adults.value} adult${adults.value > 1 ? "s" : ""}`;
+  const childLabel = children.value
+    ? ` · ${children.value} child${children.value > 1 ? "ren" : ""}`
+    : "";
+  const roomLabel = ` · ${roomsRequested.value} room${roomsRequested.value > 1 ? "s" : ""}`;
+  return `${adultLabel}${childLabel}${roomLabel}`;
+});
 
-watch(children, (count) => {
-  const next = childAges.value.slice(0, count)
-  while (next.length < count) {
-    next.push(14)
-  }
-  childAges.value = next
-}, { immediate: true })
+watch(
+  children,
+  (count) => {
+    const next = childAges.value.slice(0, count);
+    while (next.length < count) {
+      next.push(14);
+    }
+    childAges.value = next;
+  },
+  { immediate: true },
+);
 
 watch([checkInDate, checkOutDate], () => {
   if (checkInDate.value || checkOutDate.value) {
-    normalizeStayDates()
+    normalizeStayDates();
   }
-})
+});
 
 function handleClickOutside(event: MouseEvent) {
-  if (!filtersSidebarRef.value) return
+  if (!filtersSidebarRef.value) return;
   if (!filtersSidebarRef.value.contains(event.target as Node)) {
-    activeFilterPanel.value = null
+    activeFilterPanel.value = null;
   }
 }
 
 onMounted(async () => {
-  document.addEventListener('click', handleClickOutside)
-  await fetchDestinations()
-  await fetchRooms()
-  applyRouteFilters()
-  await loadHotelsFromRoute()
-  await nextTick()
-  setupInfiniteObserver()
-  initialized.value = true
-})
+  document.addEventListener("click", handleClickOutside);
+  await fetchDestinations();
+  await fetchRooms();
+  applyRouteFilters();
+  await loadHotelsFromRoute();
+  await nextTick();
+  setupInfiniteObserver();
+  initialized.value = true;
+});
 
 onBeforeUnmount(() => {
-  document.removeEventListener('click', handleClickOutside)
-  infiniteObserver?.disconnect()
-  infiniteObserver = null
-})
+  document.removeEventListener("click", handleClickOutside);
+  infiniteObserver?.disconnect();
+  infiniteObserver = null;
+});
 
-watch(() => route.query, async () => {
-  if (!initialized.value) return
-  applyRouteFilters()
-  await loadHotelsFromRoute()
-}, { deep: true })
+watch(
+  () => route.query,
+  async () => {
+    if (!initialized.value) return;
+    applyRouteFilters();
+    await loadHotelsFromRoute();
+  },
+  { deep: true },
+);
 
 // Re-fetch from page 1 when sidebar filters change (not route)
-let filterDebounce: ReturnType<typeof setTimeout> | null = null
-watch([priceRange, selectedStars, sortBy], () => {
-  if (!initialized.value) return
-  if (filterDebounce) clearTimeout(filterDebounce)
-  filterDebounce = setTimeout(() => {
-    hotels.value = []
-    void loadPage(1)
-  }, 300)
-}, { deep: true })
+let filterDebounce: ReturnType<typeof setTimeout> | null = null;
+watch(
+  [priceRange, selectedStars, sortBy],
+  () => {
+    if (!initialized.value) return;
+    if (filterDebounce) clearTimeout(filterDebounce);
+    filterDebounce = setTimeout(() => {
+      hotels.value = [];
+      void loadPage(1);
+    }, 300);
+  },
+  { deep: true },
+);
 </script>
 
 <style scoped>
@@ -584,13 +770,21 @@ watch([priceRange, selectedStars, sortBy], () => {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .hotels-page {
   background:
-    radial-gradient(circle at top, color-mix(in srgb, var(--color-primary-50) 72%, white 28%) 0%, transparent 45%),
+    radial-gradient(
+      circle at top,
+      color-mix(in srgb, var(--color-primary-50) 72%, white 28%) 0%,
+      transparent 45%
+    ),
     linear-gradient(180deg, var(--color-gray-50) 0%, white 100%);
   min-height: 100vh;
 }
@@ -639,7 +833,11 @@ watch([priceRange, selectedStars, sortBy], () => {
 
 /* Filters Sidebar matched to User Mockup */
 .filters-sidebar {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, var(--color-gray-50) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    var(--color-gray-50) 100%
+  );
   padding: 20px;
   border-radius: 16px;
   border: 1px solid color-mix(in srgb, var(--color-gray-200) 76%, white 24%);
@@ -701,7 +899,9 @@ watch([priceRange, selectedStars, sortBy], () => {
   color: var(--color-gray-500);
   font-size: 20px;
   pointer-events: none;
-  transition: transform 0.2s ease, color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    color 0.2s ease;
 }
 
 .date-picker-shell:focus-within .date-picker-shell__chevron {
@@ -769,7 +969,6 @@ watch([priceRange, selectedStars, sortBy], () => {
 
 /* Removed Toggle Switch CSS */
 
-
 .filter-actions {
   margin-top: 32px;
   display: flex;
@@ -780,26 +979,31 @@ watch([priceRange, selectedStars, sortBy], () => {
 .apply-btn {
   width: 100%;
   padding: 10px;
-  background: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-primary-600) 100%);
+  background: var(--color-primary-600);
   color: white;
-  border: none;
+  border: 1px solid var(--color-primary-600);
   border-radius: 8px;
   font-weight: 700;
   font-size: 13px;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s,
+    filter 0.2s;
   box-shadow: 0 14px 26px rgba(0, 79, 81, 0.22);
 }
 
 .apply-btn:hover {
   transform: translateY(-1px);
-  filter: brightness(1.07);
+  background: var(--color-primary-700);
   box-shadow: 0 16px 28px rgba(0, 79, 81, 0.2);
 }
 
 .apply-btn:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary-100) 60%, transparent 40%), 0 14px 26px rgba(0, 79, 81, 0.22);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--color-primary-100) 60%, transparent 40%),
+    0 14px 26px rgba(0, 79, 81, 0.22);
 }
 
 .reset-btn {
@@ -813,14 +1017,15 @@ watch([priceRange, selectedStars, sortBy], () => {
   cursor: pointer;
   text-decoration: underline;
   border-radius: 8px;
-  transition: color 0.2s ease, background-color 0.2s ease;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .reset-btn:hover {
   color: var(--color-navy-500);
   background: color-mix(in srgb, var(--color-gray-100) 65%, white 35%);
 }
-
 
 /* Deep Customizations for PrimeVue Elements */
 :deep(.custom-slider.p-slider) {
@@ -895,7 +1100,11 @@ watch([priceRange, selectedStars, sortBy], () => {
 
 :deep(.full-width-select.p-select) {
   width: 100%;
-  background: linear-gradient(180deg, white 0%, color-mix(in srgb, var(--color-gray-50) 72%, white 28%) 100%);
+  background: linear-gradient(
+    180deg,
+    white 0%,
+    color-mix(in srgb, var(--color-gray-50) 72%, white 28%) 100%
+  );
   border: 1px solid color-mix(in srgb, var(--color-gray-200) 74%, white 26%);
   border-radius: 10px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
@@ -904,14 +1113,22 @@ watch([priceRange, selectedStars, sortBy], () => {
   align-items: center;
   padding: 0 4px;
   cursor: pointer;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 :deep(.full-width-select.p-select:hover),
 :deep(.full-width-select.p-select.p-focus),
 :deep(.full-width-select.p-select[data-p-focused="true"]) {
-  border-color: color-mix(in srgb, var(--color-primary-200) 68%, white 32%) !important;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary-50) 60%, transparent 40%), inset 0 1px 0 rgba(255, 255, 255, 0.78) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--color-primary-200) 68%,
+    white 32%
+  ) !important;
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--color-primary-50) 60%, transparent 40%),
+    inset 0 1px 0 rgba(255, 255, 255, 0.78) !important;
 }
 
 :deep(.full-width-select .p-select-label) {
@@ -946,7 +1163,10 @@ watch([priceRange, selectedStars, sortBy], () => {
   transition: transform 0.24s ease;
 }
 
-:deep(.destination-dropdown.p-select[data-p-overlay-visible="true"] .p-select-dropdown),
+:deep(
+  .destination-dropdown.p-select[data-p-overlay-visible="true"]
+    .p-select-dropdown
+),
 :deep(.destination-dropdown.p-select-open .p-select-dropdown) {
   transform: rotate(180deg);
 }
@@ -981,7 +1201,9 @@ watch([priceRange, selectedStars, sortBy], () => {
   font-size: 13px;
   color: var(--color-gray-600);
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
   font-weight: 600;
   border-radius: 7px;
   line-height: 1.25;
@@ -1002,18 +1224,27 @@ watch([priceRange, selectedStars, sortBy], () => {
 
 :deep(.filter-date-picker.p-datepicker) {
   width: 100%;
-  background: linear-gradient(180deg, white 0%, color-mix(in srgb, var(--color-gray-50) 72%, white 28%) 100%);
+  background: linear-gradient(
+    180deg,
+    white 0%,
+    color-mix(in srgb, var(--color-gray-50) 72%, white 28%) 100%
+  );
   border: 1px solid color-mix(in srgb, var(--color-gray-200) 74%, white 26%);
   border-radius: 8px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
   cursor: pointer;
 }
 
 :deep(.filter-date-picker.p-datepicker:hover),
 :deep(.filter-date-picker.p-datepicker.p-focus) {
   border-color: color-mix(in srgb, var(--color-primary-200) 68%, white 32%);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary-50) 60%, transparent 40%), inset 0 1px 0 rgba(255, 255, 255, 0.78);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--color-primary-50) 60%, transparent 40%),
+    inset 0 1px 0 rgba(255, 255, 255, 0.78);
 }
 
 :deep(.filter-date-picker .p-inputtext) {
@@ -1106,7 +1337,9 @@ watch([priceRange, selectedStars, sortBy], () => {
   line-height: 0;
   border-radius: 999px;
   color: var(--color-gray-500);
-  transition: background 0.2s ease, color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
   cursor: pointer;
 }
 
@@ -1159,11 +1392,18 @@ watch([priceRange, selectedStars, sortBy], () => {
   font-size: 0.88rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
   cursor: pointer;
 }
 
-:deep(.filter-date-picker .p-datepicker-day-cell.p-datepicker-other-month .p-datepicker-day) {
+:deep(
+  .filter-date-picker
+    .p-datepicker-day-cell.p-datepicker-other-month
+    .p-datepicker-day
+) {
   color: color-mix(in srgb, var(--color-gray-500) 72%, white 28%);
 }
 
@@ -1181,12 +1421,14 @@ watch([priceRange, selectedStars, sortBy], () => {
 :deep(.filter-date-picker .p-datepicker-day-selected),
 :deep(.filter-date-picker .p-datepicker-day-selected-start),
 :deep(.filter-date-picker .p-datepicker-day-selected-end) {
-  background: linear-gradient(145deg, #0a7677 0%, var(--color-primary-600) 100%);
+  background: linear-gradient(
+    145deg,
+    #0a7677 0%,
+    var(--color-primary-600) 100%
+  );
   color: white;
   box-shadow: 0 8px 18px rgba(0, 80, 81, 0.34);
 }
-
-
 
 :deep(.p-select-list) {
   padding: 4px 0;
@@ -1220,14 +1462,19 @@ watch([priceRange, selectedStars, sortBy], () => {
   border: 1px solid color-mix(in srgb, var(--color-gray-200) 76%, white 24%);
   border-radius: 8px;
   text-align: left;
-  transition: background 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  transition:
+    background 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
   cursor: pointer;
 }
 
 .guest-trigger:hover,
 .guest-trigger--open {
   border-color: color-mix(in srgb, var(--color-primary-200) 68%, white 32%);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary-50) 60%, transparent 40%), inset 0 1px 0 rgba(255, 255, 255, 0.78);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--color-primary-50) 60%, transparent 40%),
+    inset 0 1px 0 rgba(255, 255, 255, 0.78);
 }
 
 .guest-trigger__icon {
@@ -1341,7 +1588,9 @@ watch([priceRange, selectedStars, sortBy], () => {
   min-height: 2.1rem;
   color: var(--color-primary-600);
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 .guest-counter-btn:hover:not(:disabled) {
@@ -1410,7 +1659,11 @@ watch([priceRange, selectedStars, sortBy], () => {
 
 /* Results Main */
 .search-sort-bar {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, var(--color-gray-50) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.96) 0%,
+    var(--color-gray-50) 100%
+  );
   padding: 12px 20px;
   border-radius: 20px;
   display: flex;
@@ -1435,10 +1688,14 @@ watch([priceRange, selectedStars, sortBy], () => {
 
 .search-input-wrap:focus-within {
   border-color: var(--color-primary-400);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary-100) 62%, transparent 38%);
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--color-primary-100) 62%, transparent 38%);
 }
 
-.search-input-wrap .material-symbols-outlined { color: var(--color-gray-400); font-size: 18px; }
+.search-input-wrap .material-symbols-outlined {
+  color: var(--color-gray-400);
+  font-size: 18px;
+}
 
 .search-input-wrap input {
   background: none;
@@ -1465,11 +1722,11 @@ watch([priceRange, selectedStars, sortBy], () => {
   z-index: 20;
 }
 
-.sort-label { 
-  font-size: 11px; 
-  font-weight: 800; 
-  color: var(--color-gray-500); 
-  letter-spacing: 0.5px; 
+.sort-label {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--color-gray-500);
+  letter-spacing: 0.5px;
 }
 
 :deep(.sort-select-small.p-select) {
@@ -1516,7 +1773,10 @@ watch([priceRange, selectedStars, sortBy], () => {
   flex-wrap: wrap;
 }
 
-.results-info strong { color: var(--color-navy-500); font-weight: 800; }
+.results-info strong {
+  color: var(--color-navy-500);
+  font-weight: 800;
+}
 
 .results-info__range {
   color: var(--color-gray-400);
@@ -1691,4 +1951,3 @@ watch([priceRange, selectedStars, sortBy], () => {
   cursor: text;
 }
 </style>
-
