@@ -4,5 +4,11 @@
  * Keep icon fonts centralized here.
  */
 
-/* Icon System - Material Symbols Outlined */
+/* Icon System - Material Symbols */
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght,FILL@100..700,0..1&display=swap');
+
+/* Keep existing markup (.material-symbols-outlined) but render rounded style globally */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Rounded' !important;
+}
