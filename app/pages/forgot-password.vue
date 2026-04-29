@@ -56,10 +56,6 @@
         </div>
 
         <form v-else class="space-y-4" @submit.prevent="handleSubmit">
-          <div v-if="error" class="flex items-center gap-3 rounded-r-lg border-l-4 border-error bg-error-container/30 p-4 text-sm font-medium text-on-error-container">
-            <span class="material-symbols-outlined text-error">error</span>
-            {{ error }}
-          </div>
 
           <div class="space-y-2">
             <label class="block text-sm font-semibold text-on-surface" for="email">Email address</label>
