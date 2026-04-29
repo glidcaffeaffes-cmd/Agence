@@ -11,13 +11,13 @@
     <div class="profile-container">
       <header class="page-header">
         <div>
-          <p class="page-header__label">Account</p>
-          <h1 class="page-header__title">Settings &amp; Security</h1>
-          <p class="page-header__sub">Manage your account preferences, security settings, and privacy options.</p>
+          <p class="page-header__label">Privacy &amp; Security</p>
         </div>
       </header>
 
       <div class="profile-body">
+        <ProfileSidebar />
+
         <!-- Main -->
         <main class="profile-main" style="flex: 1;">
           <!-- Tabs -->
@@ -26,9 +26,8 @@
               v-for="tab in tabs"
               :key="tab.key"
               :class="['tab-button', { 'tab-button--active': activeTab === tab.key }]"
-              @click="console.log('clicked', tab.key); activeTab = tab.key"
+              @click="activeTab = tab.key"
             >
-              <span class="material-symbols-outlined">{{ tab.icon }}</span>
               {{ tab.label }}
             </button>
           </div>
@@ -43,11 +42,10 @@
               </div>
               <div>
                 <h2 class="card-header__title">Authentication</h2>
-                <p class="card-header__sub">Manage your password and security settings</p>
               </div>
             </div>
             <div class="card-body">
-              <p>Change your password here.</p>
+              <p class="security-intro">Change your password here.</p>
               <div class="auth-form-stack">
                 <div class="form-group">
                   <label class="form-label">Current Password</label>
@@ -92,97 +90,6 @@
             </div>
           </div>
 
-          <!-- Profile Tab -->
-            <div v-show="activeTab === 'profile'" class="content-card profile-card fade-in-up">
-              <div class="card-header">
-                <div class="card-header__icon">
-                  <span class="material-symbols-outlined">person</span>
-                </div>
-                <div>
-                  <h2 class="card-header__title">Profile Information</h2>
-                  <p class="card-header__sub">Update your personal details</p>
-                </div>
-              </div>
-              <div class="card-body">
-                <p v-if="!currentProfile" class="info-message">Profile information is loading or not available.</p>
-              <div class="form-row">
-                <div class="form-group">
-                  <label class="form-label">First Name</label>
-                  <input v-model="profileForm.firstName" type="text" class="form-input" placeholder="Enter your first name" />
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Last Name</label>
-                  <input v-model="profileForm.lastName" type="text" class="form-input" placeholder="Enter your last name" />
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Email Address</label>
-                <input v-model="profileForm.email" type="email" class="form-input" placeholder="Enter your email" />
-              </div>
-              <div class="form-group">
-                <label class="form-label">Phone Number</label>
-                <input v-model="profileForm.phone" type="tel" class="form-input" placeholder="Enter your phone number" />
-              </div>
-              <div class="card-actions">
-                <button @click="updateProfileHandler" type="button" class="btn-primary-action">
-                  <span class="material-symbols-outlined btn-icon">save</span>
-                  Update Profile
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Notifications Tab -->
-            <div v-show="activeTab === 'notifications'" class="content-card notifications-card fade-in-up">
-              <div class="card-header">
-              <div class="card-header__icon">
-                <span class="material-symbols-outlined">notifications</span>
-              </div>
-              <div>
-                <h2 class="card-header__title">Notification Preferences</h2>
-                <p class="card-header__sub">Choose how you want to be notified</p>
-              </div>
-            </div>
-            <div class="card-body">
-              <div class="toggle-row">
-                <div>
-                  <span class="toggle-row__title">Email Bookings</span>
-                  <p class="toggle-row__sub">Receive email confirmations for bookings</p>
-                </div>
-                <label class="toggle-wrap">
-                  <input type="checkbox" class="sr-only" v-model="notificationSettings.emailBookings" />
-                  <span class="toggle-track"></span>
-                </label>
-              </div>
-              <div class="toggle-row">
-                <div>
-                  <span class="toggle-row__title">Promotional Emails</span>
-                  <p class="toggle-row__sub">Get updates on offers and promotions</p>
-                </div>
-                <label class="toggle-wrap">
-                  <input type="checkbox" class="sr-only" v-model="notificationSettings.emailPromotions" />
-                  <span class="toggle-track"></span>
-                </label>
-              </div>
-              <div class="toggle-row">
-                <div>
-                  <span class="toggle-row__title">SMS Reminders</span>
-                  <p class="toggle-row__sub">Receive SMS reminders for check-ins</p>
-                </div>
-                <label class="toggle-wrap">
-                  <input type="checkbox" class="sr-only" v-model="notificationSettings.smsReminders" />
-                  <span class="toggle-track"></span>
-                </label>
-              </div>
-              <div class="card-actions">
-                <button @click="saveNotificationsHandler" type="button" class="btn-primary-action">
-                  <span class="material-symbols-outlined btn-icon">save</span>
-                  Save Preferences
-                </button>
-              </div>
-             </div>
-             </div>
-
           <!-- Privacy Tab -->
             <div v-show="activeTab === 'privacy'" class="content-card privacy-card">
                <div class="card-header">
@@ -191,7 +98,6 @@
                  </div>
                  <div>
                    <h2 class="card-header__title">Privacy & Data</h2>
-                   <p class="card-header__sub">Control your data and account privacy</p>
                  </div>
                </div>
                <div class="card-body">
@@ -205,7 +111,7 @@
                   <span class="toggle-track"></span>
                 </label>
               </div>
-              <div class="card-actions">
+              <div class="card-actions privacy-actions">
                 <button type="button" class="btn-outline-action">
                   <span class="material-symbols-outlined">download</span>
                   Download My Data
@@ -227,11 +133,10 @@
 <script setup lang="ts">
 definePageMeta({ middleware: "auth" });
 import { useAuth } from "~/composables/useAuth";
-import { ref, watch } from "vue";
+import { ref } from "vue";
 import { useAppToast } from "~/composables/useAppToast";
 
-const { currentProfile, updateProfile, changePassword, loading, error } =
-  useAuth();
+const { changePassword, error } = useAuth();
 const { success: toastSuccess, error: toastError, warn: toastWarn } = useAppToast();
 
 const activeTab = useState('settings-active-tab', () => 'security');
@@ -242,39 +147,13 @@ const passwordForm = ref({
   confirmPassword: "",
 });
 
-const profileForm = ref({
-  firstName: "John",
-  lastName: "Doe",
-  email: "john@example.com",
-  phone: "+1234567890",
-});
-
-watch(currentProfile, (profile) => {
-  if (profile) {
-    profileForm.value = {
-      firstName: profile.firstName || '',
-      lastName: profile.lastName || '',
-      email: profile.email || '',
-      phone: profile.phone || '',
-    };
-  }
-}, { immediate: true });
-
 onMounted(() => {
   activeTab.value = 'security'
 })
 
-const notificationSettings = ref({
-  emailBookings: true,
-  emailPromotions: false,
-  smsReminders: true,
-});
-
 const tabs = [
-  { key: 'security', label: 'Security', icon: 'shield' },
-  { key: 'profile', label: 'Profile', icon: 'person' },
-  { key: 'notifications', label: 'Notifications', icon: 'notifications' },
-  { key: 'privacy', label: 'Privacy', icon: 'privacy_tip' },
+  { key: 'security', label: 'Security' },
+  { key: 'privacy', label: 'Privacy' },
 ];
 
 async function changePasswordHandler() {
@@ -302,19 +181,6 @@ async function changePasswordHandler() {
   }
 }
 
-async function updateProfileHandler() {
-  const success = await updateProfile(profileForm.value);
-  if (success) {
-    alert("Profile updated successfully!");
-  } else {
-    alert(error.value || "Failed to update profile.");
-  }
-}
-
-async function saveNotificationsHandler() {
-  // TODO: Implement save notifications
-  alert("Notification preferences saved!");
-}
 </script>
 
 <style scoped>
@@ -362,7 +228,7 @@ async function saveNotificationsHandler() {
 /* Layout */
 .profile-body {
   display: flex;
-  gap: 28px;
+  gap: 32px;
   align-items: flex-start;
 }
 .profile-main {
@@ -370,47 +236,51 @@ async function saveNotificationsHandler() {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 32px;
 }
 
 .settings-tabs {
   display: flex;
-  gap: 8px;
+  gap: 24px;
   background: #fff;
   border: 1px solid var(--color-border-soft);
-  border-radius: var(--radius-xl);
-  padding: 8px;
-  overflow-x: auto;
+  border-radius: 0;
+  padding: 0 32px;
 }
 
 .tab-button {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
+  gap: 0;
+  padding: 20px 0;
   border: none;
   background: transparent;
-  color: var(--color-text-muted);
+  color: #64748b;
   font-size: 13px;
   font-weight: 600;
-  border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: color 0.2s;
   white-space: nowrap;
+  position: relative;
 }
 
 .tab-button:hover {
-  background: var(--color-bg-soft);
-  color: var(--color-text);
+  color: var(--color-primary-600);
 }
 
 .tab-button--active {
-  background: var(--color-primary-600);
-  color: #fff;
+  color: var(--color-primary-600);
 }
 
-.tab-button .material-symbols-outlined {
-  font-size: 16px;
+.tab-button--active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4px;
+  border-radius: 3px 3px 0 0;
+  background: var(--color-primary-600);
 }
 
 /* ProfileSidebar.vue handles sidebar styles */
@@ -418,24 +288,23 @@ async function saveNotificationsHandler() {
 /* Content cards */
 .content-card {
   background: #ffffff;
-  border-radius: var(--radius-2xl);
+  border-radius: var(--radius-xl);
   border: 1px solid var(--color-border-soft);
-  box-shadow: 0 4px 20px -4px rgba(0, 103, 104, 0.05);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
   overflow: hidden;
 }
 
 .auth-card,
-.profile-card,
-.notifications-card,
 .privacy-card {
-  max-width: 800px;
+  width: 100%;
+  max-width: none;
 }
 
 .auth-form-stack {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  max-width: 480px;
+  gap: 16px;
+  max-width: 640px;
 }
 
 .card-header {
@@ -449,26 +318,32 @@ async function saveNotificationsHandler() {
 .card-header__icon {
   font-size: 20px;
   color: var(--color-primary-600);
+  display: flex;
 }
 .card-header__icon .material-symbols-outlined {
   font-size: 20px;
 }
 .card-header__title {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: var(--color-heading);
   margin: 0;
 }
-.card-header__sub {
-  font-size: var(--font-size-body-sm);
-  color: var(--color-text-muted);
-}
 
 .card-body {
-  padding: 28px;
+  padding: 28px 36px 30px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
+}
+
+.security-intro {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-muted);
 }
 
 /* Form */
@@ -486,19 +361,19 @@ async function saveNotificationsHandler() {
   grid-column: 1 / -1;
 }
 .form-label {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--color-text-muted);
+  letter-spacing: 0.1em;
+  color: var(--color-heading);
 }
 .form-input {
   width: 100%;
-  padding: 13px 18px;
+  padding: 12px 16px;
   background: var(--color-bg-soft);
-  border: 1.5px solid var(--color-border);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
-  font-size: var(--font-size-body-md);
+  font-size: 13px;
   font-weight: 500;
   color: var(--color-text);
   outline: none;
@@ -518,24 +393,25 @@ async function saveNotificationsHandler() {
 .card-actions {
   display: flex;
   justify-content: flex-end;
-  padding-top: 8px;
+  gap: 12px;
+  padding-top: 10px;
   border-top: 1px solid var(--color-border-soft);
 }
 .btn-primary-action {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 13px 28px;
+  padding: 12px 22px;
   background: var(--color-primary-600);
   color: #fff;
   border: none;
   border-radius: var(--radius-xl);
   cursor: pointer;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
-  box-shadow: 0 6px 20px rgba(0, 103, 104, 0.25);
+  letter-spacing: 0.12em;
+  box-shadow: 0 6px 16px rgba(0, 103, 104, 0.24);
   transition:
     background 0.2s,
     transform 0.15s,
@@ -559,15 +435,18 @@ async function saveNotificationsHandler() {
 }
 
 .btn-outline-action {
-  padding: 11px 22px;
-  border: 1.5px solid var(--color-border);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 20px;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
   background: transparent;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.11em;
   color: var(--color-text);
   transition: all 0.2s ease;
   white-space: nowrap;
@@ -633,15 +512,16 @@ async function saveNotificationsHandler() {
 }
 .toggle-row__title {
   display: block;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   color: var(--color-text);
   margin-bottom: 4px;
 }
 .toggle-row__sub {
-  font-size: var(--font-size-body-sm);
+  font-size: 13px;
+  font-weight: 500;
   color: var(--color-text-muted);
 }
 .toggle-wrap {
@@ -657,8 +537,8 @@ async function saveNotificationsHandler() {
 }
 .toggle-track {
   display: block;
-  width: 44px;
-  height: 24px;
+  width: 52px;
+  height: 30px;
   border-radius: 99px;
   background: var(--color-gray-200);
   position: relative;
@@ -667,10 +547,10 @@ async function saveNotificationsHandler() {
 .toggle-track::after {
   content: "";
   position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 18px;
-  height: 18px;
+  top: 4px;
+  left: 4px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   background: #fff;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
@@ -682,7 +562,11 @@ input[type="checkbox"]:checked ~ .toggle-wrap .toggle-track {
 }
 .sr-only:checked + .toggle-track::after,
 input[type="checkbox"]:checked ~ .toggle-wrap .toggle-track::after {
-  transform: translateX(20px);
+  transform: translateX(22px);
+}
+
+.privacy-actions {
+  justify-content: center;
 }
 
 /* Empty vault */
@@ -743,6 +627,13 @@ input[type="checkbox"]:checked ~ .toggle-wrap .toggle-track::after {
   .mfa-block {
     flex-direction: column;
     align-items: flex-start;
+  }
+  .card-body {
+    padding: 20px 18px 22px;
+  }
+  .settings-tabs {
+    padding: 0 16px;
+    gap: 18px;
   }
 }
 

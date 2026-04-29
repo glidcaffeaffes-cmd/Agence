@@ -11,9 +11,7 @@
     <div class="profile-container">
       <header class="page-header">
         <div>
-          <span class="badge-label">My Bookings</span>
-          <h1>Reservation History</h1>
-          <p>Stay on top of upcoming trips, recent cancellations, and finished stays across the selected month.</p>
+          <span class="badge-label">Reservations</span>
         </div>
         <div class="header-actions">
           <div class="month-nav">
@@ -41,11 +39,6 @@
 
         <main class="profile-main">
           <section class="control-panel">
-            <label class="search-field">
-              <span class="material-symbols-outlined">search</span>
-              <input v-model="search" type="text" placeholder="Search by hotel, city, or reference" />
-            </label>
-
             <div class="status-pills">
               <button
                 v-for="option in statusOptions"
@@ -86,9 +79,9 @@
 
           <div v-else-if="reservations.length === 0" class="state-box">
             <span class="material-symbols-outlined">calendar_month</span>
-            <p v-if="search || statusFilter !== ''">No bookings match your filters. Try adjusting them.</p>
+            <p v-if="statusFilter !== ''">No bookings match your filters. Try adjusting them.</p>
             <p v-else>No bookings for {{ monthLabel }}. <NuxtLink to="/hotels" class="empty-link">Explore hotels to book your first trip</NuxtLink></p>
-            <NuxtLink v-if="search || statusFilter !== ''" to="/reservations/history" class="empty-link">Clear filters</NuxtLink>
+            <NuxtLink v-if="statusFilter !== ''" to="/reservations/history" class="empty-link">Clear filters</NuxtLink>
           </div>
 
           <ReservationCalendar
@@ -323,7 +316,6 @@ const hotels = ref<Hotel[]>([])
 const loading = ref(false)
 const error = ref<string | null>(null)
 const viewMode = ref<'list' | 'calendar'>('list')
-const search = ref('')
 const statusFilter = ref<ReservationStatus | ''>('')
 const monthCursor = ref(currentMonthKey())
 const cancellationPreviews = ref<Record<number, BookingCancellationPreview>>({})
@@ -502,7 +494,6 @@ async function loadReservations() {
         page: 1,
         limit: 100,
         accountId: accountId.value,
-        search: search.value.trim() || undefined,
         status: statusFilter.value || undefined,
         start: range.start,
         end: range.end,
@@ -626,7 +617,7 @@ watch(
   },
 )
 
-watch([search, statusFilter, monthCursor, accountId], () => {
+watch([statusFilter, monthCursor, accountId], () => {
   if (!initialized.value || !accountId.value) return
   loadReservations()
 })
@@ -644,35 +635,60 @@ onUnmounted(() => {
 
 <style scoped>
 .profile-page { min-height: 100vh; background: var(--color-bg-soft); }
-.profile-container { max-width: 1240px; margin: 0 auto; padding: 40px 24px 72px; }
-.page-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 20px; }
-.badge-label { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 999px; background: var(--color-primary-25); color: var(--color-primary-700); font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
-.page-header h1 { margin: 12px 0 8px; color: var(--color-heading); font-size: clamp(2rem, 3vw, 2.6rem); line-height: 1.05; }
-.page-header p { margin: 0; color: var(--color-text-muted); max-width: 60ch; line-height: 1.6; }
+.profile-container { max-width: 1200px; margin: 0 auto; padding: 24px 32px 80px; }
+.page-header { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 14px; }
+.badge-label { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 999px; background: var(--color-primary-25); color: var(--color-primary-700); font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
 .header-actions { display: flex; gap: 0.8rem; align-items: center; flex-wrap: wrap; }
 .month-nav { display: inline-flex; align-items: center; gap: 0.55rem; background: #fff; border: 1px solid var(--color-border-soft); border-radius: 999px; padding: 0.3rem 0.45rem; }
 .month-nav button, .booking-close-btn { width: 34px; height: 34px; border-radius: 10px; border: 1px solid transparent; background: transparent; color: var(--color-text-muted); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
-.month-nav strong { min-width: 144px; text-align: center; color: var(--color-heading); font-size: 0.88rem; }
+.month-nav strong { min-width: 144px; text-align: center; color: var(--color-heading); font-size: 13px; font-weight: 700; }
 .view-toggle { display: inline-flex; padding: 0.25rem; background: #fff; border: 1px solid var(--color-border-soft); border-radius: 999px; }
-.view-toggle button { border: none; background: transparent; color: var(--color-text-muted); padding: 0.55rem 0.95rem; border-radius: 999px; font-size: 0.84rem; font-weight: 700; cursor: pointer; }
+.view-toggle button { border: none; background: transparent; color: var(--color-text-muted); padding: 0.55rem 0.95rem; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer; }
 .view-toggle--active { background: var(--color-primary-600) !important; color: #fff !important; }
-.btn-export { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--color-border); background: #fff; color: var(--color-text); border-radius: 12px; padding: 10px 14px; font-size: 13px; font-weight: 700; cursor: pointer; }
+.btn-export { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--color-border); background: #fff; color: var(--color-heading); border-radius: 12px; padding: 10px 14px; font-size: 13px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 0.08em; }
 .btn-export:hover { background: var(--color-bg-soft); }
 .btn-export:disabled { opacity: 0.5; cursor: not-allowed; }
-.profile-body { display: flex; gap: 28px; align-items: flex-start; }
+.profile-body { display: flex; gap: 32px; align-items: flex-start; }
 .profile-main { flex: 1; min-width: 0; display: grid; gap: 16px; }
-.control-panel { background: #fff; padding: 20px; border-radius: 20px; border: 1px solid var(--color-border-soft); box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.05); display: grid; gap: 16px; }
-.search-field { position: relative; }
-.search-field .material-symbols-outlined { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--color-text-muted); }
-.search-field input { width: 100%; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-bg-soft); padding: 15px 18px 15px 52px; font-size: 14px; outline: none; }
-.search-field input:focus { background: #fff; border-color: var(--color-primary-500); box-shadow: 0 0 0 4px rgba(0, 103, 104, 0.1); }
-.status-pills { display: flex; gap: 10px; flex-wrap: wrap; }
-.filter-pill { border: 1px solid var(--color-border); background: var(--color-bg-soft); color: var(--color-text-muted); border-radius: 999px; padding: 10px 16px; font-size: 13px; font-weight: 700; cursor: pointer; }
-.filter-pill--active { background: var(--color-primary-600); border-color: var(--color-primary-600); color: #fff; }
+.control-panel { background: #fff; padding: 0 32px; border-radius: 0; border: 1px solid var(--color-border-soft); box-shadow: none; display: grid; gap: 0; }
+.status-pills {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--color-border-soft);
+  padding: 0;
+}
+.filter-pill {
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  border-radius: 0;
+  padding: 20px 0;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+}
+.filter-pill:hover {
+  color: var(--color-primary-600);
+}
+.filter-pill--active {
+  color: var(--color-primary-600);
+}
+.filter-pill--active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--color-primary-600);
+}
 .summary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .summary-card { background: #fff; border: 1px solid var(--color-border-soft); border-radius: 16px; padding: 14px 16px; }
-.summary-card span { display: block; font-size: 0.8rem; color: var(--color-text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
-.summary-card strong { display: block; margin-top: 6px; color: var(--color-heading); font-size: 1.5rem; }
+.summary-card span { display: block; font-size: 11px; color: var(--color-text-muted); font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; }
+.summary-card strong { display: block; margin-top: 6px; color: var(--color-heading); font-size: 1.9rem; }
 .state-box { min-height: 220px; display: grid; place-content: center; gap: 10px; text-align: center; border-radius: 20px; border: 1px solid var(--color-border-soft); background: #fff; color: var(--color-text-muted); }
 .state-box--error { color: #b42318; }
 .empty-link { display: inline-flex; justify-content: center; align-items: center; text-decoration: none; color: var(--color-primary-700); font-weight: 700; }
@@ -683,7 +699,7 @@ onUnmounted(() => {
 .booking-card:nth-child(3) { animation-delay: 0.3s; }
 .booking-card:nth-child(4) { animation-delay: 0.4s; }
 .booking-card:nth-child(5) { animation-delay: 0.5s; }
-.booking-card { display: grid; grid-template-columns: 220px minmax(0, 1fr); background: #fff; border-radius: 20px; border: 1px solid var(--color-border-soft); overflow: hidden; box-shadow: 0 16px 30px rgba(15, 23, 42, 0.06); }
+.booking-card { display: grid; grid-template-columns: 220px minmax(0, 1fr); background: #fff; border-radius: 16px; border: 1px solid var(--color-border-soft); overflow: hidden; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06); }
 .booking-card__media img, .media-fallback { width: 100%; height: 100%; min-height: 190px; object-fit: cover; }
 .media-fallback { display: grid; place-content: center; background: var(--color-bg-soft); color: var(--color-text-muted); }
 .media-fallback .material-symbols-outlined { font-size: 36px; }
@@ -691,7 +707,7 @@ onUnmounted(() => {
 .booking-card__top { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; }
 .booking-ref { margin: 0; color: var(--color-text-muted); font-size: 0.74rem; font-weight: 800; letter-spacing: 0.08em; }
 .booking-card__top h2 { margin: 8px 0 0; color: var(--color-heading); font-size: 1.15rem; }
-.booking-city { margin: 6px 0 0; color: var(--color-text-muted); font-size: 0.92rem; }
+.booking-city { margin: 6px 0 0; color: var(--color-text-muted); font-size: 13px; font-weight: 500; }
 .booking-meta { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding-top: 14px; border-top: 1px solid var(--color-border-soft); }
 .booking-meta span { display: block; color: var(--color-text-muted); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; }
 .booking-meta strong { display: block; margin-top: 4px; color: var(--color-heading); font-size: 0.95rem; }
