@@ -112,7 +112,8 @@
 </template>
 
 <script setup lang="ts">
-const brandLogoUrl = new URL("../../../assets/images/logo.png", import.meta.url).href
+const runtimeConfig = useRuntimeConfig()
+const brandLogoUrl = `${runtimeConfig.app.baseURL}logo.png`
 </script>
 
 <style scoped>

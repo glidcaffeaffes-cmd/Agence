@@ -21,7 +21,7 @@
           <div
             class="client-navbar__brand-mark w-10 h-10 rounded-xl flex items-center justify-center"
           >
-            <img
+              <img
               :src="brandLogoUrl"
               alt=""
               class="client-navbar__brand-logo h-8 w-8 object-contain"
@@ -326,11 +326,12 @@ import { useAuthPrompt } from "~/composables/useAuthPrompt";
 import { useNotifications } from "~/composables/useNotifications";
 import { NotificationType } from "~/types/enums";
 
-const brandLogoUrl = new URL("../../../assets/images/logo.png", import.meta.url).href;
 const { isAuthenticated, isAdmin, currentProfile, logout, accountId } = useAuth();
 const { open: openAuthPrompt } = useAuthPrompt();
 const { latestNotifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
 const route = useRoute();
+const runtimeConfig = useRuntimeConfig();
+const brandLogoUrl = `${runtimeConfig.app.baseURL}logo.png`;
 
 const showUserMenu = ref(false);
 const showNotificationsMenu = ref(false);

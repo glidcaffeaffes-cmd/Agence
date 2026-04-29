@@ -108,7 +108,8 @@
 <script setup lang="ts">
 import { useAuth } from '~/composables/useAuth'
 
-const brandLogoUrl = new URL('../../assets/images/logo.png', import.meta.url).href
+const runtimeConfig = useRuntimeConfig()
+const brandLogoUrl = `${runtimeConfig.app.baseURL}logo.png`
 const { logout } = useAuth()
 
 function handleLogout() {

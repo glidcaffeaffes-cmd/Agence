@@ -164,7 +164,8 @@ import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuth } from '~/composables/useAuth'
 
-const brandLogoUrl = new URL('../../assets/images/logo.png', import.meta.url).href
+const runtimeConfig = useRuntimeConfig()
+const brandLogoUrl = `${runtimeConfig.app.baseURL}logo.png`
 
 definePageMeta({
   middleware: 'guest',
