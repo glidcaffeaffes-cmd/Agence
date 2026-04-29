@@ -380,6 +380,10 @@ export class ApiAccountRepository implements IAccountRepository {
     const dto = await apiRequest<ProfileDTO>('/profiles', {
       method: 'POST',
       body: ProfileMapper.toCreateDto(accountId, data),
+      toast: {
+        silentSuccess: true,
+        silentError: true,
+      },
     })
     invalidateApiCache(`/accounts/${accountId}/profile`, '/profiles', '/accounts')
     return ProfileMapper.fromDto(dto, account ?? undefined)
@@ -395,6 +399,10 @@ export class ApiAccountRepository implements IAccountRepository {
     const dto = await apiRequest<ProfileDTO>(`/accounts/${accountId}/profile`, {
       method: 'PATCH',
       body: ProfileMapper.toUpdateDto(data),
+      toast: {
+        silentSuccess: true,
+        silentError: true,
+      },
     })
     invalidateApiCache(`/accounts/${accountId}/profile`, '/profiles', '/accounts')
     return ProfileMapper.fromDto(dto, account ?? undefined)
