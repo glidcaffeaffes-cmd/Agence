@@ -57,6 +57,10 @@
             <span class="material-symbols-outlined text-error">error</span>
             {{ error }}
           </div>
+          <div v-if="infoMessage" class="flex items-center gap-3 bg-primary/10 border-l-4 border-primary text-on-surface p-4 rounded-r-lg text-sm font-medium">
+            <span class="material-symbols-outlined text-primary">mail</span>
+            {{ infoMessage }}
+          </div>
 
           <div class="grid grid-cols-2 gap-4 lg:gap-3">
             <div class="space-y-2">
@@ -215,7 +219,7 @@ definePageMeta({
 
 const router = useRouter()
 const route = useRoute()
-const { register, loginGoogle, loading, error } = useAuth()
+const { register, loginGoogle, loading, error, pendingVerificationEmail } = useAuth()
 
 const firstName = ref('')
 const lastName = ref('')
@@ -286,6 +290,7 @@ const passwordStrength = computed(() => {
   }
 })
 const submitted = ref(false)
+const infoMessage = ref('')
 
 async function handleRegister() {
   submitted.value = true
@@ -296,12 +301,12 @@ async function handleRegister() {
   
   const ok = await register(email.value, password.value, firstName.value, lastName.value)
   if (ok) {
-    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : ''
-    router.push(redirect.startsWith('/') ? redirect : '/')
+    pendingVerificationEmail.value = email.value.trim().toLowerCase()
+    router.push(`/verify-email?email=${encodeURIComponent(pendingVerificationEmail.value)}`)
   }
 }
 
-import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
 
 async function handleGoogleSignIn() {
   const { $firebaseAuth } = useNuxtApp()

@@ -1,4 +1,5 @@
 import { ref, computed } from 'vue'
+import { createUserWithEmailAndPassword, getIdToken, reload, sendEmailVerification, signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import type { Account, Profile } from '~/types/models'
 import { ProfileMapper } from '~/mappers'
 import { useCookie } from '#app'
@@ -77,8 +78,11 @@ export function useAuth() {
 
   const loading = ref(false)
   const error = ref<string | null>(null)
+  const pendingVerificationEmail = useState<string | null>('auth_pending_verification_email', () => null)
+  const pendingVerificationPassword = useState<string | null>('auth_pending_verification_password', () => null)
 
   const isAuthenticated = computed(() => currentAccount.value !== null)
+  const isVerified = computed(() => Boolean(currentAccount.value && currentAccount.value.emailVerified))
   const isAdmin = computed(() => currentAccount.value?.role === 'admin')
   const accountId = computed(() => currentAccount.value?.id ?? 0)
 
@@ -87,10 +91,32 @@ export function useAuth() {
     error.value = null
     try {
       const normalizedEmail = email.trim().toLowerCase()
+      const { $firebaseAuth } = useNuxtApp()
+      if (!$firebaseAuth) {
+        throw new Error('Firebase authentication is not available')
+      }
+      const firebaseCredential = await signInWithEmailAndPassword($firebaseAuth, normalizedEmail, password)
+      await reload(firebaseCredential.user)
+      if (!firebaseCredential.user.emailVerified) {
+        pendingVerificationEmail.value = normalizedEmail
+        pendingVerificationPassword.value = password
+        error.value = 'Please verify your email before accessing your account.'
+        return false
+      }
+
       const account = await service.login(normalizedEmail, password)
       if (!account) {
         error.value = 'Invalid email or password'
         return false
+      }
+      if (!account.emailVerified) {
+        try {
+          const idToken = await getIdToken(firebaseCredential.user, true)
+          await service.syncEmailVerification(account.id, idToken)
+          account.emailVerified = true
+        } catch {
+          // backend sync can be retried later
+        }
       }
 
       const profile = isVirtualAdminAccount(account)
@@ -101,6 +127,8 @@ export function useAuth() {
       currentProfile.value = mergedProfile
       currentAccount.value = account
       persistAuthState(account, mergedProfile)
+      pendingVerificationEmail.value = null
+      pendingVerificationPassword.value = null
 
       return true
     } catch (e: any) {
@@ -152,6 +180,12 @@ export function useAuth() {
     error.value = null
     try {
       const normalizedEmail = email.trim().toLowerCase()
+      const { $firebaseAuth } = useNuxtApp()
+      if (!$firebaseAuth) {
+        throw new Error('Firebase authentication is not available')
+      }
+      const firebaseCredential = await createUserWithEmailAndPassword($firebaseAuth, normalizedEmail, password)
+      await sendEmailVerification(firebaseCredential.user)
       const account = await service.register(normalizedEmail, password)
 
       const profile = await service.createProfile(account.id, {
@@ -162,11 +196,11 @@ export function useAuth() {
         email: account.email,
         role: account.role,
       })
-      const mergedProfile = ProfileMapper.merge(profile, account)
-      currentProfile.value = mergedProfile
-      currentAccount.value = account
-      persistAuthState(account, mergedProfile)
-
+      pendingVerificationEmail.value = normalizedEmail
+      pendingVerificationPassword.value = password
+      currentProfile.value = null
+      currentAccount.value = null
+      persistAuthState(null, null)
       return true
     } catch (e: any) {
       error.value = e.message
@@ -177,6 +211,10 @@ export function useAuth() {
   }
 
   function logout() {
+    const { $firebaseAuth } = useNuxtApp()
+    if ($firebaseAuth) {
+      signOut($firebaseAuth).catch(() => {})
+    }
     currentAccount.value = null
     currentProfile.value = null
     persistAuthState(null, null)
@@ -353,10 +391,52 @@ export function useAuth() {
     }
   }
 
+  async function resendVerificationEmail() {
+    const { $firebaseAuth } = useNuxtApp()
+    if (!$firebaseAuth?.currentUser) {
+      throw new Error('No verification session found. Please sign in again.')
+    }
+
+    await sendEmailVerification($firebaseAuth.currentUser)
+  }
+
+  async function refreshVerificationStatus() {
+    const { $firebaseAuth } = useNuxtApp()
+    if (!$firebaseAuth?.currentUser) {
+      return false
+    }
+
+    await reload($firebaseAuth.currentUser)
+    if (!$firebaseAuth.currentUser.emailVerified) {
+      return false
+    }
+
+    try {
+      const idToken = await getIdToken($firebaseAuth.currentUser, true)
+      await service.syncEmailVerification(currentAccount.value?.id ?? null, idToken)
+    } catch {
+      // Retry on next session.
+    }
+    if (currentAccount.value) {
+      currentAccount.value.emailVerified = true
+      persistAuthState(currentAccount.value, currentProfile.value)
+    }
+    return true
+  }
+
+  async function completeVerificationLogin() {
+    const verified = await refreshVerificationStatus()
+    if (!verified || !pendingVerificationEmail.value || !pendingVerificationPassword.value) {
+      return false
+    }
+    return login(pendingVerificationEmail.value, pendingVerificationPassword.value)
+  }
+
   return {
     currentAccount,
     currentProfile,
     isAuthenticated,
+    isVerified,
     isAdmin,
     accountId,
     loading,
@@ -364,6 +444,11 @@ export function useAuth() {
     login,
     loginGoogle,
     register,
+    resendVerificationEmail,
+    refreshVerificationStatus,
+    completeVerificationLogin,
+    pendingVerificationEmail,
+    pendingVerificationPassword,
     requestPasswordReset,
     resetPassword,
     logout,

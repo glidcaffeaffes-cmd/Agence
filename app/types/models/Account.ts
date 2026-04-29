@@ -8,5 +8,6 @@ export interface Account {
   password: string
   registrationDate: string
   active: boolean
+  emailVerified: boolean
   role: 'client' | 'admin'
 }

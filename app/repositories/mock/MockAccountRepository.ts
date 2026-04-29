@@ -22,6 +22,15 @@ export class MockAccountRepository implements IAccountRepository {
     }
   }
 
+  async syncEmailVerification(accountId: number | null, _idToken: string): Promise<{ verified: boolean }> {
+    const account = accountId ? this.accounts.find(a => a.id === accountId) : this.accounts[0]
+    if (!account) {
+      throw new Error('Account not found')
+    }
+    account.emailVerified = true
+    return { verified: true }
+  }
+
   async getAll(): Promise<Account[]> {
     return this.accounts
   }
@@ -44,7 +53,13 @@ export class MockAccountRepository implements IAccountRepository {
     if (existing) return existing
     
     // Create mock account if it doesn't exist
-    return this.create({ email: data.email, password: data.uid, active: true, role: 'client' })
+    return this.create({
+      email: data.email,
+      password: data.uid,
+      active: true,
+      emailVerified: true,
+      role: 'client',
+    })
   }
 
   async create(account: Omit<Account, 'id' | 'registrationDate'>): Promise<Account> {
@@ -52,6 +67,7 @@ export class MockAccountRepository implements IAccountRepository {
       ...account,
       id: Date.now(),
       registrationDate: new Date().toISOString().split('T')[0],
+      emailVerified: account.emailVerified ?? false,
     }
     this.accounts.push(newAccount)
     return newAccount

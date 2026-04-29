@@ -246,6 +246,7 @@ export const AccountMapper = {
       password: '',
       registrationDate: dto.dateInscription,
       active: dto.actif ?? true,
+      emailVerified: dto.emailVerified ?? false,
       role: mapAccountRole(dto.role),
     }
   },
