@@ -14,9 +14,9 @@
 
       <!-- top row: location chip + discount badge -->
       <div class="offer-card__image-top">
-        <span v-if="offer.hotelName" class="offer-card__chip">
+        <span v-if="offer.hotelCity" class="offer-card__chip">
           <span class="material-symbols-outlined">location_on</span>
-          {{ offer.hotelName }}
+          {{ offer.hotelCity }}
         </span>
         <span class="offer-card__discount">
           <span class="material-symbols-outlined">local_offer</span>
@@ -26,9 +26,12 @@
 
       <!-- bottom: active pill -->
       <div class="offer-card__image-bottom">
-        <span class="offer-card__status" :class="{ 'offer-card__status--active': offer.active }">
+        <span
+          class="offer-card__status"
+          :class="{ 'offer-card__status--active': offer.active }"
+        >
           <span class="offer-card__status-dot"></span>
-          {{ offer.active ? 'Active Deal' : 'Upcoming' }}
+          {{ offer.active ? "Active Deal" : "Upcoming" }}
         </span>
       </div>
     </div>
@@ -38,10 +41,13 @@
       <div class="offer-card__meta">
         <span class="offer-card__label">Exclusive Offer</span>
       </div>
+      <p class="offer-card__hotel-name">
+        {{ offer.hotelName || `Hotel #${offer.hotelId}` }}
+      </p>
 
-      <h3 class="offer-card__title">{{ offer.title }}</h3>
-
-      <p v-if="offer.description" class="offer-card__desc">{{ truncatedDescription }}</p>
+      <p v-if="offer.description" class="offer-card__desc">
+        {{ truncatedDescription }}
+      </p>
 
       <!-- footer: validity + CTA -->
       <div class="offer-card__footer">
@@ -49,7 +55,10 @@
           <span class="material-symbols-outlined">event</span>
           <span>Until {{ formatDate(offer.endDate) }}</span>
         </div>
-        <button class="offer-card__cta" @click.stop="navigateTo(`/hotels/${offer.hotelId}`)">
+        <button
+          class="offer-card__cta"
+          @click.stop="navigateTo(`/hotels/${offer.hotelId}`)"
+        >
           View
         </button>
       </div>
@@ -58,33 +67,38 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import type { Offer } from '~/types/models'
+import { computed, ref } from "vue";
+import type { Offer } from "~/types/models";
 
-const props = defineProps<{ offer: Offer }>()
+const props = defineProps<{ offer: Offer }>();
 
 const offerFallbackImages = [
-  'https://images.unsplash.com/photo-1540541338287-41700ceee514?auto=format&fit=crop&q=80&w=1200',
-  'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=1200',
-  'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&q=80&w=1200',
-  'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=1200',
-]
+  "https://images.unsplash.com/photo-1540541338287-41700ceee514?auto=format&fit=crop&q=80&w=1200",
+  "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=1200",
+  "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&q=80&w=1200",
+  "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=1200",
+];
 
-const fallbackImage = offerFallbackImages[props.offer.id % offerFallbackImages.length]
+const fallbackImage =
+  offerFallbackImages[props.offer.id % offerFallbackImages.length];
 
 function onImageError(e: Event) {
-  const img = e.target as HTMLImageElement
-  img.src = fallbackImage
+  const img = e.target as HTMLImageElement;
+  img.src = fallbackImage;
 }
 
 const truncatedDescription = computed(() => {
-  const desc = props.offer.description || ''
-  return desc.length > 80 ? `${desc.substring(0, 80)}…` : desc
-})
+  const desc = props.offer.description || "";
+  return desc.length > 80 ? `${desc.substring(0, 80)}…` : desc;
+});
 
 function formatDate(dateStr: string) {
-  if (!dateStr) return 'N/A'
-  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  if (!dateStr) return "N/A";
+  return new Date(dateStr).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 </script>
 
@@ -100,15 +114,16 @@ function formatDate(dateStr: string) {
   height: 100%;
   border: 1px solid var(--color-border-soft);
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
-  transition: transform var(--motion-duration-normal) var(--motion-ease-default),
-              box-shadow var(--motion-duration-normal) var(--motion-ease-default),
-              border-color var(--motion-duration-normal) var(--motion-ease-default);
+  transition:
+    transform var(--motion-duration-normal) var(--motion-ease-default),
+    box-shadow var(--motion-duration-normal) var(--motion-ease-default),
+    border-color var(--motion-duration-normal) var(--motion-ease-default);
 }
 
 .offer-card:hover {
   transform: translateY(-4px);
   border-color: rgba(0, 103, 104, 0.2);
-  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.10);
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.1);
 }
 
 /* ─── Image Container ─────────────────────────────────────── */
@@ -244,9 +259,15 @@ function formatDate(dateStr: string) {
 }
 
 @keyframes pulse-green {
-  0%   { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7); }
-  70%  { box-shadow: 0 0 0 6px rgba(52, 211, 153, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+  0% {
+    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(52, 211, 153, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0);
+  }
 }
 
 /* ─── Card Body ───────────────────────────────────────────── */
@@ -295,6 +316,18 @@ function formatDate(dateStr: string) {
   overflow: hidden;
 }
 
+.offer-card__hotel-name {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-navy-800);
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 /* ─── Footer ──────────────────────────────────────────────── */
 .offer-card__footer {
   display: flex;
@@ -321,7 +354,11 @@ function formatDate(dateStr: string) {
 
 .offer-card__cta {
   padding: 8px 16px;
-  background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-600));
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-500),
+    var(--color-primary-600)
+  );
   color: var(--color-white);
   border: none;
   border-radius: 10px;
@@ -329,8 +366,9 @@ function formatDate(dateStr: string) {
   font-weight: 800;
   letter-spacing: 0.01em;
   cursor: pointer;
-  transition: transform var(--motion-duration-fast) var(--motion-ease-default),
-              box-shadow var(--motion-duration-fast) var(--motion-ease-default);
+  transition:
+    transform var(--motion-duration-fast) var(--motion-ease-default),
+    box-shadow var(--motion-duration-fast) var(--motion-ease-default);
   box-shadow: 0 6px 16px rgba(0, 103, 104, 0.2);
   white-space: nowrap;
 }
