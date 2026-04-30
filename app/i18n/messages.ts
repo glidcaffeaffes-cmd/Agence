@@ -377,7 +377,7 @@ export const messages: Record<LocaleCode, MessageNode> = {
       metaTitle: "VoyageHub - Premium Hotel Booking",
       metaDescription:
         "Discover exceptional hotel stays across Tunisia with VoyageHub.",
-      heroTitle: "Finding your next exceptional stay is simple.",
+      heroTitle: "Your next exceptional stay, curated with ease.",
       destination: "Destination",
       chooseCity: "Choose a city",
       dates: "Dates",
@@ -923,7 +923,7 @@ export const messages: Record<LocaleCode, MessageNode> = {
       metaTitle: "VoyageHub - Reservation d'hotels premium",
       metaDescription:
         "Decouvrez des sejours d'exception en Tunisie avec VoyageHub.",
-      heroTitle: "Trouver votre prochain sejour d'exception devient simple.",
+      heroTitle: "Votre prochain sejour d'exception, reserve en toute simplicite.",
       destination: "Destination",
       chooseCity: "Choisissez une ville",
       dates: "Dates",
@@ -1470,7 +1470,7 @@ export const messages: Record<LocaleCode, MessageNode> = {
     home: {
       metaTitle: "VoyageHub - حجز فنادق مميزة",
       metaDescription: "اكتشف اقامات استثنائية في تونس مع VoyageHub.",
-      heroTitle: "العثور على اقامتك القادمة المميزة اصبح اسهل.",
+      heroTitle: "اقامتك الاستثنائية القادمة، نحجزها لك بسهولة.",
       destination: "الوجهة",
       chooseCity: "اختر مدينة",
       dates: "التواريخ",

@@ -1,6 +1,8 @@
 <template>
   <label class="switcher switcher--language">
-    <span class="switcher__prefix" aria-hidden="true">{{ currentLocale.flag }}</span>
+    <span class="switcher__prefix" aria-hidden="true">
+      <span :class="['switcher__flag', getLocaleFlagClass(selectedLocale)]" />
+    </span>
     <span class="visually-hidden">{{ t("language.select") }}</span>
     <Select
       v-model="selectedLocale"
@@ -13,12 +15,13 @@
     >
       <template #value="{ value }">
         <span class="switcher__value-label">
-          {{ getLocaleFlag(value) }} {{ getLocaleNativeLabel(value) }}
+          {{ getLocaleNativeLabel(value) }}
         </span>
       </template>
       <template #option="{ option }">
         <span class="switcher__option-label">
-          {{ option.flag }} {{ option.nativeLabel }}
+          <span :class="['switcher__flag', option.flag]" aria-hidden="true" />
+          {{ option.nativeLabel }}
         </span>
       </template>
     </Select>
@@ -39,7 +42,7 @@ const selectedLocale = computed<LocaleCode>({
   set: (value) => setLocale(value),
 });
 
-function getLocaleFlag(code: LocaleCode | null | undefined) {
+function getLocaleFlagClass(code: LocaleCode | null | undefined) {
   const target = localeOptions.find((item) => item.code === code);
   return target?.flag ?? currentLocale.value.flag;
 }
@@ -91,12 +94,25 @@ function getLocaleNativeLabel(code: LocaleCode | null | undefined) {
 
 .switcher__value-label,
 .switcher__option-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   font-family:
     "Segoe UI Emoji",
     "Noto Color Emoji",
     "Apple Color Emoji",
     "Segoe UI",
     sans-serif;
+}
+
+.switcher__flag {
+  display: inline-block;
+  width: 1.1rem;
+  height: 0.82rem;
+  border-radius: 0.15rem;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.12);
+  vertical-align: middle;
+  flex-shrink: 0;
 }
 
 .switcher__chevron {
@@ -124,7 +140,7 @@ function getLocaleNativeLabel(code: LocaleCode | null | undefined) {
 }
 
 :deep(.switcher__select--language .p-select-label) {
-  padding-inline: 2.15rem 0.45rem;
+  padding-inline: 2.05rem 0.5rem;
   font-size: 0.84rem;
   font-weight: 700;
 }
