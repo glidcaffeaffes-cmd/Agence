@@ -1739,6 +1739,56 @@ function formatDateForQuery(date: Date) {
   line-height: 1.6;
 }
 
+html[data-theme-resolved="dark"] .hero-filter-bar {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-surface) 92%, transparent) 0%,
+    color-mix(in srgb, var(--color-surface-2) 94%, transparent) 100%
+  );
+  border-color: color-mix(in srgb, var(--color-border) 88%, transparent);
+  box-shadow:
+    0 20px 42px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+html[data-theme-resolved="dark"] .hero-filter-trigger:hover,
+html[data-theme-resolved="dark"] .hero-filter-trigger--open {
+  background: color-mix(in srgb, var(--color-primary-500) 15%, transparent);
+}
+
+html[data-theme-resolved="dark"] .destination-search-input:focus {
+  background: var(--color-surface);
+}
+
+html[data-theme-resolved="dark"] .hero-filter-chip {
+  background: var(--color-surface-2) !important;
+  border-color: color-mix(in srgb, var(--color-primary-300) 35%, transparent) !important;
+  color: var(--color-primary-300) !important;
+}
+
+html[data-theme-resolved="dark"] .hero-filter-chip:hover {
+  background: color-mix(in srgb, var(--color-primary-500) 20%, var(--color-surface-2)) !important;
+  color: var(--color-primary-200) !important;
+}
+
+html[data-theme-resolved="dark"] .benefit-item {
+  background: linear-gradient(
+    180deg,
+    var(--color-surface) 0%,
+    var(--color-surface-2) 100%
+  );
+  border-color: var(--color-border);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+}
+
+html[data-theme-resolved="dark"] .benefit-title {
+  color: var(--color-heading);
+}
+
+html[data-theme-resolved="dark"] .benefit-text {
+  color: var(--color-text-secondary);
+}
+
 /* Stats Bar */
 .stats-bar {
   background: var(--color-primary-600);

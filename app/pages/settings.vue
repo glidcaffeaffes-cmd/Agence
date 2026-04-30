@@ -234,6 +234,7 @@ useHead(() => ({
 
 .settings-tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 24px;
   padding: 0 32px;
   border: 1px solid var(--color-border-soft);
@@ -241,6 +242,11 @@ useHead(() => ({
   background: var(--color-surface);
   box-shadow: var(--shadow-sm);
   overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.settings-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .tab-button {
@@ -533,5 +539,38 @@ useHead(() => ({
     flex-direction: column;
     align-items: stretch;
   }
+}
+
+html[data-theme-resolved="dark"] .settings-tabs {
+  background: var(--color-surface-2);
+  border-color: var(--color-border);
+}
+
+html[data-theme-resolved="dark"] .content-card {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+html[data-theme-resolved="dark"] .card-header {
+  background: var(--color-surface-2);
+  border-bottom-color: var(--color-border);
+}
+
+html[data-theme-resolved="dark"] .toggle-row {
+  background: var(--color-surface-2);
+  border-color: var(--color-border-soft);
+}
+
+html[data-theme-resolved="dark"] .toggle-row:hover {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+html[data-theme-resolved="dark"] .toggle-track {
+  background: var(--switch-track-bg);
+}
+
+html[data-theme-resolved="dark"] .toggle-track::after {
+  background: var(--switch-thumb-bg);
 }
 </style>

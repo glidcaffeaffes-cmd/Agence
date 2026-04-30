@@ -1860,7 +1860,7 @@ function formatCardBrand(brand: PaymentMethod["brand"]) {
 
 .phone-dial-prefix {
   position: absolute;
-  left: 14px;
+  inset-inline-start: 14px;
   top: 50%;
   transform: translateY(-50%);
   font-size: 13px;
@@ -1882,7 +1882,7 @@ function formatCardBrand(brand: PaymentMethod["brand"]) {
 
 .input-icon {
   position: absolute;
-  right: 14px;
+  inset-inline-end: 14px;
   top: 50%;
   transform: translateY(-50%);
   font-size: 20px;
@@ -1911,7 +1911,7 @@ function formatCardBrand(brand: PaymentMethod["brand"]) {
 
 .state-icon {
   position: absolute;
-  right: 10px;
+  inset-inline-end: 10px;
   top: 50%;
   transform: translateY(-50%);
   font-size: 18px;
@@ -1923,7 +1923,7 @@ function formatCardBrand(brand: PaymentMethod["brand"]) {
 }
 
 input[type="date"] ~ .state-icon {
-  right: 36px;
+  inset-inline-end: 36px;
 }
 
 .form-group--completed .state-icon,
@@ -2312,5 +2312,10 @@ input[type="date"] ~ .state-icon {
     padding: 0 16px;
     gap: 16px;
   }
+}
+
+[dir="rtl"] .form-input--phone {
+  padding-right: 72px;
+  padding-left: 46px;
 }
 </style>
