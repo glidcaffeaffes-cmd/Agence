@@ -1,29 +1,29 @@
 <template>
   <div>
     <Head>
-      <title>Audit Logs — VoyageHub Admin</title>
-      <meta name="description" content="System audit logs and activity history for VoyageHub." />
+      <title>{{ copy.metaTitle }}</title>
+      <meta name="description" :content="copy.metaDescription" />
     </Head>
 
     <div class="admin-page">
       <div class="page-header">
         <div>
-          <p class="page-eyebrow">Security</p>
-          <h1 class="page-title">System Audit Logs</h1>
-          <p class="page-desc">Complete record of system activity and user actions</p>
+          <p class="page-eyebrow">{{ copy.eyebrow }}</p>
+          <h1 class="page-title">{{ copy.title }}</h1>
+          <p class="page-desc">{{ copy.subtitle }}</p>
         </div>
         <div class="header-actions">
           <div class="search-box">
             <span class="material-symbols-outlined">search</span>
-            <input v-model="search" id="audit-search" type="text" placeholder="Search logs…" />
+            <input v-model="search" id="audit-search" type="text" :placeholder="copy.searchPlaceholder" />
           </div>
           <select v-model="actionFilter" id="audit-action-filter" class="filter-select">
-            <option value="">All actions</option>
-            <option value="LOGIN">Login</option>
-            <option value="CREATE">Create</option>
-            <option value="UPDATE">Update</option>
-            <option value="DELETE">Delete</option>
-            <option value="EXPORT">Export</option>
+            <option value="">{{ copy.allActions }}</option>
+            <option value="LOGIN">{{ copy.actionLogin }}</option>
+            <option value="CREATE">{{ copy.actionCreate }}</option>
+            <option value="UPDATE">{{ copy.actionUpdate }}</option>
+            <option value="DELETE">{{ copy.actionDelete }}</option>
+            <option value="EXPORT">{{ copy.actionExport }}</option>
           </select>
           <button class="btn-refresh" @click="loadLogs">
             <span class="material-symbols-outlined">refresh</span>
@@ -35,15 +35,15 @@
       <div class="stats-row">
         <div class="stat-pill">
           <span class="material-symbols-outlined" style="color:#006768">list_alt</span>
-          <span>{{ logs.length }} total events</span>
+          <span>{{ copy.totalEvents }}</span>
         </div>
         <div class="stat-pill">
           <span class="material-symbols-outlined" style="color:#ba1a1a">warning</span>
-          <span>{{ logs.filter(l => l.level === 'ERROR').length }} errors</span>
+          <span>{{ copy.errors }}</span>
         </div>
         <div class="stat-pill">
           <span class="material-symbols-outlined" style="color:#CDAF5D">info</span>
-          <span>{{ logs.filter(l => l.level === 'WARNING').length }} warnings</span>
+          <span>{{ copy.warnings }}</span>
         </div>
       </div>
 
@@ -52,12 +52,12 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th>Timestamp</th>
-              <th>User</th>
-              <th>Action</th>
-              <th>Resource</th>
-              <th>Details</th>
-              <th>Level</th>
+              <th>{{ copy.timestamp }}</th>
+              <th>{{ copy.user }}</th>
+              <th>{{ copy.action }}</th>
+              <th>{{ copy.resource }}</th>
+              <th>{{ copy.details }}</th>
+              <th>{{ copy.level }}</th>
             </tr>
           </thead>
           <tbody>
@@ -80,7 +80,7 @@
               </td>
             </tr>
             <tr v-if="filtered.length === 0">
-              <td colspan="6" class="empty-row">No logs match your criteria</td>
+              <td colspan="6" class="empty-row">{{ copy.empty }}</td>
             </tr>
           </tbody>
         </table>
@@ -90,7 +90,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
 
 definePageMeta({ layout: 'admin' })
 
@@ -106,6 +106,38 @@ interface AuditLog {
 
 const search = ref('')
 const actionFilter = ref('')
+const { t } = useAppI18n()
+
+const copy = computed(() => {
+  return {
+    metaTitle: t("adminAudit.metaTitle"),
+    metaDescription: t("adminAudit.metaDescription"),
+    eyebrow: t("adminAudit.eyebrow"),
+    title: t("adminAudit.title"),
+    subtitle: t("adminAudit.subtitle"),
+    searchPlaceholder: t("adminAudit.searchPlaceholder"),
+    allActions: t("adminAudit.allActions"),
+    totalEvents: t("adminAudit.totalEvents", { count: String(logs.value.length) }),
+    errors: t("adminAudit.errors", {
+      count: String(logs.value.filter((l) => l.level === "ERROR").length),
+    }),
+    warnings: t("adminAudit.warnings", {
+      count: String(logs.value.filter((l) => l.level === "WARNING").length),
+    }),
+    timestamp: t("adminAudit.timestamp"),
+    user: t("adminAudit.user"),
+    action: t("adminAudit.action"),
+    actionLogin: t("adminAudit.actionLogin"),
+    actionCreate: t("adminAudit.actionCreate"),
+    actionUpdate: t("adminAudit.actionUpdate"),
+    actionDelete: t("adminAudit.actionDelete"),
+    actionExport: t("adminAudit.actionExport"),
+    resource: t("adminAudit.resource"),
+    details: t("adminAudit.details"),
+    level: t("adminAudit.level"),
+    empty: t("adminAudit.empty"),
+  }
+})
 
 const logs = ref<AuditLog[]>([
   { id: 1, timestamp: '2026-04-17 17:42:01', user: 'admin@voyagehub.com', action: 'LOGIN', resource: 'Auth', details: 'Successful login from 192.168.1.1', level: 'INFO' },

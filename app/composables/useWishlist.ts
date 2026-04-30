@@ -90,6 +90,7 @@ export function useWishlist() {
   const { accountId, isAuthenticated, isVerified } = useAuth()
   const { open } = useAuthPrompt()
   const { success: toastSuccess, info: toastInfo, error: toastError } = useAppToast()
+  const { t } = useAppI18n()
   const hotelIds = useState<number[]>('wishlist_hotel_ids', () => [])
   const watchInitialized = useState<boolean>('wishlist_watch_initialized', () => false)
   const hydratedAccountId = useState<number>('wishlist_hydrated_account_id', () => 0)
@@ -178,7 +179,7 @@ export function useWishlist() {
   function requireAuth() {
     if (isAuthenticated.value) {
       if (!isVerified.value) {
-        toastError('Please verify your email before accessing your account.')
+        toastError(t('toast.verifyEmail'), t('toast.error'))
         return false
       }
       return true
@@ -200,20 +201,20 @@ export function useWishlist() {
       return {
         success: false,
         action: 'blocked',
-        message: 'Sign in required.',
+        message: t('toast.signInRequired'),
       }
     }
 
     if (accountId.value <= 0) {
-      const message = 'Wishlist is only available for client accounts.'
-      toastError(message)
+      const message = t('toast.wishlistClientOnly')
+      toastError(message, t('toast.error'))
       return { success: false, action: 'blocked', message }
     }
 
     const normalizedId = toHotelId(hotelId)
     if (!normalizedId) {
-      const message = 'Invalid hotel id.'
-      toastError(message)
+      const message = t('toast.invalidHotelId')
+      toastError(message, t('toast.error'))
       return { success: false, action: 'error', message }
     }
 
@@ -221,7 +222,7 @@ export function useWishlist() {
       return {
         success: true,
         action: 'noop',
-        message: 'Hotel already in wishlist.',
+        message: t('toast.hotelAlreadySaved'),
       }
     }
 
@@ -244,26 +245,26 @@ export function useWishlist() {
             .filter((item) => Number.isFinite(item) && item > 0)
         : [...hotelIds.value, normalizedId]
 
-      toastSuccess('Hotel saved to your wishlist.')
+      toastSuccess(t('toast.hotelSaved'), t('toast.success'))
       return {
         success: true,
         action: 'saved',
-        message: 'Hotel saved to your wishlist.',
+        message: t('toast.hotelSaved'),
       }
     } catch (cause: any) {
       if (cause?.message?.includes('/wishlist')) {
         hotelIds.value = [...hotelIds.value, normalizedId]
         writeLegacyStoredIds(accountId.value, hotelIds.value)
-        toastSuccess('Hotel saved to your wishlist.')
+        toastSuccess(t('toast.hotelSaved'), t('toast.success'))
         return {
           success: true,
           action: 'saved',
-          message: 'Hotel saved to your wishlist.',
+          message: t('toast.hotelSaved'),
         }
       }
 
-      const message = cause?.message || 'Unable to save wishlist. Please try again.'
-      toastError(message)
+      const message = cause?.message || t('toast.wishlistUnavailable')
+      toastError(message, t('toast.error'))
       return { success: false, action: 'error', message }
     }
   }
@@ -273,20 +274,20 @@ export function useWishlist() {
       return {
         success: false,
         action: 'blocked',
-        message: 'Sign in required.',
+        message: t('toast.signInRequired'),
       }
     }
 
     if (accountId.value <= 0) {
-      const message = 'Wishlist is only available for client accounts.'
-      toastError(message)
+      const message = t('toast.wishlistClientOnly')
+      toastError(message, t('toast.error'))
       return { success: false, action: 'blocked', message }
     }
 
     const normalizedId = toHotelId(hotelId)
     if (!normalizedId) {
-      const message = 'Invalid hotel id.'
-      toastError(message)
+      const message = t('toast.invalidHotelId')
+      toastError(message, t('toast.error'))
       return { success: false, action: 'error', message }
     }
 
@@ -294,7 +295,7 @@ export function useWishlist() {
       return {
         success: true,
         action: 'noop',
-        message: 'Hotel already removed from wishlist.',
+        message: t('toast.hotelAlreadyRemoved'),
       }
     }
 
@@ -316,26 +317,26 @@ export function useWishlist() {
             .filter((item) => Number.isFinite(item) && item > 0)
         : hotelIds.value.filter((item) => item !== normalizedId)
 
-      toastInfo('Hotel removed from your wishlist.')
+      toastInfo(t('toast.hotelRemoved'), t('toast.info'))
       return {
         success: true,
         action: 'removed',
-        message: 'Hotel removed from your wishlist.',
+        message: t('toast.hotelRemoved'),
       }
     } catch (cause: any) {
       if (cause?.message?.includes('/wishlist')) {
         hotelIds.value = hotelIds.value.filter((item) => item !== normalizedId)
         writeLegacyStoredIds(accountId.value, hotelIds.value)
-        toastInfo('Hotel removed from your wishlist.')
+        toastInfo(t('toast.hotelRemoved'), t('toast.info'))
         return {
           success: true,
           action: 'removed',
-          message: 'Hotel removed from your wishlist.',
+          message: t('toast.hotelRemoved'),
         }
       }
 
-      const message = cause?.message || 'Unable to update wishlist. Please try again.'
-      toastError(message)
+      const message = cause?.message || t('toast.wishlistUnavailable')
+      toastError(message, t('toast.error'))
       return { success: false, action: 'error', message }
     }
   }
@@ -345,7 +346,7 @@ export function useWishlist() {
       return {
         success: false,
         action: 'blocked',
-        message: 'Sign in required.',
+        message: t('toast.signInRequired'),
       }
     }
 

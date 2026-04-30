@@ -1,79 +1,82 @@
 <template>
   <div class="info-page">
-    <Head>
-      <title>Privacy Policy - VoyageHub</title>
-      <meta
-        name="description"
-        content="VoyageHub privacy policy describing data collection, processing, and customer rights."
-      />
-    </Head>
-
     <div class="info-shell">
       <header class="info-header">
-        <h1>Privacy Policy</h1>
-        <p>Last updated: April 26, 2026</p>
+        <h1>{{ t("privacyPage.title") }}</h1>
+        <p>{{ t("privacyPage.updatedOn", { date: updatedOn }) }}</p>
       </header>
 
       <section class="info-card">
-        <h2>1. Information We Collect</h2>
-        <p>
-          We collect account, booking, and support information required to
-          process reservations and provide customer service.
-        </p>
+        <div v-for="section in sections" :key="section.title" class="info-section">
+          <h2>{{ section.title }}</h2>
+          <p>{{ section.body }}</p>
+        </div>
 
-        <h2>2. How We Use Data</h2>
-        <p>
-          Data is used to confirm reservations, prevent fraud, communicate
-          booking updates, and improve service quality.
-        </p>
-
-        <h2>3. Data Sharing</h2>
-        <p>
-          Booking-related details are shared only with relevant hotels and
-          approved payment or operational providers when necessary for service
-          delivery.
-        </p>
-
-        <h2>4. Data Retention</h2>
-        <p>
-          Reservation and support records are retained according to legal and
-          operational requirements, then removed or anonymized when no longer
-          needed.
-        </p>
-
-        <h2>5. Your Rights</h2>
-        <p>
-          You may request access, correction, or deletion of personal data
-          where legally applicable through our support channels.
-        </p>
-
-        <h2>6. Contact for Privacy Requests</h2>
-        <p>
-          To submit a privacy request, use the
-          <NuxtLink to="/contact">Contact</NuxtLink> page.
-        </p>
+        <div class="info-section">
+          <h2>{{ t("privacyPage.contactTitle") }}</h2>
+          <p>
+            {{ t("privacyPage.contactBodyPrefix") }}
+            <NuxtLink to="/contact">{{ t("privacyPage.contactLink") }}</NuxtLink>
+            {{ t("privacyPage.contactBodySuffix") }}
+          </p>
+        </div>
       </section>
     </div>
   </div>
 </template>
 
+<script setup lang="ts">
+import { computed } from 'vue'
+
+const { t } = useAppI18n()
+
+const updatedOn = 'April 26, 2026'
+const sections = computed(() => [
+  { title: t('privacyPage.collectTitle'), body: t('privacyPage.collectBody') },
+  { title: t('privacyPage.useTitle'), body: t('privacyPage.useBody') },
+  {
+    title: t('privacyPage.sharingTitle'),
+    body: t('privacyPage.sharingBody'),
+  },
+  {
+    title: t('privacyPage.retentionTitle'),
+    body: t('privacyPage.retentionBody'),
+  },
+  { title: t('privacyPage.rightsTitle'), body: t('privacyPage.rightsBody') },
+])
+
+useHead(() => ({
+  title: t('privacyPage.metaTitle'),
+  meta: [
+    {
+      name: 'description',
+      content: t('privacyPage.metaDescription'),
+    },
+  ],
+}))
+</script>
+
 <style scoped>
 .info-page {
-  background:
-    radial-gradient(circle at top, color-mix(in srgb, var(--color-primary-50) 68%, white 32%) 0%, transparent 52%),
-    linear-gradient(180deg, var(--color-gray-50) 0%, white 100%);
   min-height: calc(100vh - 140px);
+  background:
+    radial-gradient(
+      circle at top,
+      color-mix(in srgb, var(--color-primary-50) 68%, transparent) 0%,
+      transparent 52%
+    ),
+    linear-gradient(180deg, var(--color-bg-soft) 0%, var(--color-surface) 100%);
 }
 
 .info-shell {
-  max-width: 1024px;
+  width: min(1024px, calc(100% - 2rem));
   margin: 0 auto;
-  padding: 40px 24px 56px;
+  padding: 40px 0 56px;
 }
 
 .info-header h1 {
   margin: 0;
-  color: var(--color-navy-500);
+  color: var(--color-text-primary);
   font-size: clamp(1.9rem, 3vw, 2.45rem);
   font-weight: 800;
   letter-spacing: -0.02em;
@@ -81,42 +84,41 @@
 
 .info-header p {
   margin: 8px 0 0;
-  color: var(--color-gray-500);
+  color: var(--color-text-secondary);
   font-size: 0.95rem;
   font-weight: 600;
 }
 
 .info-card {
   margin-top: 20px;
-  background: white;
-  border: 1px solid color-mix(in srgb, var(--color-gray-200) 74%, white 26%);
-  border-radius: 20px;
   padding: 28px;
-  box-shadow: 0 16px 30px rgba(15, 23, 42, 0.06);
+  border: 1px solid var(--color-border-soft);
+  border-radius: 20px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+}
+
+.info-section + .info-section {
+  margin-top: 1.25rem;
 }
 
 .info-card h2 {
   margin: 0 0 8px;
-  color: var(--color-navy-500);
+  color: var(--color-text-primary);
   font-size: 1.05rem;
   font-weight: 800;
 }
 
-.info-card h2 + p {
-  margin-top: 0;
-}
-
 .info-card p {
-  margin: 0 0 16px;
-  color: var(--color-gray-600);
-  line-height: 1.7;
+  margin: 0;
+  color: var(--color-text-secondary);
   font-size: 0.96rem;
+  line-height: 1.7;
 }
 
 .info-card :deep(a) {
   color: var(--color-primary-600);
   font-weight: 700;
-  text-decoration: none;
 }
 
 .info-card :deep(a:hover) {
@@ -125,12 +127,13 @@
 
 @media (max-width: 768px) {
   .info-shell {
-    padding: 28px 16px 40px;
+    width: min(100% - 1.5rem, 1024px);
+    padding: 28px 0 40px;
   }
 
   .info-card {
-    border-radius: 16px;
     padding: 20px;
+    border-radius: 16px;
   }
 }
 </style>

@@ -44,12 +44,12 @@
               <small v-if="entry.amountLabel">{{ entry.amountLabel }}</small>
             </div>
             <div v-if="cell.entries.length > 3" class="calendar-more">
-              +{{ cell.entries.length - 3 }} more
+              {{ t('calendar.more', { count: cell.entries.length - 3 }) }}
             </div>
           </div>
 
           <div v-else class="calendar-empty">
-            {{ emptyLabel }}
+            {{ emptyLabel || t('calendar.emptyDefault') }}
           </div>
         </article>
       </div>
@@ -78,7 +78,7 @@ const props = withDefaults(
     admin?: boolean
   }>(),
   {
-    emptyLabel: 'No stays',
+    emptyLabel: '',
     admin: false,
   },
 )
@@ -88,8 +88,14 @@ const emit = defineEmits<{
   prevMonth: []
   nextMonth: []
 }>()
+const { t, formatDate, formatCurrency } = useAppI18n()
 
-const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+const weekdays = computed(() => {
+  const sunday = new Date(Date.UTC(2026, 0, 4))
+  return Array.from({ length: 7 }, (_, index) =>
+    formatDate(addUtcDays(sunday, index), { weekday: 'short' }),
+  )
+})
 
 function monthStart(key: string) {
   const [year, month] = key.split('-').map(Number)
@@ -112,8 +118,10 @@ const todayKey = computed(() => dateKey(new Date()))
 
 const monthLabel = computed(() => {
   const [year, month] = props.month.split('-').map(Number)
-  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-  return `${monthNames[month - 1]} ${year}`
+  return formatDate(new Date(Date.UTC(year, month - 1, 1)), {
+    month: 'long',
+    year: 'numeric',
+  })
 })
 
 const cells = computed(() => {
@@ -174,13 +182,6 @@ function statusClass(status: string) {
   }
 }
 
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'EUR',
-    maximumFractionDigits: 0,
-  }).format(value)
-}
 </script>
 
 <style scoped>
@@ -194,10 +195,11 @@ function formatCurrency(value: number) {
   align-items: center;
   justify-content: center;
   gap: 0.55rem;
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--color-border-soft);
   border-radius: 999px;
   padding: 0.3rem 0.45rem;
+  box-shadow: var(--shadow-sm);
 }
 
 .nav-btn {
@@ -220,7 +222,7 @@ function formatCurrency(value: number) {
 .calendar-nav strong {
   min-width: 144px;
   text-align: center;
-  color: var(--color-heading);
+  color: var(--color-text-primary);
   font-size: 0.88rem;
 }
 
@@ -228,7 +230,7 @@ function formatCurrency(value: number) {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 10px;
-  color: var(--color-gray-500);
+  color: var(--color-text-secondary);
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -251,18 +253,18 @@ function formatCurrency(value: number) {
 
 .calendar-cell {
   min-height: 162px;
-  border: 1px solid color-mix(in srgb, var(--color-gray-200) 76%, white 24%);
-  background: #fff;
+  border: 1px solid var(--color-border-soft);
+  background: var(--color-surface);
   border-radius: 16px;
   padding: 12px;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.04);
+  box-shadow: var(--shadow-sm);
 }
 
 .calendar-cell--muted {
-  background: color-mix(in srgb, var(--color-gray-50) 86%, white 14%);
+  background: var(--color-surface-secondary);
 }
 
 .calendar-cell--today {
@@ -280,7 +282,7 @@ function formatCurrency(value: number) {
 .calendar-cell__day {
   font-size: 0.92rem;
   font-weight: 800;
-  color: var(--color-navy-500);
+  color: var(--color-text-primary);
 }
 
 .calendar-cell__count {
@@ -322,14 +324,14 @@ function formatCurrency(value: number) {
 .calendar-event strong {
   font-size: 0.78rem;
   line-height: 1.2;
-  color: #0f172a;
+  color: var(--color-text-primary);
 }
 
 .calendar-event span,
 .calendar-event small {
   font-size: 0.7rem;
   line-height: 1.25;
-  color: rgba(15, 23, 42, 0.7);
+  color: var(--color-text-secondary);
 }
 
 .calendar-event--confirmed {
@@ -360,7 +362,7 @@ function formatCurrency(value: number) {
 
 .calendar-empty {
   margin-top: auto;
-  color: var(--color-gray-400);
+  color: var(--color-text-secondary);
   font-size: 0.76rem;
 }
 

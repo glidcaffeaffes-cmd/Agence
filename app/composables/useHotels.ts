@@ -7,7 +7,7 @@ import type {
   HotelFetchOptions,
   PaginatedResult,
 } from '~/types/interfaces'
-import { HotelService } from '~/services'
+import { HotelService } from "~/services/HotelService";
 import { useAsyncAction } from '~/composables/useAsyncAction'
 
 const service = new HotelService()

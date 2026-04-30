@@ -1,10 +1,10 @@
 <template>
   <div class="landing-page">
     <Head>
-      <title>VoyageHub — Premium Hotel Booking</title>
+      <title>{{ t("home.metaTitle") }}</title>
       <meta
         name="description"
-        content="Discover exceptional hotel stays across France. Book your perfect luxury getaway with VoyageHub."
+        :content="t('home.metaDescription')"
       />
     </Head>
 
@@ -27,7 +27,7 @@
         <div class="hero-content">
           <div class="hero-copy">
             <h1 class="hero-title">
-              Finding your next exceptional stay is simple.
+              {{ t("home.heroTitle") }}
             </h1>
           </div>
         </div>
@@ -53,9 +53,9 @@
                 >bed</span
               >
               <span class="hero-filter-trigger__copy">
-                <span class="hero-filter-trigger__label">Destination</span>
+                <span class="hero-filter-trigger__label">{{ t("home.destination") }}</span>
                 <span class="hero-filter-trigger__value">{{
-                  selectedCity || "Choose a city"
+                  selectedCity || t("home.chooseCity")
                 }}</span>
               </span>
               <span
@@ -76,7 +76,7 @@
                 >calendar_month</span
               >
               <span class="hero-filter-trigger__copy">
-                <span class="hero-filter-trigger__label">Dates</span>
+                <span class="hero-filter-trigger__label">{{ t("home.dates") }}</span>
                 <span class="hero-filter-trigger__value">{{
                   dateRangeLabel
                 }}</span>
@@ -99,7 +99,7 @@
                 >person</span
               >
               <span class="hero-filter-trigger__copy">
-                <span class="hero-filter-trigger__label">Guests & rooms</span>
+                <span class="hero-filter-trigger__label">{{ t("home.guestsRooms") }}</span>
                 <span class="hero-filter-trigger__value">{{
                   guestSummary
                 }}</span>
@@ -116,7 +116,7 @@
               @click="submitHeroSearch"
             >
               <span class="material-symbols-outlined">search</span>
-              <span>Search</span>
+              <span>{{ t("home.search") }}</span>
             </Button>
           </div>
 
@@ -129,7 +129,7 @@
               <input
                 type="text"
                 v-model="citySearchQuery"
-                placeholder="Choose a city"
+                :placeholder="t('home.chooseCity')"
                 class="destination-search-input"
                 autofocus
               />
@@ -151,7 +151,7 @@
                 v-if="filteredCities.length === 0"
                 class="destination-list-empty"
               >
-                No cities found
+                {{ t("home.noCities") }}
               </div>
             </div>
           </div>
@@ -162,8 +162,8 @@
           >
             <div class="hero-filter-panel__header">
               <div>
-                <strong>Stay dates</strong>
-                <span>Choose exact dates for your trip.</span>
+                <strong>{{ t("home.stayDates") }}</strong>
+                <span>{{ t("home.stayDatesHint") }}</span>
               </div>
               <span class="hero-filter-panel__nights">{{
                 stayLengthLabel
@@ -195,7 +195,7 @@
                   class="hero-filter-chip"
                   @click="applyQuickStay(days)"
                 >
-                  {{ days === 1 ? "1 day" : `${days} days` }}
+                  {{ days === 1 ? t("home.dayOne") : t("home.dayOther", { count: days }) }}
                 </Button>
               </div>
               <Button
@@ -203,7 +203,7 @@
                 class="hero-filter-apply-btn"
                 @click="applyDateSelection"
               >
-                Apply
+                {{ t("home.apply") }}
               </Button>
             </div>
           </div>
@@ -214,8 +214,8 @@
           >
             <div class="guest-counter-row">
               <div class="guest-counter-copy">
-                <strong>Adults</strong>
-                <span>Ages 18 or above</span>
+                <strong>{{ t("home.adults") }}</strong>
+                <span>{{ t("home.adultsHint") }}</span>
               </div>
               <div class="guest-counter-control">
                 <Button
@@ -224,7 +224,7 @@
                   class="guest-counter-btn"
                   @click="updateGuestCount('adults', -1)"
                   :disabled="adults <= 1"
-                  >−</Button
+                  >-</Button
                 >
                 <span>{{ adults }}</span>
                 <Button
@@ -239,8 +239,8 @@
 
             <div class="guest-counter-row">
               <div class="guest-counter-copy">
-                <strong>Children</strong>
-                <span>Age 0 to 17 years</span>
+                <strong>{{ t("home.children") }}</strong>
+                <span>{{ t("home.childrenHint") }}</span>
               </div>
               <div class="guest-counter-control">
                 <Button
@@ -249,7 +249,7 @@
                   class="guest-counter-btn"
                   @click="updateGuestCount('children', -1)"
                   :disabled="children <= 0"
-                  >−</Button
+                  >-</Button
                 >
                 <span>{{ children }}</span>
                 <Button
@@ -268,7 +268,9 @@
                 :key="`child-age-${index}`"
                 class="guest-age-item"
               >
-                <label class="guest-age-label">Child {{ index + 1 }} age</label>
+                <label class="guest-age-label">
+                  {{ t("home.childAge", { count: index + 1 }) }}
+                </label>
                 <Select
                   v-model="childAges[index]"
                   :options="childAgeOptions"
@@ -281,14 +283,13 @@
             </div>
 
             <p v-if="children > 0" class="guest-age-note">
-              We use each child age to estimate the correct room options and
-              rates for your stay.
+              {{ t("home.childAgeNote") }}
             </p>
 
             <div class="guest-counter-row">
               <div class="guest-counter-copy">
-                <strong>Rooms</strong>
-                <span>Choose what you need</span>
+                <strong>{{ t("home.rooms") }}</strong>
+                <span>{{ t("home.roomsHint") }}</span>
               </div>
               <div class="guest-counter-control">
                 <Button
@@ -297,7 +298,7 @@
                   class="guest-counter-btn"
                   @click="updateGuestCount('rooms', -1)"
                   :disabled="roomsRequested <= 1"
-                  >−</Button
+                  >-</Button
                 >
                 <span>{{ roomsRequested }}</span>
                 <Button
@@ -312,7 +313,7 @@
 
             <Button
               type="button"
-              label="Apply"
+              :label="t('home.apply')"
               class="guest-apply-button"
               @click="activeFilterPanel = null"
             />
@@ -328,9 +329,9 @@
     <section class="section-featured">
       <div class="section-container">
         <div class="section-header">
-          <h2 class="section-title">Featured Collections</h2>
+          <h2 class="section-title">{{ t("home.featuredTitle") }}</h2>
           <p class="section-subtitle">
-            Handpicked 5-star destinations for an exceptional experience
+            {{ t("home.featuredSubtitle") }}
           </p>
         </div>
         <div class="hotels-grid">
@@ -343,7 +344,7 @@
         </div>
         <div class="section-action">
           <NuxtLink to="/hotels" class="view-all-link">
-            Explore All Hotels
+            {{ t("home.exploreAllHotels") }}
             <span class="material-symbols-outlined">arrow_forward</span>
           </NuxtLink>
         </div>
@@ -377,9 +378,9 @@
     <section class="section-offers">
       <div class="section-container">
         <div class="section-header">
-          <h2 class="section-title">Special Offers</h2>
+          <h2 class="section-title">{{ t("home.offersTitle") }}</h2>
           <p class="section-subtitle">
-            Exclusive deals and seasonal packages for unforgettable journeys
+            {{ t("home.offersSubtitle") }}
           </p>
         </div>
         <div class="offers-grid">
@@ -403,7 +404,19 @@ import { useRooms } from "~/composables/useRooms";
 const { hotels, featured, fetchAll: fetchHotels, fetchFeatured } = useHotels();
 const { offers: activeOffers, fetchActive } = useOffers();
 const { rooms, fetchAll: fetchAllRooms } = useRooms();
+const { t, formatDate } = useAppI18n();
 const router = useRouter();
+
+useHead(() => ({
+  title: t("home.metaTitle"),
+  meta: [
+    {
+      name: "description",
+      content: t("home.metaDescription"),
+    },
+  ],
+}));
+
 const FEATURED_HOTELS_LIMIT = 8;
 const featuredHotels = computed(() =>
   featured.value.slice(0, FEATURED_HOTELS_LIMIT),
@@ -414,23 +427,23 @@ const limitedOffers = computed(() =>
   activeOffers.value.slice(0, OFFERS_LIMIT),
 );
 
-const benefits = [
+const benefits = computed(() => [
   {
     icon: "hotel",
-    title: "Handpicked Hotels",
-    text: "Every property in our collection is personally vetted for architectural merit and service excellence.",
+    title: t("home.benefits.hotelsTitle"),
+    text: t("home.benefits.hotelsText"),
   },
   {
     icon: "support_agent",
-    title: "Concierge Service",
-    text: "Our travel experts are available 24/7 to handle your requests, from dinner reservations to private transfers.",
+    title: t("home.benefits.conciergeTitle"),
+    text: t("home.benefits.conciergeText"),
   },
   {
     icon: "verified",
-    title: "Best Rate Guarantee",
-    text: "Book with confidence knowing you are receiving the most competitive rates available online.",
+    title: t("home.benefits.rateTitle"),
+    text: t("home.benefits.rateText"),
   },
-];
+]);
 
 const heroFilterRef = ref<HTMLElement | null>(null);
 const heroVideo = ref<HTMLVideoElement | null>(null);
@@ -452,19 +465,19 @@ const childAgeOptions = Array.from({ length: 17 }, (_, index) => ({
 // Static 24 Tunisian governorates — always available regardless of DB content
 const TUNISIA_CITIES = [
   "Ariana",
-  "Béja",
+  "Beja",
   "Ben Arous",
   "Bizerte",
-  "Gabès",
+  "Gabes",
   "Gafsa",
   "Jendouba",
   "Kairouan",
   "Kasserine",
-  "Kébili",
+  "Kebili",
   "La Manouba",
   "Le Kef",
   "Mahdia",
-  "Médenine",
+  "Medenine",
   "Monastir",
   "Nabeul",
   "Sfax",
@@ -501,16 +514,16 @@ const selectedDateRange = computed(() => {
 
 const dateRangeLabel = computed(() => {
   const [start, end] = selectedDateRange.value;
-  if (!start && !end) return "Choose your stay dates";
-  if (start && !end) return `${formatDisplayDate(start)} — Add checkout`;
+  if (!start && !end) return t("home.chooseDates");
+  if (start && !end) return `${formatDisplayDate(start)} - ${t("home.addCheckout")}`;
   if (start && end)
-    return `${formatDisplayDate(start)} — ${formatDisplayDate(end)}`;
-  return "Choose your stay dates";
+    return `${formatDisplayDate(start)} - ${formatDisplayDate(end)}`;
+  return t("home.chooseDates");
 });
 
 const stayLengthLabel = computed(() => {
   const [start, end] = selectedDateRange.value;
-  if (!start || !end) return "Exact dates";
+  if (!start || !end) return t("home.exactDates");
   const diff = Math.max(
     1,
     Math.round(
@@ -518,16 +531,36 @@ const stayLengthLabel = computed(() => {
         (1000 * 60 * 60 * 24),
     ),
   );
-  return diff === 1 ? "1 night" : `${diff} nights`;
+  return diff === 1 ? t("home.nightOne") : t("home.nightOther", { count: diff });
 });
 
 const guestSummary = computed(() => {
-  const adultLabel = `${adults.value} adult${adults.value > 1 ? "s" : ""}`;
-  const childLabel = children.value
-    ? ` · ${children.value} child${children.value > 1 ? "ren" : ""}`
-    : "";
-  const roomLabel = ` · ${roomsRequested.value} room${roomsRequested.value > 1 ? "s" : ""}`;
-  return `${adultLabel}${childLabel}${roomLabel}`;
+  const adultLabel =
+    adults.value === 1
+      ? t("home.peopleOne", { count: adults.value })
+      : t("home.peopleOther", { count: adults.value });
+  const roomLabel =
+    roomsRequested.value === 1
+      ? t("home.roomOne", { count: roomsRequested.value })
+      : t("home.roomOther", { count: roomsRequested.value });
+
+  if (!children.value) {
+    return t("home.guestSummaryNoChildren", {
+      adults: adultLabel,
+      rooms: roomLabel,
+    });
+  }
+
+  const childLabel =
+    children.value === 1
+      ? t("home.childOne", { count: children.value })
+      : t("home.childOther", { count: children.value });
+
+  return t("home.guestSummary", {
+    adults: adultLabel,
+    children: childLabel,
+    rooms: roomLabel,
+  });
 });
 
 onMounted(async () => {
@@ -630,11 +663,11 @@ function addDays(date: Date, days: number) {
 }
 
 function formatDisplayDate(date: Date) {
-  return new Intl.DateTimeFormat("en-US", {
+  return formatDate(date, {
     weekday: "short",
     month: "short",
     day: "numeric",
-  }).format(date);
+  });
 }
 
 function formatDateForQuery(date: Date) {
@@ -644,7 +677,7 @@ function formatDateForQuery(date: Date) {
 
 <style scoped>
 .landing-page {
-  background: white;
+  background: var(--color-bg);
 }
 
 /* Hero Premium */

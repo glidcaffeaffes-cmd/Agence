@@ -1,17 +1,9 @@
 <template>
   <div class="profile-page">
-    <Head>
-      <title>Reservation History - VoyageHub</title>
-      <meta
-        name="description"
-        content="Review your bookings in a detailed list or month calendar view."
-      />
-    </Head>
-
     <div class="profile-container">
       <header class="page-header">
         <div>
-          <span class="badge-label">Reservations</span>
+          <span class="badge-label">{{ t("reservationHistoryPage.badge") }}</span>
         </div>
         <div class="header-actions">
           <div class="month-nav">
@@ -24,12 +16,16 @@
             </button>
           </div>
           <div class="view-toggle">
-            <button :class="{ 'view-toggle--active': viewMode === 'list' }" @click="viewMode = 'list'">List</button>
-            <button :class="{ 'view-toggle--active': viewMode === 'calendar' }" @click="viewMode = 'calendar'">Calendar</button>
+            <button :class="{ 'view-toggle--active': viewMode === 'list' }" @click="viewMode = 'list'">
+              {{ t("reservationHistoryPage.list") }}
+            </button>
+            <button :class="{ 'view-toggle--active': viewMode === 'calendar' }" @click="viewMode = 'calendar'">
+              {{ t("reservationHistoryPage.calendar") }}
+            </button>
           </div>
           <button class="btn-export" @click="exportToCSV" :disabled="reservations.length === 0">
             <span class="material-symbols-outlined">download</span>
-            Export CSV
+            {{ t("reservationHistoryPage.exportCsv") }}
           </button>
         </div>
       </header>
@@ -54,15 +50,15 @@
 
           <section class="summary-grid">
             <article class="summary-card">
-              <span>This month</span>
+              <span>{{ t("reservationHistoryPage.thisMonth") }}</span>
               <strong>{{ reservations.length }}</strong>
             </article>
             <article class="summary-card">
-              <span>Upcoming</span>
+              <span>{{ t("reservationHistoryPage.upcoming") }}</span>
               <strong>{{ upcomingCount }}</strong>
             </article>
             <article class="summary-card">
-              <span>Completed</span>
+              <span>{{ t("reservationHistoryPage.completed") }}</span>
               <strong>{{ completedCount }}</strong>
             </article>
           </section>
@@ -74,21 +70,30 @@
 
           <div v-else-if="loading" class="state-box">
             <span class="material-symbols-outlined spin">progress_activity</span>
-            <p>Loading your reservations...</p>
+            <p>{{ t("reservationHistoryPage.loading") }}</p>
           </div>
 
           <div v-else-if="reservations.length === 0" class="state-box">
             <span class="material-symbols-outlined">calendar_month</span>
-            <p v-if="statusFilter !== ''">No bookings match your filters. Try adjusting them.</p>
-            <p v-else>No bookings for {{ monthLabel }}. <NuxtLink to="/hotels" class="empty-link">Explore hotels to book your first trip</NuxtLink></p>
-            <NuxtLink v-if="statusFilter !== ''" to="/reservations/history" class="empty-link">Clear filters</NuxtLink>
+            <p v-if="statusFilter !== ''">
+              {{ t("reservationHistoryPage.emptyFiltered") }}
+            </p>
+            <p v-else>
+              {{ t("reservationHistoryPage.emptyMonth", { month: monthLabel }) }}
+              <NuxtLink to="/hotels" class="empty-link">
+                {{ t("reservationHistoryPage.exploreHotels") }}
+              </NuxtLink>
+            </p>
+            <NuxtLink v-if="statusFilter !== ''" to="/reservations/history" class="empty-link">
+              {{ t("reservationHistoryPage.clearFilters") }}
+            </NuxtLink>
           </div>
 
           <ReservationCalendar
             v-else-if="viewMode === 'calendar'"
             :month="monthCursor"
             :entries="calendarEntries"
-            empty-label="No stay"
+            :empty-label="t('reservationHistoryPage.noStay')"
             @event-click="openDetails($event.id)"
             @prev-month="shiftMonth(-1)"
             @next-month="shiftMonth(1)"
@@ -110,7 +115,9 @@
               <div class="booking-card__body">
                 <div class="booking-card__top">
                   <div>
-                    <p class="booking-ref">REF {{ reservation.confirmationCode }}</p>
+                    <p class="booking-ref">
+                      {{ t("myBookingsPage.reference", { code: reservation.confirmationCode }) }}
+                    </p>
                     <h2>{{ hotelName(reservation.hotelId) }}</h2>
                     <p class="booking-city">{{ hotelCity(reservation.hotelId) }}</p>
                   </div>
@@ -121,28 +128,30 @@
 
                 <div class="booking-meta">
                   <div>
-                    <span>Check-in</span>
-                    <strong>{{ formatDate(reservation.checkInDate) }}</strong>
+                    <span>{{ t("reservationHistoryPage.checkIn") }}</span>
+                    <strong>{{ formatDateLabel(reservation.checkInDate) }}</strong>
                   </div>
                   <div>
-                    <span>Check-out</span>
-                    <strong>{{ formatDate(reservation.checkOutDate) }}</strong>
+                    <span>{{ t("reservationHistoryPage.checkOut") }}</span>
+                    <strong>{{ formatDateLabel(reservation.checkOutDate) }}</strong>
                   </div>
                   <div>
-                    <span>Total</span>
+                    <span>{{ t("reservationHistoryPage.total") }}</span>
                     <strong>{{ formatCurrency(reservation.totalAmount) }}</strong>
                   </div>
                 </div>
 
                 <div class="booking-actions">
-                  <button class="btn-ghost" @click="openDetails(reservation.id)">View details</button>
+                  <button class="btn-ghost" @click="openDetails(reservation.id)">
+                    {{ t("reservationHistoryPage.viewDetails") }}
+                  </button>
                   <button
                     class="btn-cancel"
                     :title="cancelButtonTitle(reservation)"
                     :disabled="!canCancelReservation(reservation) || (cancelling && selectedReservationId === reservation.id)"
                     @click="openCancel(reservation.id)"
                   >
-                    Cancel reservation
+                    {{ t("reservationHistoryPage.cancelReservation") }}
                   </button>
                 </div>
               </div>
@@ -161,7 +170,7 @@
         <section class="booking-modal-card" @click.stop>
           <header class="booking-modal-header">
             <div>
-              <h3>Booking Details</h3>
+              <h3>{{ t("reservationHistoryPage.bookingDetails") }}</h3>
               <p>{{ selectedPreview.bookingReference }}</p>
             </div>
             <button type="button" class="booking-close-btn" @click="closeDetails">
@@ -172,33 +181,39 @@
           <div class="booking-modal-content">
             <div class="booking-info-grid">
               <div class="booking-info-item">
-                <span class="booking-info-label">Hotel</span>
+                <span class="booking-info-label">{{ t("reservationHistoryPage.hotel") }}</span>
                 <strong>{{ selectedPreview.hotelName }}</strong>
               </div>
               <div class="booking-info-item">
-                <span class="booking-info-label">Room</span>
+                <span class="booking-info-label">{{ t("reservationHistoryPage.room") }}</span>
                 <strong>{{ selectedPreview.roomName }}</strong>
               </div>
               <div class="booking-info-item">
-                <span class="booking-info-label">Stay</span>
-                <strong>{{ formatDate(selectedPreview.stay.checkIn) }} - {{ formatDate(selectedPreview.stay.checkOut) }}</strong>
+                <span class="booking-info-label">{{ t("reservationHistoryPage.stay") }}</span>
+                <strong>
+                  {{ formatDateLabel(selectedPreview.stay.checkIn) }} -
+                  {{ formatDateLabel(selectedPreview.stay.checkOut) }}
+                </strong>
               </div>
               <div class="booking-info-item">
-                <span class="booking-info-label">Refund</span>
-                <strong>{{ formatRefundType(selectedPreview.refund.type) }} - {{ formatCurrency(selectedPreview.refund.amount) }}</strong>
+                <span class="booking-info-label">{{ t("reservationHistoryPage.refund") }}</span>
+                <strong>
+                  {{ formatRefundType(selectedPreview.refund.type) }} -
+                  {{ formatCurrency(selectedPreview.refund.amount) }}
+                </strong>
               </div>
             </div>
 
             <article class="policy-card">
-              <h4>Cancellation policy</h4>
+              <h4>{{ t("reservationHistoryPage.cancellationPolicy") }}</h4>
               <p>{{ selectedPreview.policy.description }}</p>
               <div class="policy-meta">
                 <div>
-                  <span>Deadline</span>
-                  <strong>{{ formatDateTime(selectedPreview.cancellationDeadline) }}</strong>
+                  <span>{{ t("reservationHistoryPage.deadline") }}</span>
+                  <strong>{{ formatDateTimeLabel(selectedPreview.cancellationDeadline) }}</strong>
                 </div>
                 <div>
-                  <span>Charge</span>
+                  <span>{{ t("reservationHistoryPage.charge") }}</span>
                   <strong>{{ formatCurrency(selectedPreview.refund.chargeAmount) }}</strong>
                 </div>
               </div>
@@ -212,9 +227,11 @@
               class="btn-cancel"
               @click="openCancel(selectedReservation.id)"
             >
-              Cancel reservation
+              {{ t("reservationHistoryPage.cancelReservation") }}
             </button>
-            <button type="button" class="btn-primary" @click="closeDetails">Close</button>
+            <button type="button" class="btn-primary" @click="closeDetails">
+              {{ t("reservationHistoryPage.close") }}
+            </button>
           </footer>
         </section>
       </div>
@@ -229,8 +246,8 @@
         <section class="booking-modal-card booking-modal-card--compact" @click.stop>
           <header class="booking-modal-header">
             <div>
-              <h3>Cancel this reservation?</h3>
-              <p>Your refund depends on the current cancellation policy.</p>
+              <h3>{{ t("reservationHistoryPage.cancelPromptTitle") }}</h3>
+              <p>{{ t("reservationHistoryPage.cancelPromptDescription") }}</p>
             </div>
             <button type="button" class="booking-close-btn" @click="closeCancel">
               <span class="material-symbols-outlined">close</span>
@@ -240,19 +257,22 @@
           <div class="booking-modal-content">
             <div class="booking-info-grid">
               <div class="booking-info-item">
-                <span class="booking-info-label">Booking reference</span>
+                <span class="booking-info-label">{{ t("reservationHistoryPage.bookingReference") }}</span>
                 <strong>{{ selectedPreview.bookingReference }}</strong>
               </div>
               <div class="booking-info-item">
-                <span class="booking-info-label">Hotel</span>
+                <span class="booking-info-label">{{ t("reservationHistoryPage.hotel") }}</span>
                 <strong>{{ selectedPreview.hotelName }}</strong>
               </div>
               <div class="booking-info-item">
-                <span class="booking-info-label">Refund</span>
-                <strong>{{ formatRefundType(selectedPreview.refund.type) }} - {{ formatCurrency(selectedPreview.refund.amount) }}</strong>
+                <span class="booking-info-label">{{ t("reservationHistoryPage.refund") }}</span>
+                <strong>
+                  {{ formatRefundType(selectedPreview.refund.type) }} -
+                  {{ formatCurrency(selectedPreview.refund.amount) }}
+                </strong>
               </div>
               <div class="booking-info-item">
-                <span class="booking-info-label">Charge</span>
+                <span class="booking-info-label">{{ t("reservationHistoryPage.charge") }}</span>
                 <strong>{{ formatCurrency(selectedPreview.refund.chargeAmount) }}</strong>
               </div>
             </div>
@@ -261,9 +281,15 @@
           </div>
 
           <footer class="booking-modal-footer">
-            <button type="button" class="btn-ghost" @click="closeCancel">Keep reservation</button>
+            <button type="button" class="btn-ghost" @click="closeCancel">
+              {{ t("reservationHistoryPage.keepReservation") }}
+            </button>
             <button type="button" class="btn-primary" :disabled="cancelling" @click="confirmCancellation">
-              {{ cancelling ? 'Cancelling...' : 'Confirm cancellation' }}
+              {{
+                cancelling
+                  ? t("reservationHistoryPage.cancelling")
+                  : t("reservationHistoryPage.confirmCancellation")
+              }}
             </button>
           </footer>
         </section>
@@ -279,7 +305,7 @@
         <section class="booking-modal-card booking-modal-card--compact" @click.stop>
           <header class="booking-modal-header">
             <div>
-              <h3>Reservation cancelled</h3>
+              <h3>{{ t("reservationHistoryPage.reservationCancelled") }}</h3>
               <p>{{ successMessage }}</p>
             </div>
             <button type="button" class="booking-close-btn" @click="closeSuccess">
@@ -288,7 +314,9 @@
           </header>
 
           <footer class="booking-modal-footer">
-            <button type="button" class="btn-primary" @click="closeSuccess">Close</button>
+            <button type="button" class="btn-primary" @click="closeSuccess">
+              {{ t("reservationHistoryPage.close") }}
+            </button>
           </footer>
         </section>
       </div>
@@ -311,6 +339,7 @@ const { accountId } = useAuth()
 const reservationService = new ReservationService()
 const hotelService = new HotelService()
 const route = useRoute()
+const { t, formatDate, formatCurrency } = useAppI18n()
 
 const reservations = ref<Reservation[]>([])
 const hotels = ref<Hotel[]>([])
@@ -329,36 +358,44 @@ const cancelling = ref(false)
 const cancelError = ref('')
 const initialized = ref(false)
 
-const statusOptions = [
-  { value: '', label: 'All' },
-  { value: ReservationStatus.CONFIRMED, label: 'Confirmed' },
-  { value: ReservationStatus.PENDING, label: 'Pending' },
-  { value: ReservationStatus.COMPLETED, label: 'Completed' },
-  { value: ReservationStatus.CANCELLED, label: 'Cancelled' },
-]
+const statusOptions = computed(() => [
+  { value: '', label: t('reservationHistoryPage.all') },
+  { value: ReservationStatus.CONFIRMED, label: t('reservationHistoryPage.confirmed') },
+  { value: ReservationStatus.PENDING, label: t('reservationHistoryPage.pending') },
+  { value: ReservationStatus.COMPLETED, label: t('reservationHistoryPage.completed') },
+  { value: ReservationStatus.CANCELLED, label: t('reservationHistoryPage.cancelled') },
+])
 
-const monthLabel = computed(() =>
-  new Date(`${monthCursor.value}-01T00:00:00.000Z`).toLocaleDateString('en-US', {
+const monthLabel = computed(() => {
+  const [year, month] = monthCursor.value.split('-').map(Number)
+  return formatDate(new Date(Date.UTC(year, month - 1, 1)), {
     month: 'long',
     year: 'numeric',
-  }),
-)
+  })
+})
+
 const upcomingCount = computed(() =>
   reservations.value.filter((reservation) =>
     [ReservationStatus.PENDING, ReservationStatus.CONFIRMED].includes(reservation.status),
   ).length,
 )
+
 const completedCount = computed(() =>
   reservations.value.filter((reservation) => reservation.status === ReservationStatus.COMPLETED).length,
 )
+
 const selectedReservation = computed(() =>
   selectedReservationId.value == null
     ? null
     : reservations.value.find((reservation) => reservation.id === selectedReservationId.value) || null,
 )
+
 const selectedPreview = computed(() =>
-  selectedReservationId.value == null ? null : cancellationPreviews.value[selectedReservationId.value] || null,
+  selectedReservationId.value == null
+    ? null
+    : cancellationPreviews.value[selectedReservationId.value] || null,
 )
+
 const calendarEntries = computed(() =>
   reservations.value.map((reservation) => ({
     id: reservation.id,
@@ -371,6 +408,15 @@ const calendarEntries = computed(() =>
   })),
 )
 
+const statusLabels = computed(() => ({
+  [ReservationStatus.CONFIRMED]: t('reservationHistoryPage.confirmed'),
+  [ReservationStatus.PENDING]: t('reservationHistoryPage.pending'),
+  [ReservationStatus.COMPLETED]: t('reservationHistoryPage.completed'),
+  [ReservationStatus.CANCELLED]: t('reservationHistoryPage.cancelled'),
+  [ReservationStatus.BLOCKED]: t('reservationHistoryPage.blocked'),
+  [ReservationStatus.REFUSED]: t('reservationHistoryPage.refused'),
+}))
+
 function currentMonthKey() {
   const now = new Date()
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
@@ -380,8 +426,9 @@ function normalizeMonthKey(value: unknown) {
   if (typeof value !== 'string') return null
   if (!/^\d{4}-\d{2}$/.test(value)) return null
   const [year, month] = value.split('-').map(Number)
-  if (!Number.isFinite(year) || !Number.isFinite(month)) return null
-  if (month < 1 || month > 12) return null
+  if (!Number.isFinite(year) || !Number.isFinite(month) || month < 1 || month > 12) {
+    return null
+  }
   return `${year}-${String(month).padStart(2, '0')}`
 }
 
@@ -406,45 +453,41 @@ function hotelFor(hotelId: number) {
 }
 
 function hotelName(hotelId: number) {
-  return hotelFor(hotelId)?.name ?? `Hotel #${hotelId}`
+  return hotelFor(hotelId)?.name ?? t('reservationHistoryPage.hotelFallback', { id: hotelId })
 }
 
 function hotelCity(hotelId: number) {
   const hotel = hotelFor(hotelId)
-  return hotel ? `${hotel.city}, ${hotel.country}` : 'Unknown destination'
+  return hotel ? `${hotel.city}, ${hotel.country}` : t('reservationHistoryPage.unknownDestination')
 }
 
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat('en-US', {
+function formatDateLabel(value: string) {
+  return formatDate(value, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
-  }).format(new Date(value))
+  })
 }
 
-function formatDateTime(value: string | null) {
-  if (!value) return 'Not available'
-  return new Intl.DateTimeFormat('en-US', {
+function formatDateTimeLabel(value: string | null) {
+  if (!value) return t('reservationHistoryPage.unavailable')
+  return formatDate(value, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-  }).format(new Date(value))
-}
-
-function formatCurrency(value: number) {
-  return `${value} €`
+  })
 }
 
 function formatStatus(status: ReservationStatus) {
-  return status.charAt(0) + status.slice(1).toLowerCase()
+  return statusLabels.value[status] || status
 }
 
 function formatRefundType(type: 'FULL' | 'PARTIAL' | 'NONE') {
-  if (type === 'FULL') return 'Full refund'
-  if (type === 'PARTIAL') return 'Partial refund'
-  return 'No refund'
+  if (type === 'FULL') return t('reservationHistoryPage.refundFull')
+  if (type === 'PARTIAL') return t('reservationHistoryPage.refundPartial')
+  return t('reservationHistoryPage.refundNone')
 }
 
 function statusClass(status: ReservationStatus) {
@@ -467,36 +510,35 @@ function canCancelReservation(reservation: Reservation) {
 }
 
 function cancelButtonTitle(reservation: Reservation) {
-  const reason = getCancellationBlockReason(reservation)
-  return reason ?? 'Cancel this reservation'
+  return getCancellationBlockReason(reservation) ?? t('reservationHistoryPage.cancelActionTitle')
 }
 
 function getCancellationBlockReason(reservation: Reservation): string | null {
   const status = reservation.status
 
   if (status === ReservationStatus.CONFIRMED) {
-    return 'Confirmed reservations cannot be cancelled.'
+    return t('reservationHistoryPage.confirmedCancellationBlocked')
   }
   if (status === ReservationStatus.COMPLETED) {
-    return 'Completed reservations cannot be cancelled.'
+    return t('reservationHistoryPage.completedCancellationBlocked')
   }
   if (status === ReservationStatus.CANCELLED) {
-    return 'This reservation is already cancelled.'
+    return t('reservationHistoryPage.cancelledCancellationBlocked')
   }
   if (status === ReservationStatus.BLOCKED) {
-    return 'Blocked reservations cannot be cancelled.'
+    return t('reservationHistoryPage.blockedCancellationBlocked')
   }
   if (status === ReservationStatus.REFUSED) {
-    return 'Refused reservations cannot be cancelled.'
+    return t('reservationHistoryPage.refusedCancellationBlocked')
   }
 
   const preview = cancellationPreviews.value[reservation.id]
   if (!preview) {
-    return 'Cancellation policy is still loading.'
+    return t('reservationHistoryPage.loadingPolicy')
   }
 
   if (!preview.cancellationAllowed) {
-    return preview.reason || 'This reservation cannot be cancelled.'
+    return preview.reason || t('reservationHistoryPage.cannotCancel')
   }
 
   return null
@@ -551,7 +593,7 @@ async function loadReservations() {
     hotels.value = nextHotels
     await hydrateCancellationPreviews()
   } catch (cause: any) {
-    error.value = cause.message || 'Unable to load reservations.'
+    error.value = cause.message || t('reservationHistoryPage.unableToLoadReservations')
   } finally {
     loading.value = false
   }
@@ -601,13 +643,13 @@ async function openCancel(reservationId: number) {
 
   const preview = await ensurePreview(reservationId)
   if (!preview) {
-    cancelError.value = 'Unable to load cancellation policy.'
+    cancelError.value = t('reservationHistoryPage.unableToLoadPolicy')
     showCancelModal.value = true
     return
   }
 
   if (!preview.cancellationAllowed) {
-    cancelError.value = preview.reason || 'This reservation cannot be cancelled.'
+    cancelError.value = preview.reason || t('reservationHistoryPage.cannotCancel')
   }
 
   showDetailsModal.value = false
@@ -643,12 +685,16 @@ async function confirmCancellation() {
 
   try {
     const confirmation = await reservationService.cancelBooking(selectedReservationId.value, accountId.value)
-    successMessage.value = `Booking ${confirmation.bookingReference} was cancelled. Refund: ${formatRefundType(confirmation.refund.type)} - ${formatCurrency(confirmation.refund.amount)}.`
+    successMessage.value = t('reservationHistoryPage.successMessage', {
+      reference: confirmation.bookingReference,
+      refundType: formatRefundType(confirmation.refund.type),
+      amount: formatCurrency(confirmation.refund.amount),
+    })
     showCancelModal.value = false
     showSuccessModal.value = true
     await loadReservations()
   } catch (cause: any) {
-    cancelError.value = cause.message || 'Unable to cancel this reservation.'
+    cancelError.value = cause.message || t('reservationHistoryPage.unableToCancel')
   } finally {
     cancelling.value = false
   }
@@ -657,18 +703,30 @@ async function confirmCancellation() {
 function exportToCSV() {
   if (!reservations.value.length) return
 
-  const headers = ['Reference', 'Hotel', 'City', 'Check-in', 'Check-out', 'Status', 'Total Amount']
-  const rows = reservations.value.map(reservation => [
+  const headers = [
+    t('reservationHistoryPage.csvReference'),
+    t('reservationHistoryPage.csvHotel'),
+    t('reservationHistoryPage.csvCity'),
+    t('reservationHistoryPage.csvCheckIn'),
+    t('reservationHistoryPage.csvCheckOut'),
+    t('reservationHistoryPage.csvStatus'),
+    t('reservationHistoryPage.csvTotalAmount'),
+  ]
+
+  const rows = reservations.value.map((reservation) => [
     reservation.confirmationCode,
     hotelName(reservation.hotelId),
     hotelCity(reservation.hotelId),
-    formatDate(reservation.checkInDate),
-    formatDate(reservation.checkOutDate),
+    formatDateLabel(reservation.checkInDate),
+    formatDateLabel(reservation.checkOutDate),
     formatStatus(reservation.status),
-    reservation.totalAmount.toString()
+    reservation.totalAmount.toString(),
   ])
 
-  const csvContent = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n')
+  const csvContent = [headers, ...rows]
+    .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+    .join('\n')
+
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
   const link = document.createElement('a')
   link.href = URL.createObjectURL(blob)
@@ -694,7 +752,12 @@ onMounted(async () => {
   if (initialMonth) {
     monthCursor.value = initialMonth
   }
-  await Promise.all([hotelService.getAll().then((data) => { hotels.value = data }), loadReservations()])
+  await Promise.all([
+    hotelService.getAll().then((data) => {
+      hotels.value = data
+    }),
+    loadReservations(),
+  ])
   initialized.value = true
 })
 
@@ -702,131 +765,593 @@ onUnmounted(() => {
   if (!import.meta.client) return
   document.body.style.overflow = ''
 })
+
+useHead(() => ({
+  title: t('reservationHistoryPage.metaTitle'),
+  meta: [
+    {
+      name: 'description',
+      content: t('reservationHistoryPage.metaDescription'),
+    },
+  ],
+}))
 </script>
 
 <style scoped>
-.profile-page { min-height: 100vh; background: var(--color-bg-soft); }
-.profile-container { max-width: 1200px; margin: 0 auto; padding: 24px 32px 80px; }
-.page-header { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 14px; }
-.badge-label { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 999px; background: var(--color-primary-25); color: var(--color-primary-700); font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
-.header-actions { display: flex; gap: 0.8rem; align-items: center; flex-wrap: wrap; }
-.month-nav { display: inline-flex; align-items: center; gap: 0.55rem; background: #fff; border: 1px solid var(--color-border-soft); border-radius: 999px; padding: 0.3rem 0.45rem; }
-.month-nav button, .booking-close-btn { width: 34px; height: 34px; border-radius: 10px; border: 1px solid transparent; background: transparent; color: var(--color-text-muted); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
-.month-nav strong { min-width: 144px; text-align: center; color: var(--color-heading); font-size: 13px; font-weight: 700; }
-.view-toggle { display: inline-flex; padding: 0.25rem; background: #fff; border: 1px solid var(--color-border-soft); border-radius: 999px; }
-.view-toggle button { border: none; background: transparent; color: var(--color-text-muted); padding: 0.55rem 0.95rem; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer; }
-.view-toggle--active { background: var(--color-primary-600) !important; color: #fff !important; }
-.btn-export { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--color-border); background: #fff; color: var(--color-heading); border-radius: 12px; padding: 10px 14px; font-size: 13px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 0.08em; }
-.btn-export:hover { background: var(--color-bg-soft); }
-.btn-export:disabled { opacity: 0.5; cursor: not-allowed; }
-.profile-body { display: flex; gap: 32px; align-items: flex-start; }
-.profile-main { flex: 1; min-width: 0; display: grid; gap: 16px; }
-.control-panel { background: #fff; padding: 0 32px; border-radius: 0; border: 1px solid var(--color-border-soft); box-shadow: none; display: grid; gap: 0; }
-.status-pills {
-  display: flex;
-  gap: 30px;
-  flex-wrap: wrap;
-  border-bottom: 1px solid var(--color-border-soft);
-  padding: 0;
+.profile-page {
+  min-height: 100vh;
+  background: var(--color-bg-soft);
 }
-.filter-pill {
-  border: none;
+
+.profile-container {
+  width: min(1200px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 24px 0 80px;
+}
+
+.page-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 14px;
+}
+
+.badge-label {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--color-primary-25);
+  color: var(--color-primary-700);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.month-nav,
+.view-toggle,
+.control-panel {
+  border: 1px solid var(--color-border-soft);
+  background: var(--color-surface);
+}
+
+.month-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.3rem 0.45rem;
+  border-radius: 999px;
+}
+
+.month-nav button,
+.booking-close-btn {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 10px;
   background: transparent;
-  color: var(--color-text-muted);
-  border-radius: 0;
-  padding: 20px 0;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.month-nav strong {
+  min-width: 144px;
+  color: var(--color-text-primary);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.view-toggle {
+  display: inline-flex;
+  padding: 0.25rem;
+  border-radius: 999px;
+}
+
+.view-toggle button {
+  padding: 0.55rem 0.95rem;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-text-secondary);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
+}
+
+.view-toggle--active {
+  background: var(--color-primary-600) !important;
+  color: var(--color-white) !important;
+}
+
+.btn-export {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.btn-export:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.profile-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+}
+
+.profile-main {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 16px;
+}
+
+.control-panel {
+  display: grid;
+  gap: 0;
+  box-shadow: none;
+}
+
+.status-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  padding: 0 32px;
+  border-bottom: 1px solid var(--color-border-soft);
+}
+
+.filter-pill {
   position: relative;
+  padding: 20px 0;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
 }
-.filter-pill:hover {
-  color: var(--color-primary-600);
-}
+
+.filter-pill:hover,
 .filter-pill--active {
   color: var(--color-primary-600);
 }
+
 .filter-pill--active::after {
-  content: "";
+  content: '';
   position: absolute;
-  left: 0;
-  right: 0;
+  inset-inline: 0;
   bottom: 0;
   height: 3px;
   border-radius: 3px 3px 0 0;
   background: var(--color-primary-600);
 }
-.summary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-.summary-card { background: #fff; border: 1px solid var(--color-border-soft); border-radius: 16px; padding: 14px 16px; }
-.summary-card span { display: block; font-size: 11px; color: var(--color-text-muted); font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; }
-.summary-card strong { display: block; margin-top: 6px; color: var(--color-heading); font-size: 1.9rem; }
-.state-box { min-height: 220px; display: grid; place-content: center; gap: 10px; text-align: center; border-radius: 20px; border: 1px solid var(--color-border-soft); background: #fff; color: var(--color-text-muted); }
-.state-box--error { color: #b42318; }
-.empty-link { display: inline-flex; justify-content: center; align-items: center; text-decoration: none; color: var(--color-primary-700); font-weight: 700; }
-.list-card { display: grid; gap: 14px; }
-.booking-card { animation: fadeInUp var(--duration-slow) var(--easing-entrance); animation-fill-mode: both; }
-.booking-card:nth-child(1) { animation-delay: 0.1s; }
-.booking-card:nth-child(2) { animation-delay: 0.2s; }
-.booking-card:nth-child(3) { animation-delay: 0.3s; }
-.booking-card:nth-child(4) { animation-delay: 0.4s; }
-.booking-card:nth-child(5) { animation-delay: 0.5s; }
-.booking-card { display: grid; grid-template-columns: 220px minmax(0, 1fr); background: #fff; border-radius: 16px; border: 1px solid var(--color-border-soft); overflow: hidden; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06); }
-.booking-card__media img, .media-fallback { width: 100%; height: 100%; min-height: 190px; object-fit: cover; }
-.media-fallback { display: grid; place-content: center; background: var(--color-bg-soft); color: var(--color-text-muted); }
-.media-fallback .material-symbols-outlined { font-size: 36px; }
-.booking-card__body { padding: 20px; display: grid; gap: 16px; }
-.booking-card__top { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; }
-.booking-ref { margin: 0; color: var(--color-text-muted); font-size: 0.74rem; font-weight: 800; letter-spacing: 0.08em; }
-.booking-card__top h2 { margin: 8px 0 0; color: var(--color-heading); font-size: 1.15rem; }
-.booking-city { margin: 6px 0 0; color: var(--color-text-muted); font-size: 13px; font-weight: 500; }
-.booking-meta { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding-top: 14px; border-top: 1px solid var(--color-border-soft); }
-.booking-meta span { display: block; color: var(--color-text-muted); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; }
-.booking-meta strong { display: block; margin-top: 4px; color: var(--color-heading); font-size: 0.95rem; }
-.booking-actions { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
-.status-pill { display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; padding: 4px 10px; font-size: 0.76rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; }
-.status-pill--confirmed { background: #ecfdf3; color: #027a48; }
-.status-pill--pending { background: #fffaeb; color: #b54708; }
-.status-pill--completed { background: #eff8ff; color: #175cd3; }
-.status-pill--cancelled { background: #f2f4f7; color: #344054; }
-.status-pill--blocked { background: #fef3f2; color: #b42318; }
-.btn-primary, .btn-ghost, .btn-cancel { border-radius: 12px; padding: 10px 14px; font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid transparent; }
-.btn-primary { background: var(--color-primary-600); color: #fff; }
-.btn-ghost { background: #fff; color: var(--color-text); border-color: var(--color-border-soft); }
-.btn-cancel { background: #fff; color: #b42318; border-color: rgba(220, 38, 38, 0.2); }
-.btn-cancel:disabled, .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-.booking-modal-overlay { position: fixed; inset: 0; z-index: 1200; background: rgba(15, 23, 42, 0.35); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; padding: 20px; }
-.booking-modal-card { width: min(760px, 100%); max-height: 90vh; overflow: auto; background: #fff; border: 1px solid var(--color-border-soft); border-radius: 18px; box-shadow: 0 24px 48px rgba(15, 23, 42, 0.18); }
-.booking-modal-card--compact { width: min(640px, 100%); }
-.booking-modal-header { padding: 18px 20px; border-bottom: 1px solid var(--color-border-soft); display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.booking-modal-header h3 { margin: 0; font-size: 24px; color: var(--color-heading); }
-.booking-modal-header p { margin: 6px 0 0; color: var(--color-text-muted); font-size: 14px; }
-.booking-modal-content { padding: 18px 20px; display: grid; gap: 14px; }
-.booking-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.booking-info-item { border: 1px solid var(--color-border-soft); border-radius: 12px; background: var(--color-surface); padding: 12px; display: flex; flex-direction: column; gap: 4px; }
-.booking-info-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted); }
-.booking-info-item strong { font-size: 14px; color: var(--color-heading); }
-.policy-card { border: 1px solid var(--color-border-soft); border-radius: 14px; background: color-mix(in srgb, var(--color-surface) 80%, white 20%); padding: 14px; }
-.policy-card h4 { margin: 0 0 8px; color: var(--color-heading); font-size: 18px; }
-.policy-card p { margin: 0; color: var(--color-text-secondary); line-height: 1.6; font-size: 14px; }
-.policy-meta { margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.policy-meta span { display: block; font-size: 11px; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
-.policy-meta strong { color: var(--color-heading); font-size: 14px; }
-.booking-modal-footer { border-top: 1px solid var(--color-border-soft); padding: 16px 20px 20px; display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
-.cancel-error { margin: 0; color: #b42318; font-size: 13px; font-weight: 600; }
-.booking-modal-enter-active, .booking-modal-leave-active { transition: opacity 0.2s ease; }
-.booking-modal-enter-active .booking-modal-card, .booking-modal-leave-active .booking-modal-card { transition: transform 0.2s ease; }
-.booking-modal-enter-from, .booking-modal-leave-to { opacity: 0; }
-.booking-modal-enter-from .booking-modal-card, .booking-modal-leave-to .booking-modal-card { transform: translateY(14px); }
 
-.spin { animation: spin 1s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-@media (max-width: 980px) {
-  .profile-body, .page-header, .booking-card { flex-direction: column; display: flex; }
-  .summary-grid { grid-template-columns: 1fr; }
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
 }
+
+.summary-card,
+.state-box,
+.booking-card,
+.booking-modal-card,
+.policy-card {
+  border: 1px solid var(--color-border-soft);
+  background: var(--color-surface);
+}
+
+.summary-card {
+  padding: 14px 16px;
+  border-radius: 16px;
+}
+
+.summary-card span {
+  display: block;
+  color: var(--color-text-secondary);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.summary-card strong {
+  display: block;
+  margin-top: 6px;
+  color: var(--color-text-primary);
+  font-size: 1.9rem;
+}
+
+.state-box {
+  min-height: 220px;
+  display: grid;
+  place-content: center;
+  gap: 10px;
+  border-radius: 20px;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.state-box--error,
+.cancel-error {
+  color: var(--color-danger-600);
+}
+
+.empty-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary-700);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.list-card {
+  display: grid;
+  gap: 14px;
+}
+
+.booking-card {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  overflow: hidden;
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.booking-card__media img,
+.media-fallback {
+  width: 100%;
+  height: 100%;
+  min-height: 190px;
+  object-fit: cover;
+}
+
+.media-fallback {
+  display: grid;
+  place-content: center;
+  background: var(--color-surface-secondary);
+  color: var(--color-text-secondary);
+}
+
+.media-fallback .material-symbols-outlined {
+  font-size: 36px;
+}
+
+.booking-card__body {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+}
+
+.booking-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.booking-ref {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.booking-card__top h2 {
+  margin: 8px 0 0;
+  color: var(--color-text-primary);
+  font-size: 1.15rem;
+}
+
+.booking-city {
+  margin: 6px 0 0;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.booking-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border-soft);
+}
+
+.booking-meta span,
+.booking-info-label,
+.policy-meta span {
+  display: block;
+  color: var(--color-text-secondary);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.booking-meta strong,
+.booking-info-item strong,
+.policy-meta strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--color-text-primary);
+  font-size: 0.95rem;
+}
+
+.booking-actions,
+.booking-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.status-pill--confirmed {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.status-pill--pending {
+  background: #fffaeb;
+  color: #b54708;
+}
+
+.status-pill--completed {
+  background: #eff8ff;
+  color: #175cd3;
+}
+
+.status-pill--cancelled {
+  background: #f2f4f7;
+  color: #344054;
+}
+
+.status-pill--blocked {
+  background: #fef3f2;
+  color: #b42318;
+}
+
+.btn-primary,
+.btn-ghost,
+.btn-cancel {
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.btn-primary {
+  background: var(--color-primary-600);
+  color: var(--color-white);
+}
+
+.btn-ghost {
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-soft);
+}
+
+.btn-cancel {
+  background: var(--color-surface);
+  color: #b42318;
+  border-color: rgb(220 38 38 / 0.2);
+}
+
+.btn-cancel:disabled,
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.booking-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgb(15 23 42 / 0.35);
+  backdrop-filter: blur(6px);
+}
+
+.booking-modal-card {
+  width: min(760px, 100%);
+  max-height: 90vh;
+  overflow: auto;
+  border-radius: 18px;
+  box-shadow: var(--shadow-xl);
+}
+
+.booking-modal-card--compact {
+  width: min(640px, 100%);
+}
+
+.booking-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--color-border-soft);
+}
+
+.booking-modal-header h3 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: 24px;
+}
+
+.booking-modal-header p {
+  margin: 6px 0 0;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.booking-modal-content {
+  display: grid;
+  gap: 14px;
+  padding: 18px 20px;
+}
+
+.booking-info-grid,
+.policy-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.booking-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid var(--color-border-soft);
+  border-radius: 12px;
+  background: var(--color-surface-secondary);
+}
+
+.policy-card {
+  padding: 14px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--color-surface-secondary) 78%, var(--color-surface));
+}
+
+.policy-card h4 {
+  margin: 0 0 8px;
+  color: var(--color-text-primary);
+  font-size: 18px;
+}
+
+.policy-card p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.policy-meta {
+  margin-top: 12px;
+  gap: 10px;
+}
+
+.booking-modal-footer {
+  align-items: center;
+  padding: 16px 20px 20px;
+  border-top: 1px solid var(--color-border-soft);
+}
+
+.cancel-error {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.booking-modal-enter-active,
+.booking-modal-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.booking-modal-enter-active .booking-modal-card,
+.booking-modal-leave-active .booking-modal-card {
+  transition: transform 0.2s ease;
+}
+
+.booking-modal-enter-from,
+.booking-modal-leave-to {
+  opacity: 0;
+}
+
+.booking-modal-enter-from .booking-modal-card,
+.booking-modal-leave-to .booking-modal-card {
+  transform: translateY(14px);
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 980px) {
+  .profile-body,
+  .page-header,
+  .booking-card {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 768px) {
-  .profile-container { padding: 28px 16px 40px; }
-  .booking-meta, .booking-info-grid, .policy-meta { grid-template-columns: 1fr; }
-  .booking-actions, .booking-modal-footer { flex-direction: column-reverse; align-items: stretch; }
+  .profile-container {
+    width: min(100% - 1.5rem, 1200px);
+    padding: 28px 0 40px;
+  }
+
+  .status-pills {
+    padding: 0 16px;
+    gap: 18px;
+    overflow-x: auto;
+  }
+
+  .booking-meta,
+  .booking-info-grid,
+  .policy-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-actions,
+  .booking-modal-footer {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
 }
 </style>

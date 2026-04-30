@@ -1,13 +1,13 @@
 <template>
   <div class="mx-auto max-w-7xl p-8 antialiased">
     <Head>
-      <title>Gestion des Utilisateurs - Admin</title>
+      <title>{{ copy.metaTitle }}</title>
     </Head>
 
     <div class="mb-8 flex items-end justify-between">
       <div>
-        <h2 class="mb-1 text-3xl font-bold tracking-tight text-[#015081]">Gestion des Utilisateurs</h2>
-        <p class="text-sm text-outline">Gerez les comptes clients et administrateurs.</p>
+        <h2 class="mb-1 text-3xl font-bold tracking-tight text-[#015081]">{{ copy.title }}</h2>
+        <p class="text-sm text-outline">{{ copy.subtitle }}</p>
       </div>
     </div>
 
@@ -21,15 +21,15 @@
           <tr class="border-b border-surface-variant/30 bg-surface-container-high/50 text-xs font-bold uppercase tracking-widest text-outline">
             <th class="px-6 py-4">ID</th>
             <th class="px-6 py-4">Email</th>
-            <th class="px-6 py-4">Role</th>
-            <th class="px-6 py-4">Date d'inscription</th>
-            <th class="px-6 py-4">Statut</th>
-            <th class="px-6 py-4 text-right">Actions</th>
+            <th class="px-6 py-4">{{ copy.role }}</th>
+            <th class="px-6 py-4">{{ copy.registrationDate }}</th>
+            <th class="px-6 py-4">{{ copy.status }}</th>
+            <th class="px-6 py-4 text-right">{{ copy.actions }}</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-surface-variant/20 text-sm">
           <tr v-if="loading">
-            <td colspan="6" class="px-6 py-8 text-center text-outline">Chargement...</td>
+            <td colspan="6" class="px-6 py-8 text-center text-outline">{{ copy.loading }}</td>
           </tr>
           <tr
             v-for="acc in accounts"
@@ -60,7 +60,7 @@
                 :class="isActive(acc) ? 'text-primary' : 'text-error'"
               >
                 <span class="h-1.5 w-1.5 rounded-full" :class="isActive(acc) ? 'bg-primary' : 'bg-error'"></span>
-                {{ isActive(acc) ? 'Actif' : 'Inactif' }}
+                {{ isActive(acc) ? copy.active : copy.inactive }}
               </span>
             </td>
             <td class="space-x-1 px-6 py-4 text-right">
@@ -73,7 +73,7 @@
               <button
                 class="rounded-lg border border-transparent p-2 shadow-sm transition-all hover:border-surface-variant/30 hover:bg-white active:scale-90"
                 :class="isActive(acc) ? 'text-error' : 'text-primary'"
-                :title="isActive(acc) ? 'Desactiver' : 'Activer'"
+                :title="isActive(acc) ? copy.deactivate : copy.activate"
                 @click="toggleActive(acc)"
               >
                 <span class="material-symbols-outlined text-lg">{{ isActive(acc) ? 'person_off' : 'how_to_reg' }}</span>
@@ -91,7 +91,7 @@
     >
       <div class="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
         <div class="flex items-center justify-between bg-[#015081] px-6 py-4">
-          <h3 class="font-bold text-white">Modifier l'utilisateur #{{ editing.id }}</h3>
+          <h3 class="font-bold text-white">{{ copy.editUser }} #{{ editing.id }}</h3>
           <button class="text-white/60 hover:text-white" @click="editing = null">
             <span class="material-symbols-outlined">close</span>
           </button>
@@ -106,24 +106,24 @@
             >
           </div>
           <div class="space-y-1">
-            <label class="text-[11px] font-bold uppercase text-outline">Role</label>
+            <label class="text-[11px] font-bold uppercase text-outline">{{ copy.role }}</label>
             <div class="rounded-lg border border-outline-variant/30 bg-surface-container-low px-3 py-2 text-sm text-on-surface-variant">
               {{ editing.role }}
             </div>
-            <p class="text-xs text-outline">Le role provient du backend et ne peut pas etre modifie ici.</p>
+            <p class="text-xs text-outline">{{ copy.roleLocked }}</p>
           </div>
           <div class="flex gap-3 pt-2">
             <button
               class="flex-1 rounded-lg py-2.5 font-bold text-outline transition-colors hover:bg-surface-container-low"
               @click="editing = null"
             >
-              Annuler
+              {{ copy.cancel }}
             </button>
             <button
               class="flex-1 rounded-lg bg-[#008F90] py-2.5 font-bold text-white transition-colors hover:bg-[#007a7a]"
               @click="saveEdit"
             >
-              Enregistrer
+              {{ copy.save }}
             </button>
           </div>
         </div>
@@ -133,13 +133,14 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import type { Account } from '~/types/models'
 import { AccountService } from '~/services'
 
 definePageMeta({ layout: 'admin' })
 
 const service = new AccountService()
+const { t, formatDate: formatLocaleDate } = useAppI18n()
 const accounts = ref<Account[]>([])
 const loading = ref(false)
 const error = ref<string | null>(null)
@@ -150,12 +151,33 @@ function isActive(account: Account) {
 }
 
 function formatDate(value: string) {
-  return new Date(value).toLocaleDateString('fr-FR', {
+  return formatLocaleDate(new Date(value), {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
   })
 }
+
+const copy = computed(() => {
+  return {
+    metaTitle: t("adminUsers.metaTitle"),
+    title: t("adminUsers.title"),
+    subtitle: t("adminUsers.subtitle"),
+    role: t("adminUsers.role"),
+    registrationDate: t("adminUsers.registrationDate"),
+    status: t("adminUsers.status"),
+    actions: t("adminUsers.actions"),
+    loading: t("adminUsers.loading"),
+    active: t("adminUsers.active"),
+    inactive: t("adminUsers.inactive"),
+    activate: t("adminUsers.activate"),
+    deactivate: t("adminUsers.deactivate"),
+    editUser: t("adminUsers.editUser"),
+    roleLocked: t("adminUsers.roleLocked"),
+    cancel: t("adminUsers.cancel"),
+    save: t("adminUsers.save"),
+  }
+})
 
 function openEdit(account: Account) {
   editing.value = { ...account }

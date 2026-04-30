@@ -1,35 +1,27 @@
 <template>
   <div class="bookings-page">
-    <Head>
-      <title>My Bookings - VoyageHub</title>
-      <meta
-        name="description"
-        content="View active and past bookings with live reservation data."
-      />
-    </Head>
-
     <div class="bookings-shell">
       <header class="bookings-header">
         <div>
-          <h1>My Bookings</h1>
-          <p>Track your reservations, stay dates, and booking statuses.</p>
+          <h1>{{ t("myBookingsPage.title") }}</h1>
+          <p>{{ t("myBookingsPage.subtitle") }}</p>
         </div>
         <NuxtLink to="/reservations/history" class="history-link">
-          Open history & calendar
+          {{ t("myBookingsPage.openHistory") }}
         </NuxtLink>
       </header>
 
       <section class="summary-grid">
         <article class="summary-card">
-          <span>Total</span>
+          <span>{{ t("myBookingsPage.total") }}</span>
           <strong>{{ bookings.length }}</strong>
         </article>
         <article class="summary-card">
-          <span>Upcoming</span>
+          <span>{{ t("myBookingsPage.upcoming") }}</span>
           <strong>{{ upcomingCount }}</strong>
         </article>
         <article class="summary-card">
-          <span>Completed</span>
+          <span>{{ t("myBookingsPage.completed") }}</span>
           <strong>{{ completedCount }}</strong>
         </article>
       </section>
@@ -37,7 +29,7 @@
       <section class="list-card">
         <div v-if="loading" class="state-box">
           <span class="material-symbols-outlined spin">progress_activity</span>
-          <p>Loading bookings...</p>
+          <p>{{ t("myBookingsPage.loading") }}</p>
         </div>
 
         <div v-else-if="errorMessage" class="state-box state-box--error">
@@ -47,7 +39,7 @@
 
         <div v-else-if="bookings.length === 0" class="state-box">
           <span class="material-symbols-outlined">luggage</span>
-          <p>No bookings found for your account yet.</p>
+          <p>{{ t("myBookingsPage.empty") }}</p>
         </div>
 
         <article
@@ -58,9 +50,11 @@
         >
           <div class="booking-main">
             <h2>{{ getHotelName(booking.hotelId) }}</h2>
-            <p class="booking-ref">Reference: {{ booking.confirmationCode }}</p>
+            <p class="booking-ref">
+              {{ t("myBookingsPage.reference", { code: booking.confirmationCode }) }}
+            </p>
             <p class="booking-dates">
-              {{ formatDate(booking.checkInDate) }} - {{ formatDate(booking.checkOutDate) }}
+              {{ formatDateLabel(booking.checkInDate) }} - {{ formatDateLabel(booking.checkOutDate) }}
             </p>
           </div>
 
@@ -76,7 +70,7 @@
               :disabled="cancelling && selectedBookingId === booking.id"
               @click="openCancelModal(booking.id)"
             >
-              Cancel Reservation
+              {{ t("myBookingsPage.cancelReservation") }}
             </button>
           </div>
         </article>
@@ -92,8 +86,8 @@
         <section class="booking-modal-card" @click.stop>
           <header class="booking-modal-header">
             <div>
-              <h3>Cancel your reservation?</h3>
-              <p>Reference: {{ selectedBooking.confirmationCode }}</p>
+              <h3>{{ t("myBookingsPage.cancelTitle") }}</h3>
+              <p>{{ t("myBookingsPage.reference", { code: selectedBooking.confirmationCode }) }}</p>
             </div>
             <button type="button" class="booking-close-btn" @click="closeCancelModal">
               <span class="material-symbols-outlined">close</span>
@@ -103,33 +97,39 @@
           <div class="booking-modal-content">
             <div class="booking-info-grid">
               <div class="booking-info-item">
-                <span class="booking-info-label">Hotel</span>
+                <span class="booking-info-label">{{ t("myBookingsPage.hotel") }}</span>
                 <strong>{{ selectedPreview.hotelName }}</strong>
               </div>
               <div class="booking-info-item">
-                <span class="booking-info-label">Room</span>
+                <span class="booking-info-label">{{ t("myBookingsPage.room") }}</span>
                 <strong>{{ selectedPreview.roomName }}</strong>
               </div>
               <div class="booking-info-item">
-                <span class="booking-info-label">Stay</span>
-                <strong>{{ formatDate(selectedPreview.stay.checkIn) }} - {{ formatDate(selectedPreview.stay.checkOut) }}</strong>
+                <span class="booking-info-label">{{ t("myBookingsPage.stay") }}</span>
+                <strong>
+                  {{ formatDateLabel(selectedPreview.stay.checkIn) }} -
+                  {{ formatDateLabel(selectedPreview.stay.checkOut) }}
+                </strong>
               </div>
               <div class="booking-info-item">
-                <span class="booking-info-label">Refund</span>
-                <strong>{{ formatRefundType(selectedPreview.refund.type) }} - {{ formatCurrency(selectedPreview.refund.amount) }}</strong>
+                <span class="booking-info-label">{{ t("myBookingsPage.refund") }}</span>
+                <strong>
+                  {{ formatRefundType(selectedPreview.refund.type) }} -
+                  {{ formatCurrency(selectedPreview.refund.amount) }}
+                </strong>
               </div>
             </div>
 
             <div class="policy-card">
-              <h4>Cancellation policy</h4>
+              <h4>{{ t("myBookingsPage.cancellationPolicy") }}</h4>
               <p>{{ selectedPreview.policy.description }}</p>
               <div class="policy-meta">
                 <div>
-                  <span>Deadline</span>
-                  <strong>{{ formatDeadline(selectedPreview.cancellationDeadline) }}</strong>
+                  <span>{{ t("myBookingsPage.deadline") }}</span>
+                  <strong>{{ formatDateTimeLabel(selectedPreview.cancellationDeadline) }}</strong>
                 </div>
                 <div>
-                  <span>Charge</span>
+                  <span>{{ t("myBookingsPage.charge") }}</span>
                   <strong>{{ formatCurrency(selectedPreview.refund.chargeAmount) }}</strong>
                 </div>
               </div>
@@ -140,7 +140,7 @@
 
           <footer class="booking-modal-footer">
             <button type="button" class="btn-ghost" @click="closeCancelModal">
-              Keep Reservation
+              {{ t("myBookingsPage.keepReservation") }}
             </button>
             <button
               type="button"
@@ -148,7 +148,11 @@
               :disabled="cancelling || !selectedPreview?.cancellationAllowed"
               @click="confirmCancellation"
             >
-              {{ cancelling ? "Cancelling..." : "Confirm Cancellation" }}
+              {{
+                cancelling
+                  ? t("myBookingsPage.cancelling")
+                  : t("myBookingsPage.confirmCancellation")
+              }}
             </button>
           </footer>
         </section>
@@ -164,8 +168,8 @@
         <section class="booking-modal-card booking-modal-card--compact" @click.stop>
           <header class="booking-modal-header">
             <div>
-              <h3>Reservation Cancelled</h3>
-              <p>Your reservation has been successfully cancelled.</p>
+              <h3>{{ t("myBookingsPage.reservationCancelled") }}</h3>
+              <p>{{ t("myBookingsPage.reservationCancelledDescription") }}</p>
             </div>
             <button type="button" class="booking-close-btn" @click="closeCancelSuccess">
               <span class="material-symbols-outlined">close</span>
@@ -175,19 +179,22 @@
           <div class="booking-modal-content">
             <div class="booking-info-grid">
               <div class="booking-info-item">
-                <span class="booking-info-label">Booking reference</span>
+                <span class="booking-info-label">{{ t("myBookingsPage.bookingReference") }}</span>
                 <strong>{{ cancelSuccessData.bookingReference }}</strong>
               </div>
               <div class="booking-info-item">
-                <span class="booking-info-label">Cancellation date</span>
-                <strong>{{ formatDateTime(cancelSuccessData.cancellationDate) }}</strong>
+                <span class="booking-info-label">{{ t("myBookingsPage.cancellationDate") }}</span>
+                <strong>{{ formatDateTimeLabel(cancelSuccessData.cancellationDate) }}</strong>
               </div>
               <div class="booking-info-item">
-                <span class="booking-info-label">Refund</span>
-                <strong>{{ formatRefundType(cancelSuccessData.refund.type) }} - {{ formatCurrency(cancelSuccessData.refund.amount) }}</strong>
+                <span class="booking-info-label">{{ t("myBookingsPage.refund") }}</span>
+                <strong>
+                  {{ formatRefundType(cancelSuccessData.refund.type) }} -
+                  {{ formatCurrency(cancelSuccessData.refund.amount) }}
+                </strong>
               </div>
               <div class="booking-info-item">
-                <span class="booking-info-label">Charge</span>
+                <span class="booking-info-label">{{ t("myBookingsPage.charge") }}</span>
                 <strong>{{ formatCurrency(cancelSuccessData.refund.chargeAmount) }}</strong>
               </div>
             </div>
@@ -195,7 +202,7 @@
 
           <footer class="booking-modal-footer">
             <button type="button" class="btn-primary" @click="closeCancelSuccess">
-              Close
+              {{ t("myBookingsPage.close") }}
             </button>
           </footer>
         </section>
@@ -221,6 +228,7 @@ import type {
 const { accountId } = useAuth()
 const { fetchPaginated, getCancellationPreview, cancelBooking } = useReservations()
 const { hotels, fetchAll: fetchHotels } = useHotels()
+const { t, formatDate, formatCurrency } = useAppI18n()
 
 const bookings = ref<Reservation[]>([])
 const loading = ref(true)
@@ -233,22 +241,33 @@ const cancelling = ref(false)
 const cancelError = ref('')
 const cancelSuccessData = ref<BookingCancellationConfirmation | null>(null)
 
-const upcomingCount = computed(() => {
-  return bookings.value.filter(
+const statusLabels = computed(() => ({
+  [ReservationStatus.CONFIRMED]: t('reservationHistoryPage.confirmed'),
+  [ReservationStatus.PENDING]: t('reservationHistoryPage.pending'),
+  [ReservationStatus.COMPLETED]: t('myBookingsPage.completed'),
+  [ReservationStatus.CANCELLED]: t('reservationHistoryPage.cancelled'),
+  [ReservationStatus.BLOCKED]: t('reservationHistoryPage.blocked'),
+  [ReservationStatus.REFUSED]: t('reservationHistoryPage.refused'),
+}))
+
+const upcomingCount = computed(() =>
+  bookings.value.filter(
     (item) =>
       item.status === ReservationStatus.PENDING ||
       item.status === ReservationStatus.CONFIRMED,
-  ).length
-})
+  ).length,
+)
 
-const completedCount = computed(() => {
-  return bookings.value.filter((item) => item.status === ReservationStatus.COMPLETED).length
-})
+const completedCount = computed(() =>
+  bookings.value.filter((item) => item.status === ReservationStatus.COMPLETED).length,
+)
+
 const selectedBooking = computed(() =>
   selectedBookingId.value == null
     ? null
     : bookings.value.find((entry) => entry.id === selectedBookingId.value) || null,
 )
+
 const selectedPreview = computed(() =>
   selectedBookingId.value == null
     ? null
@@ -267,63 +286,41 @@ function statusClass(status: ReservationStatus) {
 }
 
 function formatStatus(status: ReservationStatus) {
-  if (status === ReservationStatus.CONFIRMED) return 'Confirmed'
-  if (status === ReservationStatus.PENDING) return 'Pending'
-  if (status === ReservationStatus.COMPLETED) return 'Completed'
-  if (status === ReservationStatus.CANCELLED) return 'Cancelled'
-  if (status === ReservationStatus.BLOCKED) return 'Blocked'
-  if (status === ReservationStatus.REFUSED) return 'Refused'
-  return status
+  return statusLabels.value[status] || status
 }
 
-function formatDate(value: string) {
-  const parsed = new Date(value)
-  if (Number.isNaN(parsed.getTime())) return value
-  return new Intl.DateTimeFormat('en-US', {
+function formatDateLabel(value: string) {
+  return formatDate(value, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
-  }).format(parsed)
+  })
 }
 
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'EUR',
-    maximumFractionDigits: 0,
-  }).format(value)
-}
-
-function getHotelName(hotelId: number) {
-  return hotels.value.find((hotel) => hotel.id === hotelId)?.name ?? `Hotel #${hotelId}`
-}
-
-function showCancelButton(bookingId: number) {
-  const preview = cancellationPreviews.value[bookingId]
-  return Boolean(preview?.cancellationAllowed)
-}
-
-function formatDeadline(deadline: string | null) {
-  if (!deadline) return 'Not available'
-  return formatDateTime(deadline)
-}
-
-function formatDateTime(value: string) {
-  const parsed = new Date(value)
-  if (Number.isNaN(parsed.getTime())) return value
-  return new Intl.DateTimeFormat('en-US', {
+function formatDateTimeLabel(value: string | null) {
+  if (!value) return t('reservationHistoryPage.unavailable')
+  return formatDate(value, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-  }).format(parsed)
+  })
 }
 
 function formatRefundType(type: 'FULL' | 'PARTIAL' | 'NONE') {
-  if (type === 'FULL') return 'Full refund'
-  if (type === 'PARTIAL') return 'Partial refund'
-  return 'No refund'
+  if (type === 'FULL') return t('myBookingsPage.refundFull')
+  if (type === 'PARTIAL') return t('myBookingsPage.refundPartial')
+  return t('myBookingsPage.refundNone')
+}
+
+function getHotelName(hotelId: number) {
+  return hotels.value.find((hotel) => hotel.id === hotelId)?.name ??
+    t('reservationHistoryPage.hotelFallback', { id: hotelId })
+}
+
+function showCancelButton(bookingId: number) {
+  return Boolean(cancellationPreviews.value[bookingId]?.cancellationAllowed)
 }
 
 async function ensureCancellationPreview(bookingId: number) {
@@ -367,13 +364,15 @@ async function openCancelModal(bookingId: number) {
   cancelError.value = ''
   const preview = await ensureCancellationPreview(bookingId)
   if (!preview) {
-    cancelError.value = 'Unable to load cancellation policy.'
+    cancelError.value = t('myBookingsPage.unableToLoadCancellationPolicy')
     showCancelModal.value = true
     return
   }
+
   if (!preview.cancellationAllowed) {
-    cancelError.value = preview.reason || 'This reservation cannot be cancelled.'
+    cancelError.value = preview.reason || t('reservationHistoryPage.cannotCancel')
   }
+
   showCancelModal.value = true
 }
 
@@ -388,13 +387,14 @@ function closeCancelSuccess() {
 
 async function confirmCancellation() {
   if (!selectedBookingId.value || !accountId.value) return
+
   cancelling.value = true
   cancelError.value = ''
 
   try {
     const confirmation = await cancelBooking(selectedBookingId.value, accountId.value)
     if (!confirmation) {
-      cancelError.value = 'Unable to cancel this reservation.'
+      cancelError.value = t('myBookingsPage.failedToCancelReservation')
       return
     }
 
@@ -402,6 +402,9 @@ async function confirmCancellation() {
     showCancelModal.value = false
     showCancelSuccess.value = true
     await loadBookings()
+  } catch (error: any) {
+    cancelError.value =
+      error?.message || t('myBookingsPage.failedToCancelReservation')
   } finally {
     cancelling.value = false
   }
@@ -423,7 +426,8 @@ async function loadBookings() {
     )
     await hydrateCancellationPreviews()
   } catch (error: any) {
-    errorMessage.value = error?.message || 'Failed to load booking data.'
+    errorMessage.value =
+      error?.message || t('myBookingsPage.failedToLoadBookings')
   } finally {
     loading.value = false
   }
@@ -445,20 +449,34 @@ onUnmounted(() => {
 onMounted(async () => {
   await Promise.all([fetchHotels(), loadBookings()])
 })
+
+useHead(() => ({
+  title: t('myBookingsPage.metaTitle'),
+  meta: [
+    {
+      name: 'description',
+      content: t('myBookingsPage.metaDescription'),
+    },
+  ],
+}))
 </script>
 
 <style scoped>
 .bookings-page {
-  background:
-    radial-gradient(circle at top, color-mix(in srgb, var(--color-primary-50) 70%, white 30%) 0%, transparent 48%),
-    linear-gradient(180deg, var(--color-gray-50) 0%, white 100%);
   min-height: calc(100vh - 140px);
+  background:
+    radial-gradient(
+      circle at top,
+      color-mix(in srgb, var(--color-primary-50) 70%, transparent) 0%,
+      transparent 48%
+    ),
+    linear-gradient(180deg, var(--color-bg-soft) 0%, var(--color-surface) 100%);
 }
 
 .bookings-shell {
-  max-width: 1120px;
+  width: min(1120px, calc(100% - 2rem));
   margin: 0 auto;
-  padding: 40px 24px 56px;
+  padding: 40px 0 56px;
 }
 
 .bookings-header {
@@ -470,7 +488,7 @@ onMounted(async () => {
 
 .bookings-header h1 {
   margin: 0;
-  color: var(--color-navy-500);
+  color: var(--color-text-primary);
   font-size: clamp(2rem, 3vw, 2.45rem);
   font-weight: 800;
   letter-spacing: -0.02em;
@@ -478,60 +496,62 @@ onMounted(async () => {
 
 .bookings-header p {
   margin: 8px 0 0;
-  color: var(--color-gray-500);
+  color: var(--color-text-secondary);
   font-weight: 600;
 }
 
 .history-link {
-  text-decoration: none;
-  color: var(--color-primary-700);
-  border: 1px solid color-mix(in srgb, var(--color-primary-200) 65%, white 35%);
-  background: color-mix(in srgb, var(--color-primary-50) 56%, white 44%);
-  border-radius: 12px;
   padding: 10px 14px;
+  border: 1px solid color-mix(in srgb, var(--color-primary-300) 28%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--color-primary-50) 45%, var(--color-surface));
+  color: var(--color-primary-700);
   font-size: 0.9rem;
   font-weight: 700;
+  text-decoration: none;
   white-space: nowrap;
 }
 
 .summary-grid {
-  margin-top: 18px;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
+  margin-top: 18px;
+}
+
+.summary-card,
+.list-card {
+  border: 1px solid var(--color-border-soft);
+  background: var(--color-surface);
 }
 
 .summary-card {
-  background: white;
-  border: 1px solid color-mix(in srgb, var(--color-gray-200) 72%, white 28%);
-  border-radius: 14px;
   padding: 14px 16px;
+  border-radius: 14px;
 }
 
 .summary-card span {
   display: block;
+  color: var(--color-text-secondary);
   font-size: 0.8rem;
-  color: var(--color-gray-500);
   font-weight: 700;
-  text-transform: uppercase;
   letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .summary-card strong {
   display: block;
   margin-top: 6px;
-  color: var(--color-navy-500);
+  color: var(--color-text-primary);
   font-size: 1.5rem;
   font-weight: 800;
 }
 
 .list-card {
   margin-top: 16px;
-  background: white;
-  border: 1px solid color-mix(in srgb, var(--color-gray-200) 74%, white 26%);
-  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 16px 30px rgba(15, 23, 42, 0.06);
+  border-radius: 20px;
+  box-shadow: var(--shadow-md);
 }
 
 .state-box {
@@ -540,15 +560,16 @@ onMounted(async () => {
   place-content: center;
   gap: 8px;
   text-align: center;
-  color: var(--color-gray-500);
+  color: var(--color-text-secondary);
 }
 
 .state-box .material-symbols-outlined {
   font-size: 30px;
 }
 
-.state-box--error {
-  color: #b42318;
+.state-box--error,
+.cancel-error {
+  color: var(--color-danger-600);
 }
 
 .booking-row {
@@ -556,7 +577,7 @@ onMounted(async () => {
   justify-content: space-between;
   gap: 14px;
   padding: 18px 20px;
-  border-bottom: 1px solid var(--color-gray-100);
+  border-bottom: 1px solid var(--color-border-soft);
 }
 
 .booking-row:last-child {
@@ -565,7 +586,7 @@ onMounted(async () => {
 
 .booking-main h2 {
   margin: 0;
-  color: var(--color-navy-500);
+  color: var(--color-text-primary);
   font-size: 1.02rem;
   font-weight: 800;
 }
@@ -573,19 +594,19 @@ onMounted(async () => {
 .booking-ref,
 .booking-dates {
   margin: 6px 0 0;
-  color: var(--color-gray-600);
+  color: var(--color-text-secondary);
   font-size: 0.92rem;
 }
 
 .booking-side {
-  text-align: right;
   display: grid;
-  gap: 8px;
   align-content: center;
+  gap: 8px;
+  text-align: end;
 }
 
 .booking-side strong {
-  color: var(--color-navy-500);
+  color: var(--color-text-primary);
   font-size: 1rem;
 }
 
@@ -593,8 +614,8 @@ onMounted(async () => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 999px;
   padding: 4px 10px;
+  border-radius: 999px;
   font-size: 0.76rem;
   font-weight: 800;
   letter-spacing: 0.04em;
@@ -626,27 +647,32 @@ onMounted(async () => {
   color: #b42318;
 }
 
-.btn-cancel {
+.btn-cancel,
+.btn-primary,
+.btn-ghost {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(220, 38, 38, 0.2);
-  color: #b42318;
-  background: #fff;
-  border-radius: 999px;
-  padding: 8px 12px;
-  font-size: 12px;
+  border-radius: 12px;
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+}
+
+.btn-cancel {
+  padding: 8px 12px;
+  border: 1px solid rgb(220 38 38 / 0.2);
+  background: var(--color-surface);
+  color: #b42318;
 }
 
 .btn-cancel:hover {
-  border-color: rgba(220, 38, 38, 0.4);
-  background: rgba(220, 38, 38, 0.06);
+  background: rgb(220 38 38 / 0.06);
+  border-color: rgb(220 38 38 / 0.4);
 }
 
-.btn-cancel:disabled {
+.btn-cancel:disabled,
+.btn-primary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
@@ -655,23 +681,22 @@ onMounted(async () => {
   position: fixed;
   inset: 0;
   z-index: 1200;
-  background: rgba(15, 23, 42, 0.35);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
+  background: rgb(15 23 42 / 0.35);
+  backdrop-filter: blur(6px);
 }
 
 .booking-modal-card {
   width: min(760px, 100%);
   max-height: 90vh;
   overflow: auto;
-  background: #fff;
   border: 1px solid var(--color-border-soft);
   border-radius: 18px;
-  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.18);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-xl);
 }
 
 .booking-modal-card--compact {
@@ -679,33 +704,33 @@ onMounted(async () => {
 }
 
 .booking-modal-header {
-  padding: 18px 20px;
-  border-bottom: 1px solid var(--color-border-soft);
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--color-border-soft);
 }
 
 .booking-modal-header h3 {
   margin: 0;
+  color: var(--color-text-primary);
   font-size: 24px;
-  color: var(--color-heading);
 }
 
 .booking-modal-header p {
   margin: 6px 0 0;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font-size: 14px;
 }
 
 .booking-close-btn {
   width: 36px;
   height: 36px;
-  border-radius: 10px;
   border: 1px solid var(--color-border-soft);
-  background: #fff;
-  color: var(--color-text-muted);
+  border-radius: 10px;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -713,118 +738,96 @@ onMounted(async () => {
 }
 
 .booking-modal-content {
-  padding: 18px 20px;
   display: grid;
   gap: 14px;
+  padding: 18px 20px;
 }
 
-.booking-info-grid {
+.booking-info-grid,
+.policy-meta {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
 
-.booking-info-item {
+.booking-info-item,
+.policy-card {
   border: 1px solid var(--color-border-soft);
-  border-radius: 12px;
-  background: var(--color-surface);
-  padding: 12px;
+}
+
+.booking-info-item {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--color-surface-secondary);
 }
 
-.booking-info-label {
+.booking-info-label,
+.policy-meta span {
+  color: var(--color-text-secondary);
   font-size: 10px;
   font-weight: 700;
-  text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--color-text-muted);
+  text-transform: uppercase;
 }
 
-.booking-info-item strong {
+.booking-info-item strong,
+.policy-meta strong {
+  color: var(--color-text-primary);
   font-size: 14px;
-  color: var(--color-heading);
 }
 
 .policy-card {
-  border: 1px solid var(--color-border-soft);
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--color-surface) 80%, white 20%);
   padding: 14px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--color-surface-secondary) 78%, var(--color-surface));
 }
 
 .policy-card h4 {
   margin: 0 0 8px;
-  color: var(--color-heading);
+  color: var(--color-text-primary);
   font-size: 18px;
 }
 
 .policy-card p {
   margin: 0;
   color: var(--color-text-secondary);
-  line-height: 1.6;
   font-size: 14px;
+  line-height: 1.6;
 }
 
 .policy-meta {
   margin-top: 12px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
 
-.policy-meta span {
-  display: block;
-  font-size: 11px;
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.policy-meta strong {
-  color: var(--color-heading);
-  font-size: 14px;
-}
-
 .booking-modal-footer {
-  border-top: 1px solid var(--color-border-soft);
-  padding: 16px 20px 20px;
   display: flex;
   justify-content: flex-end;
   align-items: center;
   gap: 10px;
-}
-
-.btn-primary,
-.btn-ghost {
-  border-radius: 12px;
-  padding: 10px 14px;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  border: 1px solid transparent;
+  padding: 16px 20px 20px;
+  border-top: 1px solid var(--color-border-soft);
 }
 
 .btn-primary {
+  padding: 10px 14px;
+  border: 1px solid transparent;
   background: var(--color-primary-600);
-  color: #fff;
-}
-
-.btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  color: var(--color-white);
 }
 
 .btn-ghost {
-  background: #fff;
-  color: var(--color-text);
-  border-color: var(--color-border-soft);
+  padding: 10px 14px;
+  border: 1px solid var(--color-border-soft);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
 }
 
 .cancel-error {
   margin: 0;
-  color: #b42318;
   font-size: 13px;
   font-weight: 600;
 }
@@ -857,6 +860,7 @@ onMounted(async () => {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -870,10 +874,12 @@ onMounted(async () => {
 
 @media (max-width: 768px) {
   .bookings-shell {
-    padding: 28px 16px 40px;
+    width: min(100% - 1.5rem, 1120px);
+    padding: 28px 0 40px;
   }
 
-  .bookings-header {
+  .bookings-header,
+  .booking-row {
     flex-direction: column;
   }
 
@@ -888,11 +894,10 @@ onMounted(async () => {
 
   .booking-row {
     padding: 14px 16px;
-    flex-direction: column;
   }
 
   .booking-side {
-    text-align: left;
+    text-align: start;
   }
 
   .booking-info-grid,

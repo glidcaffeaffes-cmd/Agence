@@ -1,17 +1,19 @@
 <template>
   <div class="profile-page">
     <Head>
-      <title>My Profile — VoyageHub</title>
+      <title>{{ t("profilePage.metaTitle") }}</title>
       <meta
         name="description"
-        content="Manage your VoyageHub profile and preferences."
+        :content="t('profilePage.metaDescription')"
       />
     </Head>
 
     <div class="profile-container">
       <!-- Page Header -->
       <header class="profile-header">
-        <span class="profile-header__title">My Profile</span>
+        <span class="profile-header__title">{{
+          t("profilePage.title")
+        }}</span>
       </header>
 
       <div class="profile-body">
@@ -24,26 +26,20 @@
             <!-- Tabs Header -->
             <div class="tabs-header">
               <button
-                v-for="tab in [
-                  'Account Settings',
-                  'Travel Preferences',
-                  'Documents',
-                  'Billing',
-                  'Notifications',
-                ]"
-                :key="tab"
+                v-for="tab in tabItems"
+                :key="tab.id"
                 class="tab-btn"
-                :class="{ 'tab-btn--active': activeTab === tab }"
-                @click="activeTab = tab"
+                :class="{ 'tab-btn--active': activeTab === tab.id }"
+                @click="activeTab = tab.id"
               >
-                {{ tab }}
+                {{ tab.label }}
               </button>
             </div>
 
             <!-- Tab Content -->
             <div class="tab-content">
               <!-- Account Settings Tab -->
-              <div v-if="activeTab === 'Account Settings'" class="tab-pane">
+              <div v-if="activeTab === 'account'" class="tab-pane">
                 <form @submit.prevent="saveProfile" class="profile-form">
                   <!-- Personal Details Section -->
                   <section
@@ -53,7 +49,9 @@
                       <span class="material-symbols-outlined section-icon"
                         >account_circle</span
                       >
-                      <h2 class="settings-section__title">Personal Details</h2>
+                      <h2 class="settings-section__title">
+                        {{ t("profilePage.sections.personalDetails") }}
+                      </h2>
                     </div>
                     <div class="settings-section__body">
                       <div class="form-row">
@@ -65,7 +63,9 @@
                           "
                         >
                           <div class="form-label-row">
-                            <label class="form-label">First Name</label>
+                            <label class="form-label">{{
+                              t("profilePage.labels.firstName")
+                            }}</label>
                             <span class="field-status-text">{{
                               getFieldStatusText(
                                 "firstName",
@@ -78,7 +78,7 @@
                               type="text"
                               v-model="formData.firstName"
                               class="form-input"
-                              placeholder="Nathaniel"
+                              :placeholder="t('profilePage.placeholders.firstName')"
                             />
                             <span
                               class="material-symbols-outlined state-icon"
@@ -94,7 +94,9 @@
                           :class="getFieldState('lastName', formData.lastName)"
                         >
                           <div class="form-label-row">
-                            <label class="form-label">Last Name</label>
+                            <label class="form-label">{{
+                              t("profilePage.labels.lastName")
+                            }}</label>
                             <span class="field-status-text">{{
                               getFieldStatusText("lastName", formData.lastName)
                             }}</span>
@@ -104,7 +106,7 @@
                               type="text"
                               v-model="formData.lastName"
                               class="form-input"
-                              placeholder="Poole"
+                              :placeholder="t('profilePage.placeholders.lastName')"
                             />
                             <span
                               class="material-symbols-outlined state-icon"
@@ -125,7 +127,9 @@
                           "
                         >
                           <div class="form-label-row">
-                            <label class="form-label">Date of Birth</label>
+                            <label class="form-label">{{
+                              t("profilePage.labels.dateOfBirth")
+                            }}</label>
                             <span class="field-status-text">{{
                               getFieldStatusText(
                                 "dateOfBirth",
@@ -162,7 +166,7 @@
                         >contact_page</span
                       >
                       <h2 class="settings-section__title">
-                        Contact Information
+                        {{ t("profilePage.sections.contactInformation") }}
                       </h2>
                     </div>
                     <div class="settings-section__body">
@@ -173,7 +177,9 @@
                           :class="getFieldState('phone', formData.phone)"
                         >
                           <div class="form-label-row">
-                            <label class="form-label">Phone Number</label>
+                            <label class="form-label">{{
+                              t("profilePage.labels.phoneNumber")
+                            }}</label>
                             <span class="field-status-text">{{
                               getFieldStatusText("phone", formData.phone)
                             }}</span>
@@ -256,8 +262,12 @@
                         <!-- Email (Locked) -->
                         <div class="form-group">
                           <div class="form-label-row">
-                            <label class="form-label">Email Address</label>
-                            <span class="badge-verified">Verified</span>
+                            <label class="form-label">{{
+                              t("profilePage.labels.emailAddress")
+                            }}</label>
+                            <span class="badge-verified">{{
+                              t("profilePage.labels.verified")
+                            }}</span>
                           </div>
                           <div class="input-icon-wrap">
                             <input
@@ -281,7 +291,9 @@
                       <span class="material-symbols-outlined section-icon"
                         >badge</span
                       >
-                      <h2 class="settings-section__title">Identification</h2>
+                      <h2 class="settings-section__title">
+                        {{ t("profilePage.sections.identification") }}
+                      </h2>
                     </div>
                     <div class="settings-section__body">
                       <div class="form-row">
@@ -296,7 +308,9 @@
                           "
                         >
                           <div class="form-label-row">
-                            <label class="form-label">Passport Number</label>
+                            <label class="form-label">{{
+                              t("profilePage.labels.passportNumber")
+                            }}</label>
                             <span class="field-status-text">{{
                               getFieldStatusText(
                                 "passportNumber",
@@ -309,7 +323,7 @@
                               type="text"
                               v-model="formData.passportNumber"
                               class="form-input"
-                              placeholder="e.g. AB123456"
+                              :placeholder="t('profilePage.placeholders.passport')"
                               maxlength="9"
                               autocapitalize="characters"
                               spellcheck="false"
@@ -340,14 +354,18 @@
                       :disabled="loading || !hasProfileChanges"
                       class="btn-update"
                     >
-                      {{ loading ? "Updating..." : "Update Profile" }}
+                      {{
+                        loading
+                          ? t("profilePage.actions.updating")
+                          : t("profilePage.actions.updateProfile")
+                      }}
                     </button>
                   </div>
                 </form>
               </div>
 
               <!-- Travel Preferences Tab -->
-              <div v-if="activeTab === 'Travel Preferences'" class="tab-pane">
+              <div v-if="activeTab === 'travel'" class="tab-pane">
                 <form @submit.prevent="saveProfile" class="profile-form">
                   <!-- Bio Section -->
                   <section class="settings-section">
@@ -355,7 +373,9 @@
                       <span class="material-symbols-outlined section-icon"
                         >description</span
                       >
-                      <h2 class="settings-section__title">Bio & About Me</h2>
+                      <h2 class="settings-section__title">
+                        {{ t("profilePage.sections.bio") }}
+                      </h2>
                     </div>
                     <div class="settings-section__body">
                       <div
@@ -363,7 +383,9 @@
                         :class="getFieldState('bio', formData.bio)"
                       >
                         <div class="form-label-row">
-                          <label class="form-label">Bio / About Me</label>
+                          <label class="form-label">{{
+                            t("profilePage.labels.bio")
+                          }}</label>
                           <span class="field-status-text">{{
                             getFieldStatusText("bio", formData.bio)
                           }}</span>
@@ -371,7 +393,7 @@
                         <textarea
                           v-model="formData.bio"
                           class="form-input form-input--textarea"
-                          placeholder="Tell fellow travellers about yourself..."
+                          :placeholder="t('profilePage.placeholders.bio')"
                           rows="4"
                         ></textarea>
                       </div>
@@ -385,7 +407,7 @@
                         >explore</span
                       >
                       <h2 class="settings-section__title">
-                        Travel Styles & Interests
+                        {{ t("profilePage.sections.travelStyles") }}
                       </h2>
                     </div>
                     <div class="settings-section__body">
@@ -399,9 +421,9 @@
                         "
                       >
                         <div class="form-label-row">
-                          <label class="form-label"
-                            >Preferred Destinations</label
-                          >
+                          <label class="form-label">{{
+                            t("profilePage.labels.preferredDestinations")
+                          }}</label>
                           <span class="field-status-text">{{
                             getFieldStatusText(
                               "preferredDestinations",
@@ -421,30 +443,32 @@
                               .filter(Boolean)
                           "
                           class="form-input"
-                          placeholder="Paris, Bali, New York..."
+                          :placeholder="t('profilePage.placeholders.destinations')"
                         />
                       </div>
 
                       <div class="form-group">
-                        <label class="form-label">Travel Style</label>
+                        <label class="form-label">{{
+                          t("profilePage.labels.travelStyle")
+                        }}</label>
                         <div class="travel-prefs">
                           <label
                             v-for="pref in travelPrefOptions"
-                            :key="pref"
+                            :key="pref.value"
                             class="pref-chip"
                             :class="
-                              formData.travelPreferences.includes(pref)
+                              formData.travelPreferences.includes(pref.value)
                                 ? 'pref-chip--active'
                                 : ''
                             "
                           >
                             <input
                               type="checkbox"
-                              :value="pref"
+                              :value="pref.value"
                               v-model="formData.travelPreferences"
                               class="sr-only"
                             />
-                            {{ pref }}
+                            {{ pref.label }}
                           </label>
                         </div>
                       </div>
@@ -457,28 +481,31 @@
                       :disabled="loading || !hasProfileChanges"
                       class="btn-update"
                     >
-                      Update Preferences
+                      {{ t("profilePage.actions.updatePreferences") }}
                     </button>
                   </div>
                 </form>
               </div>
 
               <!-- Billing Tab -->
-              <div v-if="activeTab === 'Billing'" class="tab-pane">
+              <div v-if="activeTab === 'billing'" class="tab-pane">
                 <section class="settings-section">
                   <div class="settings-section__header">
                     <span class="material-symbols-outlined section-icon"
                       >payments</span
                     >
-                    <h2 class="settings-section__title">Payment Methods</h2>
+                    <h2 class="settings-section__title">
+                      {{ t("profilePage.sections.paymentMethods") }}
+                    </h2>
                   </div>
                   <div class="settings-section__body">
                     <div class="billing-toolbar">
                       <div>
-                        <h3 class="billing-title">Saved cards</h3>
+                        <h3 class="billing-title">
+                          {{ t("profilePage.billing.title") }}
+                        </h3>
                         <p class="billing-subtitle">
-                          Add at least one payment method to complete your
-                          account and speed up checkout.
+                          {{ t("profilePage.billing.subtitle") }}
                         </p>
                       </div>
                       <button
@@ -490,8 +517,8 @@
                         <span class="material-symbols-outlined">add</span>
                         {{
                           paymentMethods.length
-                            ? "Add Payment Method"
-                            : "Add Your First Card"
+                            ? t("profilePage.actions.addPaymentMethod")
+                            : t("profilePage.actions.addFirstCard")
                         }}
                       </button>
                     </div>
@@ -530,13 +557,13 @@
                             v-if="method.isDefault"
                             class="payment-card__badge"
                           >
-                            Default
+                            {{ t("profilePage.labels.default") }}
                           </span>
                         </div>
 
                         <div class="payment-card__meta">
                           <span>
-                            Expires
+                            {{ t("profilePage.labels.expires") }}
                             {{ String(method.expiryMonth).padStart(2, "0") }}/{{
                               method.expiryYear
                             }}
@@ -551,7 +578,7 @@
                             :disabled="loading"
                             @click="setDefaultPaymentMethod(method.id)"
                           >
-                            Set default
+                            {{ t("profilePage.actions.setDefault") }}
                           </button>
                           <button
                             type="button"
@@ -559,7 +586,7 @@
                             :disabled="loading"
                             @click="deletePaymentMethod(method.id)"
                           >
-                            Remove
+                            {{ t("profilePage.actions.remove") }}
                           </button>
                         </div>
                       </article>
@@ -573,11 +600,10 @@
                           >
                         </div>
                         <h3 class="empty-vault__title">
-                          No payment methods added yet
+                          {{ t("profilePage.billing.emptyTitle") }}
                         </h3>
                         <p class="empty-vault__sub">
-                          Securely manage your payment options for faster
-                          bookings.
+                          {{ t("profilePage.billing.emptyDescription") }}
                         </p>
                         <button
                           type="button"
@@ -586,7 +612,7 @@
                           @click="startStripePaymentMethodSetup()"
                         >
                           <span class="material-symbols-outlined">add</span>
-                          Add Payment Method
+                          {{ t("profilePage.actions.addPaymentMethod") }}
                         </button>
                       </div>
                     </div>
@@ -595,25 +621,26 @@
               </div>
 
               <!-- Notifications Tab -->
-              <div v-if="activeTab === 'Notifications'" class="tab-pane">
+              <div v-if="activeTab === 'notifications'" class="tab-pane">
                 <section class="settings-section">
                   <div class="settings-section__header">
                     <span class="material-symbols-outlined section-icon"
                       >notifications</span
                     >
                     <h2 class="settings-section__title">
-                      Notification Settings
+                      {{ t("profilePage.sections.notificationSettings") }}
                     </h2>
                   </div>
                   <div class="settings-section__body">
                     <div class="toggle-list">
                       <label class="toggle-row">
                         <div class="toggle-info">
-                          <span class="toggle-title">Reservation Updates</span>
-                          <span class="toggle-sub"
-                            >Real-time confirmation of changes and
-                            cancellations.</span
-                          >
+                          <span class="toggle-title">{{
+                            t("profilePage.labels.reservationUpdates")
+                          }}</span>
+                          <span class="toggle-sub">{{
+                            t("profilePage.labels.reservationUpdatesDesc")
+                          }}</span>
                         </div>
                         <div class="toggle-wrap">
                           <input
@@ -627,11 +654,12 @@
 
                       <label class="toggle-row">
                         <div class="toggle-info">
-                          <span class="toggle-title">Exclusive Offers</span>
-                          <span class="toggle-sub"
-                            >Invitations to new collections and seasonal
-                            deals.</span
-                          >
+                          <span class="toggle-title">{{
+                            t("profilePage.labels.exclusiveOffers")
+                          }}</span>
+                          <span class="toggle-sub">{{
+                            t("profilePage.labels.exclusiveOffersDesc")
+                          }}</span>
                         </div>
                         <div class="toggle-wrap">
                           <input
@@ -651,7 +679,11 @@
                         class="btn-update"
                       >
                         <span class="material-symbols-outlined">save</span>
-                        {{ loading ? "Saving..." : "Save Preferences" }}
+                        {{
+                          loading
+                            ? t("profilePage.actions.saving")
+                            : t("profilePage.actions.savePreferences")
+                        }}
                       </button>
                     </div>
                   </div>
@@ -660,14 +692,17 @@
 
               <!-- Empty Tabs for now -->
               <div
-                v-if="['Documents'].includes(activeTab)"
+                v-if="['documents'].includes(activeTab)"
                 class="tab-pane tab-pane--empty"
               >
                 <div class="empty-state">
                   <span class="material-symbols-outlined">construction</span>
                   <p>
-                    The <strong>{{ activeTab }}</strong> module is coming soon
-                    to VoyageHub.
+                    {{
+                      t("profilePage.actions.documentsComingSoon", {
+                        tab: activeTabLabel,
+                      })
+                    }}
                   </p>
                 </div>
               </div>
@@ -705,6 +740,7 @@ import phoneExamplesData from "libphonenumber-js/examples.mobile";
 
 const route = useRoute();
 const router = useRouter();
+const { t, currentLocale } = useAppI18n();
 const {
   currentProfile,
   updateProfile,
@@ -715,7 +751,25 @@ const {
   loading,
 } = useAuth();
 const { success: toastSuccess, error: toastError, warn: toastWarn } = useAppToast();
-const activeTab = ref("Account Settings");
+
+type ProfileTabId =
+  | "account"
+  | "travel"
+  | "documents"
+  | "billing"
+  | "notifications";
+
+const legacyTabMap: Record<string, ProfileTabId> = {
+  account: "account",
+  "account settings": "account",
+  travel: "travel",
+  "travel preferences": "travel",
+  documents: "documents",
+  billing: "billing",
+  notifications: "notifications",
+};
+
+const activeTab = ref<ProfileTabId>("account");
 const defaultPhoneCountry: CountryCode = "TN";
 const phoneExamples = phoneExamplesData as Record<string, string>;
 
@@ -732,21 +786,38 @@ const DisplayNamesCtor = (Intl as any).DisplayNames as
       options?: { type: "region" },
     ) => { of: (code: string) => string | undefined })
   | undefined;
-const regionNameFormatter = DisplayNamesCtor
-  ? new DisplayNamesCtor(["en"], { type: "region" })
-  : null;
+const tabItems = computed(() => [
+  { id: "account" as const, label: t("profilePage.tabs.account") },
+  { id: "travel" as const, label: t("profilePage.tabs.travel") },
+  { id: "documents" as const, label: t("profilePage.tabs.documents") },
+  { id: "billing" as const, label: t("profilePage.tabs.billing") },
+  {
+    id: "notifications" as const,
+    label: t("profilePage.tabs.notifications"),
+  },
+]);
+const activeTabLabel = computed(
+  () => tabItems.value.find((tab) => tab.id === activeTab.value)?.label ?? "",
+);
+const phoneCountries = computed<PhoneCountry[]>(() => {
+  const regionNameFormatter = DisplayNamesCtor
+    ? new DisplayNamesCtor([currentLocale.value.intlLocale], {
+        type: "region",
+      })
+    : null;
 
-const phoneCountries: PhoneCountry[] = getCountries()
-  .map((code) => {
-    const countryCode = code as CountryCode;
-    return {
-      code: countryCode,
-      dialCode: getCountryCallingCode(countryCode),
-      name: regionNameFormatter?.of(countryCode) || countryCode,
-      flagUrl: `https://flagcdn.com/24x18/${countryCode.toLowerCase()}.png`,
-    };
-  })
-  .sort((a, b) => a.name.localeCompare(b.name));
+  return getCountries()
+    .map((code) => {
+      const countryCode = code as CountryCode;
+      return {
+        code: countryCode,
+        dialCode: getCountryCallingCode(countryCode),
+        name: regionNameFormatter?.of(countryCode) || countryCode,
+        flagUrl: `https://flagcdn.com/24x18/${countryCode.toLowerCase()}.png`,
+      };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
+});
 
 const selectedPhoneCountry = ref<CountryCode>(defaultPhoneCountry);
 const phoneCountryPickerRef = ref<HTMLElement | null>(null);
@@ -755,10 +826,12 @@ const isPhoneCountryMenuOpen = ref(false);
 const phoneCountryMenuStyle = ref<Record<string, string>>({});
 const selectedPhoneCountryData = computed(
   () =>
-    phoneCountries.find(
+    phoneCountries.value.find(
       (country) => country.code === selectedPhoneCountry.value,
     ) ||
-    phoneCountries.find((country) => country.code === defaultPhoneCountry) ||
+    phoneCountries.value.find(
+      (country) => country.code === defaultPhoneCountry,
+    ) ||
     null,
 );
 const selectedPhoneDialPrefix = computed(() => {
@@ -778,12 +851,18 @@ const selectedPhoneLengthInfo = computed(() => {
   }
 
   if (validLengths.length === 0) {
-    return { label: "digits required", example: "" };
+    return {
+      label: t("profilePage.validation.digitsRequired"),
+      example: "",
+    };
   }
 
   const min = Math.min(...validLengths);
   const max = Math.max(...validLengths);
-  const label = min === max ? `${min} digits` : `${min}-${max} digits`;
+  const label =
+    min === max
+      ? t("profilePage.validation.digits", { count: min })
+      : t("profilePage.validation.digitRange", { min, max });
   const example = "0".repeat(min);
 
   return { label, example };
@@ -811,6 +890,23 @@ function normalizeSingleTabQuery(
   return nextQuery;
 }
 
+function normalizeTab(
+  value: string | null | undefined,
+): ProfileTabId {
+  const key = value?.trim().toLowerCase();
+  return (key && legacyTabMap[key]) || "account";
+}
+
+useHead(() => ({
+  title: t("profilePage.metaTitle"),
+  meta: [
+    {
+      name: "description",
+      content: t("profilePage.metaDescription"),
+    },
+  ],
+}));
+
 // Handle query param for tabs
 onMounted(() => {
   const tabParamRaw = route.query.tab;
@@ -818,7 +914,7 @@ onMounted(() => {
     ? tabParamRaw[0]?.toString()
     : tabParamRaw?.toString();
   if (tabParam) {
-    activeTab.value = tabParam;
+    activeTab.value = normalizeTab(tabParam);
   }
 
   document.addEventListener("mousedown", handlePhoneCountryOutsideClick);
@@ -838,12 +934,12 @@ watch(
       const nextQuery = normalizeSingleTabQuery(route.query);
       void router.replace({ query: nextQuery });
       if (newTab[0]) {
-        activeTab.value = newTab[0].toString();
+        activeTab.value = normalizeTab(newTab[0].toString());
       }
       return;
     }
     if (newTab) {
-      activeTab.value = newTab.toString();
+      activeTab.value = normalizeTab(newTab.toString());
     }
   },
 );
@@ -875,18 +971,48 @@ watch(isPhoneCountryMenuOpen, async (isOpen) => {
 
 const notificationSettings = ref({ reservation: true, promotion: false });
 
-const travelPrefOptions = [
-  "Luxury",
-  "Adventure",
-  "Beach",
-  "City Break",
-  "Cultural",
-  "Eco Travel",
-  "Family",
-  "Solo",
-  "Wellness",
-  "Ski",
-];
+const travelPrefOptions = computed(() => [
+  {
+    value: "Luxury",
+    label: t("profilePage.travelStyles.luxury"),
+  },
+  {
+    value: "Adventure",
+    label: t("profilePage.travelStyles.adventure"),
+  },
+  {
+    value: "Beach",
+    label: t("profilePage.travelStyles.beach"),
+  },
+  {
+    value: "City Break",
+    label: t("profilePage.travelStyles.cityBreak"),
+  },
+  {
+    value: "Cultural",
+    label: t("profilePage.travelStyles.cultural"),
+  },
+  {
+    value: "Eco Travel",
+    label: t("profilePage.travelStyles.ecoTravel"),
+  },
+  {
+    value: "Family",
+    label: t("profilePage.travelStyles.family"),
+  },
+  {
+    value: "Solo",
+    label: t("profilePage.travelStyles.solo"),
+  },
+  {
+    value: "Wellness",
+    label: t("profilePage.travelStyles.wellness"),
+  },
+  {
+    value: "Ski",
+    label: t("profilePage.travelStyles.ski"),
+  },
+]);
 
 const formData = ref({
   firstName: "",
@@ -970,23 +1096,32 @@ const phoneValidationMessage = computed(() => {
   const currentCountry = selectedPhoneCountry.value;
   const lengthStatus = validatePhoneNumberLength(digits, currentCountry);
   const countryName =
-    selectedPhoneCountryData.value?.name || "selected country";
+    selectedPhoneCountryData.value?.name ||
+    t("profilePage.validation.selectedCountry");
 
   if (lengthStatus === "TOO_SHORT") {
-    return `Number is too short for ${countryName}.`;
+    return t("profilePage.validation.numberTooShort", {
+      country: countryName,
+    });
   }
 
   if (lengthStatus === "TOO_LONG") {
-    return `Number is too long for ${countryName}.`;
+    return t("profilePage.validation.numberTooLong", {
+      country: countryName,
+    });
   }
 
   if (lengthStatus === "INVALID_LENGTH") {
-    return `Invalid number length for ${countryName}.`;
+    return t("profilePage.validation.invalidNumberLength", {
+      country: countryName,
+    });
   }
 
   const fullNumber = `+${getCountryCallingCode(currentCountry)}${digits}`;
   if (!isValidPhoneNumber(fullNumber)) {
-    return `Invalid phone number for ${countryName}.`;
+    return t("profilePage.validation.invalidPhone", {
+      country: countryName,
+    });
   }
 
   return "";
@@ -998,13 +1133,16 @@ const passportValidationMessage = computed(() => {
   }
 
   if (passport.length < PASSPORT_MIN_LENGTH || passport.length > PASSPORT_MAX_LENGTH) {
-    return `Passport number must be ${PASSPORT_MIN_LENGTH}-${PASSPORT_MAX_LENGTH} characters.`;
+    return t("profilePage.validation.passportLength", {
+      min: PASSPORT_MIN_LENGTH,
+      max: PASSPORT_MAX_LENGTH,
+    });
   }
 
   const hasLetter = /[A-Z]/.test(passport);
   const hasDigit = /\d/.test(passport);
   if (!hasLetter || !hasDigit) {
-    return "Passport number must include at least one letter and one number.";
+    return t("profilePage.validation.passportFormat");
   }
 
   return "";
@@ -1061,9 +1199,9 @@ async function saveProfile() {
   const success = await updateProfile(buildProfileUpdatePayload());
   if (success) {
     initialProfileSignature.value = profileSignatureFromDraft();
-    toastSuccess("Profile updated successfully.");
+    toastSuccess(t("profilePage.feedback.profileUpdated"));
   } else {
-    toastError("Failed to update profile. Please try again.");
+    toastError(t("profilePage.feedback.profileUpdateFailed"));
   }
 }
 
@@ -1073,9 +1211,9 @@ async function updateNotifications() {
     notificationsPromotion: notificationSettings.value.promotion,
   });
   if (success) {
-    toastSuccess("Notification preferences updated successfully.");
+    toastSuccess(t("profilePage.feedback.notificationsUpdated"));
   } else {
-    toastError("Failed to update preferences. Please try again.");
+    toastError(t("profilePage.feedback.preferencesUpdateFailed"));
   }
 }
 
@@ -1091,7 +1229,7 @@ async function startStripePaymentMethodSetup() {
     if (!session?.url) {
       paymentSetupFeedback.value = {
         type: "error",
-        message: "Unable to open Stripe right now. Please try again.",
+        message: t("profilePage.feedback.unableOpenStripe"),
       };
       return;
     }
@@ -1111,7 +1249,7 @@ async function handlePaymentSetupReturn() {
   if (setupStatus === "cancel") {
     paymentSetupFeedback.value = {
       type: "error",
-      message: "Card setup was canceled. You can try again anytime.",
+      message: t("profilePage.feedback.cardSetupCancelled"),
     };
     const nextQuery = normalizeSingleTabQuery(route.query);
     delete nextQuery.setup;
@@ -1130,11 +1268,11 @@ async function handlePaymentSetupReturn() {
   paymentSetupFeedback.value = success
     ? {
         type: "success",
-        message: "Payment method added successfully.",
+        message: t("profilePage.feedback.paymentMethodAdded"),
       }
     : {
         type: "error",
-        message: "We could not confirm your card. Please try again.",
+        message: t("profilePage.feedback.paymentMethodConfirmFailed"),
       };
 
   const nextQuery = normalizeSingleTabQuery(route.query);
@@ -1148,19 +1286,19 @@ async function setDefaultPaymentMethod(paymentMethodId: number) {
     isDefault: true,
   });
   if (!success) {
-    toastError("Failed to update payment method.");
+    toastError(t("profilePage.feedback.paymentMethodUpdateFailed"));
     return;
   }
-  toastSuccess("Default payment method updated.");
+  toastSuccess(t("profilePage.feedback.paymentMethodUpdated"));
 }
 
 async function deletePaymentMethod(paymentMethodId: number) {
   const success = await removePaymentMethod(paymentMethodId);
   if (!success) {
-    toastError("Failed to remove payment method.");
+    toastError(t("profilePage.feedback.paymentMethodRemoveFailed"));
     return;
   }
-  toastSuccess("Payment method removed.");
+  toastSuccess(t("profilePage.feedback.paymentMethodRemoved"));
 }
 
 function hasValue(val: any) {
@@ -1189,15 +1327,19 @@ function getFieldState(key: string, value: any) {
 
 function getFieldStatusText(key: string, value: any) {
   if (key === "phone") {
-    if (!hasValue(value)) return "Missing information";
-    return phoneValidationMessage.value ? "Invalid number" : "Completed";
+    if (!hasValue(value)) return t("profilePage.states.missingInformation");
+    return phoneValidationMessage.value
+      ? t("profilePage.states.invalidNumber")
+      : t("profilePage.states.completed");
   }
   if (key === "passportNumber") {
-    if (!hasValue(value)) return "Missing information";
-    return passportValidationMessage.value ? "Invalid format" : "Completed";
+    if (!hasValue(value)) return t("profilePage.states.missingInformation");
+    return passportValidationMessage.value
+      ? t("profilePage.states.invalidFormat")
+      : t("profilePage.states.completed");
   }
-  if (hasValue(value)) return "Completed";
-  return "Missing information";
+  if (hasValue(value)) return t("profilePage.states.completed");
+  return t("profilePage.states.missingInformation");
 }
 
 function getFieldIcon(key: string, value: any) {
@@ -1301,15 +1443,15 @@ function normalizePhoneForSave(phone: string) {
 function formatCardBrand(brand: PaymentMethod["brand"]) {
   switch (brand) {
     case "visa":
-      return "Visa";
+      return t("profilePage.brands.visa");
     case "mastercard":
-      return "Mastercard";
+      return t("profilePage.brands.mastercard");
     case "amex":
-      return "American Express";
+      return t("profilePage.brands.amex");
     case "discover":
-      return "Discover";
+      return t("profilePage.brands.discover");
     default:
-      return "Card";
+      return t("profilePage.brands.card");
   }
 }
 </script>
@@ -1375,7 +1517,7 @@ function formatCardBrand(brand: PaymentMethod["brand"]) {
   gap: 24px;
   padding: 0 32px;
   border-bottom: 1px solid var(--color-border-soft);
-  background: #ffffff;
+  background: var(--color-surface);
 }
 
 .tab-btn {
@@ -1468,7 +1610,7 @@ function formatCardBrand(brand: PaymentMethod["brand"]) {
    Settings Sections (Divided Blocks)
 ────────────────────────────────────────── */
 .settings-section {
-  background: #ffffff;
+  background: var(--color-surface);
   border: 1px solid var(--color-border-soft);
   border-radius: var(--radius-xl);
   margin-bottom: 24px;
@@ -1561,7 +1703,7 @@ function formatCardBrand(brand: PaymentMethod["brand"]) {
 }
 
 .form-input:focus {
-  background: #ffffff;
+  background: var(--color-surface);
   border-color: var(--color-primary-500);
   box-shadow: 0 0 0 3px rgba(0, 103, 104, 0.12);
 }
@@ -1587,13 +1729,13 @@ function formatCardBrand(brand: PaymentMethod["brand"]) {
 }
 
 .phone-input-group:focus-within {
-  background: #ffffff;
+  background: var(--color-surface);
   border-color: var(--color-primary-500);
   box-shadow: 0 0 0 3px rgba(0, 103, 104, 0.12);
 }
 
 .phone-country-picker {
-  background-color: #ffffff !important;
+  background-color: var(--color-surface) !important;
   position: relative;
   flex: 0 0 62px;
   z-index: 30;
@@ -1627,7 +1769,7 @@ function formatCardBrand(brand: PaymentMethod["brand"]) {
 }
 
 .phone-country-trigger:focus {
-  background: #ffffff;
+  background: var(--color-surface);
   box-shadow: none;
 }
 
@@ -1644,7 +1786,7 @@ function formatCardBrand(brand: PaymentMethod["brand"]) {
   max-height: 280px;
   overflow: auto;
   z-index: 4000;
-  background: #ffffff;
+  background: var(--color-surface);
   border: 1px solid var(--color-border-soft);
   border-radius: var(--radius-xl);
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
@@ -1849,7 +1991,11 @@ input[type="date"] ~ .state-icon {
 .payment-card {
   border: 1px solid var(--color-border-soft);
   border-radius: var(--radius-xl);
-  background: linear-gradient(180deg, #ffffff 0%, var(--color-bg-soft) 100%);
+  background: linear-gradient(
+    180deg,
+    var(--color-surface) 0%,
+    var(--color-bg-soft) 100%
+  );
   padding: 18px;
   display: flex;
   flex-direction: column;
@@ -1969,7 +2115,7 @@ input[type="date"] ~ .state-icon {
   width: 56px;
   height: 56px;
   border-radius: var(--radius-full);
-  background: #ffffff;
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   display: flex;
   align-items: center;
@@ -2038,7 +2184,7 @@ input[type="date"] ~ .state-icon {
 }
 
 .toggle-row:hover {
-  background: #ffffff;
+  background: var(--color-surface);
   border-color: var(--color-border);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
@@ -2083,7 +2229,7 @@ input[type="date"] ~ .state-icon {
   left: 3px;
   width: 18px;
   height: 18px;
-  background: #ffffff;
+  background: var(--color-surface);
   border-radius: 50%;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

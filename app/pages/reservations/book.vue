@@ -1,43 +1,38 @@
 <template>
   <div class="booking-page">
-    <Head>
-      <title>Complete Booking - VoyageHub</title>
-      <meta name="description" content="Review your booking and pay securely with Stripe." />
-    </Head>
-
     <section class="booking-card">
-      <h1>Complete your booking</h1>
-      <p class="subtitle">Review details and continue to Stripe Checkout.</p>
+      <h1>{{ t("checkoutPage.title") }}</h1>
+      <p class="subtitle">{{ t("checkoutPage.subtitle") }}</p>
 
       <div v-if="!selectedHotel" class="state state--warning">
-        Please select a hotel before paying.
+        {{ t("checkoutPage.missingHotel") }}
       </div>
 
       <div v-else class="details-grid">
         <article class="detail-box">
           <h2>{{ selectedHotel.name }}</h2>
           <p>{{ selectedHotel.city }}, {{ selectedHotel.country }}</p>
-          <p>{{ selectedHotel.stars }}-star hotel</p>
+          <p>{{ t("checkoutPage.starHotel", { count: selectedHotel.stars }) }}</p>
         </article>
 
         <article class="detail-box">
-          <h3>Stay</h3>
-          <p>Check-in: {{ displayCheckIn }}</p>
-          <p>Check-out: {{ displayCheckOut }}</p>
-          <p>Nights: {{ nights }}</p>
+          <h3>{{ t("checkoutPage.stay") }}</h3>
+          <p>{{ t("checkoutPage.checkIn") }}: {{ displayCheckIn }}</p>
+          <p>{{ t("checkoutPage.checkOut") }}: {{ displayCheckOut }}</p>
+          <p>{{ t("checkoutPage.nights") }}: {{ nights }}</p>
         </article>
 
         <article class="detail-box">
-          <h3>Guest</h3>
+          <h3>{{ t("checkoutPage.guest") }}</h3>
           <p>{{ guestName }}</p>
           <p>{{ guestEmail }}</p>
           <p>{{ guestPhone }}</p>
         </article>
 
         <article class="detail-box">
-          <h3>Estimated total</h3>
+          <h3>{{ t("checkoutPage.estimatedTotal") }}</h3>
           <p class="amount">{{ estimatedTotalLabel }}</p>
-          <small>Final validation occurs on backend before Stripe session creation.</small>
+          <small>{{ t("checkoutPage.estimateNote") }}</small>
         </article>
       </div>
 
@@ -46,7 +41,7 @@
         :disabled="!selectedHotel || isPaying"
         @click="payNow"
       >
-        {{ isPaying ? 'Redirecting to Stripe...' : 'Pay Now' }}
+        {{ isPaying ? t("checkoutPage.redirecting") : t("checkoutPage.payNow") }}
       </button>
 
       <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
@@ -67,6 +62,7 @@ const roomService = new RoomService()
 const { selectedHotel } = useHotels()
 const { accountId, currentAccount, currentProfile } = useAuth()
 const { createBooking, createCheckoutSession } = useReservations()
+const { t, formatDate, formatCurrency } = useAppI18n()
 const PAYMENT_RESULT_ACCESS_KEY = 'vh_payment_result_access'
 
 const isPaying = ref(false)
@@ -89,10 +85,11 @@ const nights = computed(() => {
 })
 
 const displayCheckIn = computed(() =>
-  checkInDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+  formatDate(checkInDate, { month: 'short', day: 'numeric', year: 'numeric' }),
 )
+
 const displayCheckOut = computed(() =>
-  checkOutDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+  formatDate(checkOutDate, { month: 'short', day: 'numeric', year: 'numeric' }),
 )
 
 const guestName = computed(() => {
@@ -101,21 +98,21 @@ const guestName = computed(() => {
     return `${profile.firstName || ''} ${profile.lastName || ''}`.trim()
   }
 
-  return currentAccount.value?.email.split('@')[0] || 'VoyageHub Guest'
+  return currentAccount.value?.email.split('@')[0] || t('checkoutPage.guestFallback')
 })
 
-const guestEmail = computed(() => currentAccount.value?.email || 'No email available')
-const guestPhone = computed(() => currentProfile.value?.phone || 'No phone provided')
+const guestEmail = computed(() => currentAccount.value?.email || t('checkoutPage.noEmail'))
+const guestPhone = computed(() => currentProfile.value?.phone || t('checkoutPage.noPhone'))
 
 const estimatedTotalLabel = computed(() => {
   if (estimatedTotal.value === null) {
-    return 'Loading...'
+    return t('checkoutPage.loadingAmount')
   }
 
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(estimatedTotal.value)
+  return formatCurrency(estimatedTotal.value, 'USD', {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 2,
+  })
 })
 
 async function refreshEstimate() {
@@ -149,12 +146,12 @@ async function payNow() {
   errorMessage.value = ''
 
   if (!selectedHotel.value) {
-    errorMessage.value = 'No hotel selected.'
+    errorMessage.value = t('checkoutPage.noHotelSelected')
     return
   }
 
   if (!accountId.value) {
-    errorMessage.value = 'You must be signed in to continue.'
+    errorMessage.value = t('checkoutPage.signInRequired')
     return
   }
 
@@ -169,7 +166,7 @@ async function payNow() {
     const room = rooms[0]
 
     if (!room) {
-      throw new Error('No available room found for this stay window.')
+      throw new Error(t('checkoutPage.noAvailableRoom'))
     }
 
     const booking = await createBooking({
@@ -186,7 +183,7 @@ async function payNow() {
     })
 
     if (!booking) {
-      throw new Error('Unable to create booking.')
+      throw new Error(t('checkoutPage.bookingCreateFailed'))
     }
 
     const session = await createCheckoutSession({
@@ -197,15 +194,15 @@ async function payNow() {
     })
 
     if (!session?.url) {
-      throw new Error('Unable to create Stripe checkout session.')
+      throw new Error(t('checkoutPage.stripeSessionFailed'))
     }
 
     if (typeof window !== 'undefined') {
       sessionStorage.setItem(PAYMENT_RESULT_ACCESS_KEY, '1')
+      window.location.assign(session.url)
     }
-    window.location.assign(session.url)
   } catch (error: any) {
-    errorMessage.value = error?.message || 'Payment failed. Please try again.'
+    errorMessage.value = error?.message || t('checkoutPage.paymentFailed')
   } finally {
     isPaying.value = false
   }
@@ -213,34 +210,50 @@ async function payNow() {
 
 onMounted(refreshEstimate)
 watch(selectedHotel, refreshEstimate)
+
+useHead(() => ({
+  title: t('checkoutPage.metaTitle'),
+  meta: [
+    {
+      name: 'description',
+      content: t('checkoutPage.metaDescription'),
+    },
+  ],
+}))
 </script>
 
 <style scoped>
 .booking-page {
   min-height: calc(100vh - 120px);
-  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
   padding: 40px 16px;
+  background:
+    radial-gradient(
+      circle at top,
+      color-mix(in srgb, var(--color-primary-50) 60%, transparent) 0%,
+      transparent 48%
+    ),
+    linear-gradient(180deg, var(--color-bg-soft) 0%, var(--color-surface) 100%);
 }
 
 .booking-card {
-  max-width: 920px;
+  width: min(920px, 100%);
   margin: 0 auto;
-  background: #ffffff;
-  border-radius: 20px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
   padding: 28px;
+  border: 1px solid var(--color-border-soft);
+  border-radius: 20px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-lg);
 }
 
 h1 {
   margin: 0;
+  color: var(--color-text-primary);
   font-size: 2rem;
-  color: #0f172a;
 }
 
 .subtitle {
   margin: 8px 0 18px;
-  color: #475569;
+  color: var(--color-text-secondary);
 }
 
 .details-grid {
@@ -250,36 +263,41 @@ h1 {
 }
 
 .detail-box {
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
   padding: 14px;
-  background: #f8fafc;
+  border: 1px solid var(--color-border-soft);
+  border-radius: 14px;
+  background: var(--color-surface-secondary);
 }
 
 .detail-box h2,
 .detail-box h3 {
   margin: 0 0 8px;
-  color: #0f172a;
+  color: var(--color-text-primary);
+}
+
+.detail-box p,
+.detail-box small {
+  color: var(--color-text-secondary);
 }
 
 .detail-box p {
   margin: 0 0 6px;
-  color: #334155;
 }
 
 .amount {
+  color: var(--color-text-primary);
   font-size: 1.2rem;
   font-weight: 700;
 }
 
 .pay-button {
-  margin-top: 20px;
   width: 100%;
+  margin-top: 20px;
+  padding: 14px;
   border: none;
   border-radius: 12px;
-  padding: 14px;
-  background: #0f172a;
-  color: #ffffff;
+  background: var(--color-text-primary);
+  color: var(--color-white);
   font-weight: 700;
   cursor: pointer;
 }
@@ -290,20 +308,20 @@ h1 {
 }
 
 .state {
+  margin-bottom: 14px;
   padding: 14px;
   border-radius: 12px;
-  margin-bottom: 14px;
 }
 
 .state--warning {
-  background: #fff7ed;
-  border: 1px solid #fed7aa;
-  color: #9a3412;
+  border: 1px solid var(--alert-warning-border);
+  background: var(--alert-warning-bg);
+  color: var(--alert-warning-text);
 }
 
 .error-text {
   margin-top: 10px;
-  color: #b91c1c;
+  color: var(--color-danger-600);
   font-weight: 600;
 }
 

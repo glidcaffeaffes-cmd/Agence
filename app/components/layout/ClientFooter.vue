@@ -2,18 +2,18 @@
   <footer class="client-footer">
     <div class="footer-container">
       <div class="footer-grid">
-        <!-- Brand & Manifesto -->
         <div class="footer-brand-col">
           <NuxtLink to="/" class="footer-brand">
             <span class="footer-brand-mark">
               <img :src="brandLogoUrl" alt="" class="footer-brand-logo" aria-hidden="true" />
             </span>
-            <span class="brand-text"
-              >Voyage<span class="brand-accent">Hub</span></span
-            >
+            <span class="brand-text">
+              Voyage<span class="brand-accent">Hub</span>
+            </span>
           </NuxtLink>
+
           <div class="footer-social">
-            <div class="flex gap-1">
+            <div class="footer-social-links">
               <a
                 href="https://www.facebook.com"
                 target="_blank"
@@ -58,52 +58,41 @@
                 </svg>
               </a>
             </div>
-            <span class="footer-social-label">FOLLOW US</span>
+            <span class="footer-social-label">{{ t("footer.followUs") }}</span>
           </div>
         </div>
 
-        <!-- Navigation Groups -->
         <div class="footer-nav-grid">
           <div class="footer-col">
-            <h4 class="footer-heading">Company</h4>
-            <NuxtLink to="/about" class="footer-link">About Us</NuxtLink>
-            <NuxtLink to="/terms" class="footer-link"
-              >Terms of Service</NuxtLink
-            >
-            <NuxtLink to="/privacy" class="footer-link"
-              >Privacy Policy</NuxtLink
-            >
+            <h4 class="footer-heading">{{ t("footer.company") }}</h4>
+            <NuxtLink to="/about" class="footer-link">{{ t("footer.aboutUs") }}</NuxtLink>
+            <NuxtLink to="/terms" class="footer-link">{{ t("footer.terms") }}</NuxtLink>
+            <NuxtLink to="/privacy" class="footer-link">{{ t("footer.privacy") }}</NuxtLink>
           </div>
 
           <div class="footer-col">
-            <h4 class="footer-heading">Booking</h4>
-            <NuxtLink to="/my-bookings" class="footer-link"
-              >My Bookings</NuxtLink
-            >
-            <NuxtLink to="/cancellation-policy" class="footer-link"
-              >Cancellation Policy</NuxtLink
-            >
-            <NuxtLink to="/help-center" class="footer-link"
-              >Help Center</NuxtLink
-            >
+            <h4 class="footer-heading">{{ t("footer.booking") }}</h4>
+            <NuxtLink to="/my-bookings" class="footer-link">{{ t("footer.myBookings") }}</NuxtLink>
+            <NuxtLink to="/cancellation-policy" class="footer-link">
+              {{ t("footer.cancellationPolicy") }}
+            </NuxtLink>
+            <NuxtLink to="/help-center" class="footer-link">{{ t("footer.helpCenter") }}</NuxtLink>
           </div>
 
           <div class="footer-col">
-            <h4 class="footer-heading">Support</h4>
-            <NuxtLink to="/contact" class="footer-link">Contact</NuxtLink>
+            <h4 class="footer-heading">{{ t("footer.support") }}</h4>
+            <NuxtLink to="/contact" class="footer-link">{{ t("footer.contact") }}</NuxtLink>
           </div>
         </div>
       </div>
 
-      <!-- Bottom Bar -->
       <div class="footer-bottom">
         <div class="footer-bottom-content">
           <p class="copyright">
-            &copy; {{ new Date().getFullYear() }} VoyageHub Authority. All
-            rights reserved.
+            &copy; {{ new Date().getFullYear() }} VoyageHub Authority. {{ t("footer.rights") }}
           </p>
           <div class="footer-meta">
-            <span>Sfax &bull; Tunis &bull; Mahdia &bull; Gafsa</span>
+            <span>{{ t("common.cities") }}</span>
           </div>
         </div>
       </div>
@@ -112,44 +101,50 @@
 </template>
 
 <script setup lang="ts">
-const runtimeConfig = useRuntimeConfig()
-const brandLogoUrl = `${runtimeConfig.app.baseURL}logo.png`
+const runtimeConfig = useRuntimeConfig();
+const brandLogoUrl = `${runtimeConfig.app.baseURL}logo.png`;
+const { t } = useAppI18n();
 </script>
 
 <style scoped>
 .client-footer {
-  background: linear-gradient(180deg, #f9fcff 0%, #eef5fb 100%);
-  color: var(--color-gray-700);
   margin-top: auto;
-  border-top: 1px solid rgba(188, 201, 200, 0.55);
+  border-top: 1px solid color-mix(in srgb, var(--color-border) 72%, transparent);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-bg-soft) 88%, transparent) 0%,
+      color-mix(in srgb, var(--color-surface) 96%, transparent) 100%
+    );
+  color: var(--color-text-secondary);
 }
 
 .footer-container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 24px 24px 0;
+  padding: 1.5rem 1.5rem 0;
 }
 
 .footer-grid {
   display: grid;
   grid-template-columns: minmax(280px, 1.2fr) minmax(0, 2fr);
-  gap: 24px;
-  margin-bottom: 16px;
-  padding: 16px 8px;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+  padding: 1rem 0.5rem;
 }
 
 .footer-brand {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
   text-decoration: none;
-  margin-bottom: 24px;
 }
 
 .footer-brand-mark {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 1rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -157,17 +152,17 @@ const brandLogoUrl = `${runtimeConfig.app.baseURL}logo.png`
 }
 
 .footer-brand-logo {
-  width: 34px;
-  height: 34px;
+  width: 2.1rem;
+  height: 2.1rem;
   object-fit: contain;
 }
 
 .footer-brand .brand-text {
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: 800;
-  color: var(--color-gray-900);
   letter-spacing: -0.02em;
   font-family: var(--font-family-heading) !important;
+  color: var(--color-text-primary);
 }
 
 .footer-brand .brand-accent {
@@ -177,58 +172,63 @@ const brandLogoUrl = `${runtimeConfig.app.baseURL}logo.png`
 .footer-social {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding-left: 12px;
+  gap: 0.75rem;
+  padding-inline-start: 0.75rem;
+}
+
+.footer-social-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
 }
 
 .footer-social-label {
-  font-size: 14px;
-  color: var(--color-gray-700);
+  font-size: 0.85rem;
   font-weight: 800;
+  color: var(--color-text-primary);
 }
 
 .footer-social-link {
-  width: 36px;
-  height: 36px;
+  width: 2.35rem;
+  height: 2.35rem;
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-gray-700);
-  background: white;
-  border: 1px solid rgba(188, 201, 200, 0.7);
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-soft);
   transition:
-    color 0.2s ease,
-    border-color 0.2s ease,
-    transform 0.2s ease,
-    background-color 0.2s ease;
+    color var(--duration-fast) var(--easing-standard),
+    border-color var(--duration-fast) var(--easing-standard),
+    transform var(--duration-fast) var(--easing-standard),
+    background-color var(--duration-fast) var(--easing-standard);
 }
 
 .footer-social-link:hover {
   color: var(--color-primary-600);
   border-color: var(--color-primary-300);
-  background: color-mix(in srgb, var(--color-primary-50) 70%, white 30%);
+  background: color-mix(in srgb, var(--color-primary-50) 70%, var(--color-surface));
   transform: translateY(-1px);
 }
 
 .footer-social-link svg {
-  width: 20px;
-  height: 20px;
+  width: 1.15rem;
+  height: 1.15rem;
   fill: currentColor;
 }
 
-/* Nav Grid */
 .footer-nav-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
 }
 
 .footer-heading {
-  color: var(--color-gray-500);
-  font-size: 11px;
+  margin-bottom: 0.6rem;
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
   font-weight: 700;
-  margin-bottom: 8px;
   text-transform: uppercase;
   letter-spacing: 0.16em;
 }
@@ -236,92 +236,81 @@ const brandLogoUrl = `${runtimeConfig.app.baseURL}logo.png`
 .footer-col {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 0.15rem;
 }
 
 .footer-link {
-  text-decoration: none;
-  color: var(--color-gray-700);
-  font-size: 13px;
-  line-height: 1.4;
-  transition:
-    color 0.2s ease,
-    background-color 0.2s ease,
-    transform 0.2s ease;
   width: fit-content;
-  padding: 3px 6px;
-  margin-left: -6px;
-  border-radius: 8px;
+  padding: 0.2rem 0.4rem;
+  margin-inline-start: -0.4rem;
+  border-radius: 0.6rem;
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.45;
+  text-decoration: none;
+  transition:
+    color var(--duration-fast) var(--easing-standard),
+    background-color var(--duration-fast) var(--easing-standard),
+    transform var(--duration-fast) var(--easing-standard);
 }
 
 .footer-link:hover {
   color: var(--color-primary-700);
-  background: rgba(77, 182, 172, 0.12);
+  background: color-mix(in srgb, var(--color-primary-50) 68%, transparent);
   transform: translateX(2px);
 }
 
-/* Bottom Bar */
 .footer-bottom {
-  padding: 10px 0 12px;
-  border-top: 1px solid rgba(188, 201, 200, 0.55);
+  padding: 0.8rem 0 1rem;
+  border-top: 1px solid color-mix(in srgb, var(--color-border) 72%, transparent);
 }
 
 .footer-bottom-content {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
 .copyright {
-  font-size: 12px;
-  color: var(--color-gray-600);
   margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 0.78rem;
 }
 
 .footer-meta {
-  font-size: 10px;
-  font-weight: 600;
+  color: var(--color-text-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.16em;
-  color: var(--color-gray-500);
+  letter-spacing: 0.14em;
 }
 
 @media (max-width: 1024px) {
   .footer-grid {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 1.25rem;
   }
-  .footer-container {
-    padding: 20px 20px 0;
-  }
+
   .footer-nav-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 14px;
   }
 }
 
 @media (max-width: 640px) {
   .footer-container {
-    padding: 18px 16px 0;
+    padding: 1.1rem 1rem 0;
   }
-  .footer-grid {
-    gap: 16px;
-    margin-bottom: 14px;
-  }
-  .footer-brand .brand-text {
-    font-size: 20px;
-  }
+
   .footer-nav-grid {
     grid-template-columns: 1fr;
-    gap: 14px;
+    gap: 0.9rem;
   }
-  .footer-col {
-    gap: 2px;
+
+  .footer-brand .brand-text {
+    font-size: 1.25rem;
   }
-  .footer-bottom {
-    padding: 10px 0 12px;
-  }
+
   .footer-bottom-content {
     flex-direction: column;
     text-align: center;

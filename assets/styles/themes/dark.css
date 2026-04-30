@@ -1,0 +1,215 @@
+html[data-theme-resolved='dark'] {
+  color-scheme: dark;
+
+  /* SEMANTIC USAGE TOKENS */
+  --color-bg: #0a1218;
+  --color-bg-soft: #0d1720;
+  --color-surface: #111c24;
+  --color-surface-2: #16232d;
+  --color-card: #12202a;
+  --color-card-elevated: #182733;
+
+  --color-border: #263845;
+  --color-border-soft: #1d2b36;
+  --color-divider: #223340;
+
+  --color-overlay: rgb(0 0 0 / 0.58);
+  --color-shadow: rgb(0 0 0 / 0.82);
+
+  --color-text: #edf4f8;
+  --color-text-soft: #c3d1d8;
+  --color-text-muted: #93a5b0;
+  --color-text-inverse: #0a1218;
+  --color-heading: #f7fbfe;
+  --color-link: #6cd7d7;
+  --color-link-hover: #8af3f4;
+
+  --color-focus-ring: rgb(138 243 244 / 0.36);
+  --color-selection: rgb(108 215 215 / 0.32);
+
+  --color-disabled: #17232c;
+  --color-disabled-text: #5c707d;
+  --color-disabled-bg: #101a22;
+
+  --color-room-available: var(--color-success-400);
+  --color-room-booked: #607482;
+
+  --color-reservation-pending: var(--color-warning-400);
+  --color-reservation-confirmed: var(--color-success-400);
+  --color-reservation-cancelled: #94a3b8;
+  --color-reservation-refused: var(--color-danger-400);
+
+  --color-promotion-badge: var(--color-accent-400);
+  --color-review-star: var(--color-accent-400);
+
+  --color-analytics-highlight: var(--color-primary-300);
+  --color-admin-action: var(--color-navy-300);
+  --color-cancellation-policy: var(--color-info-400);
+  --color-urgent-alert: var(--color-danger-400);
+
+  --btn-primary-bg: var(--color-primary-400);
+  --btn-primary-text: #031414;
+  --btn-primary-hover-bg: var(--color-primary-300);
+  --btn-primary-active-bg: var(--color-primary-200);
+
+  --btn-secondary-bg: var(--color-surface-2);
+  --btn-secondary-text: #d8ebff;
+  --btn-secondary-border: #38576f;
+  --btn-secondary-hover-bg: #1b2d3b;
+  --btn-secondary-active-bg: #22384a;
+
+  --btn-outline-bg: transparent;
+  --btn-outline-text: #b9d8f1;
+  --btn-outline-border: #597993;
+  --btn-outline-hover-bg: rgb(35 98 148 / 0.14);
+
+  --btn-ghost-bg: transparent;
+  --btn-ghost-text: var(--color-text-soft);
+  --btn-ghost-hover-bg: rgb(255 255 255 / 0.05);
+
+  --btn-danger-bg: var(--color-danger-400);
+  --btn-danger-hover-bg: var(--color-danger-300);
+
+  --btn-success-bg: var(--color-success-400);
+  --btn-success-hover-bg: var(--color-success-300);
+
+  --input-bg: #0f1a22;
+  --input-border: #304450;
+  --input-text: var(--color-text);
+  --input-placeholder: #6f8593;
+  --input-hover-border: #47606f;
+  --input-focus-border: #6cd7d7;
+  --input-focus-ring: 0 0 0 3px rgb(138 243 244 / 0.2);
+  --input-error-border: var(--color-danger-400);
+
+  --checkbox-border: #3a4f5c;
+  --checkbox-checked-bg: var(--color-primary-300);
+
+  --switch-track-bg: #304450;
+  --switch-track-active-bg: var(--color-success-400);
+  --switch-thumb-bg: #f7fbfe;
+
+  --badge-bg: #16232d;
+  --badge-text: #cfdae2;
+  --badge-primary-bg: rgb(108 215 215 / 0.14);
+  --badge-primary-text: #9cf7f8;
+
+  --hotel-card-bg: var(--color-card);
+  --hotel-card-border: var(--color-border-soft);
+  --hotel-card-shadow: 0 18px 38px rgb(0 0 0 / 0.32);
+  --hotel-card-hover-shadow: 0 22px 46px rgb(0 0 0 / 0.4);
+
+  --topbar-bg: rgb(17 28 36 / 0.86);
+  --topbar-border: #243643;
+  --navbar-bg: rgb(17 28 36 / 0.88);
+  --sidebar-bg: #081319;
+  --sidebar-text: #d4e7ef;
+  --sidebar-hover-bg: #10222c;
+  --sidebar-active-bg: #14313a;
+
+  --tab-text: #8ea3b0;
+  --tab-active-text: #8af3f4;
+  --tab-active-border: #6cd7d7;
+  --tab-hover-bg: rgb(255 255 255 / 0.05);
+
+  --modal-bg: #14212a;
+  --modal-backdrop: rgb(0 0 0 / 0.62);
+  --modal-shadow: 0 30px 72px rgb(0 0 0 / 0.44);
+
+  --toast-bg: #0b141a;
+  --toast-text: #f7fbfe;
+
+  --alert-info-bg: rgb(14 165 233 / 0.14);
+  --alert-info-border: rgb(14 165 233 / 0.32);
+  --alert-info-text: #d8f4ff;
+
+  --alert-success-bg: rgb(16 185 129 / 0.14);
+  --alert-success-border: rgb(16 185 129 / 0.3);
+  --alert-success-text: #d8fff0;
+
+  --alert-warning-bg: rgb(245 158 11 / 0.14);
+  --alert-warning-border: rgb(245 158 11 / 0.28);
+  --alert-warning-text: #fff3d4;
+
+  --alert-danger-bg: rgb(244 63 94 / 0.14);
+  --alert-danger-border: rgb(244 63 94 / 0.28);
+  --alert-danger-text: #ffe1e7;
+
+  --table-bg: #132029;
+  --table-header-bg: #182733;
+  --table-header-text: #c3d1d8;
+  --table-border: #233541;
+  --table-row-hover-bg: rgb(255 255 255 / 0.03);
+
+  --pagination-bg: #14212a;
+  --pagination-border: #2d404d;
+  --pagination-text: var(--color-text);
+  --pagination-active-bg: rgb(108 215 215 / 0.18);
+  --pagination-active-text: #9cf7f8;
+
+  --skeleton-bg: #1a2a34;
+  --skeleton-highlight: #243743;
+  --loader-color: var(--color-primary-300);
+
+  --stat-card-bg: #132029;
+  --stat-value-text: #f7fbfe;
+  --stat-label-text: #9bb0bc;
+
+  --review-card-bg: #16232d;
+  --review-text: #c3d1d8;
+
+  /* Tailwind runtime bridge */
+  --tw-primary-container: 0 79 80;
+  --tw-on-tertiary-fixed-variant: 255 236 191;
+  --tw-secondary-container: 27 75 114;
+  --tw-surface: 17 28 36;
+  --tw-on-secondary-container: 225 243 255;
+  --tw-secondary-fixed: 64 126 172;
+  --tw-on-primary-fixed-variant: 213 255 255;
+  --tw-surface-container: 22 35 45;
+  --tw-on-surface: 237 244 248;
+  --tw-surface-variant: 31 46 57;
+  --tw-on-primary: 3 20 20;
+  --tw-on-secondary: 255 255 255;
+  --tw-surface-container-lowest: 10 18 24;
+  --tw-primary: 77 182 172;
+  --tw-inverse-surface: 229 239 245;
+  --tw-secondary-fixed-dim: 143 198 254;
+  --tw-on-tertiary: 24 18 0;
+  --tw-on-secondary-fixed-variant: 233 245 255;
+  --tw-error-container: 91 25 31;
+  --tw-on-surface-variant: 195 209 216;
+  --tw-surface-tint: 108 215 215;
+  --tw-on-background: 237 244 248;
+  --tw-error: 251 113 133;
+  --tw-tertiary: 227 195 111;
+  --tw-tertiary-fixed: 122 98 33;
+  --tw-inverse-primary: 0 79 80;
+  --tw-on-error-container: 255 226 231;
+  --tw-on-tertiary-fixed: 255 246 220;
+  --tw-secondary: 143 198 254;
+  --tw-outline: 132 151 162;
+  --tw-surface-dim: 9 16 22;
+  --tw-surface-container-highest: 35 51 63;
+  --tw-primary-fixed: 138 243 244;
+  --tw-on-secondary-fixed: 1 29 52;
+  --tw-inverse-on-surface: 16 24 31;
+  --tw-on-primary-container: 233 255 255;
+  --tw-on-primary-fixed: 0 32 32;
+  --tw-on-tertiary-container: 255 240 198;
+  --tw-outline-variant: 71 89 100;
+  --tw-tertiary-fixed-dim: 198 168 87;
+  --tw-tertiary-container: 94 74 22;
+  --tw-surface-container-low: 16 28 36;
+  --tw-background: 10 18 24;
+  --tw-surface-container-high: 27 41 51;
+  --tw-on-error: 42 0 5;
+  --tw-primary-fixed-dim: 108 215 215;
+  --tw-surface-bright: 28 42 52;
+
+  --color-surface-primary: var(--color-surface);
+  --color-surface-secondary: var(--color-surface-2);
+  --color-text-primary: var(--color-text);
+  --color-text-secondary: var(--color-text-soft);
+  --color-error: var(--color-danger-400);
+}

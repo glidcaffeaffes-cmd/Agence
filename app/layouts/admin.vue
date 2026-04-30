@@ -1,182 +1,288 @@
 <template>
-  <div class="bg-surface text-on-surface antialiased min-h-screen">
-    <!-- SideNavBar -->
-    <aside class="admin-sidebar h-screen w-64 fixed left-0 top-0 z-50 flex flex-col overflow-y-auto">
-      <!-- Brand -->
-      <div class="px-6 py-5 flex-shrink-0 border-b mb-2" style="border-color: var(--color-primary-500);">
-        <div class="flex items-center gap-2">
-          <img :src="brandLogoUrl" alt="" class="h-8 w-8 rounded-lg object-contain brightness-0 invert" aria-hidden="true" />
-          <h1 class="text-lg font-bold tracking-tight" style="color: var(--color-white);">VoyageHub</h1>
-        </div>
+  <div class="admin-shell">
+    <button
+      v-if="sidebarOpen"
+      class="admin-shell__overlay"
+      aria-label="Close navigation"
+      @click="sidebarOpen = false"
+    ></button>
+
+    <aside :class="['admin-sidebar', { 'admin-sidebar--open': sidebarOpen }]">
+      <div class="admin-sidebar__brand">
+        <NuxtLink to="/admin" class="admin-sidebar__brand-link" @click="sidebarOpen = false">
+          <img
+            :src="brandLogoUrl"
+            alt=""
+            class="admin-sidebar__brand-logo"
+            aria-hidden="true"
+          />
+          <h1 class="admin-sidebar__brand-title">VoyageHub</h1>
+        </NuxtLink>
       </div>
 
-      <nav class="flex-1 px-2 pb-4" id="sidebar-nav">
-        <!-- Overview -->
-        <p class="nav-group-label">Overview</p>
-        <NuxtLink to="/admin" exact active-class="nav-active" class="nav-item">
-          <span class="material-symbols-outlined">dashboard</span>
-          <span>Dashboard</span>
-        </NuxtLink>
-        <NuxtLink to="/admin/stats" active-class="nav-active" class="nav-item">
-          <span class="material-symbols-outlined">bar_chart</span>
-          <span>Statistics</span>
-        </NuxtLink>
-        <NuxtLink to="/admin/reports" active-class="nav-active" class="nav-item">
-          <span class="material-symbols-outlined">receipt_long</span>
-          <span>Financial Reports</span>
-        </NuxtLink>
-
-        <!-- Operations -->
-        <p class="nav-group-label">Operations</p>
-        <NuxtLink to="/admin/hotels" active-class="nav-active" class="nav-item">
-          <span class="material-symbols-outlined">hotel</span>
-          <span>Hotels</span>
-        </NuxtLink>
-        <NuxtLink to="/admin/reservations" active-class="nav-active" class="nav-item">
-          <span class="material-symbols-outlined">calendar_month</span>
-          <span>Reservations</span>
-        </NuxtLink>
-        <NuxtLink to="/admin/partners" active-class="nav-active" class="nav-item">
-          <span class="material-symbols-outlined">handshake</span>
-          <span>Partners</span>
-        </NuxtLink>
-        <NuxtLink to="/admin/offers" active-class="nav-active" class="nav-item">
-          <span class="material-symbols-outlined">sell</span>
-          <span>Offers</span>
-        </NuxtLink>
-        <NuxtLink to="/admin/complaints" active-class="nav-active" class="nav-item">
-          <span class="material-symbols-outlined">forum</span>
-          <span>Complaints</span>
-        </NuxtLink>
-
-        <!-- People -->
-        <p class="nav-group-label">People</p>
-        <NuxtLink to="/admin/users" active-class="nav-active" class="nav-item">
-          <span class="material-symbols-outlined">group</span>
-          <span>Users</span>
-        </NuxtLink>
-        <NuxtLink to="/admin/notifications" active-class="nav-active" class="nav-item">
-          <span class="material-symbols-outlined">notifications</span>
-          <span>Notifications</span>
-        </NuxtLink>
-
-        <!-- System -->
-        <p class="nav-group-label">System</p>
-        <NuxtLink to="/admin/roles" active-class="nav-active" class="nav-item">
-          <span class="material-symbols-outlined">manage_accounts</span>
-          <span>Roles & Access</span>
-        </NuxtLink>
-        <NuxtLink to="/admin/settings" active-class="nav-active" class="nav-item">
-          <span class="material-symbols-outlined">settings</span>
-          <span>Settings</span>
-        </NuxtLink>
-        <NuxtLink to="/admin/audit" active-class="nav-active" class="nav-item">
-          <span class="material-symbols-outlined">policy</span>
-          <span>Audit Logs</span>
-        </NuxtLink>
-        <NuxtLink to="/admin/integrations" active-class="nav-active" class="nav-item">
-          <span class="material-symbols-outlined">extension</span>
-          <span>API & Integrations</span>
-        </NuxtLink>
+      <nav class="admin-sidebar__nav" id="sidebar-nav">
+        <section v-for="group in navGroups" :key="group.label" class="admin-sidebar__group">
+          <p class="nav-group-label">{{ group.label }}</p>
+          <NuxtLink
+            v-for="item in group.items"
+            :key="item.to"
+            :to="item.to"
+            class="nav-item"
+            active-class="nav-active"
+            :exact-active-class="item.exact ? 'nav-active' : undefined"
+            @click="sidebarOpen = false"
+          >
+            <span class="material-symbols-outlined">{{ item.icon }}</span>
+            <span>{{ item.label }}</span>
+          </NuxtLink>
+        </section>
       </nav>
 
-      <!-- Footer -->
-      <div class="px-4 pb-4 pt-4 border-t flex-shrink-0" style="border-color: var(--color-primary-500);">
-        <NuxtLink to="/" class="nav-item">
+      <div class="admin-sidebar__footer">
+        <NuxtLink to="/" class="nav-item" @click="sidebarOpen = false">
           <span class="material-symbols-outlined">open_in_new</span>
-          <span>View Site</span>
+          <span>{{ t("admin.viewSite") }}</span>
         </NuxtLink>
-        <button type="button" class="nav-item nav-item--danger w-full text-left" @click="handleLogout">
+        <button type="button" class="nav-item nav-item--danger" @click="handleLogout">
           <span class="material-symbols-outlined">logout</span>
-          <span>Sign Out</span>
+          <span>{{ t("admin.signOut") }}</span>
         </button>
       </div>
     </aside>
 
-    <!-- Main Content Canvas -->
-    <main class="ml-64 min-h-screen">
-      <!-- Admin Topbar (autonomous from client layout) -->
+    <div class="admin-canvas">
       <AdminTopbar />
-
-
-      <!-- Exact Page Output Slot -->
-      <slot />
-    </main>
+      <main class="admin-content">
+        <slot />
+      </main>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useAuth } from '~/composables/useAuth'
+import { computed, watch } from "vue";
+import { useRoute } from "vue-router";
+import { useAuth } from "~/composables/useAuth";
 
-const runtimeConfig = useRuntimeConfig()
-const brandLogoUrl = `${runtimeConfig.app.baseURL}logo.png`
-const { logout } = useAuth()
+const runtimeConfig = useRuntimeConfig();
+const route = useRoute();
+const { logout } = useAuth();
+const { t } = useAppI18n();
+const sidebarOpen = useState<boolean>("admin-sidebar-open", () => false);
+const brandLogoUrl = `${runtimeConfig.app.baseURL}logo.png`;
+
+const navGroups = computed(() => [
+  {
+    label: t("admin.overview"),
+    items: [
+      { to: "/admin", label: t("admin.dashboard"), icon: "dashboard", exact: true },
+      { to: "/admin/stats", label: t("admin.statistics"), icon: "bar_chart" },
+      { to: "/admin/reports", label: t("admin.financialReports"), icon: "receipt_long" },
+    ],
+  },
+  {
+    label: t("admin.operations"),
+    items: [
+      { to: "/admin/hotels", label: t("admin.hotels"), icon: "hotel" },
+      { to: "/admin/reservations", label: t("admin.reservations"), icon: "calendar_month" },
+      { to: "/admin/partners", label: t("admin.partners"), icon: "handshake" },
+      { to: "/admin/offers", label: t("admin.offers"), icon: "sell" },
+      { to: "/admin/complaints", label: t("admin.complaints"), icon: "forum" },
+    ],
+  },
+  {
+    label: t("admin.people"),
+    items: [
+      { to: "/admin/users", label: t("admin.users"), icon: "group" },
+      { to: "/admin/notifications", label: t("admin.notifications"), icon: "notifications" },
+    ],
+  },
+  {
+    label: t("admin.system"),
+    items: [
+      { to: "/admin/roles", label: t("admin.rolesAccess"), icon: "manage_accounts" },
+      { to: "/admin/settings", label: t("admin.settings"), icon: "settings" },
+      { to: "/admin/audit", label: t("admin.auditLogs"), icon: "policy" },
+      { to: "/admin/integrations", label: t("admin.apiIntegrations"), icon: "extension" },
+    ],
+  },
+]);
 
 function handleLogout() {
-  logout()
-  navigateTo('/login')
+  sidebarOpen.value = false;
+  logout();
+  navigateTo("/login");
 }
+
+watch(
+  () => route.fullPath,
+  () => {
+    sidebarOpen.value = false;
+  },
+);
 </script>
 
-<style>
-/* Base typography and scrollbars */
-.material-symbols-outlined {
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+<style scoped>
+.admin-shell {
+  min-height: 100vh;
+  background: var(--color-bg-soft);
+  color: var(--color-text);
 }
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #bcc9c8; border-radius: 10px; }
 
-/* Sidebar Shell */
+.admin-shell__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  border: 0;
+  background: var(--color-overlay);
+}
+
 .admin-sidebar {
-  background-color: var(--color-primary-600);
+  position: fixed;
+  inset-block: 0;
+  inset-inline-start: 0;
+  z-index: 45;
+  width: min(16rem, calc(100vw - 2rem));
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  background: var(--sidebar-bg);
   box-shadow: var(--shadow-xl);
+  transform: translateX(-100%);
+  transition: transform var(--duration-normal) var(--easing-standard);
 }
 
-/* Sidebar Navigation Classes */
-.nav-group-label {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--sidebar-text);
-  opacity: 0.6;
-  margin: var(--spacing-6) var(--spacing-4) var(--spacing-2);
+.admin-sidebar--open {
+  transform: translateX(0);
 }
-.nav-item {
-  display: flex; align-items: center; gap: var(--spacing-3);
-  padding: var(--spacing-3) var(--spacing-4);
-  margin-bottom: var(--spacing-1);
-  color: var(--sidebar-text);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  border-radius: var(--radius-md);
-  transition: all var(--motion-duration-fast) var(--motion-ease-default);
+
+.admin-sidebar__brand {
+  padding: 1.35rem 1.25rem 1rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-primary-400) 48%, transparent);
+}
+
+.admin-sidebar__brand-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
   text-decoration: none;
 }
+
+.admin-sidebar__brand-logo {
+  width: 2rem;
+  height: 2rem;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+.admin-sidebar__brand-title {
+  margin: 0;
+  color: var(--color-white);
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.admin-sidebar__nav {
+  flex: 1;
+  padding: 0.75rem 0.6rem 1rem;
+}
+
+.admin-sidebar__group + .admin-sidebar__group {
+  margin-top: 0.5rem;
+}
+
+.admin-sidebar__footer {
+  padding: 1rem 0.75rem 1.15rem;
+  border-top: 1px solid color-mix(in srgb, var(--color-primary-400) 48%, transparent);
+}
+
+.admin-canvas {
+  min-height: 100vh;
+}
+
+.admin-content {
+  padding: clamp(1rem, 2.5vw, 1.75rem);
+}
+
+.nav-group-label {
+  margin: 1rem 0.65rem 0.45rem;
+  color: rgb(255 255 255 / 0.62);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.nav-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.78rem 0.95rem;
+  margin-bottom: 0.25rem;
+  border: 0;
+  border-radius: 0.9rem;
+  background: transparent;
+  color: var(--sidebar-text);
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  text-align: start;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--easing-standard),
+    color var(--duration-fast) var(--easing-standard),
+    transform var(--duration-fast) var(--easing-standard);
+}
+
 .nav-item:hover {
-  background-color: var(--color-primary-700);
+  background: var(--sidebar-hover-bg);
   color: var(--color-white);
+  transform: translateX(2px);
 }
+
 .nav-item .material-symbols-outlined {
-  font-size: 1.25rem;
-  transition: color var(--motion-duration-fast) ease;
+  font-size: 1.2rem;
 }
+
 .nav-active {
-  background-color: var(--color-primary-800);
+  background: var(--sidebar-active-bg);
   color: var(--color-white);
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
-}
-.nav-active .material-symbols-outlined {
-  color: var(--color-white);
-  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
 }
 
 .nav-item--danger:hover {
-  background-color: var(--alert-danger-bg) !important;
-  color: var(--color-danger-600) !important;
+  background: var(--alert-danger-bg);
+  color: var(--color-danger-200);
 }
-.nav-item--danger:hover .material-symbols-outlined {
-  color: var(--color-danger-600);
+
+html[dir='rtl'] .admin-sidebar {
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+  transform: translateX(100%);
+}
+
+html[dir='rtl'] .admin-sidebar--open {
+  transform: translateX(0);
+}
+
+@media (min-width: 1024px) {
+  .admin-shell__overlay {
+    display: none;
+  }
+
+  .admin-sidebar {
+    transform: none;
+  }
+
+  .admin-canvas {
+    margin-inline-start: 16rem;
+  }
+
+  html[dir='rtl'] .admin-canvas {
+    margin-inline-start: 0;
+    margin-inline-end: 16rem;
+  }
 }
 </style>

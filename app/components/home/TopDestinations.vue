@@ -1,12 +1,11 @@
-﻿<template>
+<template>
   <section class="top-destinations">
     <div class="td-container">
       <div class="td-header">
-        <h2 class="td-title">Top Destinations</h2>
-        <p class="td-subtitle">Explore Tunisia's most sought-after cities</p>
+        <h2 class="td-title">{{ t("destinations.title") }}</h2>
+        <p class="td-subtitle">{{ t("destinations.subtitle") }}</p>
       </div>
 
-      <!-- Loading skeleton -->
       <div v-if="loading" class="td-track">
         <div v-for="i in 7" :key="i" class="td-item td-item--skeleton">
           <div class="td-circle td-circle--skeleton"></div>
@@ -15,7 +14,6 @@
         </div>
       </div>
 
-      <!-- Cities row â€” only cities with hotels, up to 7 -->
       <div v-else-if="displayed.length > 0" class="td-track">
         <button
           v-for="dest in displayed"
@@ -35,12 +33,15 @@
           </div>
           <span class="td-name">{{ dest.ville }}</span>
           <span class="td-count">
-            {{ dest.count }} {{ dest.count === 1 ? "Hotel" : "Hotels" }}
+            {{
+              dest.count === 1
+                ? `${dest.count} ${t("destinations.hotelOne")}`
+                : `${dest.count} ${t("destinations.hotelOther")}`
+            }}
           </span>
         </button>
       </div>
 
-      <!-- Fallback: no hotels yet â€” show top 7 cities as preview -->
       <div v-else class="td-track">
         <button
           v-for="city in FALLBACK_CITIES"
@@ -59,7 +60,7 @@
             </div>
           </div>
           <span class="td-name">{{ city }}</span>
-          <span class="td-count">Explore</span>
+          <span class="td-count">{{ t("destinations.explore") }}</span>
         </button>
       </div>
     </div>
@@ -71,11 +72,11 @@ import { computed } from "vue";
 import { useDestinations } from "~/composables/useDestinations";
 
 const router = useRouter();
+const { t } = useAppI18n();
 const { destinations, loading, fetchDestinations } = useDestinations();
 
 onMounted(fetchDestinations);
 
-// All 24 Tunisian governorates
 const ALL_TUNISIA_CITIES = [
   "Ariana",
   "Beja",
@@ -103,7 +104,6 @@ const ALL_TUNISIA_CITIES = [
   "Zaghouan",
 ];
 
-// 7 most iconic fallback cities when no hotels exist yet
 const FALLBACK_CITIES = [
   "Tunis",
   "Sousse",
@@ -171,17 +171,18 @@ const normalizeCityKey = (value: string) =>
     .trim()
     .toLowerCase();
 
-// Computed: only Tunisian cities that have hotels, up to 7, desc by count
 const tunisiaCitiesLower = new Set(
-  ALL_TUNISIA_CITIES.map((c) => normalizeCityKey(c)),
+  ALL_TUNISIA_CITIES.map((city) => normalizeCityKey(city)),
 );
 
 const displayed = computed(() => {
   return destinations.value
     .filter(
-      (d) => d.count > 0 && tunisiaCitiesLower.has(normalizeCityKey(d.ville)),
+      (destination) =>
+        destination.count > 0 &&
+        tunisiaCitiesLower.has(normalizeCityKey(destination.ville)),
     )
-    .sort((a, b) => b.count - a.count)
+    .sort((left, right) => right.count - left.count)
     .slice(0, 7);
 });
 
@@ -201,14 +202,14 @@ function hashString(value: string): number {
     .reduce((hash, char) => ((hash << 5) - hash + char.charCodeAt(0)) | 0, 0);
 }
 
-// Improved error handler: tries default image, then stops retrying
 const failedImages = new Set<string>();
-function onImgError(e: Event, ville: string) {
-  const img = e.target as HTMLImageElement;
+
+function onImgError(event: Event, ville: string) {
+  const image = event.target as HTMLImageElement;
   const cityKey = normalizeCityKey(ville);
   if (!failedImages.has(cityKey)) {
     failedImages.add(cityKey);
-    img.src = DEFAULT_IMAGE;
+    image.src = DEFAULT_IMAGE;
   }
 }
 
@@ -218,9 +219,8 @@ function navigateToCity(ville: string) {
 </script>
 
 <style scoped>
-/* â”€â”€â”€ Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .top-destinations {
-  background: var(--color-white);
+  background: var(--color-surface);
   padding: 32px 0 36px;
 }
 
@@ -230,7 +230,6 @@ function navigateToCity(ville: string) {
   padding: 0 32px;
 }
 
-/* â”€â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .td-header {
   text-align: center;
   margin-bottom: 28px;
@@ -251,7 +250,6 @@ function navigateToCity(ville: string) {
   line-height: 1.5;
 }
 
-/* â”€â”€â”€ Cities Track â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .td-track {
   display: flex;
   align-items: flex-start;
@@ -259,142 +257,99 @@ function navigateToCity(ville: string) {
   gap: 12px;
   flex-wrap: nowrap;
   overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
   padding-bottom: 4px;
 }
 
-.td-track::-webkit-scrollbar {
-  display: none;
-}
-
-/* â”€â”€â”€ City Item â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .td-item {
+  min-width: 140px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 10px;
+  padding: 12px 10px;
+  border: 1px solid transparent;
+  border-radius: 22px;
   background: transparent;
-  border: none;
   cursor: pointer;
-  padding: 4px 8px 8px;
-  border-radius: var(--radius-2xl);
-  min-width: 108px;
-  max-width: 130px;
-  flex-shrink: 0;
-  transition: transform var(--motion-duration-normal) var(--motion-ease-default);
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .td-item:hover {
-  transform: translateY(-4px);
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--color-primary-300) 45%, transparent);
+  background: color-mix(in srgb, var(--color-primary-50) 56%, transparent);
 }
 
-.td-item:hover .td-circle {
-  box-shadow: 0 12px 32px rgba(0, 103, 104, 0.22);
-  border-color: var(--color-primary-300);
-}
-
-/* â”€â”€â”€ Circle Image â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .td-circle-wrap {
-  width: 110px;
-  height: 110px;
-  border-radius: 50%;
-  padding: 3px;
-  background: linear-gradient(
-    135deg,
-    var(--color-primary-200),
-    var(--color-accent-300)
-  );
-  transition: background var(--motion-duration-fast);
-}
-
-.td-item:hover .td-circle-wrap {
-  background: linear-gradient(
-    135deg,
-    var(--color-primary-400),
-    var(--color-accent-500)
-  );
+  position: relative;
 }
 
 .td-circle {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
+  width: 94px;
+  height: 94px;
+  border-radius: 999px;
   overflow: hidden;
-  border: 3px solid var(--color-white);
-  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.12);
-  transition:
-    box-shadow var(--motion-duration-normal),
-    border-color var(--motion-duration-normal);
+  border: 3px solid color-mix(in srgb, var(--color-primary-200) 55%, transparent);
+  box-shadow: 0 10px 18px rgba(15, 23, 42, 0.08);
 }
 
 .td-circle img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
-  transition: transform var(--motion-duration-slow) var(--motion-ease-default);
 }
 
-.td-item:hover .td-circle img {
-  transform: scale(1.1);
-}
-
-/* â”€â”€â”€ Labels â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .td-name {
-  font-size: 13px;
+  color: var(--color-text-primary);
+  font-size: 15px;
   font-weight: 800;
-  color: var(--color-heading);
   text-align: center;
-  letter-spacing: -0.01em;
-  line-height: 1.2;
 }
 
 .td-count {
-  font-size: 11.5px;
+  color: var(--color-text-secondary);
+  font-size: 12px;
   font-weight: 600;
-  color: var(--color-text-muted);
   text-align: center;
 }
 
-/* â”€â”€â”€ Skeleton â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .td-item--skeleton {
-  cursor: default;
   pointer-events: none;
 }
 
-.td-circle--skeleton {
-  width: 110px;
-  height: 110px;
-  border-radius: 50%;
+.td-circle--skeleton,
+.td-skeleton-line {
   background: linear-gradient(
     90deg,
-    var(--color-gray-100) 25%,
-    var(--color-gray-50) 50%,
-    var(--color-gray-100) 75%
+    var(--color-skeleton-bg, var(--skeleton-bg)) 0%,
+    var(--color-skeleton-highlight, var(--skeleton-highlight)) 50%,
+    var(--color-skeleton-bg, var(--skeleton-bg)) 100%
   );
   background-size: 200% 100%;
-  animation: shimmer 1.6s infinite;
+  animation: shimmer 1.4s infinite;
+}
+
+.td-circle--skeleton {
+  width: 94px;
+  height: 94px;
+  border-radius: 999px;
 }
 
 .td-skeleton-line {
-  height: 11px;
-  border-radius: var(--radius-sm);
-  background: linear-gradient(
-    90deg,
-    var(--color-gray-100) 25%,
-    var(--color-gray-50) 50%,
-    var(--color-gray-100) 75%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.6s infinite;
+  border-radius: 999px;
 }
 
 .td-skeleton-line--name {
-  width: 70px;
+  width: 84px;
+  height: 14px;
 }
+
 .td-skeleton-line--count {
-  width: 50px;
+  width: 62px;
+  height: 12px;
 }
 
 @keyframes shimmer {
@@ -406,21 +361,17 @@ function navigateToCity(ville: string) {
   }
 }
 
-/* â”€â”€â”€ Responsive â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @media (max-width: 768px) {
+  .td-container {
+    padding: 0 16px;
+  }
+
   .td-track {
     justify-content: flex-start;
   }
 
-  .td-circle-wrap,
-  .td-circle--skeleton {
-    width: 90px;
-    height: 90px;
-  }
-
   .td-item {
-    min-width: 90px;
-    max-width: 105px;
+    min-width: 124px;
   }
 }
 </style>

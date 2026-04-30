@@ -1,8 +1,10 @@
-:root {
+:root,
+html[data-theme-resolved='light'] {
   /*
    * LIGHT THEME MAPPINGS
    * Maps primitive color scales to semantic usage in a light theme environment.
    */
+  color-scheme: light;
 
   /* SEMANTIC USAGE TOKENS */
   --color-bg:                  var(--color-white);
@@ -188,6 +190,55 @@
   /* Rating & Reviews */
   --review-card-bg:            var(--color-gray-50);
   --review-text:               var(--color-text-soft);
+
+  /* Tailwind runtime bridge */
+  --tw-primary-container: 0 130 131;
+  --tw-on-tertiary-fixed-variant: 88 68 0;
+  --tw-secondary-container: 143 198 254;
+  --tw-surface: 245 250 255;
+  --tw-on-secondary-container: 6 82 131;
+  --tw-secondary-fixed: 207 229 255;
+  --tw-on-primary-fixed-variant: 0 79 80;
+  --tw-surface-container: 231 239 246;
+  --tw-on-surface: 21 29 34;
+  --tw-surface-variant: 220 227 235;
+  --tw-on-primary: 255 255 255;
+  --tw-on-secondary: 255 255 255;
+  --tw-surface-container-lowest: 255 255 255;
+  --tw-primary: 0 103 104;
+  --tw-inverse-surface: 42 49 55;
+  --tw-secondary-fixed-dim: 153 203 255;
+  --tw-on-tertiary: 255 255 255;
+  --tw-on-secondary-fixed-variant: 0 74 120;
+  --tw-error-container: 255 218 214;
+  --tw-on-surface-variant: 61 73 73;
+  --tw-surface-tint: 0 105 106;
+  --tw-on-background: 21 29 34;
+  --tw-error: 186 26 26;
+  --tw-tertiary: 115 92 16;
+  --tw-tertiary-fixed: 255 224 142;
+  --tw-inverse-primary: 108 215 215;
+  --tw-on-error-container: 147 0 10;
+  --tw-on-tertiary-fixed: 36 26 0;
+  --tw-secondary: 35 98 148;
+  --tw-outline: 109 121 121;
+  --tw-surface-dim: 211 219 226;
+  --tw-surface-container-highest: 220 227 235;
+  --tw-primary-fixed: 138 243 244;
+  --tw-on-secondary-fixed: 0 29 52;
+  --tw-inverse-on-surface: 234 242 249;
+  --tw-on-primary-container: 243 255 254;
+  --tw-on-primary-fixed: 0 32 32;
+  --tw-on-tertiary-container: 79 61 0;
+  --tw-outline-variant: 188 201 200;
+  --tw-tertiary-fixed-dim: 227 195 111;
+  --tw-tertiary-container: 198 168 87;
+  --tw-surface-container-low: 237 245 252;
+  --tw-background: 245 250 255;
+  --tw-surface-container-high: 225 233 240;
+  --tw-on-error: 255 255 255;
+  --tw-primary-fixed-dim: 108 215 215;
+  --tw-surface-bright: 245 250 255;
 
   /* ALIASES FOR COMPONENTS */
   --spacing-0: var(--space-0);

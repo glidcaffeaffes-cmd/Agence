@@ -1,0 +1,60 @@
+/* Theme overrides for PrimeVue Select and DatePicker dropdowns and custom hotel page elements */
+.p-dropdown,
+.p-dropdown .p-dropdown-label,
+.p-dropdown .p-dropdown-trigger,
+.p-dropdown-panel,
+.p-dropdown-items,
+.p-dropdown-item,
+.p-datepicker,
+.p-datepicker .p-datepicker-header,
+.p-datepicker-calendar,
+.p-datepicker-calendar td,
+.p-datepicker-calendar td > span {
+  background: var(--color-bg, #fff) !important;
+  color: var(--color-text, #172033) !important;
+  border-color: var(--color-border, #d9e1ea) !important;
+}
+
+html[data-theme-resolved="dark"] .p-dropdown,
+html[data-theme-resolved="dark"] .p-dropdown .p-dropdown-label,
+html[data-theme-resolved="dark"] .p-dropdown .p-dropdown-trigger,
+html[data-theme-resolved="dark"] .p-dropdown-panel,
+html[data-theme-resolved="dark"] .p-dropdown-items,
+html[data-theme-resolved="dark"] .p-dropdown-item,
+html[data-theme-resolved="dark"] .p-datepicker,
+html[data-theme-resolved="dark"] .p-datepicker .p-datepicker-header,
+html[data-theme-resolved="dark"] .p-datepicker-calendar,
+html[data-theme-resolved="dark"] .p-datepicker-calendar td,
+html[data-theme-resolved="dark"] .p-datepicker-calendar td > span {
+  background: var(--color-bg, #18181b) !important;
+  color: var(--color-text, #f4f4f5) !important;
+  border-color: var(--color-border, #27272a) !important;
+}
+
+.p-dropdown-item.p-highlight,
+.p-dropdown-item.p-highlight:focus,
+.p-dropdown-item.p-highlight:hover {
+  background: var(--color-primary, #1d4b8f) !important;
+  color: var(--color-bg, #fff) !important;
+}
+
+html[data-theme-resolved="dark"] .p-dropdown-item.p-highlight,
+html[data-theme-resolved="dark"] .p-dropdown-item.p-highlight:focus,
+html[data-theme-resolved="dark"] .p-dropdown-item.p-highlight:hover {
+  background: var(--color-primary, #60a5fa) !important;
+  color: var(--color-bg, #18181b) !important;
+}
+
+/* Ensure guest panel and other custom elements use theme variables */
+.guest-panel,
+.child-age-select-premium,
+.filter-date-picker {
+  background: var(--color-bg, #fff);
+  color: var(--color-text, #172033);
+}
+html[data-theme-resolved="dark"] .guest-panel,
+html[data-theme-resolved="dark"] .child-age-select-premium,
+html[data-theme-resolved="dark"] .filter-date-picker {
+  background: var(--color-bg, #18181b);
+  color: var(--color-text, #f4f4f5);
+}

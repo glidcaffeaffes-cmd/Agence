@@ -30,7 +30,7 @@
           <img
             v-if="currentProfile?.photo"
             :src="currentProfile.photo"
-            alt="Profile photo"
+            :alt="t('profileSidebar.profilePhoto')"
             referrerpolicy="no-referrer"
             class="avatar-image"
           />
@@ -47,7 +47,7 @@
           <button
             class="avatar-edit-btn"
             :disabled="isUploadingAvatar"
-            :title="isUploadingAvatar ? 'Uploading...' : 'Update Profile Picture'"
+            :title="isUploadingAvatar ? t('profileSidebar.uploading') : t('profileSidebar.updateProfilePicture')"
             @click="openAvatarPicker"
           >
             <span class="material-symbols-outlined">{{
@@ -56,7 +56,7 @@
           </button>
         </div>
         <h2 class="sidebar-name">
-          {{ currentProfile?.firstName || "Guest" }}
+          {{ currentProfile?.firstName || t("profileSidebar.guest") }}
           {{ currentProfile?.lastName || "" }}
         </h2>
       </div>
@@ -65,11 +65,11 @@
 
       <div class="sidebar-stats">
         <div class="stat-item">
-          <span class="stat-label">Trips Completed</span>
+          <span class="stat-label">{{ t("profileSidebar.tripsCompleted") }}</span>
           <span class="stat-value stat-value--primary">{{ tripsCompleted }}</span>
         </div>
         <div class="stat-item">
-          <span class="stat-label">Saved Hotels</span>
+          <span class="stat-label">{{ t("profileSidebar.savedHotels") }}</span>
           <span class="stat-value">{{ savedHotelsCount }}</span>
         </div>
       </div>
@@ -86,7 +86,7 @@
           active-class="sidebar-nav__link--active"
         >
           <span class="material-symbols-outlined">person</span>
-          Profile Settings
+          {{ t("profileSidebar.profileSettings") }}
         </NuxtLink>
         <NuxtLink
           to="/reservations/history"
@@ -94,7 +94,7 @@
           active-class="sidebar-nav__link--active"
         >
           <span class="material-symbols-outlined">history</span>
-          Reservations
+          {{ t("profileSidebar.reservations") }}
         </NuxtLink>
         <NuxtLink
           to="/settings"
@@ -102,7 +102,7 @@
           active-class="sidebar-nav__link--active"
         >
           <span class="material-symbols-outlined">settings</span>
-          Privacy & Security
+          {{ t("profileSidebar.privacySecurity") }}
         </NuxtLink>
       </nav>
     </div>
@@ -123,6 +123,7 @@ const { success: toastSuccess, error: toastError } = useAppToast();
 const { count: savedHotelsCount, hydrate: hydrateWishlist } = useWishlist();
 const { reservations, fetchByAccount } = useReservations();
 const { percentage } = useProfileCompletion(currentProfile);
+const { t } = useAppI18n();
 const avatarInputRef = ref<HTMLInputElement | null>(null);
 const isUploadingAvatar = ref(false);
 
@@ -185,13 +186,13 @@ async function handleAvatarSelect(event: Event) {
 
     const success = await updateProfile({ photo: result.url });
     if (!success) {
-      throw new Error("Unable to save profile photo");
+      throw new Error(t("profileSidebar.unableSavePhoto"));
     }
-    toastSuccess("Profile photo updated.");
+    toastSuccess(t("profileSidebar.profilePhotoUpdated"));
   } catch (error) {
     console.error("Avatar upload failed:", error);
     const message =
-      error instanceof Error ? error.message : "Image upload failed. Please try again.";
+      error instanceof Error ? error.message : t("profileSidebar.uploadFailed");
     toastError(message);
   } finally {
     isUploadingAvatar.value = false;
@@ -212,7 +213,7 @@ async function handleAvatarSelect(event: Event) {
 }
 
 .profile-card {
-  background: #ffffff;
+  background: var(--color-surface);
   border-radius: var(--radius-2xl);
   border: 1px solid var(--color-border-soft);
   box-shadow:
@@ -245,7 +246,7 @@ async function handleAvatarSelect(event: Event) {
   width: 90px;
   height: 90px;
   border-radius: var(--radius-pill);
-  border: 4px solid #ffffff;
+  border: 4px solid var(--color-surface);
   position: relative;
   z-index: 2;
 }
@@ -262,7 +263,7 @@ async function handleAvatarSelect(event: Event) {
     var(--color-primary-500),
     var(--color-primary-700)
   );
-  color: #ffffff;
+  color: white;
   font-size: 2.4rem;
   font-weight: 800;
   display: flex;
@@ -270,7 +271,7 @@ async function handleAvatarSelect(event: Event) {
   justify-content: center;
   border-radius: var(--radius-pill);
   box-shadow: 0 8px 24px rgba(0, 103, 104, 0.2);
-  border: 4px solid #ffffff;
+  border: 4px solid var(--color-surface);
   position: relative;
   z-index: 2;
   font-family: var(--font-family-heading) !important;
@@ -279,7 +280,7 @@ async function handleAvatarSelect(event: Event) {
 .avatar-progress-svg {
   position: absolute;
   top: 0;
-  left: 0;
+  inset-inline-start: 0;
   width: 100%;
   height: 100%;
   z-index: 1;
@@ -300,13 +301,13 @@ async function handleAvatarSelect(event: Event) {
 .avatar-edit-btn {
   position: absolute;
   bottom: 4px;
-  right: 4px;
+  inset-inline-end: 4px;
   width: 32px;
   height: 32px;
   border-radius: var(--radius-pill);
   background: var(--color-primary-600);
-  color: #ffffff;
-  border: 2px solid #ffffff;
+  color: white;
+  border: 2px solid var(--color-surface);
   display: flex;
   align-items: center;
   justify-content: center;

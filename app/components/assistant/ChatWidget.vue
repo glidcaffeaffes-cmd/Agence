@@ -190,15 +190,17 @@ async function sendSuggestion(value: string) {
 </script>
 
 <style scoped>
+
 .assistant-widget {
-  --assistant-ink: #172033;
-  --assistant-muted: #667085;
-  --assistant-line: #d9e1ea;
-  --assistant-soft: #f6f8fb;
-  --assistant-accent: #1d4b8f;
-  --assistant-accent-strong: #17376b;
-  --assistant-accent-weak: #eaf1fb;
-  --assistant-focus: rgb(29 75 143 / 0.18);
+  /* Use global theme variables for color and background */
+  --assistant-ink: var(--color-text, #172033);
+  --assistant-muted: var(--color-text-muted, #667085);
+  --assistant-line: var(--color-border, #d9e1ea);
+  --assistant-soft: var(--color-bg-soft, #f6f8fb);
+  --assistant-accent: var(--color-primary, #1d4b8f);
+  --assistant-accent-strong: var(--color-primary-dark, #17376b);
+  --assistant-accent-weak: var(--color-primary-weak, #eaf1fb);
+  --assistant-focus: var(--color-focus, rgb(29 75 143 / 0.18));
 
   position: fixed;
   right: max(1.25rem, env(safe-area-inset-right));
@@ -256,7 +258,7 @@ async function sendSuggestion(value: string) {
   overflow: hidden;
   border: 1px solid var(--assistant-line);
   border-radius: 0.85rem;
-  background: #fff;
+  background: var(--color-bg, #fff);
   box-shadow: 0 28px 56px -34px rgb(23 32 51 / 0.55);
 }
 
@@ -268,7 +270,7 @@ async function sendSuggestion(value: string) {
   min-height: 4rem;
   padding: 0.65rem 0.85rem;
   border-bottom: 1px solid var(--assistant-line);
-  background: #fff;
+  background: var(--color-bg, #fff);
 }
 
 .assistant-header__icon,
@@ -337,7 +339,7 @@ async function sendSuggestion(value: string) {
   flex-direction: column;
   gap: 0.65rem;
   padding: 0.85rem;
-  background: var(--assistant-soft);
+  background: var(--color-bg-soft, var(--assistant-soft));
 }
 
 .assistant-conversation::-webkit-scrollbar {
@@ -372,16 +374,16 @@ async function sendSuggestion(value: string) {
 .assistant-message--assistant .assistant-message__bubble {
   border: 1px solid var(--assistant-line);
   border-bottom-left-radius: 0.35rem;
-  background: white;
-  color: var(--assistant-ink);
+  background: var(--color-bg, #fff);
+  color: var(--color-text, var(--assistant-ink));
   box-shadow: 0 10px 22px -20px rgb(23 32 51 / 0.32);
 }
 
 .assistant-message--user .assistant-message__bubble {
-  border: 1px solid #b7d9d8;
+  border: 1px solid var(--color-primary-weak, #b7d9d8);
   border-bottom-right-radius: 0.35rem;
-  background: #eef8f7;
-  color: #16484b;
+  background: var(--color-bg-user, #eef8f7);
+  color: var(--color-primary-dark, #16484b);
 }
 
 .assistant-starters {
@@ -400,8 +402,8 @@ async function sendSuggestion(value: string) {
   border: 1px solid var(--assistant-line);
   border-radius: 0.75rem;
   padding: 0.5rem 0.65rem 0.5rem 0.75rem;
-  background: white;
-  color: var(--assistant-ink);
+  background: var(--color-bg, #fff);
+  color: var(--color-text, var(--assistant-ink));
   text-align: left;
   font-size: 0.84rem;
   font-weight: 650;
@@ -437,7 +439,7 @@ async function sendSuggestion(value: string) {
   padding: 0.8rem 0.9rem;
   border: 1px solid var(--assistant-line);
   border-radius: 999px;
-  background: white;
+  background: var(--color-bg, #fff);
 }
 
 .assistant-typing span {
@@ -462,7 +464,7 @@ async function sendSuggestion(value: string) {
   gap: 0.6rem;
   padding: 0.7rem 0.85rem 0.8rem;
   border-top: 1px solid var(--assistant-line);
-  background: white;
+  background: var(--color-bg, #fff);
 }
 
 .assistant-actions,
@@ -509,8 +511,8 @@ async function sendSuggestion(value: string) {
 
 .assistant-suggestion {
   border: 1px solid var(--assistant-line);
-  background: #fff;
-  color: var(--assistant-ink);
+  background: var(--color-bg, #fff);
+  color: var(--color-text, var(--assistant-ink));
 }
 
 .assistant-suggestion:hover:not(:disabled) {

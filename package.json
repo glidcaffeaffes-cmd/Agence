@@ -16,6 +16,7 @@
     "@stripe/stripe-js": "^9.3.1",
     "bootstrap": "^5.3.8",
     "firebase": "^12.12.1",
+    "flag-icons": "^7.5.0",
     "libphonenumber-js": "^1.12.42",
     "nuxt": "^4.4.2",
     "primevue": "^4.5.4",

@@ -1,15 +1,43 @@
 import { tailwindRuntimeConfigScript } from './config/tailwind-theme'
 
-const googleFontHref = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap'
+const googleFontHref =
+  'https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap'
 const runtimeStylesheets = [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
   { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
   { rel: 'stylesheet', href: googleFontHref }
 ] as const
 
+const themePreferenceBootstrapScript = `
+(() => {
+  try {
+    const key = 'voyagehub-theme'
+    const stored = window.localStorage.getItem(key)
+    const preference =
+      stored === 'light' || stored === 'dark' || stored === 'system'
+        ? stored
+        : 'system'
+    const resolved =
+      preference === 'system'
+        ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+        : preference
+    const root = document.documentElement
+    root.dataset.themePreference = preference
+    root.dataset.themeResolved = resolved
+    root.style.colorScheme = resolved
+  } catch {
+    const root = document.documentElement
+    root.dataset.themePreference = 'system'
+    root.dataset.themeResolved = 'light'
+    root.style.colorScheme = 'light'
+  }
+})()
+`.trim()
+
 const runtimeScripts = [
+  { innerHTML: themePreferenceBootstrapScript, type: 'text/javascript' },
+  { innerHTML: tailwindRuntimeConfigScript, type: 'text/javascript' },
   { src: 'https://cdn.tailwindcss.com?plugins=forms,container-queries' },
-  { innerHTML: tailwindRuntimeConfigScript, type: 'text/javascript' }
 ] as const
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
@@ -69,7 +97,8 @@ export default defineNuxtConfig({
     dirs: ['app/repositories/mock', 'app/repositories']
   },
   css: [
-    '~~/assets/styles/base/theme.css'
+    '~~/assets/styles/base/theme.css',
+    'flag-icons/css/flag-icons.min.css'
   ],
   primevue: {
     importTheme: { from: '@primeuix/themes/aura', as: 'Aura' },

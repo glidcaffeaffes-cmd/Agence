@@ -1,99 +1,134 @@
 <template>
   <header class="admin-topbar">
-    <!-- Left: Brand (mirrored from ClientNavbar structure) -->
-      
+    <div class="admin-topbar__start">
+      <button
+        class="topbar-icon-btn admin-topbar__menu-btn"
+        :title="t('nav.menu')"
+        @click="sidebarOpen = true"
+      >
+        <span class="material-symbols-outlined">menu</span>
+      </button>
 
-    <!-- Center: Search -->
-    <div class="topbar-search">
-      <span class="material-symbols-outlined search-icon">search</span>
-      <input
-        v-model="searchQuery"
-        class="search-input"
-        placeholder="Rechercher…"
-        type="text"
-        @keyup.enter="handleSearch"
-      />
+      <div class="topbar-search">
+        <span class="material-symbols-outlined search-icon">search</span>
+        <input
+          v-model="searchQuery"
+          class="search-input"
+          :placeholder="t('admin.searchPlaceholder')"
+          type="text"
+          @keyup.enter="handleSearch"
+        />
+      </div>
     </div>
 
-    <!-- Right: Actions + User -->
     <div class="topbar-actions">
-      <!-- Quick links -->
-      <NuxtLink to="/" target="_blank" class="topbar-icon-btn" title="Voir le site client">
+      <div class="topbar-switchers">
+        <LanguageSwitcher />
+        <ThemeSwitcher />
+      </div>
+
+      <NuxtLink
+        to="/"
+        target="_blank"
+        class="topbar-icon-btn"
+        :title="t('admin.viewClientSite')"
+      >
         <span class="material-symbols-outlined">open_in_new</span>
       </NuxtLink>
 
-      <!-- Notifications -->
-      <button class="topbar-icon-btn notification-btn" title="Notifications">
+      <button class="topbar-icon-btn notification-btn" :title="t('admin.notifications')">
         <span class="material-symbols-outlined">notifications</span>
         <span v-if="notifCount > 0" class="notif-badge">{{ notifCount }}</span>
       </button>
 
-      <!-- Settings -->
-      <NuxtLink to="/admin/settings" class="topbar-icon-btn" title="Paramètres">
+      <NuxtLink
+        to="/admin/settings"
+        class="topbar-icon-btn"
+        :title="t('admin.settings')"
+      >
         <span class="material-symbols-outlined">settings</span>
       </NuxtLink>
 
-      <!-- Divider -->
       <div class="topbar-divider"></div>
 
-      <!-- User pill (same pattern as ClientNavbar's nav-avatar-btn) -->
-      <button class="user-pill" @click="showMenu = !showMenu">
-        <div v-if="currentProfile?.photo" class="user-avatar-wrap">
-          <img :src="currentProfile.photo" alt="Avatar" referrerpolicy="no-referrer" class="user-avatar" />
-        </div>
-        <div v-else class="user-avatar-placeholder brand-text">
-          {{ avatarLetter }}
-        </div>
-        <div class="user-info">
-          <span class="user-name">{{ currentProfile?.firstName || 'Admin' }}</span>
-          <span class="user-role">{{ currentProfile?.role || 'Staff' }}</span>
-        </div>
-        <span class="material-symbols-outlined chevron" :class="{ 'rotate-180': showMenu }">expand_more</span>
-      </button>
-
-      <!-- Dropdown (same pattern as ClientNavbar's user-dropdown) -->
-      <Transition name="dropdown">
-        <div v-if="showMenu" class="user-dropdown">
-          <div class="dropdown-header">
-            <div v-if="currentProfile?.photo" class="dropdown-avatar-wrap">
-              <img :src="currentProfile.photo" alt="Avatar" class="dropdown-avatar" />
-            </div>
-            <div v-else class="dropdown-avatar-placeholder brand-text">
-              {{ avatarLetter }}
-            </div>
-            <div>
-              <p class="dropdown-name">{{ currentProfile?.firstName }} {{ currentProfile?.lastName }}</p>
-              <p class="dropdown-email">{{ currentProfile?.email }}</p>
-            </div>
+      <div ref="menuRef" class="topbar-user-shell">
+        <button class="user-pill" @click="showMenu = !showMenu">
+          <div v-if="currentProfile?.photo" class="user-avatar-wrap">
+            <img
+              :src="currentProfile.photo"
+              alt="Avatar"
+              referrerpolicy="no-referrer"
+              class="user-avatar"
+            />
           </div>
-          <div class="dropdown-divider"></div>
-          <NuxtLink to="/admin" class="dropdown-item" @click="showMenu = false">
-            <span class="material-symbols-outlined">dashboard</span> Dashboard
-          </NuxtLink>
-          <NuxtLink to="/admin/settings" class="dropdown-item" @click="showMenu = false">
-            <span class="material-symbols-outlined">settings</span> Paramètres
-          </NuxtLink>
-          <div class="dropdown-divider"></div>
-          <NuxtLink to="/" class="dropdown-item" @click="showMenu = false">
-            <span class="material-symbols-outlined">open_in_new</span> Voir le site
-          </NuxtLink>
-          <button type="button" class="dropdown-item dropdown-item--danger" @click="handleLogout">
-            <span class="material-symbols-outlined">logout</span> Se deconnecter
-          </button>
-        </div>
-      </Transition>
+          <div v-else class="user-avatar-placeholder brand-text">
+            {{ avatarLetter }}
+          </div>
+          <div class="user-info">
+            <span class="user-name">
+              {{ currentProfile?.firstName || t("admin.adminFallback") }}
+            </span>
+            <span class="user-role">
+              {{ currentProfile?.role || t("admin.staffFallback") }}
+            </span>
+          </div>
+          <span class="material-symbols-outlined chevron" :class="{ 'rotate-180': showMenu }">
+            expand_more
+          </span>
+        </button>
+
+        <Transition name="dropdown">
+          <div v-if="showMenu" class="user-dropdown">
+            <div class="dropdown-header">
+              <div v-if="currentProfile?.photo" class="dropdown-avatar-wrap">
+                <img :src="currentProfile.photo" alt="Avatar" class="dropdown-avatar" />
+              </div>
+              <div v-else class="dropdown-avatar-placeholder brand-text">
+                {{ avatarLetter }}
+              </div>
+              <div>
+                <p class="dropdown-name">
+                  {{ currentProfile?.firstName }} {{ currentProfile?.lastName }}
+                </p>
+                <p class="dropdown-email">{{ currentProfile?.email }}</p>
+              </div>
+            </div>
+            <div class="dropdown-divider"></div>
+            <NuxtLink to="/admin" class="dropdown-item" @click="showMenu = false">
+              <span class="material-symbols-outlined">dashboard</span>
+              {{ t("admin.dashboard") }}
+            </NuxtLink>
+            <NuxtLink to="/admin/settings" class="dropdown-item" @click="showMenu = false">
+              <span class="material-symbols-outlined">settings</span>
+              {{ t("admin.settings") }}
+            </NuxtLink>
+            <div class="dropdown-divider"></div>
+            <NuxtLink to="/" class="dropdown-item" @click="showMenu = false">
+              <span class="material-symbols-outlined">open_in_new</span>
+              {{ t("admin.viewSite") }}
+            </NuxtLink>
+            <button type="button" class="dropdown-item dropdown-item--danger" @click="handleLogout">
+              <span class="material-symbols-outlined">logout</span>
+              {{ t("admin.signOut") }}
+            </button>
+          </div>
+        </Transition>
+      </div>
     </div>
   </header>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useAuth } from '~/composables/useAuth'
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { useAuth } from "~/composables/useAuth";
 
-const { currentProfile, logout } = useAuth()
-const searchQuery = ref('')
-const showMenu = ref(false)
-const notifCount = ref(3)
+const { currentProfile, logout } = useAuth();
+const { t } = useAppI18n();
+const sidebarOpen = useState<boolean>("admin-sidebar-open", () => false);
+const searchQuery = ref("");
+const showMenu = ref(false);
+const notifCount = ref(3);
+const menuRef = ref<HTMLElement | null>(null);
 
 const avatarLetter = computed(() => {
   const first = currentProfile.value?.firstName?.trim().charAt(0).toUpperCase() || "";
@@ -102,236 +137,416 @@ const avatarLetter = computed(() => {
 });
 
 function handleLogout() {
-  logout()
-  navigateTo('/login')
+  logout();
+  showMenu.value = false;
+  navigateTo("/login");
 }
 
 function handleSearch() {
-  // placeholder — wire to real search when ready
+  // Placeholder for future admin search wiring.
 }
 
-// Close dropdown on outside click
-const closeDropdownOnOutsideClick = (e: MouseEvent) => {
-  const el = document.querySelector('.user-pill')
-  const dropdown = document.querySelector('.user-dropdown')
-  if (el && dropdown && !el.contains(e.target as Node) && !dropdown.contains(e.target as Node)) {
-    showMenu.value = false
+function handleDocumentClick(event: MouseEvent) {
+  const target = event.target as Node | null;
+  if (!target) {
+    return;
+  }
+
+  if (menuRef.value && !menuRef.value.contains(target)) {
+    showMenu.value = false;
   }
 }
 
 onMounted(() => {
-  document.addEventListener('click', closeDropdownOnOutsideClick)
-})
+  document.addEventListener("click", handleDocumentClick);
+});
 
 onBeforeUnmount(() => {
-  document.removeEventListener('click', closeDropdownOnOutsideClick)
-})
+  document.removeEventListener("click", handleDocumentClick);
+});
 </script>
 
 <style scoped>
-/* ─── Topbar Shell ───────────────────────────────────── */
 .admin-topbar {
   position: sticky;
   top: 0;
-  z-index: 40;
-  width: 100%;
-  height: 64px;
+  z-index: 35;
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  padding: 0 2rem;
-  background: rgba(255, 255, 255, 0.85); /* fallback */
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 4.35rem;
+  padding: 0.85rem clamp(1rem, 3vw, 2rem);
   background: var(--topbar-bg);
   backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--topbar-border);
   box-shadow: var(--shadow-sm);
 }
 
-/* ─── Search (center) ────────────────────────────────── */
-.topbar-search {
-  flex: 1;
-  max-width: 360px;
-  position: relative;
+.admin-topbar__start {
   display: flex;
   align-items: center;
+  gap: 0.9rem;
+  flex: 1;
+  min-width: 0;
 }
+
+.admin-topbar__menu-btn {
+  display: inline-flex;
+}
+
+.topbar-search {
+  position: relative;
+  width: min(100%, 23rem);
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
 .search-icon {
   position: absolute;
-  left: var(--spacing-3);
-  font-size: 1.25rem;
+  inset-inline-start: 0.85rem;
+  font-size: 1.15rem;
   color: var(--color-text-muted);
   pointer-events: none;
 }
+
 .search-input {
   width: 100%;
-  height: 38px;
-  padding: 0 var(--spacing-3) 0 2.5rem;
-  background-color: var(--color-white);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md); /* Standard rectangle shape */
-  font-size: var(--font-size-sm);
-  color: var(--color-text);
+  min-height: 2.55rem;
+  padding: 0 0.95rem 0 2.5rem;
+  background-color: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-xl);
+  color: var(--input-text);
   outline: none;
-  transition: border-color var(--motion-duration-fast), box-shadow var(--motion-duration-fast);
-}
-.search-input::placeholder { color: var(--color-text-muted); }
-.search-input:focus {
-  border-color: var(--color-primary-500);
-  box-shadow: 0 0 0 3px var(--color-primary-100);
+  transition:
+    border-color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard),
+    background-color var(--duration-fast) var(--easing-standard);
 }
 
-/* ─── Actions (right) ────────────────────────────────── */
+.search-input::placeholder {
+  color: var(--input-placeholder);
+}
+
+.search-input:focus {
+  border-color: var(--input-focus-border);
+  box-shadow: var(--shadow-focus);
+}
+
 .topbar-actions {
   display: flex;
   align-items: center;
-  gap: var(--spacing-2);
-  margin-left: auto;
-  flex-shrink: 0;
-  position: relative;
+  justify-content: flex-end;
+  gap: 0.55rem;
+  flex-wrap: wrap;
 }
-.topbar-icon-btn {
+
+.topbar-switchers {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-full);
-  border: none;
-  background: transparent;
-  color: var(--color-text-soft);
-  cursor: pointer;
-  transition: background var(--motion-duration-fast), color var(--motion-duration-fast);
-  text-decoration: none;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.topbar-user-shell {
   position: relative;
 }
-.topbar-icon-btn .material-symbols-outlined { font-size: 1.25rem; }
-.topbar-icon-btn:hover { background: var(--color-bg-soft); color: var(--color-primary-600); }
 
-.notification-btn { position: relative; }
+.topbar-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.55rem;
+  height: 2.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border-soft);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  text-decoration: none;
+  position: relative;
+  transition:
+    background-color var(--duration-fast) var(--easing-standard),
+    color var(--duration-fast) var(--easing-standard),
+    border-color var(--duration-fast) var(--easing-standard);
+}
+
+.topbar-icon-btn:hover {
+  background: var(--color-surface-secondary);
+  color: var(--color-primary-600);
+  border-color: color-mix(in srgb, var(--color-primary-400) 45%, transparent);
+}
+
+.topbar-icon-btn .material-symbols-outlined {
+  font-size: 1.2rem;
+}
+
+.notification-btn {
+  position: relative;
+}
+
 .notif-badge {
   position: absolute;
-  top: 4px; right: 4px;
-  min-width: 16px; height: 16px;
+  top: 0.15rem;
+  inset-inline-end: 0.15rem;
+  min-width: 1rem;
+  height: 1rem;
+  padding-inline: 0.2rem;
   border-radius: 999px;
   background: var(--color-danger-500);
   color: var(--color-white);
-  font-size: 0.65rem;
-  font-weight: 700;
+  font-size: 0.62rem;
+  font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 4px;
   border: 2px solid var(--topbar-bg);
 }
 
 .topbar-divider {
   width: 1px;
-  height: 24px;
+  height: 1.6rem;
   background: var(--color-border);
-  margin: 0 var(--spacing-2);
+  margin-inline: 0.15rem;
 }
 
-/* ─── User Pill ── */
 .user-pill {
   display: flex;
   align-items: center;
-  gap: var(--spacing-3);
-  padding: 0.25rem 0.75rem 0.25rem 0.25rem;
-  border: 1px solid var(--color-border-soft);
-  border-radius: var(--radius-full);
+  gap: 0.75rem;
+  padding: 0.28rem 0.85rem 0.28rem 0.28rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
   background: var(--color-surface);
   cursor: pointer;
-  transition: all var(--motion-duration-fast) var(--motion-ease-default);
+  transition:
+    border-color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard),
+    background-color var(--duration-fast) var(--easing-standard);
 }
+
 .user-pill:hover {
-  border-color: var(--color-primary-400);
+  border-color: color-mix(in srgb, var(--color-primary-400) 45%, transparent);
   box-shadow: var(--shadow-sm);
 }
-.user-avatar-wrap { width: 32px; height: 32px; border-radius: 50%; overflow: hidden; }
-.user-avatar { width: 100%; height: 100%; object-fit: cover; }
+
+.user-avatar-wrap,
 .user-avatar-placeholder {
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  background: var(--color-primary-600);
-  color: white;
-  display: flex;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.user-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-avatar-placeholder {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
+  background: var(--color-primary-500);
+  color: var(--color-white);
+  font-size: 0.7rem;
   font-weight: 800;
 }
-.user-info { display: flex; flex-direction: column; text-align: left; line-height: 1.2; }
-.user-name { font-size: var(--font-size-sm); font-weight: var(--font-weight-bold); color: var(--color-text); }
-.user-role { font-size: var(--font-size-xs); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted); }
-.chevron {
-  font-size: 1.125rem;
-  color: var(--color-text-muted);
-  transition: transform var(--motion-duration-fast);
-}
-.rotate-180 { transform: rotate(180deg); }
 
-/* ─── Dropdown ─── */
+.user-info {
+  display: flex;
+  flex-direction: column;
+  text-align: start;
+  line-height: 1.2;
+}
+
+.user-name {
+  color: var(--color-text-primary);
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.user-role {
+  color: var(--color-text-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.chevron {
+  font-size: 1.05rem;
+  color: var(--color-text-muted);
+  transition: transform var(--duration-fast) var(--easing-standard);
+}
+
+.rotate-180 {
+  transform: rotate(180deg);
+}
+
 .user-dropdown {
   position: absolute;
-  top: calc(100% + var(--spacing-2));
-  right: 0;
-  min-width: 240px;
+  top: calc(100% + 0.65rem);
+  inset-inline-end: 0;
+  min-width: 15rem;
   background: var(--color-surface);
   border: 1px solid var(--color-border-soft);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  padding: var(--spacing-2);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-dropdown);
+  padding: 0.45rem;
   z-index: var(--z-dropdown);
 }
+
 .dropdown-header {
   display: flex;
   align-items: center;
-  gap: var(--spacing-3);
-  padding: var(--spacing-3) var(--spacing-3) var(--spacing-2);
+  gap: 0.8rem;
+  padding: 0.8rem 0.85rem 0.65rem;
 }
-.dropdown-avatar-wrap { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; }
-.dropdown-avatar { width: 100%; height: 100%; object-fit: cover; }
+
+.dropdown-avatar-wrap,
 .dropdown-avatar-placeholder {
-  width: 40px; height: 40px;
-  border-radius: 50%;
-  background: var(--color-primary-600);
-  color: white;
-  display: flex;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.dropdown-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dropdown-avatar-placeholder {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  background: var(--color-primary-500);
+  color: var(--color-white);
+  font-size: 0.85rem;
   font-weight: 800;
 }
-.dropdown-name { font-size: var(--font-size-base); font-weight: var(--font-weight-bold); color: var(--color-heading); margin: 0; }
-.dropdown-email { font-size: var(--font-size-sm); color: var(--color-text-muted); margin: 0; }
-.dropdown-divider { height: 1px; background: var(--color-border-soft); margin: var(--spacing-2) 0; }
+
+.dropdown-name,
+.dropdown-email {
+  margin: 0;
+}
+
+.dropdown-name {
+  color: var(--color-heading);
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.dropdown-email {
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: var(--color-border-soft);
+  margin: 0.35rem 0;
+}
+
 .dropdown-item {
   display: flex;
   align-items: center;
-  gap: var(--spacing-3);
+  gap: 0.75rem;
   width: 100%;
-  padding: var(--spacing-2) var(--spacing-3);
-  border-radius: var(--radius-md);
+  padding: 0.75rem 0.85rem;
+  border-radius: 0.8rem;
   text-decoration: none;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
   background: none;
   border: none;
   cursor: pointer;
-  transition: background var(--motion-duration-fast);
+  text-align: start;
+  transition:
+    background-color var(--duration-fast) var(--easing-standard),
+    color var(--duration-fast) var(--easing-standard);
 }
-.dropdown-item .material-symbols-outlined { font-size: 1.25rem; color: var(--color-text-muted); }
-.dropdown-item:hover { background: var(--color-bg-soft); color: var(--color-primary-700); }
-.dropdown-item:hover .material-symbols-outlined { color: var(--color-primary-700); }
-.dropdown-item--danger { color: var(--color-danger-600); }
-.dropdown-item--danger .material-symbols-outlined { color: var(--color-danger-600); }
-.dropdown-item--danger:hover { background: var(--alert-danger-bg); color: var(--color-danger-700); }
-.dropdown-item--danger:hover .material-symbols-outlined { color: var(--color-danger-700); }
 
-/* ─── Transitions ────────────────────────────────────── */
-.dropdown-enter-active, .dropdown-leave-active { transition: opacity 0.2s ease, transform 0.2s ease; }
-.dropdown-enter-from, .dropdown-leave-to { opacity: 0; transform: translateY(-8px) scale(0.98); }
+.dropdown-item .material-symbols-outlined {
+  font-size: 1.15rem;
+  color: var(--color-text-muted);
+}
+
+.dropdown-item:hover {
+  background: color-mix(in srgb, var(--color-primary-500) 9%, transparent);
+  color: var(--color-primary-700);
+}
+
+.dropdown-item--danger {
+  color: var(--color-danger-600);
+}
+
+.dropdown-item--danger:hover {
+  background: var(--alert-danger-bg);
+  color: var(--color-danger-700);
+}
+
+.dropdown-enter-active,
+.dropdown-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.dropdown-enter-from,
+.dropdown-leave-to {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.98);
+}
+
+@media (min-width: 1024px) {
+  .admin-topbar__menu-btn {
+    display: none;
+  }
+}
+
+@media (max-width: 860px) {
+  .admin-topbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-topbar__start,
+  .topbar-actions {
+    width: 100%;
+  }
+
+  .topbar-actions {
+    justify-content: space-between;
+  }
+
+  .topbar-switchers {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .topbar-search {
+    width: 100%;
+  }
+
+  .topbar-switchers {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .topbar-divider {
+    display: none;
+  }
+
+  .user-info {
+    display: none;
+  }
+}
 </style>
-

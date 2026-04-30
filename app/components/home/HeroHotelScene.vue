@@ -12,9 +12,9 @@
         <img src="/images/hero.png" alt="Luxury hotel resort" class="photo-plane__image" />
         <div class="photo-plane__overlay"></div>
         <div class="photo-plane__caption">
-          <span class="photo-plane__tag">Signature Hotel</span>
-          <h3>Architectural stays designed for premium travel</h3>
-          <p>Waterfront suites, calm interiors, and concierge-led arrivals for clients who value polish.</p>
+          <span class="photo-plane__tag">{{ t("homeScene.tag") }}</span>
+          <h3>{{ t("homeScene.title") }}</h3>
+          <p>{{ t("homeScene.description") }}</p>
         </div>
       </div>
 
@@ -38,25 +38,29 @@
       </div>
 
       <div class="float-card float-card--rating">
-        <span class="float-card__kicker">Guest rating</span>
+        <span class="float-card__kicker">{{ t("homeScene.guestRating") }}</span>
         <div class="float-card__metric">
           <strong>9.8</strong>
-          <span>Exceptional</span>
+          <span>{{ t("homeScene.exceptional") }}</span>
         </div>
-        <p>Selected for executive trips and luxury escapes.</p>
+        <p>{{ t("homeScene.guestRatingDescription") }}</p>
       </div>
 
       <div class="float-card float-card--service">
-        <span class="float-card__kicker">Premium stay</span>
+        <span class="float-card__kicker">{{ t("homeScene.premiumStay") }}</span>
         <ul class="float-card__list">
-          <li>Private transfers</li>
-          <li>Suite upgrade priority</li>
-          <li>Fast human concierge</li>
+          <li>{{ t("homeScene.privateTransfers") }}</li>
+          <li>{{ t("homeScene.suiteUpgrade") }}</li>
+          <li>{{ t("homeScene.concierge") }}</li>
         </ul>
       </div>
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+const { t } = useAppI18n();
+</script>
 
 <style scoped>
 .hotel-scene {
@@ -137,7 +141,6 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
 }
 
 .photo-plane__overlay {
@@ -258,21 +261,21 @@
   font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
 }
 
 .hotel-window-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .hotel-window,
 .hotel-side-window {
   display: block;
   border-radius: 10px;
-  background: linear-gradient(180deg, #b7ecf0 0%, #76bad3 100%);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+  background: linear-gradient(180deg, #7dc6ff 0%, #edf7ff 100%);
+  border: 1px solid rgba(35, 98, 148, 0.18);
 }
 
 .hotel-window {
@@ -280,168 +283,123 @@
 }
 
 .hotel-side-window {
-  height: 14px;
+  height: 18px;
 }
 
 .hotel-entry {
   position: absolute;
-  left: 56px;
+  left: 50%;
   bottom: 12px;
-  width: 44px;
-  height: 50px;
-  border-radius: 14px 14px 10px 10px;
-  background: linear-gradient(180deg, #0f172a 0%, #253447 100%);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
-}
-
-.hotel-entry::after {
-  content: "";
-  position: absolute;
-  left: 8px;
-  right: 8px;
-  top: 10px;
-  height: 12px;
-  border-radius: 8px;
-  background: rgba(183, 236, 240, 0.5);
+  width: 34px;
+  height: 36px;
+  transform: translateX(-50%);
+  border-radius: 18px 18px 10px 10px;
+  background: linear-gradient(180deg, #184868 0%, #0f2a3c 100%);
 }
 
 .hotel-deck {
-  left: -24px;
-  bottom: -2px;
-  width: 142px;
-  height: 80px;
-  border-radius: 28px;
-  background: linear-gradient(180deg, #f8fbfd 0%, #d9e5ec 100%);
-  transform: rotate(-8deg);
+  right: -8px;
+  bottom: 0;
+  width: 132px;
+  height: 54px;
+  border-radius: 26px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(222, 237, 246, 0.92));
   z-index: 4;
 }
 
 .hotel-pool {
   position: absolute;
-  left: 16px;
-  top: 14px;
-  width: 76px;
-  height: 38px;
+  left: 18px;
+  top: 12px;
+  width: 58px;
+  height: 28px;
   border-radius: 999px;
-  background: linear-gradient(135deg, #7ee7ee 0%, #2b7da1 100%);
-  box-shadow: inset 0 0 0 4px rgba(255, 255, 255, 0.48);
+  background: linear-gradient(180deg, #86dbff 0%, #4bb5ef 100%);
+  box-shadow: inset 0 3px 10px rgba(255, 255, 255, 0.34);
 }
 
 .hotel-lounger {
   position: absolute;
-  right: 18px;
-  top: 18px;
-  width: 28px;
-  height: 10px;
+  right: 26px;
+  top: 12px;
+  width: 12px;
+  height: 32px;
   border-radius: 999px;
-  background: #ffffff;
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
-}
-
-.hotel-lounger::after {
-  content: "";
-  position: absolute;
-  right: -4px;
-  top: 10px;
-  width: 18px;
-  height: 4px;
-  border-radius: 999px;
-  background: #cfdbe5;
-  transform: rotate(22deg);
+  background: linear-gradient(180deg, #cdaf5d 0%, #9a7d3c 100%);
+  transform: rotate(-18deg);
 }
 
 .hotel-lounger--alt {
-  top: 40px;
-  right: 28px;
+  right: 12px;
+  transform: rotate(-10deg);
 }
 
 .float-card {
   position: absolute;
-  z-index: 4;
-  max-width: 190px;
-  padding: 14px 16px;
+  padding: 16px 18px;
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.68);
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(18px);
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.8);
   box-shadow:
-    0 26px 54px rgba(15, 23, 42, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.58);
+    0 22px 46px rgba(15, 23, 42, 0.13),
+    0 10px 22px rgba(15, 23, 42, 0.05);
+  z-index: 5;
 }
 
 .float-card--rating {
-  top: 44px;
-  left: -4px;
-  animation: cardFloatLeft 8s ease-in-out infinite;
+  left: 6px;
+  bottom: 94px;
+  width: 180px;
 }
 
 .float-card--service {
-  right: 2px;
-  bottom: 26px;
-  animation: cardFloatRight 8.8s ease-in-out infinite;
+  right: -4px;
+  top: 54px;
+  width: 188px;
 }
 
 .float-card__kicker {
-  display: block;
-  margin-bottom: 10px;
+  display: inline-block;
+  margin-bottom: 12px;
   color: var(--color-primary-700);
   font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
 }
 
 .float-card__metric {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
-  margin-bottom: 8px;
+  align-items: flex-end;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
 .float-card__metric strong {
-  color: #0f172a;
-  font-size: 26px;
+  color: var(--color-navy-700);
+  font-size: 34px;
   line-height: 1;
 }
 
 .float-card__metric span {
-  color: var(--color-secondary-500);
-  font-size: 13px;
+  color: var(--color-primary-700);
+  font-size: 14px;
   font-weight: 700;
 }
 
-.float-card p {
+.float-card p,
+.float-card__list {
   margin: 0;
-  color: #64748b;
-  font-size: 12px;
-  line-height: 1.5;
+  color: var(--color-text-soft);
+  font-size: 13px;
+  line-height: 1.55;
 }
 
 .float-card__list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  padding-left: 18px;
   display: grid;
   gap: 8px;
-}
-
-.float-card__list li {
-  position: relative;
-  padding-left: 16px;
-  color: #334155;
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-.float-card__list li::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 7px;
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  background: var(--color-primary-500);
 }
 
 @keyframes planeFloat {
@@ -449,9 +407,8 @@
   100% {
     transform: rotateY(-14deg) rotateX(7deg) translateY(0);
   }
-
   50% {
-    transform: rotateY(-12deg) rotateX(8deg) translateY(-12px);
+    transform: rotateY(-12deg) rotateX(8deg) translateY(-10px);
   }
 }
 
@@ -460,123 +417,44 @@
   100% {
     transform: translateY(0);
   }
-
   50% {
-    transform: translateY(-10px);
+    transform: translateY(-8px);
   }
 }
 
-@keyframes cardFloatLeft {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-14px);
-  }
-}
-
-@keyframes cardFloatRight {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(10px);
-  }
-}
-
-@media (max-width: 1200px) {
+@media (max-width: 960px) {
   .hotel-scene,
   .scene-shell {
-    min-height: 460px;
+    min-height: 420px;
   }
 
-  .photo-plane--front {
-    inset: 16px 24px 24px 28px;
-  }
-
-  .photo-plane__caption h3 {
-    font-size: 24px;
-  }
-
-  .hotel-model {
+  .float-card--service {
     right: 10px;
-    bottom: 42px;
-    transform: scale(0.84);
-    transform-origin: bottom right;
+    top: 24px;
   }
 }
 
 @media (max-width: 768px) {
   .hotel-scene,
   .scene-shell {
-    min-height: 420px;
-  }
-
-  .scene-glow--teal {
-    width: 180px;
-    height: 180px;
-    right: 12px;
-  }
-
-  .scene-glow--blue {
-    width: 180px;
-    height: 180px;
-    left: 0;
+    min-height: 350px;
   }
 
   .photo-plane--back {
-    inset: 32px 10px 28px 42px;
+    inset: 32px 18px 34px 54px;
   }
 
   .photo-plane--front {
-    inset: 10px 14px 18px 12px;
-    transform: none;
-    animation: none;
+    inset: 8px 22px 20px 18px;
   }
 
-  .photo-plane__caption {
-    left: 22px;
-    right: 22px;
-    bottom: 20px;
-  }
-
-  .photo-plane__caption h3 {
-    font-size: 20px;
-  }
-
-  .photo-plane__caption p {
-    font-size: 12px;
-  }
-
-  .hotel-model {
-    right: 8px;
-    bottom: 28px;
-    transform: scale(0.62);
-    transform-origin: bottom right;
-    animation: none;
-  }
-
-  .float-card--rating {
-    top: 22px;
-    left: 8px;
-  }
-
-  .float-card--service {
+  .hotel-model,
+  .float-card {
     display: none;
   }
 
-  .float-card {
-    max-width: 150px;
-    padding: 12px 14px;
-    animation: none;
-  }
-
-  .float-card__metric strong {
-    font-size: 22px;
+  .scene-shadow {
+    left: 30px;
   }
 }
 </style>

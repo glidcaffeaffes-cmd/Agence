@@ -2,17 +2,21 @@
   <div class="hotel-detail">
     <div v-if="loading" class="loading-state">
       <span class="material-symbols-outlined rotating">progress_activity</span>
-      <p>Loading hotel details...</p>
+      <p>{{ t("hotelDetailPage.loading") }}</p>
     </div>
 
     <template v-else-if="hotel">
       <!-- Top Navigation -->
       <nav class="detail-nav">
         <div class="breadcrumbs">
-          <NuxtLink to="/">Home</NuxtLink>
-          <span class="material-symbols-outlined separator">chevron_right</span>
-          <NuxtLink to="/hotels">Hotels</NuxtLink>
-          <span class="material-symbols-outlined separator">chevron_right</span>
+          <NuxtLink to="/">{{ t("hotelDetailPage.home") }}</NuxtLink>
+          <span class="material-symbols-outlined separator">{{
+            breadcrumbChevron
+          }}</span>
+          <NuxtLink to="/hotels">{{ t("hotelDetailPage.hotels") }}</NuxtLink>
+          <span class="material-symbols-outlined separator">{{
+            breadcrumbChevron
+          }}</span>
           <span class="active">{{ hotel.name }}</span>
         </div>
         <div class="nav-actions">
@@ -22,7 +26,7 @@
           >
             <button class="action-btn" @click="isShareOpen = !isShareOpen">
               <span class="material-symbols-outlined">ios_share</span>
-              <span>Share</span>
+              <span>{{ t("hotelDetailPage.share") }}</span>
               <span
                 class="material-symbols-outlined"
                 style="font-size: 16px; margin-left: -4px"
@@ -60,7 +64,11 @@
             <span class="material-symbols-outlined">
               {{ isWishlisted(hotel.id) ? "favorite" : "favorite_border" }}
             </span>
-            {{ isWishlisted(hotel.id) ? "Saved" : "Save" }}
+            {{
+              isWishlisted(hotel.id)
+                ? t("hotelDetailPage.saved")
+                : t("hotelDetailPage.save")
+            }}
           </button>
         </div>
       </nav>
@@ -99,17 +107,17 @@
                 class="gallery-arrow gallery-arrow--prev"
                 v-if="hotel.images.length > 1"
                 @click="prevImage"
-                aria-label="Previous photo"
+                :aria-label="t('hotelDetailPage.previousPhoto')"
               >
-                <span class="material-symbols-outlined">chevron_left</span>
+                <span class="material-symbols-outlined">{{ prevChevron }}</span>
               </button>
               <button
                 class="gallery-arrow gallery-arrow--next"
                 v-if="hotel.images.length > 1"
                 @click="nextImage"
-                aria-label="Next photo"
+                :aria-label="t('hotelDetailPage.nextPhoto')"
               >
-                <span class="material-symbols-outlined">chevron_right</span>
+                <span class="material-symbols-outlined">{{ nextChevron }}</span>
               </button>
               <div class="gallery-counter">
                 {{ activeGalleryIndex + 1 }} / {{ hotel.images.length }}
@@ -119,7 +127,7 @@
                 @click="openLightbox(activeGalleryIndex)"
               >
                 <span class="material-symbols-outlined">photo_library</span>
-                All {{ hotel.images.length }} photos
+                {{ t("hotelDetailPage.allPhotos", { count: hotel.images.length }) }}
               </button>
             </div>
 
@@ -172,28 +180,32 @@
                     >star</span
                   >
                 </div>
-                <span class="hi-rating-label">Excellent</span>
+                <span class="hi-rating-label">{{
+                  t("hotelDetailPage.excellent")
+                }}</span>
               </div>
-              <span class="hi-review-count">{{ reviews.length }} reviews</span>
+              <span class="hi-review-count">{{
+                t("hotelDetailPage.reviewCount", { count: reviews.length })
+              }}</span>
             </div>
           </div>
 
           <!-- Category bars -->
           <div class="hi-rating-bars">
             <div class="hi-bar-row">
-              <span>Location</span>
+              <span>{{ t("hotelDetailPage.location") }}</span>
               <div class="hi-bar">
                 <div class="hi-bar-fill" style="width: 90%"></div>
               </div>
             </div>
             <div class="hi-bar-row">
-              <span>Service</span>
+              <span>{{ t("hotelDetailPage.service") }}</span>
               <div class="hi-bar">
                 <div class="hi-bar-fill" style="width: 85%"></div>
               </div>
             </div>
             <div class="hi-bar-row">
-              <span>Value</span>
+              <span>{{ t("hotelDetailPage.value") }}</span>
               <div class="hi-bar">
                 <div class="hi-bar-fill" style="width: 80%"></div>
               </div>
@@ -202,7 +214,7 @@
 
           <!-- About -->
           <div class="hi-about">
-            <h3 class="hi-section-label">About</h3>
+            <h3 class="hi-section-label">{{ t("hotelDetailPage.about") }}</h3>
             <p class="hi-desc" style="white-space: pre-line">
               {{ hotel.description }}
             </p>
@@ -210,7 +222,9 @@
 
           <!-- All Amenities -->
           <div class="hi-amenities">
-            <h3 class="hi-section-label">Amenities & Services</h3>
+            <h3 class="hi-section-label">
+              {{ t("hotelDetailPage.amenities") }}
+            </h3>
             <div class="hi-chips">
               <span
                 v-for="amenity in hotel.amenities ||
@@ -236,18 +250,20 @@
             <div class="hi-price-col">
               <div class="hi-price-row">
                 <span class="hi-price"
-                  >From
+                  >{{ t("common.from") }}
                   <strong>{{ formatEuro(fromPricePerNight) }}</strong></span
                 >
-                <span class="hi-per">/night</span>
+                <span class="hi-per">{{ t("common.perNight") }}</span>
               </div>
-              <p class="hi-no-charge">You won't be charged yet</p>
+              <p class="hi-no-charge">{{ t("hotelDetailPage.notCharged") }}</p>
             </div>
 
             <div class="hi-controls-col">
               <div class="hi-controls-bar">
                 <div class="hi-date-field">
-                  <label class="filter-label">Check-in</label>
+                  <label class="filter-label">{{
+                    t("hotelDetailPage.checkIn")
+                  }}</label>
                   <div class="date-picker-shell">
                     <span
                       class="material-symbols-outlined date-picker-shell__icon"
@@ -259,7 +275,7 @@
                       :manualInput="false"
                       :minDate="today"
                       appendTo="self"
-                      placeholder="Select"
+                      :placeholder="t('hotelDetailPage.select')"
                       dateFormat="D, M d"
                       class="filter-date-picker"
                     />
@@ -270,7 +286,9 @@
                   </div>
                 </div>
                 <div class="hi-date-field">
-                  <label class="filter-label">Check-out</label>
+                  <label class="filter-label">{{
+                    t("hotelDetailPage.checkOut")
+                  }}</label>
                   <div class="date-picker-shell">
                     <span
                       class="material-symbols-outlined date-picker-shell__icon"
@@ -282,7 +300,7 @@
                       :manualInput="false"
                       :minDate="checkOutMinDate"
                       appendTo="self"
-                      placeholder="Select"
+                      :placeholder="t('hotelDetailPage.select')"
                       dateFormat="D, M d"
                       class="filter-date-picker"
                     />
@@ -297,7 +315,9 @@
                   class="hi-guest-field-container"
                   ref="guestPanelContainerRef"
                 >
-                  <label class="filter-label">Guests</label>
+                  <label class="filter-label">{{
+                    t("hotelDetailPage.guests")
+                  }}</label>
                   <button
                     type="button"
                     class="guest-trigger"
@@ -309,7 +329,7 @@
                     >
                     <span class="guest-trigger__copy">
                       <strong>{{ guestSummary }}</strong>
-                      <span>Adults, children</span>
+                      <span>{{ t("hotelDetailPage.adultsChildren") }}</span>
                     </span>
                     <span
                       class="material-symbols-outlined guest-trigger__chevron"
@@ -325,7 +345,8 @@
                   >
                     <div class="guest-counter-row">
                       <div class="guest-counter-copy">
-                        <strong>Adults</strong><span>Ages 18+</span>
+                        <strong>{{ t("hotelDetailPage.adults") }}</strong
+                        ><span>{{ t("hotelDetailPage.adultsAge") }}</span>
                       </div>
                       <div class="guest-counter-control">
                         <button
@@ -348,7 +369,8 @@
                     </div>
                     <div class="guest-counter-row">
                       <div class="guest-counter-copy">
-                        <strong>Children</strong><span>Ages 0–17</span>
+                        <strong>{{ t("hotelDetailPage.children") }}</strong
+                        ><span>{{ t("hotelDetailPage.childrenAge") }}</span>
                       </div>
                       <div class="guest-counter-control">
                         <button
@@ -371,14 +393,20 @@
                     </div>
                     <!-- Age selector per child -->
                     <div v-if="children > 0" class="child-ages-section">
-                      <p class="child-ages-label">Child age at check-in</p>
+                      <p class="child-ages-label">
+                        {{ t("hotelDetailPage.childAgeAtCheckIn") }}
+                      </p>
                       <div class="child-ages-grid">
                         <div
                           v-for="(age, i) in childAges"
                           :key="i"
                           class="child-age-item"
                         >
-                          <label class="child-age-lbl">Child {{ i + 1 }}</label>
+                          <label class="child-age-lbl">{{
+                            t("hotelDetailPage.childLabel", {
+                              count: i + 1,
+                            })
+                          }}</label>
                           <Select
                             v-model="childAges[i]"
                             :options="childAgeOptions"
@@ -386,7 +414,7 @@
                             optionValue="value"
                             class="child-age-select-premium"
                             :pt="{ overlay: { class: 'child-age-overlay' } }"
-                            placeholder="Age"
+                            :placeholder="t('hotelDetailPage.age')"
                             appendTo="body"
                           />
                         </div>
@@ -397,7 +425,7 @@
                       class="guest-done-button"
                       @click="isGuestPanelOpen = false"
                     >
-                      Done
+                      {{ t("hotelDetailPage.done") }}
                     </button>
                   </div>
                 </div>
@@ -408,7 +436,11 @@
                 :disabled="!canCheckAvailability || availabilityLoading"
                 @click="handleCheckAvailability"
               >
-                {{ availabilityLoading ? "Checking..." : "Check Availability" }}
+                {{
+                  availabilityLoading
+                    ? t("hotelDetailPage.checking")
+                    : t("hotelDetailPage.checkAvailability")
+                }}
               </button>
             </div>
           </div>
@@ -489,7 +521,9 @@
 
           <!-- Rooms -->
           <section class="content-section">
-            <h2 class="section-title" id="rooms">Rooms & Availability</h2>
+            <h2 class="section-title" id="rooms">
+              {{ t("hotelDetailPage.roomsAvailability") }}
+            </h2>
             <div class="rooms-list">
               <div
                 v-for="room in rooms"
@@ -502,7 +536,7 @@
                       room.image ||
                       'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=400&q=80'
                     "
-                    alt="Room"
+                    :alt="t('hotelDetailPage.roomFallback')"
                   />
                 </div>
                 <div class="room-content">
@@ -515,7 +549,7 @@
                       >
                       <span
                         ><span class="material-symbols-outlined">king_bed</span
-                        >1 King Size Bed</span
+                        >{{ t("hotelDetailPage.kingBed") }}</span
                       >
                       <span
                         ><span class="material-symbols-outlined"
@@ -527,17 +561,17 @@
                   <div class="room-footer">
                     <div class="price-block">
                       <span class="price-val">{{ room.pricePerNight }}€</span>
-                      <span class="price-unit">/ night</span>
+                      <span class="price-unit">{{ t("common.perNight") }}</span>
                     </div>
                     <button
                       v-if="room.status === 'AVAILABLE'"
                       class="book-btn-outline"
                       @click="handleReserveFromCard(room)"
                     >
-                      Reserver
+                      {{ t("hotelDetailPage.reserve") }}
                     </button>
                     <button v-else class="book-btn-outline disabled">
-                      Unavailable
+                      {{ t("hotelDetailPage.unavailable") }}
                     </button>
                   </div>
                 </div>
@@ -550,9 +584,15 @@
             <section class="content-section no-border border-0 reviews-column">
               <div class="reviews-header-advanced">
                 <div>
-                  <h2 class="section-title m-0">Guest Reviews</h2>
+                  <h2 class="section-title m-0">
+                    {{ t("hotelDetailPage.guestReviews") }}
+                  </h2>
                   <p class="reviews-subtitle">
-                    Average based on {{ reviews.length }} verified reviews
+                    {{
+                      t("hotelDetailPage.averageBasedOn", {
+                        count: reviews.length,
+                      })
+                    }}
                   </p>
                 </div>
                 <div class="global-rating-block">
@@ -568,17 +608,21 @@
                         >star</span
                       >
                     </div>
-                    <span>Excellent</span>
+                    <span>{{ t("hotelDetailPage.excellent") }}</span>
                   </div>
                 </div>
               </div>
 
               <!-- Write a Review Form -->
               <div class="feedback-form-container">
-                <h3 class="subsection-title">Write a Review</h3>
+                <h3 class="subsection-title">
+                  {{ t("hotelDetailPage.writeReview") }}
+                </h3>
                 <div class="feedback-card">
                   <div class="rating-selector mb-3">
-                    <span class="rating-label">Your rating:</span>
+                    <span class="rating-label">{{
+                      t("hotelDetailPage.yourRating")
+                    }}</span>
                     <div class="stars-interactive">
                       <span
                         v-for="i in 5"
@@ -593,7 +637,7 @@
                   <textarea
                     v-model="newReviewText"
                     class="feedback-textarea"
-                    placeholder="Share your experience at this property..."
+                    :placeholder="t('hotelDetailPage.reviewPlaceholder')"
                     rows="4"
                   ></textarea>
                   <div class="feedback-actions">
@@ -602,7 +646,11 @@
                       @click="handleSubmitReview"
                       :disabled="!newReviewText.trim() || submitting"
                     >
-                      {{ submitting ? "Submitting..." : "Submit Review" }}
+                      {{
+                        submitting
+                          ? t("hotelDetailPage.submitting")
+                          : t("hotelDetailPage.submitReview")
+                      }}
                     </button>
                   </div>
                 </div>
@@ -627,7 +675,10 @@
                       <div class="reviewer-meta">
                         <div class="reviewer-head">
                           <strong>{{
-                            review.authorName || `Guest #${review.accountId}`
+                            review.authorName ||
+                              t("hotelDetailPage.guestLabel", {
+                                id: review.accountId,
+                              })
                           }}</strong>
                           <div class="review-stars-small">
                             <span
@@ -643,10 +694,11 @@
                           </div>
                         </div>
                         <span>{{
-                          new Date(review.publicationDate).toLocaleDateString(
-                            "en-US",
-                            { year: "numeric", month: "long", day: "numeric" },
-                          )
+                          formatDate(review.publicationDate, {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })
                         }}</span>
                       </div>
                     </div>
@@ -659,25 +711,25 @@
                   class="show-more-reviews-btn"
                   @click="showAllReviewsModal = true"
                 >
-                  Show More Reviews
+                  {{ t("hotelDetailPage.showMoreReviews") }}
                 </button>
               </div>
               <div v-else class="no-reviews-msg">
                 <span class="material-symbols-outlined">rate_review</span>
-                <p>No reviews yet. Be the first to share your experience!</p>
+                <p>{{ t("hotelDetailPage.noReviews") }}</p>
               </div>
             </section>
 
             <!-- Location / Map -->
             <section class="content-section location-column">
-              <h2 class="section-title">Location</h2>
+              <h2 class="section-title">{{ t("hotelDetailPage.location") }}</h2>
               <div class="map-container-wrapper">
                 <div class="map-info-card">
                   <div class="map-icon-box">
                     <span class="material-symbols-outlined">location_on</span>
                   </div>
                   <div class="map-address-details">
-                    <h3>Property Address</h3>
+                    <h3>{{ t("hotelDetailPage.propertyAddress") }}</h3>
                     <p>
                       {{ hotel.address }}, {{ hotel.city }}, {{ hotel.country }}
                     </p>
@@ -720,7 +772,7 @@
           >
             <section class="reviews-modal-shell" @click.stop>
               <header class="reviews-modal-header">
-                <h3>All Reviews ({{ reviews.length }})</h3>
+                <h3>{{ t("hotelDetailPage.allReviews", { count: reviews.length }) }}</h3>
                 <button
                   type="button"
                   class="reviews-modal-close"
@@ -747,7 +799,10 @@
                       <div class="reviewer-meta">
                         <div class="reviewer-head">
                           <strong>{{
-                            review.authorName || `Guest #${review.accountId}`
+                            review.authorName ||
+                              t("hotelDetailPage.guestLabel", {
+                                id: review.accountId,
+                              })
                           }}</strong>
                           <div class="review-stars-small">
                             <span
@@ -763,10 +818,11 @@
                           </div>
                         </div>
                         <span>{{
-                          new Date(review.publicationDate).toLocaleDateString(
-                            "en-US",
-                            { year: "numeric", month: "long", day: "numeric" },
-                          )
+                          formatDate(review.publicationDate, {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })
                         }}</span>
                       </div>
                     </div>
@@ -789,7 +845,7 @@
             <section class="availability-drawer" @click.stop>
               <header class="availability-drawer-header">
                 <div>
-                  <h3>Available rooms</h3>
+                  <h3>{{ t("hotelDetailPage.availableRooms") }}</h3>
                   <p>{{ selectedDateRangeLabel }} • {{ guestSummary }}</p>
                 </div>
                 <button
@@ -805,7 +861,7 @@
                 <span class="material-symbols-outlined rotating"
                   >progress_activity</span
                 >
-                <p>Checking room availability...</p>
+                <p>{{ t("hotelDetailPage.checkingAvailability") }}</p>
               </div>
 
               <template v-else>
@@ -826,7 +882,11 @@
                       <div class="availability-room-meta">
                         <span
                           ><span class="material-symbols-outlined">person</span
-                          >Up to {{ room.maxGuests }} guests</span
+                          >{{
+                            t("hotelDetailPage.upToGuests", {
+                              count: room.maxGuests,
+                            })
+                          }}</span
                         >
                         <span
                           ><span class="material-symbols-outlined"
@@ -844,14 +904,14 @@
                           <span class="price-val">{{
                             formatEuro(room.pricePerNight)
                           }}</span>
-                          <span class="price-unit">/ night</span>
+                          <span class="price-unit">{{ t("common.perNight") }}</span>
                         </div>
                         <button
                           type="button"
                           class="availability-book-btn"
                           @click="handleReserveNow(room)"
                         >
-                          Reserve Now
+                          {{ t("hotelDetailPage.reserveNow") }}
                         </button>
                       </div>
                     </div>
@@ -859,18 +919,14 @@
                 </div>
 
                 <div v-else class="availability-empty-card">
-                  <h4>No rooms available for your selected dates</h4>
+                  <h4>{{ t("hotelDetailPage.noRoomsTitle") }}</h4>
                   <p>
-                    Unfortunately, we couldn't find available rooms for
-                    {{ selectedDateRangeLabel }} for {{ adults }} adult<span
-                      v-if="adults > 1"
-                      >s</span
-                    ><span v-if="children > 0">
-                      and {{ children }} child<span v-if="children > 1"
-                        >ren</span
-                      ></span
-                    >. Try changing dates, reducing guests, or viewing similar
-                    rooms.
+                    {{
+                      t("hotelDetailPage.noRoomsDescription", {
+                        dates: selectedDateRangeLabel,
+                        guests: bookingGuestsLabel,
+                      })
+                    }}
                   </p>
                   <div class="availability-empty-actions">
                     <button
@@ -878,14 +934,14 @@
                       class="book-btn-outline"
                       @click="closeRoomsDrawer"
                     >
-                      Modify Search
+                      {{ t("hotelDetailPage.modifySearch") }}
                     </button>
                     <button
                       type="button"
                       class="primary-checkout-btn"
                       @click="viewSimilarRooms"
                     >
-                      View Similar Rooms
+                      {{ t("hotelDetailPage.viewSimilarRooms") }}
                     </button>
                   </div>
                 </div>
@@ -906,7 +962,7 @@
             >
               <header class="availability-drawer-header">
                 <div>
-                  <h3>Confirm your reservation</h3>
+                  <h3>{{ t("hotelDetailPage.confirmReservation") }}</h3>
                   <p>{{ selectedDateRangeLabel }} • {{ bookingGuestsLabel }}</p>
                 </div>
                 <button
@@ -942,7 +998,7 @@
                 </article>
 
                 <article class="booking-price-card">
-                  <h5>Price summary</h5>
+                  <h5>{{ t("hotelDetailPage.priceSummary") }}</h5>
                   <div class="breakdown-row">
                     <span
                       >{{
@@ -953,17 +1009,17 @@
                     <span>{{ formatEuro(bookingRoomPrice) }}</span>
                   </div>
                   <div class="breakdown-row">
-                    <span>Taxes</span>
+                    <span>{{ t("hotelDetailPage.taxes") }}</span>
                     <span>{{ formatEuro(bookingTaxes) }}</span>
                   </div>
                   <div class="breakdown-row total">
-                    <span>Total</span>
+                    <span>{{ t("hotelDetailPage.total") }}</span>
                     <span>{{ formatEuro(bookingTotal) }}</span>
                   </div>
                 </article>
 
                 <article class="booking-form-card">
-                  <h5>Payment option</h5>
+                  <h5>{{ t("hotelDetailPage.paymentOption") }}</h5>
                   <div class="payment-option-grid">
                     <label
                       class="payment-option-item"
@@ -979,8 +1035,8 @@
                         value="PAY_NOW"
                       />
                       <div>
-                        <strong>Pay now by card</strong>
-                        <span>Secure checkout with Stripe</span>
+                        <strong>{{ t("hotelDetailPage.payNowCard") }}</strong>
+                        <span>{{ t("hotelDetailPage.payNowCardDesc") }}</span>
                       </div>
                     </label>
 
@@ -998,46 +1054,46 @@
                         value="PAY_AT_HOTEL"
                       />
                       <div>
-                        <strong>Pay at hotel</strong>
-                        <span>Confirm booking now, pay at check-in</span>
+                        <strong>{{ t("hotelDetailPage.payAtHotel") }}</strong>
+                        <span>{{ t("hotelDetailPage.payAtHotelDesc") }}</span>
                       </div>
                     </label>
                   </div>
                 </article>
 
                 <article class="booking-form-card">
-                  <h5>Guest details</h5>
+                  <h5>{{ t("hotelDetailPage.guestDetails") }}</h5>
                   <div class="booking-form-grid">
                     <label class="booking-field">
-                      <span>Full Name</span>
+                      <span>{{ t("hotelDetailPage.fullName") }}</span>
                       <input
                         v-model="bookingForm.fullName"
                         type="text"
-                        placeholder="Enter your full name"
+                        :placeholder="t('hotelDetailPage.fullNamePlaceholder')"
                       />
                     </label>
                     <label class="booking-field">
-                      <span>Email</span>
+                      <span>{{ t("hotelDetailPage.email") }}</span>
                       <input
                         v-model="bookingForm.email"
                         type="email"
-                        placeholder="Enter your email"
+                        :placeholder="t('hotelDetailPage.emailPlaceholder')"
                       />
                     </label>
                     <label class="booking-field">
-                      <span>Phone Number</span>
+                      <span>{{ t("hotelDetailPage.phoneNumber") }}</span>
                       <input
                         v-model="bookingForm.phone"
                         type="tel"
-                        placeholder="Enter your phone number"
+                        :placeholder="t('hotelDetailPage.phonePlaceholder')"
                       />
                     </label>
                     <label class="booking-field booking-field-full">
-                      <span>Special Requests (optional)</span>
+                      <span>{{ t("hotelDetailPage.specialRequests") }}</span>
                       <textarea
                         v-model="bookingForm.specialRequests"
                         rows="3"
-                        placeholder="Any special requests for your stay"
+                        :placeholder="t('hotelDetailPage.specialRequestsPlaceholder')"
                       />
                     </label>
                   </div>
@@ -1056,14 +1112,14 @@
                 >
                   {{
                     redirectingToPayment
-                      ? "Redirecting to Payment..."
+                      ? t("hotelDetailPage.redirectingPayment")
                       : bookingLoading
                         ? selectedPaymentOption === "PAY_AT_HOTEL"
-                          ? "Confirming Reservation..."
-                          : "Preparing Payment..."
+                          ? t("hotelDetailPage.confirmingReservationAction")
+                          : t("hotelDetailPage.preparingPayment")
                         : selectedPaymentOption === "PAY_AT_HOTEL"
-                          ? "Confirm Reservation"
-                          : "Proceed to Payment"
+                          ? t("hotelDetailPage.confirmReservationAction")
+                          : t("hotelDetailPage.proceedToPayment")
                   }}
                 </button>
               </footer>
@@ -1087,9 +1143,9 @@
             >
               <header class="availability-drawer-header">
                 <div>
-                  <h3>Choose payment method</h3>
+                  <h3>{{ t("hotelDetailPage.choosePaymentMethod") }}</h3>
                   <p>
-                    Use a saved card or add a new one before secure checkout.
+                    {{ t("hotelDetailPage.choosePaymentMethodDesc") }}
                   </p>
                 </div>
                 <button
@@ -1117,10 +1173,15 @@
                     <strong>
                       {{ method.brand.toUpperCase() }} •••• {{ method.last4 }}
                     </strong>
-                    <span>Expires {{ method.expiryMonth }}/{{ method.expiryYear }}</span>
+                    <span>{{
+                      t("hotelDetailPage.expires", {
+                        month: method.expiryMonth,
+                        year: method.expiryYear,
+                      })
+                    }}</span>
                   </div>
                   <span v-if="method.isDefault" class="saved-card-badge">
-                    Default
+                    {{ t("hotelDetailPage.default") }}
                   </span>
                 </label>
               </div>
@@ -1134,8 +1195,8 @@
                 >
                   {{
                     redirectingToPayment
-                      ? "Redirecting to Payment..."
-                      : "Pay with another card"
+                      ? t("hotelDetailPage.redirectingPayment")
+                      : t("hotelDetailPage.payWithAnotherCard")
                   }}
                 </button>
                 <button
@@ -1146,8 +1207,8 @@
                 >
                   {{
                     redirectingToPayment
-                      ? "Processing payment..."
-                      : "Continue"
+                      ? t("hotelDetailPage.processingPayment")
+                      : t("hotelDetailPage.continue")
                   }}
                 </button>
               </div>
@@ -1181,16 +1242,16 @@
 
               <div class="booking-feedback-card">
                 <p>
-                  <strong>Booking reference:</strong>
+                  <strong>{{ t("hotelDetailPage.bookingReference") }}:</strong>
                   {{ bookingConfirmation.bookingReference }}
                 </p>
                 <p>
-                  <strong>Hotel:</strong> {{ bookingConfirmation.hotelName }}
+                  <strong>{{ t("hotelDetailPage.hotel") }}:</strong> {{ bookingConfirmation.hotelName }}
                 </p>
-                <p><strong>Room:</strong> {{ bookingConfirmation.roomName }}</p>
-                <p><strong>Dates:</strong> {{ selectedDateRangeLabel }}</p>
+                <p><strong>{{ t("hotelDetailPage.room") }}:</strong> {{ bookingConfirmation.roomName }}</p>
+                <p><strong>{{ t("hotelDetailPage.dates") }}:</strong> {{ selectedDateRangeLabel }}</p>
                 <p>
-                  <strong>Total:</strong>
+                  <strong>{{ t("hotelDetailPage.total") }}:</strong>
                   {{ formatEuro(bookingConfirmation.pricing.total) }}
                 </p>
               </div>
@@ -1201,14 +1262,14 @@
                   class="primary-checkout-btn"
                   @click="openMyBookingsHistory"
                 >
-                  View My Bookings
+                  {{ t("hotelDetailPage.viewMyBookings") }}
                 </button>
                 <button
                   type="button"
                   class="book-btn-outline"
                   @click="closeSuccessModal"
                 >
-                  Back to Hotel Page
+                  {{ t("hotelDetailPage.backToHotelPage") }}
                 </button>
               </div>
             </section>
@@ -1227,10 +1288,9 @@
             >
               <header class="availability-drawer-header">
                 <div>
-                  <h3>This room is no longer available</h3>
+                  <h3>{{ t("hotelDetailPage.roomUnavailableTitle") }}</h3>
                   <p>
-                    Another guest may have booked it. Please choose another
-                    available room.
+                    {{ t("hotelDetailPage.roomUnavailableDescription") }}
                   </p>
                 </div>
                 <button
@@ -1248,7 +1308,7 @@
                   class="primary-checkout-btn view-similar-btn"
                   @click="openAvailableRoomsFromUnavailable"
                 >
-                  Back to Available Rooms
+                  {{ t("hotelDetailPage.backToAvailableRooms") }}
                 </button>
               </div>
             </section>
@@ -1260,6 +1320,7 @@
 </template>
 
 <script setup lang="ts">
+import './_theme-overrides.css'
 import {
   computed,
   nextTick,
@@ -1283,6 +1344,7 @@ import type {
 } from "~/types/interfaces";
 
 const route = useRoute();
+const { t, formatDate, formatCurrency, isRtl } = useAppI18n();
 const { isAuthenticated, currentProfile, accountId } = useAuth();
 const authPrompt = useAuthPrompt();
 const { getById, checkAvailability: runCheckAvailability } = useHotels();
@@ -1299,6 +1361,27 @@ const {
 const { success: toastSuccess, info: toastInfo } = useAppToast();
 
 const hotel = ref<Hotel | null>(null);
+const breadcrumbChevron = computed(() =>
+  isRtl.value ? "chevron_left" : "chevron_right",
+);
+const prevChevron = computed(() =>
+  isRtl.value ? "chevron_right" : "chevron_left",
+);
+const nextChevron = computed(() =>
+  isRtl.value ? "chevron_left" : "chevron_right",
+);
+
+useHead(() => ({
+  title: hotel.value
+    ? t("hotelDetailPage.metaTitle", { name: hotel.value.name })
+    : "VoyageHub",
+  meta: [
+    {
+      name: "description",
+      content: t("hotelDetailPage.metaDescription"),
+    },
+  ],
+}));
 
 // ── Save & Share Logic ───────────────────────────────────────────────────
 const { isWishlisted, toggle } = useWishlist();
@@ -1312,15 +1395,15 @@ const IG_SVG = `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentCol
 const flatShareItems = computed(() => {
   if (!hotel.value) return [];
   const url = typeof window !== "undefined" ? window.location.href : "";
-  const text = `Check out ${hotel.value.name} on VoyageHub!`;
+  const text = t("hotelDetailPage.shareText", { name: hotel.value.name });
 
   return [
     {
-      label: "Copy link",
+      label: t("hotelDetailPage.copyLink"),
       icon: "link",
       click: () => {
         navigator.clipboard.writeText(url);
-        toastSuccess("Link copied to clipboard.");
+        toastSuccess(t("hotelDetailPage.linkCopied"));
       },
     },
     {
@@ -1345,8 +1428,13 @@ const flatShareItems = computed(() => {
       label: "Email",
       icon: "mail",
       click: () => {
-        const subject = `Check out this hotel on VoyageHub: ${hotel.value!.name}`;
-        const body = `Hi,\n\nI found this amazing hotel on VoyageHub and thought you might like it:\n\n${hotel.value!.name}\n${url}\n\nEnjoy!`;
+        const subject = t("hotelDetailPage.emailShareSubject", {
+          name: hotel.value!.name,
+        });
+        const body = t("hotelDetailPage.emailShareBody", {
+          name: hotel.value!.name,
+          url,
+        });
         window.open(
           `https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`,
           "_blank",
@@ -1363,7 +1451,7 @@ const flatShareItems = computed(() => {
             .catch(() => {});
         } else {
           navigator.clipboard.writeText(url);
-          toastInfo("Instagram sharing works best on mobile. Link copied.");
+          toastInfo(t("hotelDetailPage.instagramCopied"));
         }
       },
     },
@@ -1537,11 +1625,10 @@ const submitSuccess = ref(false);
 async function handleSubmitReview() {
   if (!isAuthenticated.value) {
     authPrompt.open({
-      title: "Share your experience",
-      message:
-        "Please sign in or create an account to leave a review for this hotel.",
+      title: t("hotelDetailPage.reviewAccessTitle"),
+      message: t("hotelDetailPage.reviewAccessMessage"),
       icon: "rate_review",
-      eyebrow: "Review access",
+      eyebrow: t("hotelDetailPage.reviewAccessEyebrow"),
       redirectTo: route.fullPath,
     });
     return;
@@ -1550,7 +1637,8 @@ async function handleSubmitReview() {
   if (!newReviewText.value.trim() || !hotel.value) return;
   const firstName = currentProfile.value?.firstName?.trim() ?? "";
   const lastName = currentProfile.value?.lastName?.trim() ?? "";
-  const authorName = `${firstName} ${lastName}`.trim() || "Anonymous Guest";
+  const authorName =
+    `${firstName} ${lastName}`.trim() || t("hotelDetailPage.anonymousGuest");
   submitting.value = true;
   submitSuccess.value = false;
   await submitReview({
@@ -1643,11 +1731,11 @@ function formatDateForApi(date: Date) {
 
 function formatDateForLabel(date: Date | null) {
   if (!date) return "";
-  return new Intl.DateTimeFormat("en-US", {
+  return formatDate(date, {
     month: "short",
     day: "numeric",
     year: "numeric",
-  }).format(date);
+  });
 }
 
 function formatMonthKey(date: Date) {
@@ -1657,6 +1745,7 @@ function formatMonthKey(date: Date) {
 }
 
 function formatEuro(value: number) {
+  return formatCurrency(value, "EUR");
   return `${value}€`;
 }
 
@@ -1674,7 +1763,10 @@ const averageRatingDisplay = computed(() => {
 });
 
 const guestSummary = computed(() => {
-  const adultLabel = `${adults.value} adult${adults.value > 1 ? "s" : ""}`;
+  const adultLabel =
+    adults.value > 1
+      ? t("hotelDetailPage.adultCountPlural", { count: adults.value })
+      : t("hotelDetailPage.adultCount", { count: adults.value });
   const childLabel =
     children.value > 0
       ? ` · ${children.value} child${children.value > 1 ? "ren" : ""}`
@@ -1744,7 +1836,7 @@ const priceSummary = computed(() => {
 const selectedDateRangeLabel = computed(() => {
   const checkIn = formatDateForLabel(checkInDate.value);
   const checkOut = formatDateForLabel(checkOutDate.value);
-  if (!checkIn || !checkOut) return "your selected dates";
+  if (!checkIn || !checkOut) return t("hotelDetailPage.yourSelectedDates");
   return `${checkIn} – ${checkOut}`;
 });
 
@@ -1763,28 +1855,33 @@ const bookingTotal = computed(
   () => bookingRoomPrice.value + bookingTaxes.value,
 );
 const bookingGuestsLabel = computed(() => {
-  const adultsLabel = `${adults.value} adult${adults.value > 1 ? "s" : ""}`;
+  const adultsLabel =
+    adults.value > 1
+      ? t("hotelDetailPage.adultCountPlural", { count: adults.value })
+      : t("hotelDetailPage.adultCount", { count: adults.value });
   if (children.value < 1) {
     return adultsLabel;
   }
-  return `${adultsLabel}, ${children.value} child${children.value > 1 ? "ren" : ""}`;
+  return `${adultsLabel}, ${
+    children.value > 1
+      ? t("hotelDetailPage.childCountPlural", { count: children.value })
+      : t("hotelDetailPage.childCount", { count: children.value })
+  }`;
 });
 const savedPaymentMethods = computed(
   () => currentProfile.value?.paymentMethods ?? [],
 );
 
 const bookingSuccessTitle = computed(() =>
-  bookingConfirmation.value?.paymentOption === "PAY_AT_HOTEL"
-    ? "Reservation Submitted"
-    : "Reservation Submitted",
+  t("hotelDetailPage.bookingSubmitted"),
 );
 
 const bookingSuccessDescription = computed(() =>
   bookingConfirmation.value?.paymentOption === "PAY_AT_HOTEL"
-    ? "Your booking is pending. You will pay at hotel check-in."
+    ? t("hotelDetailPage.payAtHotelPending")
     : bookingConfirmation.value?.confirmed
-      ? "Your payment was successful and your reservation is confirmed."
-      : "Your booking is now pending payment confirmation.",
+      ? t("hotelDetailPage.paymentConfirmed")
+      : t("hotelDetailPage.paymentPending"),
 );
 
 const isAnyModalOpen = computed(
@@ -1911,7 +2008,7 @@ function prefillBookingForm() {
 function handleReserveFromCard(room: any) {
   const roomForBooking = {
     ...room,
-    title: room.title ?? room.type ?? "Room",
+    title: room.title ?? room.type ?? t("hotelDetailPage.roomFallback"),
     image:
       room.image ||
       "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=400&q=80",
@@ -1975,7 +2072,7 @@ async function proceedToPaymentCheckout(confirmation: BookingConfirmation) {
     });
     bookingFormError.value =
       bookingApiError.value ||
-      "Unable to initialize secure payment. Please try again.";
+      t("hotelDetailPage.securePaymentInitError");
     redirectingToPayment.value = false;
     showSavedCardChoice.value = false;
     pendingCardBookingConfirmation.value = null;
@@ -1999,7 +2096,7 @@ async function handlePayNowWithSelectedCard() {
   });
   if (!paid?.paid) {
     bookingFormError.value =
-      bookingApiError.value || "Unable to process payment with this card.";
+      bookingApiError.value || t("hotelDetailPage.savedCardPaymentError");
     return;
   }
 
@@ -2044,11 +2141,10 @@ async function handleConfirmReservation() {
 
   if (!isAuthenticated.value || !accountId.value) {
     authPrompt.open({
-      title: "Reservation required",
-      message:
-        "Please sign in or create an account to confirm your reservation.",
+      title: t("hotelDetailPage.bookingRequiredTitle"),
+      message: t("hotelDetailPage.bookingRequiredMessage"),
       icon: "hotel",
-      eyebrow: "Booking access",
+      eyebrow: t("hotelDetailPage.bookingRequiredEyebrow"),
       redirectTo: route.fullPath,
     });
     return;
@@ -2060,7 +2156,7 @@ async function handleConfirmReservation() {
 
   if (!fullName || !email || !phone) {
     bookingFormError.value =
-      "Please complete Full Name, Email, and Phone Number.";
+      t("hotelDetailPage.completeGuestDetails");
     return;
   }
 
@@ -2082,7 +2178,7 @@ async function handleConfirmReservation() {
 
   if (!confirmation) {
     const reason =
-      bookingApiError.value || "Unable to confirm your reservation.";
+      bookingApiError.value || t("hotelDetailPage.reservationConfirmError");
     if (reason.toLowerCase().includes("no longer available")) {
       showBookingDrawer.value = false;
       showRoomUnavailable.value = true;
@@ -2124,25 +2220,51 @@ function viewSimilarRooms() {
     ?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-const defaultAmenities = [
-  { icon: "wifi", label: "Free high-speed Wi-Fi" },
-  { icon: "pool", label: "Heated outdoor pool" },
-  { icon: "fitness_center", label: "24/7 Fitness center" },
-  { icon: "local_bar", label: "Lounge bar & Cocktails" },
-  { icon: "restaurant", label: "Gourmet restaurant" },
-  { icon: "spa", label: "Spa & wellness center" },
-];
+const defaultAmenities = computed(() => [
+  {
+    icon: "wifi",
+    label: t("hotelDetailPage.defaultAmenities.wifi"),
+  },
+  {
+    icon: "pool",
+    label: t("hotelDetailPage.defaultAmenities.pool"),
+  },
+  {
+    icon: "fitness_center",
+    label: t("hotelDetailPage.defaultAmenities.fitness"),
+  },
+  {
+    icon: "local_bar",
+    label: t("hotelDetailPage.defaultAmenities.bar"),
+  },
+  {
+    icon: "restaurant",
+    label: t("hotelDetailPage.defaultAmenities.restaurant"),
+  },
+  {
+    icon: "spa",
+    label: t("hotelDetailPage.defaultAmenities.spa"),
+  },
+]);
 
 function getAmenityIcon(amenity: string) {
-  const amenityMap: Record<string, string> = {
-    "Free high-speed Wi-Fi": "wifi",
-    "Heated outdoor pool": "pool",
-    "24/7 Fitness center": "fitness_center",
-    "Lounge bar & Cocktails": "local_bar",
-    "Gourmet restaurant": "restaurant",
-    "Spa & wellness center": "spa",
-  };
-  return amenityMap[amenity] || "check_circle";
+  const directMatch = defaultAmenities.value.find(
+    (item) => item.label === amenity,
+  );
+  if (directMatch) {
+    return directMatch.icon;
+  }
+
+  const normalized = amenity.toLowerCase();
+  if (normalized.includes("wifi")) return "wifi";
+  if (normalized.includes("pool")) return "pool";
+  if (normalized.includes("fitness") || normalized.includes("gym"))
+    return "fitness_center";
+  if (normalized.includes("bar") || normalized.includes("cocktail"))
+    return "local_bar";
+  if (normalized.includes("restaurant")) return "restaurant";
+  if (normalized.includes("spa")) return "spa";
+  return "check_circle";
 }
 
 onMounted(async () => {
@@ -2175,7 +2297,7 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .hotel-detail {
-  background: #ffffff;
+  background: var(--color-bg-soft);
   min-height: 100vh;
   padding-bottom: 80px;
 }
@@ -2186,7 +2308,7 @@ onBeforeUnmount(() => {
   justify-content: center;
   align-items: center;
   height: 60vh;
-  color: #015081;
+  color: var(--color-heading);
 }
 
 .rotating {
@@ -2215,21 +2337,21 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  color: #64748b;
+  color: var(--color-text-muted);
   font-weight: 500;
 }
 
 .breadcrumbs a {
-  color: #64748b;
+  color: var(--color-text-muted);
   text-decoration: none;
   transition: color 0.2s;
 }
 .breadcrumbs a:hover {
-  color: #015081;
+  color: var(--color-link-hover);
   text-decoration: underline;
 }
 .breadcrumbs .active {
-  color: #015081;
+  color: var(--color-heading);
   font-weight: 600;
 }
 .separator {
@@ -2244,28 +2366,28 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   padding: 8px 16px;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
-  color: #475569;
+  color: var(--color-text-soft);
   cursor: pointer;
   transition: all 0.2s;
 }
 .action-btn:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
-  color: #015081;
+  background: var(--color-surface-2);
+  border-color: var(--color-border);
+  color: var(--color-heading);
 }
 .action-btn .material-symbols-outlined {
   font-size: 20px;
 }
 .action-btn.is-saved {
-  color: #e11d48;
-  border-color: #fecdd3;
-  background: #fff1f2;
+  color: var(--color-danger-600);
+  border-color: color-mix(in srgb, var(--color-danger-300) 65%, transparent);
+  background: color-mix(in srgb, var(--color-danger-50) 55%, var(--color-surface));
 }
 .action-btn.is-saved .material-symbols-outlined {
   font-variation-settings: "FILL" 1;
@@ -3538,7 +3660,7 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: var(--space-4);
   padding: var(--space-4);
-  background: #f8fafc;
+  background: var(--color-surface-2);
   border-bottom: 1px solid var(--color-border-soft);
 }
 .map-icon-box {
@@ -3786,8 +3908,8 @@ onBeforeUnmount(() => {
 }
 
 .submit-review-btn {
-  background: #004d4d; /* Deep Teal matching main theme */
-  color: #ffffff;
+  background: var(--color-primary-700);
+  color: var(--color-white);
   border: none;
   padding: 8px 24px;
   border-radius: 12px;
@@ -3795,13 +3917,13 @@ onBeforeUnmount(() => {
   font-size: 15px;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(0, 77, 77, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 103, 104, 0.22);
 }
 
 .submit-review-btn:hover:not(:disabled) {
-  background: #003333;
+  background: var(--color-primary-dark);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 77, 77, 0.3);
+  box-shadow: 0 6px 20px rgba(0, 103, 104, 0.3);
 }
 
 .submit-review-btn:disabled {

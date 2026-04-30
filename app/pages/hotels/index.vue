@@ -1,9 +1,9 @@
 <template>
-  <div class="hotels-page">
+  <div :class="['hotels-page', { 'hotels-page--dark': isDarkTheme }]">
     <div class="page-header">
       <div class="page-header__content">
-        <h1 class="page-title">Nos Hôtels</h1>
-        <p class="page-subtitle">Trouvez l'hôtel parfait pour votre séjour</p>
+        <h1 class="page-title">{{ t("hotelList.title") }}</h1>
+        <p class="page-subtitle">{{ t("hotelList.subtitle") }}</p>
       </div>
     </div>
 
@@ -16,12 +16,12 @@
       >
         <div class="sidebar-header">
           <span class="material-symbols-outlined">filter_list</span>
-          <span>Filtres</span>
+          <span>{{ t("hotelList.filters") }}</span>
         </div>
 
         <div class="filters-scroll">
           <div class="filter-section">
-            <label class="filter-label">Prix par nuit</label>
+            <label class="filter-label">{{ t("hotelList.pricePerNight") }}</label>
             <div class="slider-wrapper">
               <Slider
                 v-model="priceRange"
@@ -31,14 +31,14 @@
                 class="custom-slider"
               />
               <div class="slider-values">
-                <span>{{ priceRange[0] }}€</span>
-                <span>{{ priceRange[1] }}€</span>
+                <span>{{ formatCurrency(priceRange[0]) }}</span>
+                <span>{{ formatCurrency(priceRange[1]) }}</span>
               </div>
             </div>
           </div>
 
           <div class="filter-section">
-            <label class="filter-label">Classement</label>
+            <label class="filter-label">{{ t("hotelList.rating") }}</label>
             <div class="checkbox-group">
               <div v-for="star in [5, 4, 3]" :key="star" class="checkbox-field">
                 <Checkbox
@@ -62,13 +62,13 @@
           </div>
 
           <div class="filter-section filter-section--destination">
-            <label class="filter-label">Destination</label>
+            <label class="filter-label">{{ t("hotelList.destination") }}</label>
             <Select
               v-model="selectedCity"
               :options="cityOptions"
               optionLabel="label"
               optionValue="value"
-              placeholder="Toutes les villes"
+              :placeholder="t('hotelList.allCities')"
               appendTo="self"
               class="full-width-select destination-dropdown"
             />
@@ -77,7 +77,7 @@
           <div
             class="filter-section filter-section--date filter-section--checkin"
           >
-            <label class="filter-label">Check-in</label>
+            <label class="filter-label">{{ t("hotelList.checkIn") }}</label>
             <div class="date-picker-shell">
               <DatePicker
                 v-model="checkInDate"
@@ -86,7 +86,7 @@
                 :manualInput="false"
                 :minDate="today"
                 appendTo="self"
-                placeholder="Choose check-in"
+                :placeholder="t('hotelList.chooseCheckIn')"
                 dateFormat="D, M d"
                 class="filter-date-picker"
               />
@@ -99,7 +99,7 @@
           <div
             class="filter-section filter-section--date filter-section--checkout"
           >
-            <label class="filter-label">Check-out</label>
+            <label class="filter-label">{{ t("hotelList.checkOut") }}</label>
             <div class="date-picker-shell">
               <DatePicker
                 v-model="checkOutDate"
@@ -108,7 +108,7 @@
                 :manualInput="false"
                 :minDate="checkOutMinDate"
                 appendTo="self"
-                placeholder="Choose check-out"
+                :placeholder="t('hotelList.chooseCheckOut')"
                 dateFormat="D, M d"
                 class="filter-date-picker"
               />
@@ -124,7 +124,7 @@
               'filter-section--guests-open': activeFilterPanel === 'guests',
             }"
           >
-            <label class="filter-label">Guests & rooms</label>
+            <label class="filter-label">{{ t("hotelList.guestsRooms") }}</label>
             <button
               type="button"
               class="guest-trigger"
@@ -136,7 +136,7 @@
               >
               <span class="guest-trigger__copy">
                 <strong>{{ guestSummary }}</strong>
-                <span>Adults, children, rooms</span>
+                <span>{{ t("hotelList.guestsHint") }}</span>
               </span>
               <span class="material-symbols-outlined guest-trigger__chevron"
                 >expand_more</span
@@ -146,7 +146,7 @@
             <div v-if="activeFilterPanel === 'guests'" class="guest-panel">
               <div class="guest-counter-row">
                 <div class="guest-counter-copy">
-                  <strong>Adults</strong>
+                  <strong>{{ t("hotelList.adults") }}</strong>
                 </div>
                 <div class="guest-counter-control">
                   <Button
@@ -170,7 +170,7 @@
 
               <div class="guest-counter-row">
                 <div class="guest-counter-copy">
-                  <strong>Children</strong>
+                  <strong>{{ t("hotelList.children") }}</strong>
                 </div>
                 <div class="guest-counter-control">
                   <Button
@@ -199,7 +199,7 @@
                   class="guest-counter-row"
                 >
                   <label class="guest-age-label guest-counter-copy"
-                    ><strong>Age of child {{ index + 1 }}</strong></label
+                    ><strong>{{ t("hotelList.ageOfChild", { count: index + 1 }) }}</strong></label
                   >
                   <Select
                     v-model="childAges[index]"
@@ -213,7 +213,7 @@
 
               <div class="guest-counter-row">
                 <div class="guest-counter-copy">
-                  <strong>Rooms</strong>
+                  <strong>{{ t("hotelList.rooms") }}</strong>
                 </div>
                 <div class="guest-counter-control">
                   <Button
@@ -237,7 +237,7 @@
 
               <Button
                 type="button"
-                label="Apply"
+                :label="t('hotelList.done')"
                 class="apply-btn guest-done-button"
                 @click="activeFilterPanel = null"
               />
@@ -246,8 +246,8 @@
         </div>
 
         <div class="filter-actions">
-          <button class="apply-btn" @click="applyFilters">Apply</button>
-          <button class="reset-btn" @click="resetFilters">Reset Filters</button>
+          <button class="apply-btn" @click="applyFilters">{{ t("hotelList.apply") }}</button>
+          <button class="reset-btn" @click="resetFilters">{{ t("hotelList.resetFilters") }}</button>
         </div>
       </aside>
 
@@ -259,12 +259,12 @@
             <input
               type="text"
               v-model="searchQuery"
-              placeholder="Search for a hotel..."
+              :placeholder="t('hotelList.searchPlaceholder')"
             />
           </div>
           <div class="sort-view-container">
             <div class="sort-wrap">
-              <span class="sort-label">Sort by:</span>
+              <span class="sort-label">{{ t("hotelList.sortBy") }}</span>
               <Select
                 v-model="sortBy"
                 :options="sortOptions"
@@ -279,7 +279,7 @@
                 class="view-toggle-btn"
                 :class="{ active: viewMode === 'grid' }"
                 @click="viewMode = 'grid'"
-                aria-label="Vue grille"
+                :aria-label="t('hotelList.gridView')"
               >
                 <span class="material-symbols-outlined">grid_view</span>
               </button>
@@ -287,7 +287,7 @@
                 class="view-toggle-btn"
                 :class="{ active: viewMode === 'list' }"
                 @click="viewMode = 'list'"
-                aria-label="Vue liste"
+                :aria-label="t('hotelList.listView')"
               >
                 <span class="material-symbols-outlined">menu</span>
               </button>
@@ -296,7 +296,7 @@
         </div>
 
         <div class="results-info">
-          <strong>{{ total }}</strong> hotels
+          <span>{{ resultsCountLabel }}</span>
         </div>
 
         <div
@@ -314,7 +314,7 @@
         </div>
         <div v-else class="empty-results-state">
           <span class="material-symbols-outlined">hotel_class</span>
-          <p>No establishments match your selection.</p>
+          <p>{{ t("hotelList.noResults") }}</p>
         </div>
 
         <div
@@ -343,6 +343,8 @@ import {
 import { useDestinations } from "~/composables/useDestinations";
 import { useHotels } from "~/composables/useHotels";
 import { useRooms } from "~/composables/useRooms";
+const { t, formatCurrency } = useAppI18n();
+const { resolvedTheme } = useThemeMode();
 
 const {
   hotels,
@@ -356,6 +358,16 @@ const { rooms, fetchAll: fetchRooms } = useRooms();
 const { destinations, fetchDestinations } = useDestinations();
 const route = useRoute();
 const router = useRouter();
+
+useHead(() => ({
+  title: t("hotelList.metaTitle"),
+  meta: [
+    {
+      name: "description",
+      content: t("hotelList.metaDescription"),
+    },
+  ],
+}));
 
 const filtersSidebarRef = ref<HTMLElement | null>(null);
 const sidebarMaxHeight = ref("calc(100vh - 48px)");
@@ -393,19 +405,19 @@ const checkOutMinDate = computed(() => {
 
 const TUNISIA_CITIES = [
   "Ariana",
-  "Béja",
+  "Beja",
   "Ben Arous",
   "Bizerte",
-  "Gabès",
+  "Gabes",
   "Gafsa",
   "Jendouba",
   "Kairouan",
   "Kasserine",
-  "Kébili",
+  "Kebili",
   "La Manouba",
   "Le Kef",
   "Mahdia",
-  "Médenine",
+  "Medenine",
   "Monastir",
   "Nabeul",
   "Sfax",
@@ -418,16 +430,16 @@ const TUNISIA_CITIES = [
   "Zaghouan",
 ];
 
-const cityOptions = [
-  { label: "Toutes les villes", value: null },
+const cityOptions = computed(() => [
+  { label: t("hotelList.allCities"), value: null },
   ...TUNISIA_CITIES.map((city) => ({ label: city, value: city })),
-];
+]);
 
-const sortOptions = [
-  { label: "Note", value: "note" },
-  { label: "Price ascending", value: "price_asc" },
-  { label: "Price descending", value: "price_desc" },
-];
+const sortOptions = computed(() => [
+  { label: t("hotelList.sortRating"), value: "note" },
+  { label: t("hotelList.sortPriceAsc"), value: "price_asc" },
+  { label: t("hotelList.sortPriceDesc"), value: "price_desc" },
+]);
 
 function getHotelMinPrice(hotelId: number) {
   const hotelRooms = rooms.value.filter((r) => r.hotelId === hotelId);
@@ -553,7 +565,6 @@ function resetFilters() {
   children.value = 1;
   roomsRequested.value = 2;
   childAges.value = [14];
-  travelWithPets.value = false;
   activeFilterPanel.value = null;
   router.replace({ path: "/hotels" });
 }
@@ -684,13 +695,28 @@ function updateGuestCount(
 }
 
 const guestSummary = computed(() => {
-  const adultLabel = `${adults.value} adult${adults.value > 1 ? "s" : ""}`;
+  const adultLabel = t(
+    adults.value === 1 ? "home.peopleOne" : "home.peopleOther",
+    { count: adults.value },
+  );
   const childLabel = children.value
-    ? ` · ${children.value} child${children.value > 1 ? "ren" : ""}`
-    : "";
-  const roomLabel = ` · ${roomsRequested.value} room${roomsRequested.value > 1 ? "s" : ""}`;
-  return `${adultLabel}${childLabel}${roomLabel}`;
+    ? t(children.value === 1 ? "home.childOne" : "home.childOther", {
+        count: children.value,
+      })
+    : null;
+  const roomLabel = t(
+    roomsRequested.value === 1 ? "home.roomOne" : "home.roomOther",
+    { count: roomsRequested.value },
+  );
+  return [adultLabel, childLabel, roomLabel].filter(Boolean).join(" • ");
 });
+
+const resultsCountLabel = computed(() =>
+  t(total.value === 1 ? "hotelList.resultsOne" : "hotelList.resultsOther", {
+    count: total.value,
+  }),
+);
+const isDarkTheme = computed(() => resolvedTheme.value === "dark");
 
 watch(
   children,
@@ -2045,5 +2071,168 @@ watch(
 
 .search-input-wrap input {
   cursor: text;
+}
+
+@media (max-width: 900px) {
+  .search-sort-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .search-input-wrap {
+    max-width: none;
+  }
+
+  .sort-view-container {
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 640px) {
+  .page-header__content,
+  .main-container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .sort-view-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sort-wrap {
+    justify-content: space-between;
+  }
+}
+
+:global(html[dir="rtl"]) .date-picker-shell__chevron {
+  right: auto;
+  left: 18px;
+}
+
+:global(html[dir="rtl"]) .guest-trigger__chevron {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+:global(html[dir="rtl"]) .guest-panel {
+  left: auto;
+  right: 0;
+}
+
+:global(html[dir="rtl"]) :deep(.filter-date-picker .p-inputtext) {
+  padding: 0 2.2rem 0 2.8rem;
+}
+
+:global(html[dir="rtl"]) :deep(.filter-date-picker .p-datepicker-input-icon-container) {
+  left: auto;
+  right: 0.9rem;
+}
+
+:global(html[dir="rtl"]) :deep(.destination-dropdown .p-select-overlay) {
+  left: auto !important;
+  right: 0 !important;
+}
+
+:global(html[data-theme-resolved="dark"]) .hotels-page {
+  background:
+    radial-gradient(
+      circle at top,
+      color-mix(in srgb, var(--color-primary-700) 26%, transparent) 0%,
+      transparent 45%
+    ),
+    linear-gradient(180deg, var(--color-bg) 0%, var(--color-bg-soft) 100%);
+}
+
+:global(html[data-theme-resolved="dark"]) .page-header,
+:global(html[data-theme-resolved="dark"]) .filters-sidebar,
+:global(html[data-theme-resolved="dark"]) .guest-panel,
+:global(html[data-theme-resolved="dark"]) .search-sort-bar,
+:global(html[data-theme-resolved="dark"]) .search-input-wrap,
+:global(html[data-theme-resolved="dark"]) .view-toggles,
+:global(html[data-theme-resolved="dark"]) .page-pagination__btn,
+:global(html[data-theme-resolved="dark"]) .page-pagination__number,
+:global(html[data-theme-resolved="dark"]) .empty-results-state {
+  background: var(--color-surface);
+  border-color: var(--color-border-soft);
+}
+
+:global(html[data-theme-resolved="dark"]) .filters-sidebar,
+:global(html[data-theme-resolved="dark"]) .guest-panel,
+:global(html[data-theme-resolved="dark"]) .page-pagination__btn,
+:global(html[data-theme-resolved="dark"]) .page-pagination__number {
+  box-shadow: 0 18px 42px rgba(2, 6, 23, 0.35);
+}
+
+:global(html[data-theme-resolved="dark"]) .page-title,
+:global(html[data-theme-resolved="dark"]) .results-info strong {
+  color: var(--color-heading);
+}
+
+:global(html[data-theme-resolved="dark"]) .page-subtitle,
+:global(html[data-theme-resolved="dark"]) .results-info,
+:global(html[data-theme-resolved="dark"]) .guest-trigger__copy span {
+  color: var(--color-text-muted);
+}
+
+:global(html[data-theme-resolved="dark"]) :deep(.custom-slider .p-slider-handle),
+:global(html[data-theme-resolved="dark"]) :deep(.p-checkbox-box),
+:global(html[data-theme-resolved="dark"]) :deep(.p-select-overlay),
+:global(html[data-theme-resolved="dark"]) :deep(.filter-date-picker .p-datepicker),
+:global(html[data-theme-resolved="dark"]) :deep(.filter-date-picker .p-datepicker-panel),
+:global(html[data-theme-resolved="dark"]) :deep(.sort-select-small.p-select) {
+  background: var(--color-surface);
+  border-color: var(--color-border-soft);
+  color: var(--color-text);
+}
+
+.hotels-page--dark {
+  background:
+    radial-gradient(
+      circle at top,
+      color-mix(in srgb, var(--color-primary-700) 32%, transparent) 0%,
+      transparent 45%
+    ),
+    linear-gradient(180deg, var(--color-bg) 0%, var(--color-bg-soft) 100%);
+}
+
+.hotels-page--dark .page-header,
+.hotels-page--dark .filters-sidebar,
+.hotels-page--dark .guest-panel,
+.hotels-page--dark .search-sort-bar,
+.hotels-page--dark .search-input-wrap,
+.hotels-page--dark .view-toggles,
+.hotels-page--dark .page-pagination__btn,
+.hotels-page--dark .page-pagination__number,
+.hotels-page--dark .empty-results-state {
+  background: var(--color-surface);
+  border-color: var(--color-border-soft);
+}
+
+.hotels-page--dark .page-title,
+.hotels-page--dark .results-info strong {
+  color: var(--color-heading);
+}
+
+.hotels-page--dark .page-subtitle,
+.hotels-page--dark .results-info,
+.hotels-page--dark .results-info__range,
+.hotels-page--dark .filter-label,
+.hotels-page--dark .checkbox-label,
+.hotels-page--dark .slider-values,
+.hotels-page--dark .sort-label,
+.hotels-page--dark .guest-trigger__copy span {
+  color: var(--color-text-muted);
+}
+
+.hotels-page--dark .search-input-wrap input {
+  color: var(--color-text);
+}
+
+.hotels-page--dark .search-input-wrap .material-symbols-outlined,
+.hotels-page--dark .view-toggle-btn {
+  color: var(--color-text-soft);
 }
 </style>

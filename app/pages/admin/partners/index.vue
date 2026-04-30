@@ -3,12 +3,12 @@
     <!-- Page Header -->
     <div class="flex justify-between items-end mb-8">
       <div>
-        <h2 class="text-3xl font-bold text-[#015081] tracking-tight headline-md mb-1">Hôtels Partenaires</h2>
-        <p class="text-outline-variant text-sm">Gérez vos relations hôtelières et les performances du réseau VoyageHub.</p>
+        <h2 class="text-3xl font-bold text-[#015081] tracking-tight headline-md mb-1">{{ t("adminPartners.title") }}</h2>
+        <p class="text-outline-variant text-sm">{{ t("adminPartners.subtitle") }}</p>
       </div>
       <button class="bg-[#CDAF5D] text-[#241a00] font-bold py-3 px-6 rounded-lg flex items-center gap-2 shadow-sm hover:brightness-105 active:scale-95 transition-all text-sm">
         <span class="material-symbols-outlined">add</span>
-        Ajouter un partenaire
+        {{ t("adminPartners.addPartner") }}
       </button>
     </div>
 
@@ -19,7 +19,7 @@
           <img :alt="hotel.name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" :src="hotel.images[0] || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800'"/>
 
           <div class="absolute top-4 right-4 bg-white/90 backdrop-blur p-1.5 rounded-lg flex items-center cursor-pointer select-none">
-            <span class="text-xs font-bold mr-1" :class="hotel.active ? 'text-primary' : 'text-outline-variant'">{{ hotel.active ? 'Actif' : 'Inactif' }}</span>
+            <span class="text-xs font-bold mr-1" :class="hotel.active ? 'text-primary' : 'text-outline-variant'">{{ hotel.active ? t("adminPartners.active") : t("adminPartners.inactive") }}</span>
             <div class="status-toggle w-2 h-2 rounded-full transition-colors" :class="hotel.active ? 'bg-emerald-500' : 'bg-outline-variant'"></div>
           </div>
         </div>
@@ -37,28 +37,28 @@
           <div class="space-y-4">
             <div class="flex justify-between text-xs font-medium">
               <span class="text-outline">SIRET: {{ 200 + hotel.id }} 004 887 00012</span>
-              <span class="text-outline">124 Chambres</span>
+              <span class="text-outline">{{ t("adminPartners.roomsStatic", { count: 124 }) }}</span>
             </div>
             <div>
               <div class="flex justify-between items-center mb-1.5">
-                <span class="text-xs font-bold text-secondary">Taux d'occupation</span>
+                <span class="text-xs font-bold text-secondary">{{ t("adminPartners.occupancyRate") }}</span>
                 <span class="text-xs font-bold" :class="hotel.active ? 'text-primary' : 'text-outline'">{{ hotel.active ? Math.floor(Math.random() * 40 + 50) : 0 }}%</span>
               </div>
               <div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
                 <div :class="hotel.active ? 'bg-primary' : 'bg-outline-variant'" class="h-full rounded-full" :style="{ width: (hotel.active ? Math.floor(Math.random() * 40 + 50) : 0) + '%' }"></div>
               </div>
             </div>
-            <p class="text-[11px] italic text-outline-variant">Partenaire depuis le {{ new Date(2022, hotel.id, 15).toLocaleDateString() }}</p>
+            <p class="text-[11px] italic text-outline-variant">{{ t("adminPartners.partnerSince") }} {{ new Date(2022, hotel.id, 15).toLocaleDateString() }}</p>
           </div>
         </div>
         <div class="p-4 bg-surface-container-low flex justify-between gap-2 border-t border-surface-variant/20">
           <button class="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-bold text-secondary hover:bg-secondary/10 rounded-lg transition-colors active:scale-95">
-            <span class="material-symbols-outlined text-base">edit</span> Modifier
+            <span class="material-symbols-outlined text-base">edit</span> {{ t("adminPartners.edit") }}
           </button>
           <NuxtLink :to="`/hotels/${hotel.id}`" target="_blank" class="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-bold text-primary hover:bg-primary/10 rounded-lg transition-colors active:scale-95">
-            <span class="material-symbols-outlined text-base">visibility</span> Voir hôtel
+            <span class="material-symbols-outlined text-base">visibility</span> {{ t("adminPartners.viewHotel") }}
           </NuxtLink>
-          <button class="w-10 h-10 flex items-center justify-center text-error hover:bg-error/10 rounded-lg transition-colors active:scale-95" title="Retirer partenariat">
+          <button class="w-10 h-10 flex items-center justify-center text-error hover:bg-error/10 rounded-lg transition-colors active:scale-95" :title="t('adminPartners.removePartnership')">
             <span class="material-symbols-outlined">delete</span>
           </button>
         </div>
@@ -71,13 +71,14 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { HotelService } from '~/services'
+import { HotelService } from "~/services/HotelService";
 
 definePageMeta({
   layout: 'admin'
 })
 
 const hotelService = new HotelService()
+const { t } = useAppI18n()
 const { data: hotelsData } = useAsyncData('admin-partners', () => hotelService.getAll())
 
 const hotels = computed(() => hotelsData.value || [])

@@ -1,24 +1,24 @@
 <template>
   <div>
     <Head>
-      <title>Notification Templates - VoyageHub Admin</title>
+      <title>{{ copy.metaTitle }}</title>
       <meta
         name="description"
-        content="Edit transactional email and SMS templates used across VoyageHub."
+        :content="copy.metaDescription"
       />
     </Head>
 
     <div class="admin-page">
       <div class="page-header">
         <div>
-          <p class="page-eyebrow">Communications</p>
-          <h1 class="page-title">Notification Templates</h1>
-          <p class="page-desc">Welcome mail, password reset, booking lifecycle, complaint updates, and operational alerts all live here.</p>
+          <p class="page-eyebrow">{{ copy.eyebrow }}</p>
+          <h1 class="page-title">{{ copy.title }}</h1>
+          <p class="page-desc">{{ copy.subtitle }}</p>
         </div>
         <div class="header-actions">
           <button class="btn-outline" @click="loadTemplates">
             <span class="material-symbols-outlined">refresh</span>
-            Refresh
+            {{ copy.refresh }}
           </button>
         </div>
       </div>
@@ -35,19 +35,19 @@
 
       <div class="summary-grid">
         <article class="summary-card">
-          <span>Total Templates</span>
+          <span>{{ copy.totalTemplates }}</span>
           <strong>{{ templates.length }}</strong>
         </article>
         <article class="summary-card">
-          <span>Active Templates</span>
+          <span>{{ copy.activeTemplates }}</span>
           <strong>{{ templates.filter(t => t.isActive).length }}</strong>
         </article>
         <article class="summary-card">
-          <span>Email Templates</span>
+          <span>{{ copy.emailTemplates }}</span>
           <strong>{{ emailTemplates.length }}</strong>
         </article>
         <article class="summary-card">
-          <span>SMS Templates</span>
+          <span>{{ copy.smsTemplates }}</span>
           <strong>{{ smsTemplates.length }}</strong>
         </article>
       </div>
@@ -55,24 +55,24 @@
       <div class="toolbar">
         <label class="search-field">
           <span class="material-symbols-outlined">search</span>
-          <input v-model="search" type="text" placeholder="Search templates by name or trigger" />
+          <input v-model="search" type="text" :placeholder="copy.searchPlaceholder" />
         </label>
         <select v-model="channelFilter">
-          <option value="">All channels</option>
-          <option value="EMAIL">Email</option>
-          <option value="SMS">SMS</option>
+          <option value="">{{ copy.allChannels }}</option>
+          <option value="EMAIL">{{ copy.email }}</option>
+          <option value="SMS">{{ copy.sms }}</option>
         </select>
         <select v-model="statusFilter">
-          <option value="">All statuses</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
+          <option value="">{{ copy.allStatuses }}</option>
+          <option value="active">{{ copy.active }}</option>
+          <option value="inactive">{{ copy.inactive }}</option>
         </select>
       </div>
 
       <div class="layout">
         <aside class="template-list">
           <div class="template-group">
-            <h3>Email</h3>
+            <h3>{{ copy.email }}</h3>
             <button
               v-for="template in emailTemplates"
               :key="template.id"
@@ -86,7 +86,7 @@
           </div>
 
           <div class="template-group">
-            <h3>SMS</h3>
+            <h3>{{ copy.sms }}</h3>
             <button
               v-for="template in smsTemplates"
               :key="template.id"
@@ -110,49 +110,49 @@
                 </div>
                 <label class="toggle-row">
                   <input v-model="draft.isActive" type="checkbox" />
-                  <span>Active</span>
+                  <span>{{ copy.active }}</span>
                 </label>
               </div>
 
               <div class="form-grid">
                 <label>
-                  <span>Name</span>
+                  <span>{{ copy.name }}</span>
                   <input v-model="draft.name" type="text" />
                 </label>
                 <label>
-                  <span>Trigger</span>
+                  <span>{{ copy.trigger }}</span>
                   <input v-model="draft.trigger" type="text" />
                 </label>
                 <label>
-                  <span>Channel</span>
+                  <span>{{ copy.channel }}</span>
                   <select v-model="draft.channel">
-                    <option value="EMAIL">Email</option>
-                    <option value="SMS">SMS</option>
+                    <option value="EMAIL">{{ copy.email }}</option>
+                    <option value="SMS">{{ copy.sms }}</option>
                   </select>
                 </label>
                 <label>
-                  <span>Recipients</span>
+                  <span>{{ copy.recipients }}</span>
                   <select v-model="draft.recipients">
-                    <option value="client">Client only</option>
-                    <option value="admin">Admin only</option>
-                    <option value="both">Client and admin</option>
+                    <option value="client">{{ copy.clientOnly }}</option>
+                    <option value="admin">{{ copy.adminOnly }}</option>
+                    <option value="both">{{ copy.clientAndAdmin }}</option>
                   </select>
                 </label>
               </div>
 
               <label class="field-block">
-                <span>Description</span>
+                <span>{{ copy.description }}</span>
                 <input v-model="draft.description" type="text" />
               </label>
 
               <label v-if="draft.channel === 'EMAIL'" class="field-block">
-                <span>Subject</span>
+                <span>{{ copy.subject }}</span>
                 <input v-model="draft.subject" type="text" />
               </label>
 
               <div class="field-block">
                 <div class="field-row">
-                  <span>Body</span>
+                  <span>{{ copy.body }}</span>
                   <div class="token-list">
                     <button
                       v-for="token in tokens"
@@ -169,16 +169,16 @@
               </div>
 
               <div class="editor-actions">
-                <button class="btn-ghost" @click="resetDraft">Reset</button>
+                <button class="btn-ghost" @click="resetDraft">{{ copy.reset }}</button>
                 <button class="btn-primary" :disabled="saving" @click="saveTemplate">
                   <span class="material-symbols-outlined">save</span>
-                  {{ saving ? 'Saving...' : 'Save template' }}
+                  {{ saving ? copy.saving : copy.saveTemplate }}
                 </button>
               </div>
             </div>
 
             <div class="preview-panel">
-              <h3>Preview</h3>
+              <h3>{{ copy.preview }}</h3>
               <div class="preview-card">
                 <p v-if="draft.channel === 'EMAIL'" class="preview-subject">{{ previewSubject }}</p>
                 <pre class="preview-body">{{ previewBody }}</pre>
@@ -188,7 +188,7 @@
 
           <div v-else class="empty-state">
             <span class="material-symbols-outlined">mail_outline</span>
-            <p>Select a template to start editing.</p>
+            <p>{{ copy.selectTemplate }}</p>
           </div>
         </section>
       </div>
@@ -204,6 +204,7 @@ import { MailAdminService } from '~/services/MailAdminService'
 definePageMeta({ layout: 'admin' })
 
 const service = new MailAdminService()
+const { t } = useAppI18n()
 const templates = ref<MailTemplate[]>([])
 const draft = ref<MailTemplate | null>(null)
 const selectedId = ref<number | null>(null)
@@ -213,6 +214,46 @@ const saving = ref(false)
 const search = ref('')
 const channelFilter = ref('')
 const statusFilter = ref('')
+
+const copy = computed(() => {
+  return {
+    metaTitle: t("adminNotifications.metaTitle"),
+    metaDescription: t("adminNotifications.metaDescription"),
+    eyebrow: t("adminNotifications.eyebrow"),
+    title: t("adminNotifications.title"),
+    subtitle: t("adminNotifications.subtitle"),
+    refresh: t("adminNotifications.refresh"),
+    totalTemplates: t("adminNotifications.totalTemplates"),
+    activeTemplates: t("adminNotifications.activeTemplates"),
+    emailTemplates: t("adminNotifications.emailTemplates"),
+    smsTemplates: t("adminNotifications.smsTemplates"),
+    searchPlaceholder: t("adminNotifications.searchPlaceholder"),
+    allChannels: t("adminNotifications.allChannels"),
+    email: t("adminNotifications.email"),
+    sms: t("adminNotifications.sms"),
+    allStatuses: t("adminNotifications.allStatuses"),
+    active: t("adminNotifications.active"),
+    inactive: t("adminNotifications.inactive"),
+    name: t("adminNotifications.name"),
+    trigger: t("adminNotifications.trigger"),
+    channel: t("adminNotifications.channel"),
+    recipients: t("adminNotifications.recipients"),
+    clientOnly: t("adminNotifications.clientOnly"),
+    adminOnly: t("adminNotifications.adminOnly"),
+    clientAndAdmin: t("adminNotifications.clientAndAdmin"),
+    description: t("adminNotifications.description"),
+    subject: t("adminNotifications.subject"),
+    body: t("adminNotifications.body"),
+    reset: t("adminNotifications.reset"),
+    saving: t("adminNotifications.saving"),
+    saveTemplate: t("adminNotifications.saveTemplate"),
+    preview: t("adminNotifications.preview"),
+    selectTemplate: t("adminNotifications.selectTemplate"),
+    saved: t("adminNotifications.saved"),
+    saveError: t("adminNotifications.saveError"),
+    loadError: t("adminNotifications.loadError"),
+  }
+})
 
 const tokens = [
   '{{user_name}}',
@@ -313,9 +354,9 @@ async function saveTemplate() {
       template.id === updated.id ? updated : template,
     )
     selectTemplate(updated)
-    banner.value = `${updated.name} saved.`
+    banner.value = copy.value.saved.replace("{name}", updated.name)
   } catch (cause: any) {
-    error.value = cause.message || 'Unable to save template.'
+    error.value = cause.message || copy.value.saveError
   } finally {
     saving.value = false
   }
@@ -325,7 +366,7 @@ onMounted(async () => {
   try {
     await loadTemplates()
   } catch (cause: any) {
-    error.value = cause.message || 'Unable to load templates.'
+    error.value = cause.message || copy.value.loadError
   }
 })
 </script>

@@ -186,9 +186,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
-import { HotelService, ReservationService } from '~/services'
-import { useStats } from '~/composables/useStats'
+import { computed, onMounted } from "vue";
+import { HotelService } from "~/services/HotelService";
+import { ReservationService } from "~/services/ReservationService";
+import { useStats } from "~/composables/useStats";
 
 definePageMeta({
   layout: 'admin'
