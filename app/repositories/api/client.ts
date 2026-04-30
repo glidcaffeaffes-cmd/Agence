@@ -46,7 +46,9 @@ function useResponseCache() {
 }
 
 function resolveBaseUrl() {
-  return useRuntimeConfig().public.apiBase || '/api'
+  const base = useRuntimeConfig().public.apiBase || '/api'
+  console.log('API Base URL:', base)
+  return base
 }
 
 function resolveErrorMessage(error: unknown, fallback: string) {
