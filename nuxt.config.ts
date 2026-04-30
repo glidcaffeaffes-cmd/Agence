@@ -80,11 +80,14 @@ export default defineNuxtConfig({
       exclude: ['useToast']
     }
   },
-   app: {
-     head: {
-       link: [...runtimeStylesheets],
-       script: [...runtimeScripts]
-     },
-     pageTransition: false
-   }
+    app: {
+      head: {
+        link: [
+          ...runtimeStylesheets,
+          { rel: 'icon', type: 'image/png', href: '/logo.png' }
+        ],
+        script: [...runtimeScripts]
+      },
+      pageTransition: false
+    }
 })
